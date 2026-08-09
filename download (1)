@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+.env
+
+# Raw .Stat Explorer exports -- regenerate any time via the links in
+# README.md -> "Data Sources". A few MB each and several are byte-
+# identical whole-dataflow dumps, not worth carrying in git history.
+data-pipeline/raw/*.csv

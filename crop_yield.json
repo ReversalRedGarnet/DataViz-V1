@@ -1,0 +1,242 @@
+[
+  {
+    "nation": "Solomon Islands",
+    "year": 2013,
+    "crop_yield_index": 7479.8
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2014,
+    "crop_yield_index": 7655.9
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2015,
+    "crop_yield_index": 7861.7
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2016,
+    "crop_yield_index": 7278.5
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2017,
+    "crop_yield_index": 7457.9
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2018,
+    "crop_yield_index": 7377.0
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2019,
+    "crop_yield_index": 6384.5
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2020,
+    "crop_yield_index": 6590.9
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2021,
+    "crop_yield_index": 6983.9
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2022,
+    "crop_yield_index": 7176.5
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2023,
+    "crop_yield_index": 6722.1
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2024,
+    "crop_yield_index": 5830.3
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2013,
+    "crop_yield_index": 4826.9
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2014,
+    "crop_yield_index": 5871.7
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2015,
+    "crop_yield_index": 5405.4
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2016,
+    "crop_yield_index": 5242.7
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2017,
+    "crop_yield_index": 4507.3
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2018,
+    "crop_yield_index": 4709.8
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2019,
+    "crop_yield_index": 4695.4
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2020,
+    "crop_yield_index": 4717.2
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2021,
+    "crop_yield_index": 4758.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2022,
+    "crop_yield_index": 6030.7
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2023,
+    "crop_yield_index": 6067.1
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2024,
+    "crop_yield_index": 5962.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2013,
+    "crop_yield_index": 30994.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "crop_yield_index": 33982.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "crop_yield_index": 38954.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2016,
+    "crop_yield_index": 32766.6
+  },
+  {
+    "nation": "Fiji",
+    "year": 2017,
+    "crop_yield_index": 37019.1
+  },
+  {
+    "nation": "Fiji",
+    "year": 2018,
+    "crop_yield_index": 38894.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2019,
+    "crop_yield_index": 39657.2
+  },
+  {
+    "nation": "Fiji",
+    "year": 2020,
+    "crop_yield_index": 33526.1
+  },
+  {
+    "nation": "Fiji",
+    "year": 2021,
+    "crop_yield_index": 30787.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2022,
+    "crop_yield_index": 32757.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2023,
+    "crop_yield_index": 36765.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2024,
+    "crop_yield_index": 26793.8
+  },
+  {
+    "nation": "Tonga",
+    "year": 2013,
+    "crop_yield_index": 8468.5
+  },
+  {
+    "nation": "Tonga",
+    "year": 2014,
+    "crop_yield_index": 8093.9
+  },
+  {
+    "nation": "Tonga",
+    "year": 2015,
+    "crop_yield_index": 8094.6
+  },
+  {
+    "nation": "Tonga",
+    "year": 2016,
+    "crop_yield_index": 7383.3
+  },
+  {
+    "nation": "Tonga",
+    "year": 2017,
+    "crop_yield_index": 7094.8
+  },
+  {
+    "nation": "Tonga",
+    "year": 2018,
+    "crop_yield_index": 7082.2
+  },
+  {
+    "nation": "Tonga",
+    "year": 2019,
+    "crop_yield_index": 7136.0
+  },
+  {
+    "nation": "Tonga",
+    "year": 2020,
+    "crop_yield_index": 7195.5
+  },
+  {
+    "nation": "Tonga",
+    "year": 2021,
+    "crop_yield_index": 7262.4
+  },
+  {
+    "nation": "Tonga",
+    "year": 2022,
+    "crop_yield_index": 7325.1
+  },
+  {
+    "nation": "Tonga",
+    "year": 2023,
+    "crop_yield_index": 7486.8
+  },
+  {
+    "nation": "Tonga",
+    "year": 2024,
+    "crop_yield_index": 7206.4
+  }
+]
