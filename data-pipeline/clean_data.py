@@ -32,8 +32,37 @@ NATION_CODES = {
 }
 
 # Analysis period.
-YEAR_MIN = 2016
+#
+# Opens in 2013, not 2016: the storm roster now starts at Cyclone Pam (March
+# 2015), and a chart of an event year is meaningless without baseline years
+# before it. Two clear years ahead of the earliest storm is the minimum that
+# lets a reader see what "normal" looked like first.
+#
+# Widening this costs nothing at export time -- the portal dumps whole
+# dataflows and this script does the filtering -- so the only reason not to
+# reach further back is that the older figures get patchier.
+YEAR_MIN = 2013
 YEAR_MAX = 2024
+
+# The storm roster, for the coverage report at the end of a run. Each entry is
+# the year a chart would have to anchor on, and the in-scope nations that storm
+# actually struck. This is not used to filter anything: it exists so a run
+# prints, in plain terms, which storms the exported data can and cannot support
+# -- the question that decides what the site is able to show.
+#
+# The rule these were picked under: severe tropical cyclone, landfall or major
+# impact in two or more Pacific nations, since 2015. Applied evenly rather than
+# picked for the story -- Ana, Cody and Rae are excluded by it, and saying so on
+# the site is what makes the roster defensible rather than cherry-picked.
+STORMS = [
+    ("Pam", 2015, ["Vanuatu", "Solomon Islands"]),
+    ("Winston", 2016, ["Fiji", "Tonga"]),
+    ("Gita", 2018, ["Tonga", "Fiji"]),
+    ("Harold", 2020, ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]),
+    ("Yasa", 2020, ["Fiji"]),
+    ("Judy & Kevin", 2023, ["Vanuatu", "Solomon Islands", "Fiji"]),
+    ("Lola", 2023, ["Vanuatu", "Solomon Islands"]),
+]
 
 # Dataset configuration:
 # raw CSV -> output JSON + indicator selection.
@@ -108,8 +137,8 @@ def _matches_nation(raw_value, nation) -> bool:
     return raw_value.upper() in NATION_CODES.get(nation, [])
 
 
-def clean_one(csv_name: str, config: dict) -> None:
-    """Clean a single dataset and export it as JSON."""
+def clean_one(csv_name: str, config: dict) -> list:
+    """Clean a single dataset, export it as JSON, and return the rows."""
     df = pd.read_csv(RAW_DIR / csv_name)
 
     print(f"\n{csv_name}: columns found -> {list(df.columns)}")
@@ -160,11 +189,62 @@ def clean_one(csv_name: str, config: dict) -> None:
         json.dump(rows, f, indent=2)
 
     print(f"  wrote {config['json_name']} ({len(rows)} rows total)")
+    return rows
+
+
+def report_coverage(cleaned: dict) -> None:
+    """Print what the exported data actually covers, per metric and per storm.
+
+    Every dataset here has real gaps, and the gaps are not a flaw to hide --
+    they are part of what the site says. But a gap has to be known before it can
+    be shown honestly, and a silent one becomes a chart that implies a
+    measurement nobody made. This prints them up front so a re-export can be
+    judged before anything is built on it.
+    """
+    print("\n" + "=" * 72)
+    print("COVERAGE BY METRIC")
+    print("=" * 72)
+
+    for csv_name, rows in cleaned.items():
+        config = DATASETS[csv_name]
+        print(f"\n{config['json_name']}")
+        for nation in NATIONS:
+            years = sorted(r["year"] for r in rows if r["nation"] == nation)
+            if not years:
+                print(f"  {nation:<17} NO DATA AT ALL")
+                continue
+            gaps = [y for y in range(min(years), max(years) + 1) if y not in years]
+            line = f"  {nation:<17} {min(years)}-{max(years)}  ({len(years)} of {YEAR_MAX - YEAR_MIN + 1} years)"
+            if gaps:
+                line += f"  gaps: {gaps}"
+            print(line)
+
+    print("\n" + "=" * 72)
+    print("COVERAGE BY STORM")
+    print("=" * 72)
+    print("A storm is supportable for a metric when every in-scope nation it")
+    print("struck has a figure for the storm's own year. Anything less and that")
+    print("storm's chart would be comparing a country against a blank.\n")
+
+    for name, year, nations in STORMS:
+        print(f"{name} ({year}) -- {', '.join(nations)}")
+        for csv_name, rows in cleaned.items():
+            have = {r["nation"] for r in rows if r["year"] == year}
+            missing = [n for n in nations if n not in have]
+            metric = DATASETS[csv_name]["json_name"].replace(".json", "")
+            if not missing:
+                print(f"    OK       {metric}")
+            elif len(missing) == len(nations):
+                print(f"    NONE     {metric}")
+            else:
+                print(f"    PARTIAL  {metric}  -- missing {', '.join(missing)}")
+        print()
 
 
 def main() -> None:
     any_found = False
     problems = []
+    cleaned = {}
 
     for csv_name, config in DATASETS.items():
         path = RAW_DIR / csv_name
@@ -176,17 +256,22 @@ def main() -> None:
         any_found = True
 
         try:
-            clean_one(csv_name, config)
+            cleaned[csv_name] = clean_one(csv_name, config)
         except KeyError as e:
             print(f"  PROBLEM in {csv_name}: {e}")
             problems.append(csv_name)
 
     if not any_found:
         print("\nNo raw CSVs found yet.")
-    elif problems:
+        return
+
+    if problems:
         print(f"\n{len(problems)} file(s) need attention: {problems}")
     else:
         print("\nAll datasets cleaned.")
+
+    if cleaned:
+        report_coverage(cleaned)
 
 
 if __name__ == "__main__":

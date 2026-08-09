@@ -51,7 +51,7 @@ NATION_CODES = {
     "Tonga": ["TO", "TON"],
 }
 
-YEAR_MIN = 2016
+YEAR_MIN = 2013
 YEAR_MAX = 2024
 
 RAW_FILE = "population.csv"
