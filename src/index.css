@@ -2,133 +2,331 @@
 @tailwind components;
 @tailwind utilities;
 
-/* TYPE SCALE -- the small set of text roles reused across every
-   section, so a heading in BigPicture and a heading in MapView read
-   as the same design decision rather than two independent guesses.
-   New copy anywhere on the site should reach for one of these rather
-   than inventing a new size/weight/tracking combination:
-
-     Display (Hero's thesis only)   text-3xl md:text-5xl font-bold tracking-tight
-     Wordmark (Header only)         text-lg md:text-xl font-semibold tracking-tight
-     Section heading (h2)           text-xl font-semibold
-     Card/sub-heading (h3/h4)       text-sm font-medium  (or font-semibold for a
-                                     card that itself groups other cards, e.g.
-                                     the "Regional Snapshot" / insights headers)
-     Eyebrow (section-level framing, e.g. Hero's kicker)
-                                     text-sm font-semibold uppercase tracking-wide opacity-70
-     Meta label (card-level metadata, e.g. a stat tile's label)
-                                     text-xs uppercase tracking-wide opacity-70
-     Body copy                      text-sm opacity-80
-     Helper / secondary text        text-sm opacity-70 */
+/*
+  Shared typography roles used throughout the site.
+  Reuse these instead of introducing new text styles.
+*/
 
 @layer base {
+  /*
+    Theme colors are defined as CSS variables so Tailwind utilities
+    automatically adapt to light and dark mode.
+  */
+  :root {
+    --color-ink: 36 51 58;
+    --color-sand: 250 247 240;
+    --color-panel: 241 234 220;
+    --color-surface: 255 255 255;
+
+    /*
+      A darkened ocean, for the one accent that has to carry small text: the
+      eyebrow line above each headline. The decorative ocean (#5B8FA3, used for
+      the wave and the map markers) only reaches ~2.9:1 on sand and can't hold
+      text. This reaches 5.4:1, and 8.1:1 for its dark-mode counterpart.
+    */
+    --color-accent: 61 107 125;
+  }
+
+  .dark {
+    --color-ink: 240 236 227;
+    --color-sand: 24 30 33;
+    --color-panel: 34 42 46;
+    --color-surface: 41 50 54;
+    --color-accent: 143 186 205;
+  }
+
+  /*
+    Updated by App.jsx to keep in-page navigation clear of the
+    fixed header.
+  */
+  html {
+    --header-height: 96px;
+    scroll-padding-top: calc(var(--header-height) + 16px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /*
+    Avoid single-word last lines in headings, and orphans in body text.
+    Unsupported browsers ignore both and wrap as before.
+  */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
   body {
     @apply bg-sand text-ink antialiased;
-    /* Belt-and-braces guard, not a fix in itself -- the actual overflow
-       source (ScrollProgress sizing itself off window.innerWidth,
-       which includes the scrollbar) is fixed at the component level.
-       This stays as a backstop so a future fixed/absolute element that
-       drifts a few pixels too wide can't reintroduce a sitewide
-       horizontal scrollbar; it should never be the thing actually
-       doing the clipping. */
+
+    /* Prevent accidental horizontal scrolling. */
     overflow-x: hidden;
+
+    /* Smooth theme transitions. */
+    transition: background-color 200ms ease-out, color 200ms ease-out;
   }
 
-  /* Site-wide custom cursor. !important is required, not just belt-
-     and-braces: the map markers used to set cursor via a D3 *inline*
-     style, and inline styles beat any external stylesheet rule
-     regardless of specificity short of !important. That inline rule
-     has been removed (see MapView.jsx), but !important stays as a
-     guarantee against anything else -- present or future -- reverting
-     to the OS pointer on hover, per the site's actual requirement. */
-  *,
-  *::before,
-  *::after {
-    cursor: url('/cursors/spear.svg') 2 2, auto !important;
+  /*
+  View Transitions. Ripple is a single page, so the only transition here is the
+  theme toggle's -- but the default root cross-fade is left defined rather than
+  disabled outright, so it's still correct if a second view is ever added.
+
+  The theme toggle wants the opposite: the outgoing page must sit still and
+  fully opaque underneath while the new theme is wiped over it by the expanding
+  circle in ThemeToggle.jsx. Cross-fading both layers at once would wash the
+  whole page out to grey halfway through. Scoped to the sweep class so it can't
+  affect navigation, and the z-index puts the new theme on top -- without it
+  the circle would be clipping a layer that's already behind.
+*/
+html.theme-sweep::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+
+html.theme-sweep::view-transition-new(root) {
+  animation: none;
+  z-index: 999;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The root cross-fade is decoration; the toggle already opts out in JS. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body {
+      transition: none;
+    }
   }
 
-  /* Matching text-selection highlight, since the OS default blue would
-     be the one remaining unstyled system chrome on the page. */
+  /*
+    The site's only custom cursor: a standard arrow silhouette in the site's
+    own ink, outlined in the opposite tone so it reads over a light page and a
+    dark footer alike. Two files rather than one because a cursor image can't
+    respond to a CSS variable -- .dark on <html> picks between them.
+
+    Declared here and inherited, not with !important on a universal selector:
+    an inherited value loses to any element that declares its own, which is
+    what lets the interactive rule below take over. Those states are the
+    system's own pointer and help cursors, deliberately -- the arrow is the
+    only shape this site replaces.
+  */
+  html {
+    cursor: url('/cursors/arrow-light.svg') 1 1, default;
+  }
+
+  html.dark {
+    cursor: url('/cursors/arrow-dark.svg') 1 1, default;
+  }
+
+  a[href],
+  button,
+  summary,
+  [role='button'],
+  .marker,
+  .chart-mark {
+    cursor: pointer;
+  }
+
+  .data-note {
+    cursor: help;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Branded text selection. */
   ::selection {
     background-color: #5b8fa3;
     color: #faf7f0;
   }
 
-  /* Visible keyboard focus ring for the SVG map markers, since browsers
-     don't consistently draw a default one on focusable SVG elements. */
-  .marker:focus-visible {
-    outline: 2px solid #24333a;
-    outline-offset: 2px;
-  }
-
-  /* Consistent, branded focus ring for real <button> elements (zoom,
-     reset, clear selection) instead of relying on each browser's
-     inconsistent default outline. */
-  button:focus-visible {
-    outline: 2px solid #24333a;
-    outline-offset: 2px;
-  }
-
-  /* Visible keyboard focus ring for inline "no data" notes (see
-     NoDataNote.jsx). These were previously plain outline-none with no
-     replacement -- meaning a keyboard user tabbing onto one got no
-     visible focus indicator at all, since a bare <span> has no other
-     native focus styling to fall back on. */
+  /* Shared keyboard focus styling. */
+  .marker:focus-visible,
+  button:focus-visible,
   .data-note:focus-visible {
-    outline: 2px solid #24333a;
+    outline: 2px solid rgb(var(--color-ink));
     outline-offset: 2px;
+  }
+
+  .data-note:focus-visible {
     border-radius: 2px;
   }
+}
 
+@layer components {
+  /*
+    Justified text only earns its keep in a real reading column, and only with
+    hyphenation -- unhyphenated justification opens rivers of white space, and
+    the narrower the column the worse it gets. Opt in per block rather than on
+    every <p>, so captions, chart notes and centred hero lines aren't dragged
+    into it.
+  */
+  .prose-column p {
+    text-align: justify;
+    hyphens: auto;
+  }
 }
 
 @layer utilities {
-  /* The site's one signature entrance animation -- every section, card,
-     bullet, and popover uses this same "pop" (scale + rise + fade with
-     a slight overshoot) rather than each spot inventing its own
-     transition. A gentle back-out easing gives it a bit of bounce
-     without feeling cartoonish.
-     Re-triggers on every mount, which is what's wanted for the
-     empty-state <-> chart-content swaps in RippleChain/ComparisonView,
-     since React unmounts/remounts that subtree each time selection
-     changes -- picking a country visibly "pops" its content in. */
+  /* Primary entrance animation used throughout the site. */
   @keyframes pop-in {
     from {
       opacity: 0;
       transform: scale(0.94) translateY(8px);
     }
+
     to {
       opacity: 1;
       transform: scale(1) translateY(0);
     }
   }
+
   .animate-pop-in {
     animation: pop-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
 
-  /* Tooltip-specific pop: same overshoot feel, but the transform has
-     to also carry the anchor offset (tooltip is positioned by its
-     bottom-center point, via -50%/-100%) baked in, since an
-     `animation`'s own transform replaces rather than composes with a
-     separately-applied utility transform. */
+  /*
+    The ring a link of the ripple chain emits as it comes into view, so the
+    chain reads as one thing propagating rather than five cards appearing.
+    Sized past its card and clipped by it, which is what makes the arc look
+    like part of a much larger circle passing through.
+  */
+  @keyframes ripple-out {
+    from {
+      opacity: 0.5;
+      transform: translate(-50%, -50%) scale(0.12);
+    }
+
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  .ripple-ring {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 230%;
+    aspect-ratio: 1 / 1;
+    border: 1.5px solid rgb(var(--color-accent));
+    border-radius: 9999px;
+    opacity: 0;
+    pointer-events: none;
+    animation: ripple-out 1000ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  /*
+    The cyclone glyph on the storm journey map. Applied to a group inside the
+    one carrying the position, never the same one: a CSS transform here would
+    replace the translate that puts the storm on the track.
+  */
+  @keyframes cyclone-spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .cyclone-spin {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cyclone-spin 8s linear infinite;
+  }
+
+  /*
+    Cross-chart highlight. Applied by useNationHighlight.jsx to every mark that
+    isn't the country being pointed at, on every chart on the page at once.
+    Opacity only -- nothing moves, nothing is redrawn, and the axes and
+    annotations keep full strength because they carry no nation class.
+  */
+  .nation-mark {
+    transition: opacity 180ms ease-out;
+  }
+
+  .nation-dimmed {
+    opacity: 0.14;
+  }
+
+  /* Entrance animation for anchored tooltips. */
   @keyframes tooltip-pop-in {
     from {
       opacity: 0;
       transform: translate(-50%, -100%) scale(0.85);
     }
+
     to {
       opacity: 1;
       transform: translate(-50%, -100%) scale(1);
     }
   }
+
   .animate-tooltip-pop-in {
     animation: tooltip-pop-in 220ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
 }
 
+/*
+  View Transitions. The default root cross-fade is what a page-to-page
+  navigation should look like, so it's left alone.
+
+  The theme toggle wants the opposite: the outgoing page must sit still and
+  fully opaque underneath while the new theme is wiped over it by the expanding
+  circle in ThemeToggle.jsx. Cross-fading both layers at once would wash the
+  whole page out to grey halfway through. Scoped to the sweep class so it can't
+  affect navigation, and the z-index puts the new theme on top -- without it
+  the circle would be clipping a layer that's already behind.
+*/
+html.theme-sweep::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+
+html.theme-sweep::view-transition-new(root) {
+  animation: none;
+  z-index: 999;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The root cross-fade is decoration; the toggle already opts out in JS. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pop-in,
-  .animate-tooltip-pop-in {
+  .animate-tooltip-pop-in,
+  .cyclone-spin {
     animation: none;
+  }
+
+  /* The dimming still happens -- it carries meaning -- but instantly. */
+  .nation-mark {
+    transition: none;
+  }
+
+  /* Purely decorative, and the only thing it does is move. */
+  .ripple-ring {
+    display: none;
   }
 }

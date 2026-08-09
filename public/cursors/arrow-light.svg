@@ -1,0 +1,22 @@
+<!--
+  The site's cursor for light mode. A standard arrow silhouette -- the shape
+  everyone already knows -- recoloured to the site's own ink, with a sand
+  outline so it stays visible over the dark sections (the footer, Home's hero)
+  as well as the light ones.
+
+  Hotspot is the tip at (1,1), matching the "1 1" in the cursor url() in
+  src/index.css. arrow-dark.svg is this file with fill and stroke swapped;
+  .dark on <html> picks between them.
+
+  This is the only cursor the site customises. Links, buttons and chart marks
+  fall through to the system pointer.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <polygon
+    points="1,1 1,22 6.5,16.8 10,24 13.6,22.4 10.2,15.6 17.8,15.2"
+    fill="#24333A"
+    stroke="#FAF7F0"
+    stroke-width="1.6"
+    stroke-linejoin="round"
+  />
+</svg>

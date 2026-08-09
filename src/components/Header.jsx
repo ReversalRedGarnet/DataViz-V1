@@ -1,33 +1,35 @@
 import { useLayoutEffect, useRef } from 'react'
 import ScrollProgress from './ScrollProgress.jsx'
+import SectionNav from './SectionNav.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
+import BackgroundPattern from './BackgroundPattern.jsx'
+import { HEADER_BACKDROP } from '../content/patterns.js'
 
-// Persistent site header: title, one-line thesis, and the scroll
-// progress bar directly underneath it. Fixed for the entire time
-// someone's on the site, not just after scrolling past Hero -- the
-// progress bar's whole job is tracking progress from the very top, so
-// it has to be visible from the very top too.
+// Persistent site header: wordmark, thesis, controls, scroll progress. Fixed
+// from the top, since the progress bar has to be visible there.
 //
-// A plain <header> here (not nested inside <main>) gets the implicit
-// "banner" landmark automatically, which is the correct role for
-// persistent site-level chrome -- no explicit role attribute needed.
-// The title is deliberately NOT a heading element: Hero.jsx already
-// has the page's one real <h1> (the thesis headline), and a second
-// h1 here would give the page two, which breaks the single-h1
-// document outline screen reader users rely on.
+// A plain <header> here (not nested inside <main>) gets the implicit "banner"
+// landmark automatically, which is the correct role for persistent site-level
+// chrome -- no explicit role attribute needed. The title is deliberately not a
+// heading element: Hero already carries the page's one real <h1>, and a second
+// would break the single-h1 document outline screen reader users rely on.
+//
+// Ripple is a single page, so there is no site-level nav row here -- the
+// section menu on the right is the only navigation, and it moves within this
+// one page. That's the one structural difference from the multi-hazard build
+// this header was ported from.
 //
 // Props:
-//   onHeightChange -- (px: number) => void, called with this header's
-//     actual rendered height whenever it changes, so App.jsx can give
-//     <main> matching padding-top -- otherwise Hero would render
-//     partly hidden underneath this fixed header on load. Measured
-//     rather than hardcoded so it can't drift out of sync with a
-//     future copy or font-size change.
+//   onHeightChange -- (px: number) => void, called with the header's actual
+//     rendered height whenever it changes, so App.jsx can give <main> matching
+//     padding-top and keep the in-page anchor offset current. Measured rather
+//     than hardcoded so it can't drift out of sync with a future copy or
+//     font-size change.
 export default function Header({ onHeightChange }) {
   const headerRef = useRef(null)
 
-  // useLayoutEffect, not useEffect: this measurement drives another
-  // element's layout (main's padding-top), so it needs to run before
-  // the browser paints -- otherwise Hero would flash unpadded under
+  // useLayoutEffect, not useEffect: this measurement drives another element's
+  // layout, so it has to run before paint or the hero flashes unpadded under
   // the header for one frame on every load.
   useLayoutEffect(() => {
     const el = headerRef.current
@@ -40,31 +42,40 @@ export default function Header({ onHeightChange }) {
   }, [onHeightChange])
 
   return (
-    <header
-      ref={headerRef}
-      className="fixed inset-x-0 top-0 z-40 border-b border-ink/10 bg-sand shadow-sm"
-    >
-      {/* Solid fill, not the old bg-sand/90 + backdrop-blur -- a
-          translucent header let whatever was scrolling underneath
-          (chart colours, the map's ocean fill) show through and
-          compete with the title, and put text contrast at the mercy
-          of content that changes on every scroll. Opaque sand keeps
-          this a stable, legible masthead no matter what's beneath it.
+    <header ref={headerRef} className="fixed inset-x-0 top-0 z-40 border-b border-ink/10 bg-sand shadow-sm">
+      {/* No overflow-hidden on the header itself: the section menu below opens
+          past its bottom edge and would be clipped by it. The backdrop clips
+          itself instead.
 
-          Row layout on md+ (stacked on mobile, where there isn't
-          width to spare) reads as a proper nameplate: wordmark and
-          thesis share a baseline, separated by a hairline rule rather
-          than just stacking two same-weight lines. Tracking-tight on
-          the wordmark and a light italic on the thesis give the two
-          roles distinct voices instead of one undifferentiated block
-          of text. */}
-      <div className="mx-auto flex max-w-5xl flex-col gap-0.5 px-6 py-3 md:flex-row md:items-baseline md:gap-3 md:py-3.5">
-        <p className="text-lg font-semibold leading-tight tracking-tight text-ink md:text-xl">Ripple</p>
-        <p className="text-xs italic leading-snug text-ink/70 md:border-l md:border-ink/15 md:pl-3 md:text-sm">
-          Climate doesn't create inequality. It reveals it.
-        </p>
+          Solid fill, not a translucent bar -- whatever scrolls underneath
+          (chart colours, the map's ocean fill) would otherwise show through
+          and put the title's contrast at the mercy of content that changes on
+          every scroll. */}
+      <BackgroundPattern backdrop={HEADER_BACKDROP} />
+
+      <div className="relative mx-auto max-w-5xl px-6 py-3 md:py-3.5">
+        {/* Grouped right so they read as controls, not part of the wordmark. */}
+        <div className="flex items-start justify-between gap-3 md:items-baseline">
+          <div className="flex flex-col gap-0.5 md:flex-row md:items-baseline md:gap-3">
+            <a
+              href="#top"
+              className="rounded font-serif text-2xl font-semibold leading-tight tracking-tight text-ink hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink md:text-4xl"
+            >
+              Ripple
+            </a>
+            <p className="font-serif text-sm italic leading-snug text-ink/70 md:border-l md:border-ink/15 md:pl-3 md:text-lg">
+              Climate doesn't create inequality. It reveals it.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <SectionNav />
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
-      <ScrollProgress />
+      <div className="relative">
+        <ScrollProgress />
+      </div>
     </header>
   )
 }

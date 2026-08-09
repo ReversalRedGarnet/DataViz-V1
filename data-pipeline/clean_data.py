@@ -1,25 +1,16 @@
 """
-Ripple -- data cleaning pipeline
----------------------------------
-One-time, offline script. Not run in the browser (see README.md -> stack).
+Convert Pacific Data Hub CSV exports into the JSON format used by the frontend.
 
 Usage:
-    1. Export each dataset below as CSV from https://stats.pacificdata.org/
-       into data-pipeline/raw/, renamed exactly as the keys in DATASETS
-       below. Download the UNFILTERED table -- this script filters by
-       country, year, AND indicator itself.
-    2. Run:  python clean_data.py
-    3. Cleaned JSON lands in ../public/data/, ready for the frontend to
-       fetch via src/utils/loadData.js
+1. Export each dataset from https://stats.pacificdata.org/ into
+   data-pipeline/raw/ using the filenames defined in DATASETS.
+2. Run:
+       python clean_data.py
+3. Cleaned JSON files are written to ../public/data/.
 
-IMPORTANT: some raw exports from this portal are whole-dataflow dumps
-containing MANY indicators bundled together -- e.g. crop_yield.csv,
-power_generation.csv and tourist_arrivals.csv are literally the same
-file (the full "Climate Change Indicators" dataflow), and
-disaster_affected_persons.csv / disaster_economic_loss.csv are the same
-"SDG 11" dataflow dump. That's normal for this portal, not a mistake --
-this script filters each one down to the single indicator code it
-actually needs.
+Some portal exports contain multiple indicators in a single CSV. The
+configuration below selects the required indicator (and unit where needed)
+for each dataset.
 """
 
 import json
@@ -30,7 +21,7 @@ import pandas as pd
 RAW_DIR = Path(__file__).parent / "raw"
 OUT_DIR = Path(__file__).parent.parent / "public" / "data"
 
-# Locked scope -- see README.md -> "Scope (locked)"
+# Project scope.
 NATIONS = ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]
 
 NATION_CODES = {
@@ -40,15 +31,12 @@ NATION_CODES = {
     "Tonga": ["TO", "TON"],
 }
 
-# A few years of baseline before Cyclone Harold (April 2020) and a few of
-# recovery after. Widen later by just changing these two numbers.
+# Analysis period.
 YEAR_MIN = 2016
 YEAR_MAX = 2024
 
-# raw filename in data-pipeline/raw/ -> config for that file.
-# indicator_col/indicator_code select the ONE indicator this dataset
-# needs out of what may be a shared, multi-indicator dataflow dump.
-# field_name must match src/utils/metrics.js.
+# Dataset configuration:
+# raw CSV -> output JSON + indicator selection.
 DATASETS = {
     "disaster_affected_persons.csv": {
         "json_name": "disaster_affected_persons.json",
@@ -61,9 +49,8 @@ DATASETS = {
         "field_name": "economic_loss_usd",
         "indicator_col": "INDICATOR",
         "indicator_code": "VC_DSR_AALT",
-        # a handful of rows are reported in USD_MILLIONS instead of USD --
-        # excluded rather than guess-converted, since it's only ~4 rows
-        # region-wide and not worth the risk of a silent unit error.
+
+        # Ignore rows reported in USD_MILLIONS to avoid mixing units.
         "unit_col": "UNIT_MEASURE",
         "unit_value": "USD",
     },
@@ -87,35 +74,55 @@ DATASETS = {
     },
 }
 
-COUNTRY_COL_CANDIDATES = ["GEO_PICT", "REF_AREA", "Pacific Island Countries and territories", "Country"]
+COUNTRY_COL_CANDIDATES = [
+    "GEO_PICT",
+    "REF_AREA",
+    "Pacific Island Countries and territories",
+    "Country",
+]
+
 TIME_COL_CANDIDATES = ["TIME_PERIOD", "Year"]
 VALUE_COL_CANDIDATES = ["OBS_VALUE", "Value"]
 
 
 def _find_col(df, candidates, label):
-    for c in candidates:
-        if c in df.columns:
-            return c
+    """Return the first matching column name from a list of candidates."""
+    for candidate in candidates:
+        if candidate in df.columns:
+            return candidate
+
     raise KeyError(
         f"Couldn't find a {label} column. Columns in this file are: "
-        f"{list(df.columns)} -- add the real name to the candidates list at the top of this file."
+        f"{list(df.columns)} -- add the correct column name to the "
+        f"candidate list near the top of this file."
     )
 
 
 def _matches_nation(raw_value, nation) -> bool:
+    """Match a country by name or ISO code."""
     raw_value = str(raw_value).strip()
+
     if raw_value.lower() == nation.lower():
         return True
+
     return raw_value.upper() in NATION_CODES.get(nation, [])
 
 
 def clean_one(csv_name: str, config: dict) -> None:
+    """Clean a single dataset and export it as JSON."""
     df = pd.read_csv(RAW_DIR / csv_name)
+
     print(f"\n{csv_name}: columns found -> {list(df.columns)}")
 
-    indicator_col, indicator_code = config["indicator_col"], config["indicator_code"]
+    indicator_col = config["indicator_col"]
+    indicator_code = config["indicator_code"]
+
     if indicator_col not in df.columns:
-        raise KeyError(f"Expected an '{indicator_col}' column to select {indicator_code} -- not found.")
+        raise KeyError(
+            f"Expected an '{indicator_col}' column to select "
+            f"{indicator_code} -- not found."
+        )
+
     df = df[df[indicator_col] == indicator_code]
     print(f"  filtered to indicator {indicator_code}: {len(df)} rows")
 
@@ -128,28 +135,46 @@ def clean_one(csv_name: str, config: dict) -> None:
     value_col = _find_col(df, VALUE_COL_CANDIDATES, "value")
 
     rows = []
+
     for nation in NATIONS:
-        mask = df[country_col].apply(lambda v: _matches_nation(v, nation))
-        matched = df[mask]
-        in_range = matched[matched[time_col].astype(int).between(YEAR_MIN, YEAR_MAX)]
-        print(f"  {nation}: {len(matched)} rows matched, {len(in_range)} within {YEAR_MIN}-{YEAR_MAX}")
-        for _, r in in_range.iterrows():
-            rows.append({"nation": nation, "year": int(r[time_col]), config["field_name"]: r[value_col]})
+        matched = df[df[country_col].apply(_matches_nation, args=(nation,))]
+        in_range = matched[
+            matched[time_col].astype(int).between(YEAR_MIN, YEAR_MAX)
+        ]
+
+        print(
+            f"  {nation}: {len(matched)} rows matched, "
+            f"{len(in_range)} within {YEAR_MIN}-{YEAR_MAX}"
+        )
+
+        for _, row in in_range.iterrows():
+            rows.append({
+                "nation": nation,
+                "year": int(row[time_col]),
+                config["field_name"]: row[value_col],
+            })
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
     with open(OUT_DIR / config["json_name"], "w") as f:
         json.dump(rows, f, indent=2)
+
     print(f"  wrote {config['json_name']} ({len(rows)} rows total)")
 
 
 def main() -> None:
-    any_found, problems = False, []
+    any_found = False
+    problems = []
+
     for csv_name, config in DATASETS.items():
         path = RAW_DIR / csv_name
+
         if not path.exists():
             print(f"Skipping {csv_name} -- not found in {RAW_DIR}.")
             continue
+
         any_found = True
+
         try:
             clean_one(csv_name, config)
         except KeyError as e:

@@ -1,16 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Header from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
+import StormJourney from './components/StormJourney.jsx'
 import StormProfile from './components/StormProfile.jsx'
 import BigPicture from './components/BigPicture.jsx'
 import MapView from './components/MapView.jsx'
 import RippleChain from './components/RippleChain.jsx'
+import DivergenceView from './components/DivergenceView.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
-import PacificBorder from './components/PacificBorder.jsx'
-import Header from './components/Header.jsx'
-import { useSelection } from './hooks/useSelection.js'
-import { useRippleData } from './hooks/useRippleData.js'
-import { SECTION_COLORS } from './utils/theme.js'
+import PageSections from './components/PageSections.jsx'
+import { ThemeProvider } from './hooks/useTheme.jsx'
+import { useSelection, selectionAnnouncement } from './hooks/useSelection.js'
+import { useMetricData } from './hooks/useMetricData.js'
+import { METRICS } from './utils/metrics.js'
 
 const DATA_SOURCES = [
   {
@@ -33,9 +36,9 @@ const DATA_SOURCES = [
     label: 'Power generation — Pacific Data Hub (SPC)',
     url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.POWER_GEN.&pd=,&to[TIME_PERIOD]=false',
   },
-  // Supplementary sources -- not from the official Pacific Data Hub
-  // list, used only for the "storm itself" category/deaths comparison
-  // (see StormProfile.jsx), not for any ripple-chain metric above.
+  // Supplementary sources -- not from the official Pacific Data Hub list, used
+  // only for the "storm itself" category/deaths comparison (see
+  // StormProfile.jsx), not for any ripple-chain metric above.
   {
     label: 'Severe Tropical Cyclone Harold — official cyclone history, Australian Bureau of Meteorology',
     url: 'http://www.bom.gov.au/cyclone/history/Harold.shtml',
@@ -46,43 +49,60 @@ const DATA_SOURCES = [
   },
 ]
 
-// Tone for each major section, top to bottom -- the single source of
-// truth for both which background each Section uses AND which two
-// colours each PacificBorder divider needs to bound (see
-// SECTION_COLORS in theme.js and the two-tone divider in
-// PacificBorder.jsx). 'plain' sections are the interactive canvas
-// (Hero/Storm profile/Map/RippleChain); 'panel' is reserved for the
-// two sections that read as an editorial aside (BigPicture, Compare
-// recovery) -- Storm profile stays 'plain' rather than becoming a
-// third panel, since it's part of the same opening/framing beat as
-// Hero, not a separate editorial aside.
-const SECTION_TONES = ['plain', 'plain', 'panel', 'plain', 'plain', 'panel']
-const FOOTER_TONE = 'ink'
+// The page, top to bottom. PageSections owns the shape: it gives each entry its
+// anchor id, its place in the entrance stagger, and the wave divider above and
+// below it coloured to match the two tones it sits between -- so an id, a
+// stagger position and a divider colour can't drift apart the way they could
+// when App kept a parallel SECTION_TONES array and destructured it positionally.
+//
+// `tone` is the background the section actually paints, read only to colour
+// those dividers. Keep it in step with what the section renders or the wave
+// seam shows a visible colour mismatch. Every id here must also appear in
+// content/pageSections.js, which is what the header's jump-to menu links to.
+function pageSections(data, selection) {
+  const { selected, toggle, clear } = selection
 
-function delayStyle(index) {
-  return { animationDelay: `${index * 90}ms` }
+  return [
+    { id: 'top', tone: 'plain', element: <Hero /> },
+    { id: 'storm-journey', tone: 'panel', element: <StormJourney /> },
+    { id: 'storm-profile', tone: 'plain', element: <StormProfile /> },
+    { id: 'big-picture', tone: 'panel', element: <BigPicture data={data} /> },
+    {
+      id: 'map',
+      tone: 'plain',
+      element: <MapView selected={selected} onToggle={toggle} onClear={clear} />,
+    },
+    {
+      id: 'ripple-chain',
+      tone: 'plain',
+      element: <RippleChain data={data} selectedNations={selected} />,
+    },
+    { id: 'divergence', tone: 'panel', element: <DivergenceView data={data} /> },
+    {
+      id: 'compare',
+      tone: 'panel',
+      element: <ComparisonView data={data} selectedNations={selected} />,
+    },
+    { id: 'sources', tone: 'ink', element: <CitationPanel sources={DATA_SOURCES} /> },
+  ]
 }
 
-function selectionAnnouncement(selected) {
-  if (selected.length === 0) return ''
-  if (selected.length === 1) return `${selected[0]} selected. Showing its ripple chain below.`
-  return `Comparing ${selected[0]} and ${selected[1]}.`
-}
-
-export default function App() {
-  const data = useRippleData()
-  const { selected, toggle, clear } = useSelection()
+function AppShell() {
+  const data = useMetricData(METRICS)
+  const selection = useSelection()
   const [headerHeight, setHeaderHeight] = useState(0)
 
-  const [heroTone, stormTone, bigPictureTone, mapTone, rippleTone, comparisonTone] = SECTION_TONES
+  // Keep the CSS scroll offset in step with the measured header height, so a
+  // jump-to-section link doesn't land with its heading hidden behind the fixed
+  // header (see --header-height in index.css).
+  useEffect(() => {
+    document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
+  }, [headerHeight])
 
   return (
     <>
-      <Header onHeightChange={setHeaderHeight} />
-
-      {/* Visually hidden until focused -- lets keyboard users jump past
-          the map straight to the charts without tabbing through every
-          marker first. */}
+      {/* Visually hidden until focused -- lets keyboard users jump past the
+          header straight to the story without tabbing through it first. */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:rounded-br-md focus:bg-ink focus:px-4 focus:py-2 focus:text-white"
@@ -90,28 +110,24 @@ export default function App() {
         Skip to main content
       </a>
 
-      {/* Announces selection changes to screen readers, since the charts
-          and comparison view updating below wouldn't otherwise be
-          noticed without visually looking at the page. */}
+      <Header onHeightChange={setHeaderHeight} />
+
+      {/* The charts and comparison view below update silently otherwise. */}
       <div aria-live="polite" className="sr-only">
-        {selectionAnnouncement(selected)}
+        {selectionAnnouncement(selection.selected, 'Showing its ripple chain below.')}
       </div>
 
       <main id="main-content" className="min-h-screen" style={{ paddingTop: headerHeight }}>
-        <Hero style={delayStyle(0)} />
-        <PacificBorder colorAbove={SECTION_COLORS[heroTone]} colorBelow={SECTION_COLORS[stormTone]} />
-        <StormProfile style={delayStyle(1)} />
-        <PacificBorder colorAbove={SECTION_COLORS[stormTone]} colorBelow={SECTION_COLORS[bigPictureTone]} />
-        <BigPicture data={data} style={delayStyle(2)} />
-        <PacificBorder colorAbove={SECTION_COLORS[bigPictureTone]} colorBelow={SECTION_COLORS[mapTone]} />
-        <MapView selected={selected} onToggle={toggle} onClear={clear} style={delayStyle(3)} />
-        <PacificBorder colorAbove={SECTION_COLORS[mapTone]} colorBelow={SECTION_COLORS[rippleTone]} />
-        <RippleChain data={data} selectedNations={selected} style={delayStyle(4)} />
-        <PacificBorder colorAbove={SECTION_COLORS[rippleTone]} colorBelow={SECTION_COLORS[comparisonTone]} />
-        <ComparisonView data={data} selectedNations={selected} style={delayStyle(5)} />
-        <PacificBorder colorAbove={SECTION_COLORS[comparisonTone]} colorBelow={SECTION_COLORS[FOOTER_TONE]} />
-        <CitationPanel sources={DATA_SOURCES} style={delayStyle(6)} />
+        <PageSections sections={pageSections(data, selection)} />
       </main>
     </>
+  )
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppShell />
+    </ThemeProvider>
   )
 }

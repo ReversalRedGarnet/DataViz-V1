@@ -4,13 +4,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap"
+      rel="stylesheet"
+    />
     <title>Ripple — Climate Doesn't Create Inequality. It Reveals It.</title>
     <meta
       name="description"
       content="An interactive data story exploring how climate change amplifies existing social and economic vulnerabilities across the Pacific. Built for the 2026 Pacific DataViz Challenge."
     />
+
+    <!--
+      Social preview. Without these, a link to the site posted anywhere -- the
+      submission form, a message to a judge, a share between teammates --
+      renders as a bare URL with no title, no description and no image.
+
+      SITE_URL below is the one thing to change on deploy. og:image in
+      particular has to be an absolute URL: most crawlers do not resolve a
+      relative path, and a broken image is worse than no card at all. The image
+      itself is public/og-image.png, generated from the real crop-yield data
+      rather than a mock-up, so the card can't show a shape the site doesn't.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ripple" />
+    <meta property="og:title" content="Ripple — One storm, four outcomes" />
+    <meta
+      property="og:description"
+      content="One cyclone crossed four Pacific nations in April 2020. An interactive data story on why their recoveries diverged. Built for the 2026 Pacific DataViz Challenge."
+    />
+    <meta property="og:url" content="https://REPLACE-WITH-DEPLOYED-DOMAIN/" />
+    <meta property="og:image" content="https://REPLACE-WITH-DEPLOYED-DOMAIN/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Ripple: one storm, four outcomes. Four lines of crop yield, each indexed to its own 2020 value, fanning apart."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ripple — One storm, four outcomes" />
+    <meta
+      name="twitter:description"
+      content="One cyclone crossed four Pacific nations in April 2020. Their recoveries diverged."
+    />
+    <meta name="twitter:image" content="https://REPLACE-WITH-DEPLOYED-DOMAIN/og-image.png" />
+    <meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1B2226" media="(prefers-color-scheme: dark)" />
   </head>
   <body>
+    <!--
+      Runs before React mounts, and before first paint, so a dark-mode visitor
+      doesn't get a frame of the light palette. Deliberately duplicates
+      getInitialTheme() in src/hooks/useTheme.jsx (same 'ripple-theme' key,
+      same stored-choice-beats-OS-preference order) -- an import couldn't run
+      early enough. Keep the two in step.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('ripple-theme')
+          var dark = stored === 'dark' || (!stored && matchMedia('(prefers-color-scheme: dark)').matches)
+          if (dark) document.documentElement.classList.add('dark')
+        } catch (e) {
+          /* private mode, storage disabled -- fall through to light */
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -1,33 +1,102 @@
 // Real color values for places JS/D3 needs an actual string (Tailwind
 // classes don't work inside D3's .attr('fill', ...) calls).
 //
-// These are deliberately DARKER than the decorative ocean/sun tokens in
-// tailwind.config.js. A contrast check (WCAG 2.1) found the original
-// soft pastel yellow measured ~1.5:1 as a chart line or badge fill
-// against the page background -- badly under the 3:1 minimum for
-// graphical objects, and white text on it came out under 2:1. These
-// values keep the same ocean/gold hue family but darken enough to pass:
-//   white text on ocean-data / gold-data: 5.8:1 / 5.4:1
-//   line-on-page-background:              5.5:1 / 5.1:1
-export const SELECTION_COLORS = ['#3D6B7D', '#8A6300'] // pick 1 (ocean-data), pick 2 (gold-data)
-
-// Real hex values matching each Section `tone` (see Section.jsx) and
-// the footer's ink background -- PacificBorder needs actual colour
-// strings (not Tailwind class names) to fill the two regions on
-// either side of the wave divider between sections.
-export const SECTION_COLORS = {
-  plain: '#FAF7F0', // == tailwind 'sand', the page's base background
-  panel: '#F1EADC', // a slightly deeper, warm neutral -- used sparingly for the two "editorial" sections (BigPicture, Compare recovery) so they read as a distinct panel without introducing a new hue
-  ink: '#24333A', // == tailwind 'ink', the footer's background
+// Darker than the decorative ocean/sun tokens in tailwind.config.js --
+// same hue family, adjusted to clear WCAG 2.1's 3:1 minimum for
+// graphical objects (white text on ocean-data/gold-data: 5.8:1/5.4:1).
+// Every colour a data mark can take, per theme. Theme-aware because a fixed
+// pair can't clear WCAG's 3:1 non-text contrast on both a white card and a
+// #293236 one: the light pair measures 5.8:1 and 4.4:1 on white but only
+// 2.2:1 and 2.4:1 on the dark card, where marks and map pins were washing out.
+// The dark pair measures 6.3:1 and 8.2:1 there.
+//
+//   selection -- first and second pick. Blue against gold in both themes, the
+//     most robust pairing for red/green colour blindness, and the two differ
+//     in lightness as well as hue so the distinction survives greyscale.
+//   single -- single-series marks (snapshot bars, the storm scatter), where
+//     colour carries no information. Deliberately the same blue as the first
+//     pick rather than a fourth near-identical ocean tone: one data blue and
+//     one data gold across the whole site is easier to learn than four.
+//   idle -- a map pin nobody has picked yet. Reads as "available", not as a
+//     third category.
+//   onMark -- text sitting on top of a mark, i.e. the pin's 1/2 badge. Follows
+//     the marks, so it flips as they do.
+//   series -- the one place four nations are drawn at once (the divergence
+//     charts), where the two-pick palette can't stretch. Extends the same blue
+//     and gold with a brick and a violet rather than starting over: measured
+//     5.1:1 to 7.0:1 against both the card and the section behind it, in both
+//     themes. Deliberately no green, which would put a red/green pair in the
+//     same chart. Hue is still the weakest of the three cues these lines carry
+//     -- each also gets its own dash pattern and its own end label, so the
+//     chart survives being read in greyscale.
+const CHART_COLORS_BY_THEME = {
+  light: {
+    selection: ['#3D6B7D', '#8A6300'],
+    series: ['#3D6B7D', '#8A6300', '#9A3B2E', '#5C4A8A'],
+    single: '#3D6B7D',
+    idle: '#5B8FA3',
+    onMark: '#FFFFFF',
+    markRing: '#FFFFFF',
+  },
+  dark: {
+    selection: ['#8FBACD', '#F0C868'],
+    series: ['#8FBACD', '#F0C868', '#EE9B8A', '#B4A6E0'],
+    single: '#8FBACD',
+    idle: '#7FA8B8',
+    onMark: '#1B2226',
+    markRing: '#1B2226',
+  },
 }
 
-// Decorative accent for the fish border motif (FishBorder.jsx) and the
-// spear cursor's highlight edge -- deliberately NOT a new, unrelated
-// hue. It's ink and sand blended at 60/40, i.e. literally made out of
-// two colours already in the palette, which is why the same tone
-// works for both: one accent shared across two decorative touches
-// reads as one deliberate choice rather than each picking its own
-// colour independently. Contrast against sand: ~3.7:1; against panel:
-// ~3.3:1 -- visible as a pattern without needing WCAG text-contrast
-// levels, since it's decorative rather than load-bearing information.
-export const PEWTER = '#7A8183'
+export function chartColorsFor(theme) {
+  return CHART_COLORS_BY_THEME[theme] ?? CHART_COLORS_BY_THEME.light
+}
+
+// Fill colors per Section `tone`, for PacificBorder to paint the regions
+// either side of its wave. An SVG fill attribute can't read a CSS custom
+// property, so these deliberately duplicate the :root/.dark variables in
+// index.css and must be kept in step with them.
+const SECTION_COLORS_BY_THEME = {
+  light: {
+    plain: '#FAF7F0', // tailwind 'sand'
+    panel: '#F1EADC', // deeper neutral, for editorial-aside sections
+    ink: '#24333A', // tailwind 'ink', the footer's background
+  },
+  dark: {
+    plain: '#181E21',
+    panel: '#222A2E',
+    // Same value as panel, by design: in dark mode the 'ink' tone renders as
+    // dark:bg-panel rather than flipping to the light tone, which read as too
+    // bright. The wave seam shows a colour mismatch if this drifts from it.
+    ink: '#222A2E',
+  },
+}
+
+export function sectionColorsFor(theme) {
+  return SECTION_COLORS_BY_THEME[theme] ?? SECTION_COLORS_BY_THEME.light
+}
+
+
+// Axis text and gridlines for D3 charts, tracking the theme the same way the
+// marks above do.
+export const CHART_INK = {
+  light: '#24333A',
+  dark: '#F0ECE3',
+}
+
+// Halo around chart points, matching the card behind them so overlapping marks
+// stay distinct. Kept in step with --color-surface.
+export const CHART_SURFACE = {
+  light: '#FFFFFF',
+  dark: '#293236',
+}
+
+
+// Map ocean/land/coastline. A dimmed, desaturated dark-mode counterpart in the
+// same hue family, rather than the map keeping its light colours the way an
+// embedded Google Map does -- at full brightness it overwhelmed a dark page.
+// Marker and selection colours are unchanged; both read fine on either.
+export const MAP_COLORS = {
+  light: { ocean: '#7FBFD9', land: '#FAF7F0', coastline: '#C9DCE2' },
+  dark: { ocean: '#2E4A57', land: '#293236', coastline: '#3E4B50' },
+}

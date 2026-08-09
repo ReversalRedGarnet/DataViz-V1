@@ -1,14 +1,9 @@
-// Custom icons for the map's zoom/reset buttons, replacing the plain
-// "+" / "\u2212" / "\u27f2" text glyphs that used to sit inside those
-// circles. Same stroke weight (2.25) and color (ink) as the chart
-// lines and the wave border, so these read as part of the same visual
-// language rather than a separate icon set bolted on top.
+// Icons for the map's zoom/reset buttons. Same stroke weight and colour as the
+// chart lines and the wave border, so they read as one icon set.
 //
-// Zoom-out's minus is literally just the cross's horizontal stroke --
-// no separate design, same coordinates. Reset is the one genuinely new
-// shape: a ~290-degree arc (large-arc-flag 1, sweep-flag 0 -- the long
-// way around the circle, not the short way through the gap) with a
-// small filled triangular arrowhead landing tangent to the curl.
+// Zoom-out is literally the cross's horizontal stroke, same coordinates. Reset
+// is a ~290-degree arc (large-arc-flag 1, sweep-flag 0: the long way round, not
+// the short way through the gap) with an arrowhead tangent to the curl.
 //
 // Props:
 //   kind -- 'zoomIn' | 'zoomOut' | 'reset'

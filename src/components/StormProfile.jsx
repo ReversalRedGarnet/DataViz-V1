@@ -1,13 +1,21 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import Section from './Section.jsx'
 import Tooltip from './Tooltip.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
+import { useTheme } from '../hooks/useTheme.jsx'
+import { useElementWidth } from '../hooks/useElementWidth.js'
+import { useInView } from '../hooks/useInView.js'
 import { resetSvg } from '../utils/d3helpers.js'
-import { renderStormProfileChart, STORM_CHART_WIDTH, STORM_CHART_HEIGHT } from '../utils/chartRenderers.jsx'
+import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 
+// In the order Harold reached them, which is also the order the journey
+// section walks through. `date` is the day of that nation's closest approach
+// or defining impact, from the Bureau of Meteorology's cyclone history and the
+// UN OCHA situation reports already cited on this page.
 export const STORM_PROFILE = [
   {
     name: 'Solomon Islands',
+    date: '3 April 2020',
     category: 1,
     categoryLabel: 'Tropical low / Category 1 at time of impact',
     deaths: 27,
@@ -16,6 +24,7 @@ export const STORM_PROFILE = [
   },
   {
     name: 'Vanuatu',
+    date: '6 April 2020',
     category: 5,
     categoryLabel: 'Category 5 (landfall, Espiritu Santo)',
     deaths: 2,
@@ -24,6 +33,7 @@ export const STORM_PROFILE = [
   },
   {
     name: 'Fiji',
+    date: '8 April 2020',
     category: 4,
     categoryLabel: 'Category 4 (landfall, Kadavu)',
     deaths: 1,
@@ -32,6 +42,7 @@ export const STORM_PROFILE = [
   },
   {
     name: 'Tonga',
+    date: '9 April 2020',
     category: 4,
     categoryLabel: 'Category 4 (passed offshore, no landfall)',
     deaths: 0,
@@ -44,55 +55,63 @@ export const STORM_PROFILE = [
 //   style -- forwarded to the underlying Section, used by App.jsx to
 //     stagger each section's entrance on first load
 export default function StormProfile({ style }) {
-  const ref = useRef(null)
+  const [ref, node, width] = useElementWidth()
+  const [chartRef, inView] = useInView()
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
+  const { theme } = useTheme()
 
+  // The dots and their labels arrive one at a time, and this chart sits below
+  // three paragraphs of framing -- far enough down that at mount it is off
+  // screen on most windows.
   useEffect(() => {
-    if (!ref.current) return
-    const svg = resetSvg(ref, STORM_CHART_WIDTH, STORM_CHART_HEIGHT)
-    renderStormProfileChart(svg, { rows: STORM_PROFILE, showTooltip, hideTooltip })
-  }, [showTooltip, hideTooltip])
+    if (!inView || !node || !width) return
+    const svg = resetSvg(node, width, STORM_CHART_HEIGHT)
+    renderStormProfileChart(svg, { width, rows: STORM_PROFILE, showTooltip, hideTooltip, theme })
+  }, [inView, node, width, showTooltip, hideTooltip, theme])
 
   return (
     <Section style={style}>
       <div ref={containerRef} className="relative mx-auto max-w-3xl">
-        <h2 className="mb-2 text-xl font-semibold">Cyclone Harold at a Glance</h2>
+        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">Cyclone Harold at a Glance</h2>
 
-<div className="max-w-2xl space-y-3 text-sm opacity-80">
-  <p>
-    Tropical Cyclone Harold was one of the strongest storms of the 2020 South Pacific
-    cyclone season. Between 2 and 10 April 2020, it tracked across Solomon Islands,
-    Vanuatu, Fiji, and Tonga, bringing destructive winds, heavy rainfall, storm surges,
-    and widespread flooding.
-  </p>
+        <div className="prose-column max-w-prose space-y-3 text-sm opacity-80">
+          <p>
+            Tropical Cyclone Harold was one of the strongest storms of the 2020 South Pacific
+            cyclone season. Between 2 and 10 April 2020, it tracked across Solomon Islands,
+            Vanuatu, Fiji, and Tonga, bringing destructive winds, heavy rainfall, storm surges,
+            and widespread flooding.
+          </p>
 
-  <p>
-    Although Harold was the same weather system throughout its journey, its intensity
-    changed over time. Some countries experienced a direct Category 5 landfall, while
-    others encountered a weaker system or were affected primarily by rough seas and
-    coastal flooding.
-  </p>
+          <p>
+            Although Harold was the same weather system throughout its journey, its intensity
+            changed over time. Some countries experienced a direct Category 5 landfall, while
+            others encountered a weaker system or were affected primarily by rough seas and
+            coastal flooding.
+          </p>
 
-  <p>
-    The chart below compares Cyclone Harold's strength at its closest approach to each
-    nation against the reported loss of life. It introduces an important observation:
-    stronger storms do not always produce the greatest human impact.
-  </p>
-</div>
+          <p>
+            The chart below compares Cyclone Harold's strength at its closest approach to each
+            nation against the reported loss of life. It introduces an important observation:
+            stronger storms do not always produce the greatest human impact.
+          </p>
+        </div>
 
-        <svg
-          ref={ref}
-          role="img"
-          aria-label="Scatter chart comparing cyclone category at closest approach against deaths, for each of the four nations"
-          className="mt-4 h-auto w-full"
-        />
+        <div ref={chartRef}>
+          <svg
+            ref={ref}
+            role="img"
+            aria-label="Scatter chart comparing cyclone category at closest approach against deaths, for each of the four nations"
+            className="mt-6 block w-full"
+            style={{ height: STORM_CHART_HEIGHT }}
+          />
+        </div>
 
         <p className="mt-3 max-w-2xl text-sm font-medium">
-  One of the most striking findings is that the cyclone's deadliest single event occurred
-  while Harold was at its weakest documented phase. Twenty-seven people lost their lives
-  when the passenger ferry <em>MV Taimareho</em> was overwhelmed off Solomon Islands—
-  more than the combined death toll recorded in Vanuatu, Fiji, and Tonga.
-</p>
+          One of the most striking findings is that the cyclone's deadliest single event occurred
+          while Harold was at its weakest documented phase. Twenty-seven people lost their lives
+          when the passenger ferry <em>MV Taimareho</em> was overwhelmed off Solomon Islands&mdash;
+          more than the combined death toll recorded in Vanuatu, Fiji, and Tonga.
+        </p>
 
         {/* Screen-reader-only data table -- same pattern as RippleChain:
             the chart above conveys the shape, this gives the same

@@ -1,41 +1,46 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import Section from './Section.jsx'
-import NoDataNote from './NoDataNote.jsx'
 import Tooltip from './Tooltip.jsx'
+import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
-import { resetSvg } from '../utils/d3helpers.js'
-import { renderSnapshotChart, CHART_WIDTH, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 import { NATIONS } from './MapView.jsx'
 import { EVENT_YEAR, METRICS } from '../utils/metrics.js'
+import { formatNationList } from '../utils/formatNationList.js'
+import { missingNations, snapshotRowsByMetric } from '../utils/rows.js'
+
+const NATION_NAMES = NATIONS.map((n) => n.name)
 
 export default function BigPicture({ data, style }) {
   const stats = useMemo(() => computeStats(data), [data])
-  const snapshots = useMemo(() => computeSnapshots(data), [data])
+  const snapshots = useMemo(
+    () => snapshotRowsByMetric(data, METRICS, EVENT_YEAR, NATION_NAMES),
+    [data]
+  )
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
 
   return (
     <Section tone="panel" style={style}>
       <div ref={containerRef} className="relative">
-        <h2 className="mb-2 text-xl font-semibold">The Bigger Picture</h2>
+        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">The Bigger Picture</h2>
 
-<div className="max-w-2xl space-y-3 text-sm opacity-80">
-  <p>
-    Cyclone Harold was a shared disaster, but recovery was shaped by far more than the
-    storm itself. Population size, infrastructure, economic capacity, and national
-    preparedness all influenced how each country experienced its aftermath.
-  </p>
+        <div className="prose-column max-w-prose space-y-3 text-sm opacity-80">
+          <p>
+            Cyclone Harold was a shared disaster, but recovery was shaped by far more than the
+            storm itself. Population size, infrastructure, economic capacity, and national
+            preparedness all influenced how each country experienced its aftermath.
+          </p>
 
-  <p>
-    Rather than focusing on one nation at a time, this section compares the region as a
-    whole. By looking at key indicators side by side, patterns begin to emerge that are
-    difficult to see in isolation.
-  </p>
+          <p>
+            Rather than focusing on one nation at a time, this section compares the region as a
+            whole. By looking at key indicators side by side, patterns begin to emerge that are
+            difficult to see in isolation.
+          </p>
 
-  <p>
-    Together, these snapshots provide a foundation for the detailed comparisons explored
-    throughout the rest of this project.
-  </p>
-</div>
+          <p>
+            Together, these snapshots provide a foundation for the detailed comparisons explored
+            throughout the rest of this project.
+          </p>
+        </div>
 
         {stats ? (
           <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -70,26 +75,35 @@ export default function BigPicture({ data, style }) {
 
         {snapshots && (
           <div className="mt-8">
-           <h3 className="mb-1 text-sm font-semibold">
-  Regional Snapshot — {EVENT_YEAR}
-</h3>
-           <p className="mb-3 max-w-2xl text-sm opacity-80">
-  Each chart presents a single snapshot from {EVENT_YEAR}, allowing all four nations to
-  be compared under the same conditions. Rather than showing change over time, the focus
-  here is on the differences between countries at the same moment.
-</p>
+            <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+              Regional Snapshot — {EVENT_YEAR}
+            </h3>
+            <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
+              Each chart presents a single snapshot from {EVENT_YEAR}, allowing all four nations to
+              be compared under the same conditions. Rather than showing change over time, the focus
+              here is on the differences between countries at the same moment.
+            </p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {METRICS.map((m, i) => (
-                <MetricSnapshot
-                  key={m.key}
-                  metric={m}
-                  rows={snapshots[m.key]}
-                  showTooltip={showTooltip}
-                  hideTooltip={hideTooltip}
-                  index={i}
-                  spanFull={i === METRICS.length - 1 && METRICS.length % 2 !== 0}
-                />
-              ))}
+              {METRICS.map((m, i) => {
+                const rows = snapshots[m.key]
+                const nationsMissing = missingNations(NATION_NAMES, rows)
+                return (
+                  <MetricSnapshotChart
+                    key={m.key}
+                    label={m.label}
+                    ariaLabel={`${m.label}, ${EVENT_YEAR}, by nation`}
+                    rows={rows}
+                    nationsMissing={nationsMissing}
+                    missingNote={`No ${EVENT_YEAR} data available for ${formatNationList(nationsMissing)}.`}
+                    emptyNote={`Data not available for ${EVENT_YEAR}.`}
+                    format={m.format}
+                    showTooltip={showTooltip}
+                    hideTooltip={hideTooltip}
+                    index={i}
+                    className={i === METRICS.length - 1 && METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
+                  />
+                )
+              })}
             </div>
           </div>
         )}
@@ -103,102 +117,14 @@ export default function BigPicture({ data, style }) {
 function StatTile({ index, label, value, detail }) {
   return (
     <div
-      className="animate-pop-in rounded-xl border border-ink/10 bg-white/60 p-4"
+      className="animate-pop-in rounded-xl border border-ink/10 bg-surface/60 p-5"
       style={{ animationDelay: `${index * 90}ms` }}
     >
-      <p className="text-xs uppercase tracking-wide opacity-70">{label}</p>
-      <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{value}</p>
-      <p className="mt-1 text-xs opacity-70">{detail}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{label}</p>
+      <p className="mt-2 text-3xl font-semibold leading-none tabular-nums">{value}</p>
+      <p className="mt-2 text-xs opacity-70">{detail}</p>
     </div>
   )
-}
-
-function MetricSnapshot({ metric, rows, showTooltip, hideTooltip, index, spanFull }) {
-  const { label, format } = metric
-  const ref = useRef(null)
-  const nationsMissing = NATIONS.map((n) => n.name).filter((n) => !rows.some((d) => d.nation === n))
-
-  useEffect(() => {
-    if (!rows || rows.length === 0 || !ref.current) return
-    const svg = resetSvg(ref, CHART_WIDTH, CHART_HEIGHT)
-    renderSnapshotChart(svg, { rows, format, showTooltip, hideTooltip })
-  }, [rows, format, showTooltip, hideTooltip])
-
-  return (
-    <div
-      className={`animate-pop-in rounded-xl border border-ink/10 bg-white/60 p-3 ${spanFull ? 'sm:col-span-2' : ''}`}
-      style={{ animationDelay: `${index * 60}ms` }}
-    >
-      <h4 className="mb-1 text-sm font-medium">{label}</h4>
-      {rows.length > 0 ? (
-        <svg
-          ref={ref}
-          role="img"
-          aria-label={`${label}, ${EVENT_YEAR}, by nation`}
-          className="h-auto w-full"
-        />
-      ) : (
-        <NoDataNote
-          showTooltip={showTooltip}
-          hideTooltip={hideTooltip}
-          className="block py-6 text-center text-sm italic opacity-70"
-        >
-          Data not available for {EVENT_YEAR}.
-        </NoDataNote>
-      )}
-      {rows.length > 0 && nationsMissing.length > 0 && (
-        <NoDataNote
-          showTooltip={showTooltip}
-          hideTooltip={hideTooltip}
-          className="mt-1 inline-block text-xs italic opacity-70"
-        >
-          No {EVENT_YEAR} data available for {formatNationList(nationsMissing)}.
-        </NoDataNote>
-      )}
-      {/* Screen-reader-only data table -- same pattern as RippleChain:
-          the chart conveys the comparison visually, this gives the
-          same numbers as text.
-
-          whitespace-normal overrides the nowrap .sr-only sets (and
-          which inherits into every cell) -- see the matching comment
-          in StormProfile.jsx for why an inherited nowrap on a table
-          can silently blow out the whole page's width. Nothing here
-          is long enough to trigger it today, but the mechanism is
-          identical, so it gets the same defensive fix rather than
-          waiting for a future data value to be the one that does. */}
-      <table className="sr-only whitespace-normal">
-        <caption>
-          {label}, {EVENT_YEAR}, by nation
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Country</th>
-            <th scope="col">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((d) => (
-            <tr key={d.nation}>
-              <td>{d.nation}</td>
-              <td>{d.value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-// Unlike RippleChain/ComparisonView's NoDataNote usage (where at most 2
-// nations are ever selected, so a plain join(' and ') never had to
-// handle more than 2 items), this chart compares all four nations at
-// once -- economic_loss, for instance, only has a real EVENT_YEAR
-// figure for one of them, leaving three missing simultaneously. Proper
-// list grammar (Oxford comma) rather than "A and B and C".
-function formatNationList(names) {
-  if (names.length <= 1) return names.join('')
-  if (names.length === 2) return `${names[0]} and ${names[1]}`
-  return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`
 }
 
 function computeStats(data) {
@@ -220,25 +146,3 @@ function computeStats(data) {
   return { totalAffected, maxNation: max.nation, minNation: min.nation, ratio, economicLossReported }
 }
 
-// One row per nation that actually has an EVENT_YEAR figure for this
-// metric -- deliberately NOT falling back to "nearest available year"
-// for nations missing EVENT_YEAR data. This chart's whole point is a
-// same-moment comparison; silently mixing in a different year for one
-// nation would undermine the exact thing it's trying to show, so a
-// missing nation is shown as missing (see NoDataNote in
-// MetricSnapshot) rather than papered over with a different year's
-// number.
-function computeSnapshots(data) {
-  if (!data) return null
-  const result = {}
-  for (const m of METRICS) {
-    result[m.key] = (data[m.key] ?? [])
-      .filter((d) => d.year === EVENT_YEAR)
-      .map((d) => ({ nation: d.nation, value: d[m.field] }))
-      .sort(
-        (a, b) =>
-          NATIONS.findIndex((n) => n.name === a.nation) - NATIONS.findIndex((n) => n.name === b.nation)
-      )
-  }
-  return result
-}

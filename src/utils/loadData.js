@@ -1,5 +1,4 @@
-// Fetch helper for the static JSON files produced by
-// data-pipeline/clean_data.py into /public/data/.
+// Fetch helper for the static JSON the pipeline scripts write to /public/data/.
 export async function loadDataset(filename) {
   const res = await fetch(`/data/${filename}`)
   if (!res.ok) {

@@ -1,27 +1,18 @@
-// Cyclone Harold, April 2020 -- the shared "before/after" anchor used
-// by ComparisonView and the comparative-insights bullets in
-// RippleChain. Kept here rather than duplicated in each file.
+// Cyclone Harold, April 2020: the before/after anchor for this page.
 export const EVENT_YEAR = 2020
 
-// Shared metric definitions used by RippleChain and ComparisonView.
-// Filenames match the DATASETS dict in data-pipeline/clean_data.py.
+// Filenames match data-pipeline/clean_data.py's DATASETS dict.
 //
-// chartType picks the D3 chart best suited to each metric's actual data
-// shape (see RippleChain.jsx for the renderers):
-//   'bar'  -- disaster-style metrics that only have a handful of
-//             irregularly-spaced years on record (e.g. Fiji's economic
-//             loss skips 2017). A line connects across that gap and
-//             implies a trend that was never measured; a bar per year
-//             on record doesn't.
-//   'line' -- metrics reported every year for every country, where a
-//             continuous trend is the real story.
-//   'area' -- also continuous, but the *size* of the drop is the point
-//             (tourist arrivals cratering after Harold/COVID) -- a
-//             filled area reads that loss of volume more viscerally
-//             than a bare line.
+// chartType: 'bar' where the year range has gaps, since a line would imply a
+// trend across years never measured; 'line' for continuous data; 'area' where
+// the drop in volume is itself the point.
 //
-// format() turns a raw number into the string shown in chart tooltips
-// and comparison cards, so a value never appears without its unit.
+// caveat: what this series cannot be read as. Printed under the chart rather
+// than kept in a methodology note at the bottom of the page, because the
+// misreading each one guards against happens at the moment the chart is
+// looked at. Every one of these is about attribution: none of these series
+// isolates Cyclone Harold, and the chain they form is a sequence of plausible
+// links, not a measured causal path.
 export const METRICS = [
   {
     key: 'affected_persons',
@@ -30,6 +21,8 @@ export const METRICS = [
     label: 'People affected',
     chartType: 'bar',
     format: (v) => `${Math.round(v).toLocaleString()} people`,
+    caveat:
+      'Annual, all-hazard national totals -- not Harold alone. Fiji was also struck by Severe Tropical Cyclone Yasa in December 2020, and that is inside the same year\u2019s figure.',
   },
   {
     key: 'economic_loss',
@@ -38,6 +31,8 @@ export const METRICS = [
     label: 'Economic loss (US$)',
     chartType: 'bar',
     format: (v) => `US$${Math.round(v).toLocaleString()}`,
+    caveat:
+      'Reported for only seven country-years across this whole period. Solomon Islands has no figure at all, and 2020 is reported for Fiji only, so this link in the chain is mostly absent rather than mostly zero.',
   },
   {
     key: 'crop_yield',
@@ -46,6 +41,8 @@ export const METRICS = [
     label: 'Crop yield (kg/ha)',
     chartType: 'line',
     format: (v) => `${v.toLocaleString(undefined, { maximumFractionDigits: 1 })} kg/ha`,
+    caveat:
+      'A national aggregate across all crops. Year-to-year movement carries drought, planting decisions and market conditions as well as storm damage.',
   },
   {
     key: 'tourist_arrivals',
@@ -54,6 +51,8 @@ export const METRICS = [
     label: 'Tourist arrivals',
     chartType: 'area',
     format: (v) => `${Math.round(v).toLocaleString()} visitors`,
+    caveat:
+      'Pacific borders closed to visitors in March 2020, a month before Harold. The collapse in this series is overwhelmingly COVID-19, and no part of it can be separated out as the cyclone\u2019s.',
   },
   {
     key: 'power_generation',
@@ -62,5 +61,7 @@ export const METRICS = [
     label: 'Power generation (GWh)',
     chartType: 'line',
     format: (v) => `${v.toLocaleString(undefined, { maximumFractionDigits: 1 })} GWh`,
+    caveat:
+      'National generation follows economy-wide demand. The 2020\u201321 dip sits on top of pandemic restrictions, not only storm damage to the network.',
   },
 ]

@@ -1,15 +1,8 @@
-// Floating tooltip box, positioned by useTooltip.js. Styled with the
-// site's ink border and sand fill rather than an accent colour, so it
-// reads as part of the same visual language as the rest of the page
-// instead of introducing another one-off colour.
+// Floating tooltip box, positioned by useTooltip.js.
 //
-// Uses .animate-tooltip-pop-in (a real @keyframes animation, see
-// index.css) rather than a CSS `transition` -- this element fully
-// mounts/unmounts each time it appears (see the `if (!tooltip) return
-// null` below), and a `transition` needs a prior style to animate
-// *from* within the same DOM node, so it would never actually run on
-// entrance. An `animation` runs automatically on mount instead, which
-// is what makes this an actual "popup" rather than an instant snap-in.
+// Animation, not transition: this element mounts and unmounts each time it
+// appears, and a transition needs a prior style on the same node to animate
+// from, so it would never run on entrance.
 //
 // Props:
 //   tooltip -- { x, y, content } | null, from useTooltip()
