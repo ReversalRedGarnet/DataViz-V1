@@ -68,8 +68,8 @@ function pageSections(data, selection, storm, onSelectStorm) {
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
     { id: 'exclusions', tone: 'panel', element: <ExclusionsPanel /> },
-    { id: 'storm-journey', tone: 'panel', element: <StormJourney /> },
-    { id: 'storm-profile', tone: 'plain', element: <StormProfile /> },
+    { id: 'storm-journey', tone: 'panel', element: <StormJourney storm={storm} /> },
+    { id: 'storm-profile', tone: 'plain', element: <StormProfile storm={storm} /> },
     { id: 'big-picture', tone: 'panel', element: <BigPicture data={data} storm={storm} /> },
     {
       id: 'map',

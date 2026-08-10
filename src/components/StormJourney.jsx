@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import Section from './Section.jsx'
 import { NATIONS } from './MapView.jsx'
-import { STORM_PROFILE } from './StormProfile.jsx'
+import EmptyState from './EmptyState.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useActiveStep } from '../hooks/useActiveStep.js'
 import { chartColorsFor, MAP_COLORS, CHART_INK } from '../utils/theme.js'
@@ -11,7 +11,9 @@ import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 
-// Harold's route across the four nations, read by scrolling. The map is
+// The selected storm's route across the nations it struck, read by scrolling.
+// Stops come from the storm registry in the order the storm reached them. The
+// map is
 // sticky; the steps beside it are what moves, and each one advances the track,
 // the storm glyph and the marker states.
 //
@@ -25,20 +27,16 @@ const HEIGHT = 430
 // capital-city positions the interactive map uses.
 const COORDS = Object.fromEntries(NATIONS.map((n) => [n.name, [n.lon, n.lat]]))
 
-const STEPS = STORM_PROFILE.map((row) => ({
-  ...row,
-  lonLat: COORDS[row.name],
-}))
-
-// What each stop adds to the argument the page is making. The factual detail
-// stays in STORM_PROFILE, cited on the section below this one; these are the
-// connecting sentences, not new claims.
-const STEP_LEAD = {
-  'Solomon Islands': 'The deadliest day came first, at the storm\u2019s weakest.',
-  Vanuatu: 'Four days later, the same system made landfall at full strength.',
-  Fiji: 'Still a severe storm, over a country with more to absorb it.',
-  Tonga: 'A near miss, and the shortest recovery of the four.',
+// Built per storm rather than once at module load: each storm reached a
+// different set of nations in a different order, and the track is drawn through
+// the stops in array order.
+function buildSteps(storm) {
+  return (storm?.profile ?? []).map((row) => ({ ...row, lonLat: COORDS[row.name] }))
 }
+
+// The connecting sentence for each stop now lives with that stop in
+// src/content/storms.js as `lead`, so a storm's facts and the sentences that
+// join them cannot drift apart across six storms.
 
 // Distance along a path to the point closest to a given position. The track is
 // a smoothed curve through the four stops, so a stop's own coordinates aren't
@@ -62,13 +60,15 @@ function lengthAtPoint(pathNode, [px, py]) {
 
 // Props:
 //   style -- forwarded to the underlying Section (entrance stagger)
-export default function StormJourney({ style }) {
+export default function StormJourney({ storm, style }) {
+  const STEPS = buildSteps(storm)
   const svgRef = useRef(null)
   const stepsRef = useRef(null)
   const sceneRef = useRef(null)
   const [built, setBuilt] = useState(false)
   const { theme } = useTheme()
   const active = useActiveStep(stepsRef, STEPS.length)
+  const hasSteps = STEPS.length > 0
 
   // Built once. The coastline fetch is the same static file the interactive
   // map uses, so this costs nothing extra after that section has loaded.
@@ -230,17 +230,32 @@ export default function StormJourney({ style }) {
       .attr('fill-opacity', (_, i) => (i <= active ? 0.7 : 0))
   }, [active, theme, built])
 
+  if (!storm) {
+    return (
+      <EmptyState tone="panel" style={style}>
+        Pick a storm from the timeline to travel with it.
+      </EmptyState>
+    )
+  }
+  if (!hasSteps) {
+    return (
+      <EmptyState tone="panel" style={style}>
+        {storm.name}&rsquo;s stop-by-stop record has not been compiled yet.
+      </EmptyState>
+    )
+  }
+
   return (
     <Section tone="panel" style={style}>
       <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-        2&ndash;10 April 2020
+        {STEPS[0].date} &ndash; {STEPS[STEPS.length - 1].date}
       </p>
       <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
-        Follow the storm
+        Follow {storm.name}
       </h2>
       <p className="max-w-prose text-sm opacity-75">
-        Harold crossed four countries in a week, and was a different storm by the time it reached
-        each one. Scroll to travel with it.
+        {storm.name} reached {STEPS.length} of these four countries, and was a different storm by
+        the time it arrived at each. Scroll to travel with it.
       </p>
 
       <div className="mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
@@ -275,7 +290,7 @@ export default function StormJourney({ style }) {
               <h3 className="mt-1 font-serif text-xl font-semibold tracking-tight md:text-2xl">
                 {step.name}
               </h3>
-              <p className="mt-2 text-sm font-medium">{STEP_LEAD[step.name]}</p>
+              <p className="mt-2 text-sm font-medium">{step.lead}</p>
               <p className="mt-3 text-sm opacity-80">{step.fact}</p>
               <p className="mt-3 text-xs uppercase tracking-[0.12em] opacity-60">
                 {step.categoryLabel} &middot; {step.deaths}{' '}

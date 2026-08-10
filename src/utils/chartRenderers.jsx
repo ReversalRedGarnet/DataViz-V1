@@ -223,8 +223,13 @@ function stormPointTooltip(row) {
       <p className="font-semibold">{row.name}</p>
       <p className="opacity-80">{row.categoryLabel}</p>
       <p className="opacity-80">
-        {row.deaths} {row.deaths === 1 ? 'death' : 'deaths'}
+        {row.deaths == null
+          ? 'Deaths not reported'
+          : `${row.deaths} ${row.deaths === 1 ? 'death' : 'deaths'}${
+              row.deathsKind === 'indirect' ? ', indirect' : ''
+            }`}
       </p>
+      {row.deathsNote && <p className="mt-1 italic opacity-70">{row.deathsNote}</p>}
       <p className="mt-1 opacity-70">{row.fact}</p>
     </>
   )
@@ -458,15 +463,31 @@ export function renderStormProfileChart(
 
   const x = d3.scaleLinear().domain([0.5, 5.5]).range([margin.left, width - margin.right])
 
+  // Some stops have no published national fatality figure at all. That is not
+  // the same fact as zero, and it must not be drawn as though it were: every
+  // unreported stop on this roster is the secondary nation in its storm, so
+  // plotting them at or near the axis would systematically understate exactly
+  // the countries this site exists to draw attention to.
+  //
+  // They get their own band above the plot instead, separated by a rule and
+  // labelled, so the reader sees the stop, sees its category, and sees that the
+  // toll was never counted -- three facts, none of them invented.
+  const reported = rows.filter((d) => d.deaths != null)
+  const unreported = rows.filter((d) => d.deaths == null)
+
   // Tonga's nil death toll is a real and important reading, and on a domain
   // starting exactly at zero its dot sat half-buried in the axis line. The
   // domain drops slightly below zero to lift it clear; the ticks stay at or
   // above zero so the axis never implies negative deaths.
-  const maxDeaths = d3.max(rows, (d) => d.deaths)
+  const maxDeaths = d3.max(reported, (d) => d.deaths) || 1
+  const bandHeight = unreported.length > 0 ? 26 : 0
+  const plotTop = margin.top + bandHeight
   const y = d3
     .scaleLinear()
     .domain([-maxDeaths * 0.08, maxDeaths * 1.2])
-    .range([height - margin.bottom, margin.top])
+    .range([height - margin.bottom, plotTop])
+
+  const bandY = margin.top + bandHeight / 2 - 2
 
   drawYAxis(svg, y, {
     ink,
@@ -475,6 +496,29 @@ export function renderStormProfileChart(
     tickFormat: INT_FORMAT,
     tickValues: d3.ticks(0, maxDeaths * 1.2, 4).filter((t) => t >= 0),
   })
+
+  // The band, drawn before the points so nothing sits on top of a marker.
+  if (unreported.length > 0) {
+    svg
+      .append('line')
+      .attr('x1', margin.left)
+      .attr('x2', width - margin.right)
+      .attr('y1', plotTop - 8)
+      .attr('y2', plotTop - 8)
+      .attr('stroke', ink)
+      .attr('stroke-opacity', 0.25)
+      .attr('stroke-dasharray', '3 3')
+
+    svg
+      .append('text')
+      .attr('x', margin.left)
+      .attr('y', margin.top - 4)
+      .attr('font-size', AXIS_FONT)
+      .attr('font-style', 'italic')
+      .attr('fill', ink)
+      .attr('fill-opacity', 0.6)
+      .text('Deaths not reported')
+  }
   drawXAxis(svg, d3.axisBottom(x).ticks(5).tickFormat(INT_FORMAT), { ink, height, margin })
 
   svg
@@ -498,18 +542,28 @@ export function renderStormProfileChart(
     .attr('fill-opacity', 0.7)
     .text('Deaths')
 
+  // A hollow marker for deaths that were not caused by the storm directly.
+  // Lola's four Solomon Islands deaths were a dysentery outbreak weeks after
+  // landfall, from damaged water supplies; Harold's twenty-seven were drownings
+  // during the storm. Both belong on this chart -- they are both real tolls --
+  // but a filled dot at 4 beside a filled dot at 27 asserts a like-for-like
+  // comparison the sources do not support.
+  const isIndirect = (d) => d.deathsKind === 'indirect'
+  const markY = (d) => (d.deaths == null ? bandY : y(d.deaths))
+
   const points = svg
     .selectAll('circle.storm-point')
     .data(rows)
     .join('circle')
     .attr('class', (d) => `storm-point chart-mark nation-mark nation-${slug(d.name)}`)
     .attr('cx', (d) => x(d.category + (d.dodge ?? 0)))
-    .attr('cy', (d) => y(d.deaths))
+    .attr('cy', markY)
     .attr('r', 0)
-    .attr('fill', palette.single)
+    .attr('fill', (d) => (isIndirect(d) || d.deaths == null ? surface : palette.single))
     .attr('fill-opacity', 0.9)
-    .attr('stroke', surface)
-    .attr('stroke-width', 1.5)
+    .attr('stroke', (d) => (isIndirect(d) || d.deaths == null ? palette.single : surface))
+    .attr('stroke-width', (d) => (isIndirect(d) || d.deaths == null ? 2 : 1.5))
+    .attr('stroke-dasharray', (d) => (d.deaths == null ? '3 2' : null))
     .on('pointerenter pointermove', function (event, d) {
       showTooltip(event, stormPointTooltip(d))
       d3.select(this).transition().duration(motionDuration(120)).attr('r', 10)
@@ -543,7 +597,7 @@ export function renderStormProfileChart(
     .join('text')
     .attr('class', 'storm-label')
     .attr('x', labelX)
-    .attr('y', (d) => y(d.deaths) - 14)
+    .attr('y', (d) => markY(d) - 14)
     .attr('text-anchor', 'middle')
     .attr('font-size', AXIS_FONT)
     .attr('font-weight', 600)
