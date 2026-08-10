@@ -22,7 +22,7 @@ export const METRICS = [
     chartType: 'bar',
     format: (v) => `${Math.round(v).toLocaleString()} people`,
     caveat:
-      'Annual, all-hazard national totals -- not Harold alone. Fiji was also struck by Severe Tropical Cyclone Yasa in December 2020, and that is inside the same year\u2019s figure.',
+      'Annual, all-hazard national totals -- not one storm alone. A year holding two cyclones reports them as a single figure. Years where the official figure was exactly zero are shown as missing rather than as zero, because this series cannot distinguish "nobody affected" from "nothing reported" -- Vanuatu\u2019s figure for 2015, the year Cyclone Pam struck, is zero. Gaps here are reporting gaps, and they fall most often on the countries least able to report.',
   },
   {
     key: 'economic_loss',
@@ -32,7 +32,7 @@ export const METRICS = [
     chartType: 'bar',
     format: (v) => `US$${Math.round(v).toLocaleString()}`,
     caveat:
-      'Reported for only seven country-years across this whole period. Solomon Islands has no figure at all, and 2020 is reported for Fiji only, so this link in the chain is mostly absent rather than mostly zero.',
+      'Reported for only ten country-years across this whole period. Solomon Islands has a single figure, and 2020 is reported for Fiji only, so this link in the chain is mostly absent rather than mostly zero.',
   },
   {
     key: 'crop_yield',
@@ -52,7 +52,7 @@ export const METRICS = [
     chartType: 'area',
     format: (v) => `${Math.round(v).toLocaleString()} visitors`,
     caveat:
-      'Pacific borders closed to visitors in March 2020, a month before Harold. The collapse in this series is overwhelmingly COVID-19, and no part of it can be separated out as the cyclone\u2019s.',
+      'Pacific borders closed to visitors in March 2020, a month before Cyclone Harold. The collapse in this series is overwhelmingly COVID-19, and no part of it can be separated out as any cyclone\u2019s. Solomon Islands is absent entirely, and Vanuatu and Tonga stop reporting after 2022.',
   },
   {
     key: 'power_generation',

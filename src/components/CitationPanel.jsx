@@ -53,10 +53,21 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
             <>
               <p className="text-sand/85 dark:text-ink/85">
                 Figures are drawn from official Pacific Data Hub statistics for Solomon Islands,
-                Vanuatu, Fiji, and Tonga. Data coverage varies by country and metric — direct
-                disaster economic loss in particular is patchy for Solomon Islands and Vanuatu in
-                the official dataset, and is labelled as unavailable where that's the case rather
-                than left blank without explanation.
+                Vanuatu, Fiji, and Tonga, covering 2013 to 2024. Data coverage varies by country
+                and metric — direct disaster economic loss in particular is patchy, tourist
+                arrivals are absent for Solomon Islands entirely, and no disaster figures are
+                reported for any of these countries after 2022. Missing figures are labelled as
+                unavailable rather than left blank without explanation.
+              </p>
+
+              <p className="text-sand/85 dark:text-ink/85 mt-3">
+                One deliberate departure from the source data: in the people-affected series, a
+                figure of exactly zero is treated as unreported and shown as missing. That series
+                does not distinguish “nobody was affected” from “nothing was submitted”, and the
+                difference is not academic — Vanuatu's official figure for 2015, the year Cyclone
+                Pam became the most destructive storm in its history, is zero. The rule is applied
+                to every zero in that series rather than only to years a storm is known to have
+                struck, so no individual figure is being overridden on our judgement.
               </p>
               <p className="text-sand/85 dark:text-ink/85 mt-3">
                 Even the data about these disasters is unevenly distributed — some nations have the

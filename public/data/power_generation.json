@@ -1,6 +1,21 @@
 [
   {
     "nation": "Solomon Islands",
+    "year": 2013,
+    "power_generation_index": 85.6
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2014,
+    "power_generation_index": 90.5
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2015,
+    "power_generation_index": 91.7
+  },
+  {
+    "nation": "Solomon Islands",
     "year": 2016,
     "power_generation_index": 96.2
   },
@@ -38,6 +53,21 @@
     "nation": "Solomon Islands",
     "year": 2023,
     "power_generation_index": 110.9
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2013,
+    "power_generation_index": 70.2
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2014,
+    "power_generation_index": 70.6
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2015,
+    "power_generation_index": 67.0
   },
   {
     "nation": "Vanuatu",
@@ -81,6 +111,21 @@
   },
   {
     "nation": "Fiji",
+    "year": 2013,
+    "power_generation_index": 969.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "power_generation_index": 995.0
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "power_generation_index": 1019.3
+  },
+  {
+    "nation": "Fiji",
     "year": 2016,
     "power_generation_index": 1030.5
   },
@@ -118,6 +163,21 @@
     "nation": "Fiji",
     "year": 2023,
     "power_generation_index": 1284.5
+  },
+  {
+    "nation": "Tonga",
+    "year": 2013,
+    "power_generation_index": 54.2
+  },
+  {
+    "nation": "Tonga",
+    "year": 2014,
+    "power_generation_index": 55.3
+  },
+  {
+    "nation": "Tonga",
+    "year": 2015,
+    "power_generation_index": 58.0
   },
   {
     "nation": "Tonga",

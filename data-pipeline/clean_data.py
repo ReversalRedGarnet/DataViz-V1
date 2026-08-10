@@ -51,15 +51,26 @@ YEAR_MAX = 2024
 # -- the question that decides what the site is able to show.
 #
 # The rule these were picked under: severe tropical cyclone, landfall or major
-# impact in two or more Pacific nations, since 2015. Applied evenly rather than
-# picked for the story -- Ana, Cody and Rae are excluded by it, and saying so on
-# the site is what makes the roster defensible rather than cherry-picked.
+# impact in two or more of the four in-scope nations, since 2015. Applied
+# evenly rather than picked for the story, which means it also throws out
+# storms that would have suited it:
+#
+#   Ana (2021), Cody (2022)  -- Fiji only
+#   Rae (2022)               -- minor, no fatalities
+#   Yasa (2020)              -- severe, and it would have strengthened the
+#                               "2020 was relentless" beat, but within these
+#                               four nations it struck Fiji alone and so fails
+#                               the same two-nation test the others passed.
+#
+# Keeping Yasa because it helped the argument is exactly the bias the rule
+# exists to prevent. The exclusions belong on the site itself: stating what was
+# left out, and why, is what makes the roster defensible rather than
+# cherry-picked. Six storms, five of them in 2020 and 2023.
 STORMS = [
     ("Pam", 2015, ["Vanuatu", "Solomon Islands"]),
     ("Winston", 2016, ["Fiji", "Tonga"]),
     ("Gita", 2018, ["Tonga", "Fiji"]),
     ("Harold", 2020, ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]),
-    ("Yasa", 2020, ["Fiji"]),
     ("Judy & Kevin", 2023, ["Vanuatu", "Solomon Islands", "Fiji"]),
     ("Lola", 2023, ["Vanuatu", "Solomon Islands"]),
 ]
@@ -72,6 +83,31 @@ DATASETS = {
         "field_name": "affected_persons",
         "indicator_col": "INDICATOR",
         "indicator_code": "VC_DSR_AFFCT",
+
+        # Drop rows reported as exactly 0. This series does not distinguish
+        # "nobody was affected" from "nothing was reported", and across this
+        # roster the difference is not subtle: Vanuatu's figure for 2015, the
+        # year Cyclone Pam became the most destructive storm in its history, is
+        # 0. So is Tonga's for 2016, and Fiji's for 2015 and 2017.
+        #
+        # A blank in a chart reads as "not measured". A zero bar reads as
+        # "nothing happened" -- a claim the chart makes on its own authority,
+        # and in these cases a false one. Given the series cannot tell the two
+        # apart, the honest move is to decline to assert either.
+        #
+        # Applied uniformly to every zero in this metric rather than only to
+        # the nation-years we happen to know a storm struck. Overriding the
+        # official source case by case, using our own roster to decide which
+        # zeros are "wrong", would be us editing the data to match what we
+        # already believe. A blanket rule states one checkable thing -- this
+        # series does not distinguish absent from none -- and needs no
+        # judgement about any individual figure.
+        #
+        # The consequence has to be said on the site, not buried here: some
+        # nation-years are missing from these charts because nothing was
+        # reported, and the countries with the least capacity to report are the
+        # ones most often missing. See the caveat in src/utils/metrics.js.
+        "zero_is_missing": True,
     },
     "disaster_economic_loss.csv": {
         "json_name": "disaster_economic_loss.json",
@@ -164,6 +200,7 @@ def clean_one(csv_name: str, config: dict) -> list:
     value_col = _find_col(df, VALUE_COL_CANDIDATES, "value")
 
     rows = []
+    dropped_zeros = []
 
     for nation in NATIONS:
         matched = df[df[country_col].apply(_matches_nation, args=(nation,))]
@@ -177,11 +214,24 @@ def clean_one(csv_name: str, config: dict) -> list:
         )
 
         for _, row in in_range.iterrows():
+            value = row[value_col]
+
+            # See "zero_is_missing" in this dataset's config for why.
+            if config.get("zero_is_missing") and pd.to_numeric(value, errors="coerce") == 0:
+                dropped_zeros.append((nation, int(row[time_col])))
+                continue
+
             rows.append({
                 "nation": nation,
                 "year": int(row[time_col]),
-                config["field_name"]: row[value_col],
+                config["field_name"]: value,
             })
+
+    if dropped_zeros:
+        print(
+            f"  dropped {len(dropped_zeros)} zero-valued nation-years as "
+            f"unreported: {sorted(dropped_zeros)}"
+        )
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 

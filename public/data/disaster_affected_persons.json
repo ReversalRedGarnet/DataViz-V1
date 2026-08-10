@@ -1,6 +1,21 @@
 [
   {
     "nation": "Solomon Islands",
+    "year": 2013,
+    "affected_persons": 7577.0
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2014,
+    "affected_persons": 14831.0
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2015,
+    "affected_persons": 185886.0
+  },
+  {
+    "nation": "Solomon Islands",
     "year": 2016,
     "affected_persons": 60858.0
   },
@@ -36,6 +51,11 @@
   },
   {
     "nation": "Vanuatu",
+    "year": 2014,
+    "affected_persons": 152.0
+  },
+  {
+    "nation": "Vanuatu",
     "year": 2017,
     "affected_persons": 920.0
   },
@@ -66,11 +86,6 @@
   },
   {
     "nation": "Fiji",
-    "year": 2017,
-    "affected_persons": 0.0
-  },
-  {
-    "nation": "Fiji",
     "year": 2018,
     "affected_persons": 155726.0
   },
@@ -96,13 +111,8 @@
   },
   {
     "nation": "Tonga",
-    "year": 2016,
-    "affected_persons": 0.0
-  },
-  {
-    "nation": "Tonga",
-    "year": 2017,
-    "affected_persons": 0.0
+    "year": 2014,
+    "affected_persons": 4520.0
   },
   {
     "nation": "Tonga",
