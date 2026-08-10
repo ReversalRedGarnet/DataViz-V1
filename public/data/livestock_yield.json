@@ -1,0 +1,242 @@
+[
+  {
+    "nation": "Solomon Islands",
+    "year": 2013,
+    "livestock_yield_kg": 3328.1
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2014,
+    "livestock_yield_kg": 3408.4
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2015,
+    "livestock_yield_kg": 3476.1
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2016,
+    "livestock_yield_kg": 3217.7
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2017,
+    "livestock_yield_kg": 3330.6
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2018,
+    "livestock_yield_kg": 3381.8
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2019,
+    "livestock_yield_kg": 2930.8
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2020,
+    "livestock_yield_kg": 3062.6
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2021,
+    "livestock_yield_kg": 3356.1
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2022,
+    "livestock_yield_kg": 3380.7
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2023,
+    "livestock_yield_kg": 3199.5
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2024,
+    "livestock_yield_kg": 2847.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2013,
+    "livestock_yield_kg": 1684.3
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2014,
+    "livestock_yield_kg": 2092.4
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2015,
+    "livestock_yield_kg": 2049.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2016,
+    "livestock_yield_kg": 2024.3
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2017,
+    "livestock_yield_kg": 1808.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2018,
+    "livestock_yield_kg": 1975.1
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2019,
+    "livestock_yield_kg": 2008.9
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2020,
+    "livestock_yield_kg": 2115.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2021,
+    "livestock_yield_kg": 2138.7
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2022,
+    "livestock_yield_kg": 3281.7
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2023,
+    "livestock_yield_kg": 3286.7
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2024,
+    "livestock_yield_kg": 3306.6
+  },
+  {
+    "nation": "Fiji",
+    "year": 2013,
+    "livestock_yield_kg": 5509.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "livestock_yield_kg": 5459.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "livestock_yield_kg": 8029.7
+  },
+  {
+    "nation": "Fiji",
+    "year": 2016,
+    "livestock_yield_kg": 6110.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2017,
+    "livestock_yield_kg": 6512.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2018,
+    "livestock_yield_kg": 6846.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2019,
+    "livestock_yield_kg": 6680.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2020,
+    "livestock_yield_kg": 6859.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2021,
+    "livestock_yield_kg": 7196.2
+  },
+  {
+    "nation": "Fiji",
+    "year": 2022,
+    "livestock_yield_kg": 7822.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2023,
+    "livestock_yield_kg": 7555.2
+  },
+  {
+    "nation": "Fiji",
+    "year": 2024,
+    "livestock_yield_kg": 4317.0
+  },
+  {
+    "nation": "Tonga",
+    "year": 2013,
+    "livestock_yield_kg": 1645.2
+  },
+  {
+    "nation": "Tonga",
+    "year": 2014,
+    "livestock_yield_kg": 1308.8
+  },
+  {
+    "nation": "Tonga",
+    "year": 2015,
+    "livestock_yield_kg": 1273.7
+  },
+  {
+    "nation": "Tonga",
+    "year": 2016,
+    "livestock_yield_kg": 1124.5
+  },
+  {
+    "nation": "Tonga",
+    "year": 2017,
+    "livestock_yield_kg": 1115.7
+  },
+  {
+    "nation": "Tonga",
+    "year": 2018,
+    "livestock_yield_kg": 1089.6
+  },
+  {
+    "nation": "Tonga",
+    "year": 2019,
+    "livestock_yield_kg": 1072.6
+  },
+  {
+    "nation": "Tonga",
+    "year": 2020,
+    "livestock_yield_kg": 1081.6
+  },
+  {
+    "nation": "Tonga",
+    "year": 2021,
+    "livestock_yield_kg": 1085.4
+  },
+  {
+    "nation": "Tonga",
+    "year": 2022,
+    "livestock_yield_kg": 1091.4
+  },
+  {
+    "nation": "Tonga",
+    "year": 2023,
+    "livestock_yield_kg": 1110.8
+  },
+  {
+    "nation": "Tonga",
+    "year": 2024,
+    "livestock_yield_kg": 1062.5
+  }
+]

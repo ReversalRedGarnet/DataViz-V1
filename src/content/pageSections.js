@@ -12,6 +12,7 @@ export const PAGE_SECTIONS = [
   { id: 'map', label: 'Explore the Map' },
   { id: 'ripple-chain', label: 'The Ripple Chain' },
   { id: 'divergence', label: 'Where They Part Ways' },
+  { id: 'context', label: 'Capacity & Context' },
   { id: 'compare', label: 'Compare Recovery' },
   { id: 'sources', label: 'Sources' },
 ]

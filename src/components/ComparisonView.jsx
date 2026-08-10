@@ -1,4 +1,4 @@
-import { METRICS, EVENT_YEAR } from '../utils/metrics.js'
+import { CHAIN_METRICS, EVENT_YEAR } from '../utils/metrics.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { chartColorsFor } from '../utils/theme.js'
 import { pctChange } from '../utils/rows.js'
@@ -69,7 +69,7 @@ function NationSummary({ nation, data, color, index, showTooltip, hideTooltip })
       <h3 className="font-serif text-xl font-semibold tracking-tight">{nation}</h3>
       <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">Since {EVENT_YEAR}</p>
       <ul className="divide-y divide-ink/10 text-sm">
-        {METRICS.map((m) => {
+        {CHAIN_METRICS.map((m) => {
           const rows = (data[m.key] ?? [])
             .filter((d) => d.nation === nation)
             .sort((a, b) => a.year - b.year)

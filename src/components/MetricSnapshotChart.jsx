@@ -21,6 +21,9 @@ import { renderSnapshotChart, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 //   format, yTickFormat -- forwarded to renderSnapshotChart
 //   showTooltip, hideTooltip
 //   index -- entrance stagger
+//   caveat -- what this series cannot be read as, printed under the chart in
+//     the same place and style TrendChart uses, so the two chart types don't
+//     put the same kind of note in two different places
 //   className -- layout hook (e.g. sm:col-span-2 for an odd one out)
 export default function MetricSnapshotChart({
   label,
@@ -34,6 +37,7 @@ export default function MetricSnapshotChart({
   showTooltip,
   hideTooltip,
   index = 0,
+  caveat,
   className = '',
 }) {
   const [ref, node, width] = useElementWidth()
@@ -76,6 +80,11 @@ export default function MetricSnapshotChart({
         >
           {missingNote}
         </NoDataNote>
+      )}
+      {caveat && (
+        <p className="mt-2 border-l-2 border-ink/15 pl-3 text-xs italic leading-snug opacity-70">
+          {caveat}
+        </p>
       )}
       <table className="sr-only whitespace-normal">
         <caption>{ariaLabel}</caption>

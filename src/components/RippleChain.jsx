@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { METRICS } from '../utils/metrics.js'
+import { CHAIN_METRICS, FOOTNOTE_METRICS } from '../utils/metrics.js'
 import { buildComparativeInsights } from '../utils/insights.js'
 import { rowsByMetricForNations } from '../utils/rows.js'
 import { useTooltip } from '../hooks/useTooltip.js'
@@ -24,7 +24,7 @@ export default function RippleChain({ data, selectedNations, style }) {
   // Memoised deliberately: the tooltip state lives here, so an unmemoised
   // filter would redraw every chart on every hover. See rows.js.
   const filteredByMetric = useMemo(
-    () => rowsByMetricForNations(data, METRICS, selectedNations),
+    () => rowsByMetricForNations(data, CHAIN_METRICS, selectedNations),
     [data, selectedNations]
   )
 
@@ -43,8 +43,8 @@ export default function RippleChain({ data, selectedNations, style }) {
       <div ref={containerRef} className="relative mx-auto max-w-3xl">
         <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">The ripple chain</h2>
         <p className="mb-3 max-w-prose text-sm opacity-70">
-          Five linked records, in the order the damage travels: who was hit, what it cost, then the
-          harvest, the visitors and the power supply that follow.
+          Five linked records, in the order the damage travels: who was hit, then the harvest, the
+          herds, the power supply and the visitors that follow.
         </p>
         <p className="mb-4 max-w-prose text-sm opacity-70">
           Read this as a sequence of plausible links rather than a measured causal path. Every
@@ -54,7 +54,7 @@ export default function RippleChain({ data, selectedNations, style }) {
         </p>
         <SelectionLegend selected={selectedNations} />
         <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {METRICS.map((m, i) => (
+          {CHAIN_METRICS.map((m, i) => (
             <TrendChart
               key={m.key}
               label={m.label}
@@ -69,10 +69,15 @@ export default function RippleChain({ data, selectedNations, style }) {
               stage={i + 1}
               ripple
               caveat={m.caveat}
-              className={i === METRICS.length - 1 && METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
+              className={i === CHAIN_METRICS.length - 1 && CHAIN_METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
             />
           ))}
         </div>
+
+        <p className="mt-6 max-w-prose text-xs italic opacity-70">
+          Direct economic loss is deliberately not a link here. {FOOTNOTE_METRICS[0].caveat} A chart
+          of it would be mostly empty space, and an empty chart argues that little was lost.
+        </p>
 
         {insights && (
           <InsightsPanel

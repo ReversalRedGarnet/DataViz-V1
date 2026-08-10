@@ -9,7 +9,7 @@ import { useTheme } from '../hooks/useTheme.jsx'
 import { useInView } from '../hooks/useInView.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { chartColorsFor } from '../utils/theme.js'
-import { METRICS, EVENT_YEAR } from '../utils/metrics.js'
+import { CHAIN_METRICS, EVENT_YEAR } from '../utils/metrics.js'
 import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.js'
 import { motionDuration } from '../utils/motion.js'
 
@@ -45,7 +45,7 @@ export default function DivergenceView({ data, style }) {
 
   const nations = useMemo(() => NATIONS.map((n) => n.name), [])
   const panels = useMemo(
-    () => buildDivergencePanels(data, METRICS, nations, EVENT_YEAR),
+    () => buildDivergencePanels(data, CHAIN_METRICS, nations, EVENT_YEAR),
     [data, nations]
   )
   const years = useMemo(() => divergenceYearRange(panels, EVENT_YEAR), [panels])
@@ -161,9 +161,10 @@ export default function DivergenceView({ data, style }) {
           </div>
 
           <p className="mt-6 max-w-prose text-xs italic opacity-70">
-            People affected and economic loss are left out of this view. Both are reported in
-            scattered years rather than continuously, and running a gappy record through an index
-            would draw a confident line across years nobody measured.
+            People affected is left out of this view, and economic loss is not in the chain at
+            all. Both are reported in scattered years rather than continuously, and running a
+            gappy record through an index would draw a confident line across years nobody
+            measured.
           </p>
           <p className="mt-2 max-w-prose text-xs italic opacity-70">
             The further right the sweep runs, the less of what it shows belongs to the storm.

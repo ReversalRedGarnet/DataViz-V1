@@ -7,6 +7,7 @@ import BigPicture from './components/BigPicture.jsx'
 import MapView from './components/MapView.jsx'
 import RippleChain from './components/RippleChain.jsx'
 import DivergenceView from './components/DivergenceView.jsx'
+import ContextPanel from './components/ContextPanel.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
@@ -78,6 +79,7 @@ function pageSections(data, selection) {
       element: <RippleChain data={data} selectedNations={selected} />,
     },
     { id: 'divergence', tone: 'panel', element: <DivergenceView data={data} /> },
+    { id: 'context', tone: 'plain', element: <ContextPanel data={data} /> },
     {
       id: 'compare',
       tone: 'panel',

@@ -1,0 +1,242 @@
+[
+  {
+    "nation": "Solomon Islands",
+    "year": 2013,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2014,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2015,
+    "sst_anomaly_c": 0.1
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2016,
+    "sst_anomaly_c": 0.7
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2017,
+    "sst_anomaly_c": 0.7
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2018,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2019,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2020,
+    "sst_anomaly_c": 0.8
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2021,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2022,
+    "sst_anomaly_c": 0.7
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2023,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Solomon Islands",
+    "year": 2024,
+    "sst_anomaly_c": 0.9
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2013,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2014,
+    "sst_anomaly_c": 0.3
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2015,
+    "sst_anomaly_c": -0.1
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2016,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2017,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2018,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2019,
+    "sst_anomaly_c": 0.3
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2020,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2021,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2022,
+    "sst_anomaly_c": 1.1
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2023,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2024,
+    "sst_anomaly_c": 0.7
+  },
+  {
+    "nation": "Fiji",
+    "year": 2013,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "sst_anomaly_c": -0.1
+  },
+  {
+    "nation": "Fiji",
+    "year": 2016,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2017,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2018,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2019,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2020,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2021,
+    "sst_anomaly_c": 0.7
+  },
+  {
+    "nation": "Fiji",
+    "year": 2022,
+    "sst_anomaly_c": 1.1
+  },
+  {
+    "nation": "Fiji",
+    "year": 2023,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2024,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Tonga",
+    "year": 2013,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Tonga",
+    "year": 2014,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Tonga",
+    "year": 2015,
+    "sst_anomaly_c": -0.1
+  },
+  {
+    "nation": "Tonga",
+    "year": 2016,
+    "sst_anomaly_c": 0.4
+  },
+  {
+    "nation": "Tonga",
+    "year": 2017,
+    "sst_anomaly_c": 0.6
+  },
+  {
+    "nation": "Tonga",
+    "year": 2018,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Tonga",
+    "year": 2019,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Tonga",
+    "year": 2020,
+    "sst_anomaly_c": 0.7
+  },
+  {
+    "nation": "Tonga",
+    "year": 2021,
+    "sst_anomaly_c": 0.8
+  },
+  {
+    "nation": "Tonga",
+    "year": 2022,
+    "sst_anomaly_c": 1.1
+  },
+  {
+    "nation": "Tonga",
+    "year": 2023,
+    "sst_anomaly_c": 0.5
+  },
+  {
+    "nation": "Tonga",
+    "year": 2024,
+    "sst_anomaly_c": 0.6
+  }
+]

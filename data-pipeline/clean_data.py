@@ -75,10 +75,38 @@ STORMS = [
     ("Lola", 2023, ["Vanuatu", "Solomon Islands"]),
 ]
 
-# Dataset configuration:
-# raw CSV -> output JSON + indicator selection.
+# Several metrics below come out of the same portal dataflow, and the portal
+# exports whole dataflows rather than single indicators. Rather than asking for
+# nine identical copies of two files, each dataset lists the filenames it will
+# accept and the first one present wins. That means the five files already in
+# raw/ serve all ten metrics -- adding an indicator costs a DATASETS entry, not
+# another download.
+CLIMATE_CSVS = [
+    "climate_change_indicators.csv",
+    "crop_yield.csv",
+    "power_generation.csv",
+    "tourist_arrivals.csv",
+]
+SDG11_CSVS = [
+    "sdg_11.csv",
+    "disaster_affected_persons.csv",
+    "disaster_economic_loss.csv",
+]
+
+# Dataset configuration: output JSON + which indicator to pull from which dump.
+#
+# Grouped the way the site groups them, because the grouping is an argument
+# rather than a filing convenience. The chain metrics are consequences of a
+# disaster, and they are the patchy ones -- consequence data depends on a
+# country having the capacity to assess and report after being hit, which is
+# precisely what a disaster destroys and precisely what the least-resourced
+# countries have least of. The capacity and context metrics are complete
+# because they are structural or satellite-derived and need nobody to file a
+# return. That asymmetry is not an inconvenience in the data; it is one of the
+# things the data says.
 DATASETS = {
     "disaster_affected_persons.csv": {
+        "csv_candidates": SDG11_CSVS,
         "json_name": "disaster_affected_persons.json",
         "field_name": "affected_persons",
         "indicator_col": "INDICATOR",
@@ -110,6 +138,7 @@ DATASETS = {
         "zero_is_missing": True,
     },
     "disaster_economic_loss.csv": {
+        "csv_candidates": SDG11_CSVS,
         "json_name": "disaster_economic_loss.json",
         "field_name": "economic_loss_usd",
         "indicator_col": "INDICATOR",
@@ -120,22 +149,98 @@ DATASETS = {
         "unit_value": "USD",
     },
     "crop_yield.csv": {
+        "csv_candidates": CLIMATE_CSVS,
         "json_name": "crop_yield.json",
         "field_name": "crop_yield_index",
         "indicator_col": "CLIMATE_CHANGE_INDICATORS",
         "indicator_code": "CROP_YIELD",
     },
     "tourist_arrivals.csv": {
+        "csv_candidates": CLIMATE_CSVS,
         "json_name": "tourist_arrivals.json",
         "field_name": "tourist_arrivals_index",
         "indicator_col": "CLIMATE_CHANGE_INDICATORS",
         "indicator_code": "TRSM_ARR",
     },
     "power_generation.csv": {
+        "csv_candidates": CLIMATE_CSVS,
         "json_name": "power_generation.json",
         "field_name": "power_generation_index",
         "indicator_col": "CLIMATE_CHANGE_INDICATORS",
         "indicator_code": "POWER_GEN",
+    },
+
+    # --- Chain, continued -------------------------------------------------
+    # Livestock yield sits beside crop yield so the food-system link rests on
+    # two records instead of one. Complete for all four nations, 2013-2024.
+    "livestock_yield.csv": {
+        "csv_candidates": CLIMATE_CSVS,
+        "json_name": "livestock_yield.json",
+        "field_name": "livestock_yield_kg",
+        "indicator_col": "CLIMATE_CHANGE_INDICATORS",
+        "indicator_code": "LVST_YIELD",
+    },
+
+    # --- Capacity ---------------------------------------------------------
+    # Number of meteorological monitoring stations. Flat across the whole
+    # period -- Fiji 8, Vanuatu 6, Tonga 4, Solomon Islands 3 -- which is what
+    # makes it useful: it is not a trend, it is a standing difference in who
+    # can observe their own weather. Line it up against the gaps in the chain
+    # metrics above and the ranking is the same. This is the series that turns
+    # "coverage varies by country" from an apology into a finding.
+    "meteo_stations.csv": {
+        "csv_candidates": CLIMATE_CSVS,
+        "json_name": "meteo_stations.json",
+        "field_name": "stations",
+        "indicator_col": "CLIMATE_CHANGE_INDICATORS",
+        "indicator_code": "METEO_MONITOR_NET",
+    },
+
+    # --- Physical context -------------------------------------------------
+    # Sea surface temperature anomaly, in degrees C. The physical driver behind
+    # the one cyclone claim that is well supported: IPCC AR6 finds it likely
+    # that the proportion of Category 3-5 tropical cyclones has risen over the
+    # past four decades.
+    #
+    # Read as a trend, never per storm. The 2015 anomaly is NEGATIVE in three
+    # of four nations, and 2015 is the year of Cyclone Pam -- so a per-storm
+    # reading of this series immediately contradicts itself. The site must say
+    # warming raises the ceiling on intensity, not that a warm year produced a
+    # given storm.
+    "sst_anomaly.csv": {
+        "csv_candidates": CLIMATE_CSVS,
+        "json_name": "sst_anomaly.json",
+        "field_name": "sst_anomaly_c",
+        "indicator_col": "CLIMATE_CHANGE_INDICATORS",
+        "indicator_code": "SST_ANOM",
+    },
+
+    # Sea level anomaly, in metres. Underwrites the strongest attribution
+    # statement available: sea level rise worsens storm surge, and IPCC AR6
+    # rates the human contribution to sea level rise since 1971 very likely.
+    # A storm arriving on a higher ocean reaches further inland, whatever
+    # caused the storm.
+    "sea_level.csv": {
+        "csv_candidates": CLIMATE_CSVS,
+        "json_name": "sea_level.json",
+        "field_name": "sea_level_m",
+        "indicator_col": "CLIMATE_CHANGE_INDICATORS",
+        "indicator_code": "SEA_LVL",
+    },
+
+    # Greenhouse gas emissions per head, in tonnes. The one indicator here that
+    # is about responsibility rather than exposure.
+    #
+    # Handle the copy carefully: Solomon Islands is around 0.8 t and genuinely
+    # low, but Fiji is around 3.0 and Tonga 2.8, which are not negligible
+    # globally. "These nations emit almost nothing" would be false for three of
+    # the four. Any comparator figure put on the page needs its own source.
+    "ghg_per_capita.csv": {
+        "csv_candidates": CLIMATE_CSVS,
+        "json_name": "ghg_per_capita.json",
+        "field_name": "ghg_tonnes_per_capita",
+        "indicator_col": "CLIMATE_CHANGE_INDICATORS",
+        "indicator_code": "GHG_EMI_CAPITA",
     },
 }
 
@@ -173,11 +278,20 @@ def _matches_nation(raw_value, nation) -> bool:
     return raw_value.upper() in NATION_CODES.get(nation, [])
 
 
-def clean_one(csv_name: str, config: dict) -> list:
-    """Clean a single dataset, export it as JSON, and return the rows."""
-    df = pd.read_csv(RAW_DIR / csv_name)
+def _resolve_source(csv_name: str, config: dict):
+    """First filename in this dataset's candidate list that exists in raw/."""
+    for candidate in config.get("csv_candidates", [csv_name]):
+        path = RAW_DIR / candidate
+        if path.exists():
+            return path
+    return None
 
-    print(f"\n{csv_name}: columns found -> {list(df.columns)}")
+
+def clean_one(path, config: dict) -> list:
+    """Clean a single dataset, export it as JSON, and return the rows."""
+    df = pd.read_csv(path, low_memory=False)
+
+    print(f"\n{config['json_name']} (from {path.name})")
 
     indicator_col = config["indicator_col"]
     indicator_code = config["indicator_code"]
@@ -297,16 +411,17 @@ def main() -> None:
     cleaned = {}
 
     for csv_name, config in DATASETS.items():
-        path = RAW_DIR / csv_name
+        path = _resolve_source(csv_name, config)
 
-        if not path.exists():
-            print(f"Skipping {csv_name} -- not found in {RAW_DIR}.")
+        if path is None:
+            candidates = config.get("csv_candidates", [csv_name])
+            print(f"Skipping {config['json_name']} -- none of {candidates} in {RAW_DIR}.")
             continue
 
         any_found = True
 
         try:
-            cleaned[csv_name] = clean_one(csv_name, config)
+            cleaned[csv_name] = clean_one(path, config)
         except KeyError as e:
             print(f"  PROBLEM in {csv_name}: {e}")
             problems.append(csv_name)

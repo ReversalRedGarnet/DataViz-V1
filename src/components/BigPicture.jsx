@@ -4,7 +4,7 @@ import Tooltip from './Tooltip.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { NATIONS } from './MapView.jsx'
-import { EVENT_YEAR, METRICS } from '../utils/metrics.js'
+import { EVENT_YEAR, CHAIN_METRICS } from '../utils/metrics.js'
 import { formatNationList } from '../utils/formatNationList.js'
 import { missingNations, snapshotRowsByMetric } from '../utils/rows.js'
 
@@ -13,7 +13,7 @@ const NATION_NAMES = NATIONS.map((n) => n.name)
 export default function BigPicture({ data, style }) {
   const stats = useMemo(() => computeStats(data), [data])
   const snapshots = useMemo(
-    () => snapshotRowsByMetric(data, METRICS, EVENT_YEAR, NATION_NAMES),
+    () => snapshotRowsByMetric(data, CHAIN_METRICS, EVENT_YEAR, NATION_NAMES),
     [data]
   )
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
@@ -84,7 +84,7 @@ export default function BigPicture({ data, style }) {
               here is on the differences between countries at the same moment.
             </p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {METRICS.map((m, i) => {
+              {CHAIN_METRICS.map((m, i) => {
                 const rows = snapshots[m.key]
                 const nationsMissing = missingNations(NATION_NAMES, rows)
                 return (
@@ -100,7 +100,7 @@ export default function BigPicture({ data, style }) {
                     showTooltip={showTooltip}
                     hideTooltip={hideTooltip}
                     index={i}
-                    className={i === METRICS.length - 1 && METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
+                    className={i === CHAIN_METRICS.length - 1 && CHAIN_METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
                   />
                 )
               })}

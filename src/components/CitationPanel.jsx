@@ -61,6 +61,13 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
               </p>
 
               <p className="text-sand/85 dark:text-ink/85 mt-3">
+                Those gaps are not evenly distributed, and the site treats that as a finding rather
+                than a disclaimer. The nations with the fewest weather stations are the same ones
+                missing most often from the disaster records — which is why observing capacity is
+                charted here alongside the consequences it fails to capture.
+              </p>
+
+              <p className="text-sand/85 dark:text-ink/85 mt-3">
                 One deliberate departure from the source data: in the people-affected series, a
                 figure of exactly zero is treated as unreported and shown as missing. That series
                 does not distinguish “nobody was affected” from “nothing was submitted”, and the
