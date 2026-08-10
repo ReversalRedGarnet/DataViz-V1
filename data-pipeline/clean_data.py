@@ -215,18 +215,15 @@ DATASETS = {
         "indicator_code": "SST_ANOM",
     },
 
-    # Sea level anomaly, in metres. Underwrites the strongest attribution
-    # statement available: sea level rise worsens storm surge, and IPCC AR6
-    # rates the human contribution to sea level rise since 1971 very likely.
-    # A storm arriving on a higher ocean reaches further inland, whatever
-    # caused the storm.
-    "sea_level.csv": {
-        "csv_candidates": CLIMATE_CSVS,
-        "json_name": "sea_level.json",
-        "field_name": "sea_level_m",
-        "indicator_col": "CLIMATE_CHANGE_INDICATORS",
-        "indicator_code": "SEA_LVL",
-    },
+    # Sea level anomaly was exported and then cut. The portal reports it to
+    # the nearest 0.1 m, which across this period yields three distinct values
+    # and hides any movement under 10 cm. It underwrites the best-attributed
+    # mechanism available -- higher seas carry a storm surge further inland,
+    # and IPCC AR6 rates the human contribution to sea level rise since 1971
+    # very likely -- but a chart at that resolution claims more precision than
+    # the record has. The sentence is stronger than the chart, so the point is
+    # made in the section copy instead. Re-add SEA_LVL here if a
+    # finer-grained source turns up.
 
     # Greenhouse gas emissions per head, in tonnes. The one indicator here that
     # is about responsibility rather than exposure.

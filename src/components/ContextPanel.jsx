@@ -101,11 +101,21 @@ export default function ContextPanel({ data, style }) {
               What is changing underneath
             </h3>
             <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
-              Three regional records, all four nations on each. These are the only climate claims
-              this site makes with confidence, and they are all claims about trends. Warmer seas
-              raise the ceiling on how intense a storm can get; a higher ocean carries any surge
-              further inland. Neither says anything about why one particular cyclone formed, and
-              the note under each chart says where its limits are.
+              Two regional records, all four nations on each. These are the only climate claims
+              this site makes with confidence, and both are claims about trends rather than about
+              any individual storm. Warmer seas raise the ceiling on how intense a cyclone can
+              become; emissions per head say who is doing the warming. The note under each chart
+              says where its limits are.
+            </p>
+            <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
+              A third mechanism belongs here and is stated rather than charted. Sea level rise
+              worsens storm surge — a storm arriving on a higher ocean reaches further inland,
+              whatever caused the storm — and it is the best-attributed link of the three, with
+              IPCC AR6 rating the human contribution to sea level rise since 1971 very likely. The
+              regional record for it is reported only to the nearest 0.1&nbsp;m, which across
+              twelve years gives three distinct values and hides any movement under 10&nbsp;cm.
+              Charting it would claim a precision the measurement does not have, so it is left as a
+              sentence.
             </p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CONTEXT_METRICS.map((m, i) => (

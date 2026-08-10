@@ -106,16 +106,6 @@ export const CONTEXT_METRICS = [
       'A trend, and only a trend. Warmer seas raise the ceiling on how intense a cyclone can become -- IPCC AR6 finds it likely the global proportion of Category 3\u20135 storms has risen over the past four decades. They do not explain any individual storm, and this series makes that plain: the 2015 anomaly is negative in three of these four nations, and 2015 is the year of Cyclone Pam.',
   },
   {
-    key: 'sea_level',
-    file: 'sea_level.json',
-    field: 'sea_level_m',
-    label: 'Sea level anomaly (m)',
-    chartType: 'line',
-    format: (v) => `${v.toFixed(1)} m`,
-    caveat:
-      'Reported to the nearest 0.1 m, so this series holds only three distinct values across twelve years and any movement smaller than 10 cm is invisible in it. Read it as confirmation of direction, not as a measurement of rate. The mechanism it points at is the best-attributed one available: higher seas carry a storm surge further inland whatever caused the storm, and IPCC AR6 rates the human contribution to sea level rise since 1971 very likely.',
-  },
-  {
     key: 'ghg_per_capita',
     file: 'ghg_per_capita.json',
     field: 'ghg_tonnes_per_capita',
@@ -123,7 +113,7 @@ export const CONTEXT_METRICS = [
     chartType: 'line',
     format: (v) => `${v.toFixed(1)} t per person`,
     caveat:
-      'The one figure here about responsibility rather than exposure. Read it without overstating it: Solomon Islands is genuinely low at around 0.8 t, but Fiji and Tonga sit near 3 t, which is not negligible against many countries. No comparator is drawn on this chart, because a global-average line would need its own source and its own definition of what is counted.',
+      'The one figure here about responsibility rather than exposure. Read it without overstating it: Solomon Islands is genuinely low at around 0.8 t, but Fiji and Tonga sit near 3 t, which is not negligible against many countries. No global-average line is drawn on this chart, and that is a deliberate omission rather than an oversight -- the source gives the unit only as "tonnes", without saying whether it counts carbon dioxide alone or all greenhouse gases as CO2-equivalent, and without saying whether land use is included. A comparator built on a different accounting basis would look like a fair comparison and would not be one.',
   },
 ]
 
