@@ -7,49 +7,22 @@ import { useElementWidth } from '../hooks/useElementWidth.js'
 import { useInView } from '../hooks/useInView.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/chartRenderers.jsx'
+import { stormById } from '../content/storms.js'
 
 // In the order Harold reached them, which is also the order the journey
 // section walks through. `date` is the day of that nation's closest approach
 // or defining impact, from the Bureau of Meteorology's cyclone history and the
 // UN OCHA situation reports already cited on this page.
-export const STORM_PROFILE = [
-  {
-    name: 'Solomon Islands',
-    date: '3 April 2020',
-    category: 1,
-    categoryLabel: 'Tropical low / Category 1 at time of impact',
-    deaths: 27,
-    dodge: 0,
-    fact: "The passenger ferry MV Taimareho was overwhelmed by Harold's swell in Ironbottom Sound, Malaita Province -- the deadliest single event of the whole cyclone, at its weakest documented phase.",
-  },
-  {
-    name: 'Vanuatu',
-    date: '6 April 2020',
-    category: 5,
-    categoryLabel: 'Category 5 (landfall, Espiritu Santo)',
-    deaths: 2,
-    dodge: 0,
-    fact: '230 km/h sustained winds, gusts to 325 km/h -- the strongest storm to hit Vanuatu since Cyclone Pam in 2015. Up to 90% of homes lost in the worst-hit areas.',
-  },
-  {
-    name: 'Fiji',
-    date: '8 April 2020',
-    category: 4,
-    categoryLabel: 'Category 4 (landfall, Kadavu)',
-    deaths: 1,
-    dodge: -0.35,
-    fact: '1,919 buildings damaged; 103mm of rain recorded at Sigatoka in a single day.',
-  },
-  {
-    name: 'Tonga',
-    date: '9 April 2020',
-    category: 4,
-    categoryLabel: 'Category 4 (passed offshore, no landfall)',
-    deaths: 0,
-    dodge: 0.35,
-    fact: '428 homes damaged or destroyed by flooding and storm surge, without a direct hit.',
-  },
-]
+// The per-nation storm facts now live in src/content/storms.js, alongside the
+// roster itself, so a storm's identity and its researched detail cannot drift
+// apart. Re-exported here because StormJourney has always read them from this
+// module; the shape is unchanged.
+//
+// Only Harold has a profile at present. A storm without one still gets a full
+// ripple chain -- this section and the journey simply have nothing to draw, and
+// say so rather than rendering an empty chart.
+export const STORM_PROFILE = stormById('harold').profile
+
 
 // Props:
 //   style -- forwarded to the underlying Section, used by App.jsx to

@@ -8,6 +8,8 @@ import MapView from './components/MapView.jsx'
 import RippleChain from './components/RippleChain.jsx'
 import DivergenceView from './components/DivergenceView.jsx'
 import ContextPanel from './components/ContextPanel.jsx'
+import StormTimeline from './components/StormTimeline.jsx'
+import ExclusionsPanel from './components/ExclusionsPanel.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
@@ -15,6 +17,7 @@ import { ThemeProvider } from './hooks/useTheme.jsx'
 import { useSelection, selectionAnnouncement } from './hooks/useSelection.js'
 import { useMetricData } from './hooks/useMetricData.js'
 import { METRICS } from './utils/metrics.js'
+import { STORMS, stormById } from './content/storms.js'
 
 const DATA_SOURCES = [
   {
@@ -37,17 +40,11 @@ const DATA_SOURCES = [
     label: 'Power generation — Pacific Data Hub (SPC)',
     url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.POWER_GEN.&pd=,&to[TIME_PERIOD]=false',
   },
-  // Supplementary sources -- not from the official Pacific Data Hub list, used
-  // only for the "storm itself" category/deaths comparison (see
-  // StormProfile.jsx), not for any ripple-chain metric above.
-  {
-    label: 'Severe Tropical Cyclone Harold — official cyclone history, Australian Bureau of Meteorology',
-    url: 'http://www.bom.gov.au/cyclone/history/Harold.shtml',
-  },
-  {
-    label: 'Tropical Cyclone Harold — humanitarian situation reports, UN OCHA / ReliefWeb',
-    url: 'https://reliefweb.int/disaster/tc-2020-000049-vut',
-  },
+  // Supplementary sources follow, drawn from the roster itself so a storm and
+  // its citations cannot drift apart. Not from the official Pacific Data Hub
+  // list, and used only for the "storm itself" facts in the profile and journey
+  // sections -- never for a ripple-chain metric above.
+  ...STORMS.flatMap((storm) => storm.sources),
 ]
 
 // The page, top to bottom. PageSections owns the shape: it gives each entry its
@@ -60,14 +57,20 @@ const DATA_SOURCES = [
 // those dividers. Keep it in step with what the section renders or the wave
 // seam shows a visible colour mismatch. Every id here must also appear in
 // content/pageSections.js, which is what the header's jump-to menu links to.
-function pageSections(data, selection) {
+function pageSections(data, selection, storm, onSelectStorm) {
   const { selected, toggle, clear } = selection
 
   return [
     { id: 'top', tone: 'plain', element: <Hero /> },
+    {
+      id: 'timeline',
+      tone: 'plain',
+      element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
+    },
+    { id: 'exclusions', tone: 'panel', element: <ExclusionsPanel /> },
     { id: 'storm-journey', tone: 'panel', element: <StormJourney /> },
     { id: 'storm-profile', tone: 'plain', element: <StormProfile /> },
-    { id: 'big-picture', tone: 'panel', element: <BigPicture data={data} /> },
+    { id: 'big-picture', tone: 'panel', element: <BigPicture data={data} storm={storm} /> },
     {
       id: 'map',
       tone: 'plain',
@@ -76,14 +79,14 @@ function pageSections(data, selection) {
     {
       id: 'ripple-chain',
       tone: 'plain',
-      element: <RippleChain data={data} selectedNations={selected} />,
+      element: <RippleChain data={data} storm={storm} selectedNations={selected} />,
     },
-    { id: 'divergence', tone: 'panel', element: <DivergenceView data={data} /> },
+    { id: 'divergence', tone: 'panel', element: <DivergenceView data={data} storm={storm} /> },
     { id: 'context', tone: 'plain', element: <ContextPanel data={data} /> },
     {
       id: 'compare',
       tone: 'panel',
-      element: <ComparisonView data={data} selectedNations={selected} />,
+      element: <ComparisonView data={data} storm={storm} selectedNations={selected} />,
     },
     { id: 'sources', tone: 'ink', element: <CitationPanel sources={DATA_SOURCES} /> },
   ]
@@ -92,6 +95,11 @@ function pageSections(data, selection) {
 function AppShell() {
   const data = useMetricData(METRICS)
   const selection = useSelection()
+  // Nothing is selected on load, deliberately: the timeline is the argument and
+  // a storm is the evidence for it, so the reader chooses which piece to open
+  // rather than landing mid-way through one.
+  const [stormId, setStormId] = useState(null)
+  const storm = stormById(stormId)
   const [headerHeight, setHeaderHeight] = useState(0)
 
   // Keep the CSS scroll offset in step with the measured header height, so a
@@ -120,7 +128,7 @@ function AppShell() {
       </div>
 
       <main id="main-content" className="min-h-screen" style={{ paddingTop: headerHeight }}>
-        <PageSections sections={pageSections(data, selection)} />
+        <PageSections sections={pageSections(data, selection, storm, setStormId)} />
       </main>
     </>
   )

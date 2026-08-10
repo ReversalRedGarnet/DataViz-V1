@@ -265,6 +265,18 @@ html.theme-sweep::view-transition-new(root) {
     opacity: 0.14;
   }
 
+  /*
+    A nation drawn for comparison rather than because the event reached it.
+    Deliberately far less aggressive than .nation-dimmed above: that one is a
+    transient hover state and is meant to get out of the way, while this is the
+    chart's resting appearance and the line still has to be readable. A country
+    the storm missed is the nearest thing this data has to a control, and
+    hiding it would throw that away.
+  */
+  .nation-unstruck {
+    opacity: 0.42;
+  }
+
   /* Entrance animation for anchored tooltips. */
   @keyframes tooltip-pop-in {
     from {

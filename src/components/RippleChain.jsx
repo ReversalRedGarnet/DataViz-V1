@@ -16,9 +16,13 @@ import Tooltip from './Tooltip.jsx'
 //
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
+//   storm -- the selected storm, or null. Its year is the before/after anchor,
+//     and the nations it struck are drawn at full strength while the rest are
+//     dimmed: a country the storm missed is the nearest thing this data has to
+//     a control, so it stays on the chart rather than being removed.
 //   selectedNations -- ordered; order drives colour, matching the map's badges
 //   style -- forwarded to Section (entrance stagger)
-export default function RippleChain({ data, selectedNations, style }) {
+export default function RippleChain({ data, storm, selectedNations, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
 
   // Memoised deliberately: the tooltip state lives here, so an unmemoised
@@ -29,19 +33,26 @@ export default function RippleChain({ data, selectedNations, style }) {
   )
 
   const insights = useMemo(() => {
-    if (!data || selectedNations.length !== 2) return null
-    return buildComparativeInsights(data, selectedNations[0], selectedNations[1])
-  }, [data, selectedNations])
+    if (!data || !storm || selectedNations.length !== 2) return null
+    return buildComparativeInsights(data, selectedNations[0], selectedNations[1], storm.year)
+  }, [data, storm, selectedNations])
 
   if (!data) return <EmptyState style={style}>Ripple chain -- waiting on data.</EmptyState>
+  if (!storm) {
+    return <EmptyState style={style}>Pick a storm from the timeline above to follow what came after it.</EmptyState>
+  }
   if (!selectedNations || selectedNations.length === 0) {
     return <EmptyState style={style}>Click a country on the map above to see its ripple chain.</EmptyState>
   }
 
+  const unstruck = selectedNations.filter((n) => !storm.nations.includes(n))
+
   return (
     <Section style={style}>
       <div ref={containerRef} className="relative mx-auto max-w-3xl">
-        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">The ripple chain</h2>
+        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+          After {storm.name}, {storm.year}
+        </h2>
         <p className="mb-3 max-w-prose text-sm opacity-70">
           Five linked records, in the order the damage travels: who was hit, then the harvest, the
           herds, the power supply and the visitors that follow.
@@ -53,6 +64,14 @@ export default function RippleChain({ data, selectedNations, style }) {
           that particular record cannot be asked to prove.
         </p>
         <SelectionLegend selected={selectedNations} />
+        {unstruck.length > 0 && (
+          <p className="mt-3 max-w-prose text-xs italic opacity-70">
+            {unstruck.join(' and ')} {unstruck.length === 1 ? 'was' : 'were'} not struck by{' '}
+            {storm.name} and {unstruck.length === 1 ? 'is' : 'are'} drawn faded. Left on the chart
+            rather than removed: a country the storm missed is the closest thing these records have
+            to a comparison.
+          </p>
+        )}
         <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {CHAIN_METRICS.map((m, i) => (
             <TrendChart
@@ -68,6 +87,7 @@ export default function RippleChain({ data, selectedNations, style }) {
               index={i}
               stage={i + 1}
               ripple
+              dimNations={unstruck}
               caveat={m.caveat}
               className={i === CHAIN_METRICS.length - 1 && CHAIN_METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
             />

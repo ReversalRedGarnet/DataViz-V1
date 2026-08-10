@@ -1,4 +1,4 @@
-import { CHAIN_METRICS, EVENT_YEAR } from '../utils/metrics.js'
+import { CHAIN_METRICS } from '../utils/metrics.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { chartColorsFor } from '../utils/theme.js'
 import { pctChange } from '../utils/rows.js'
@@ -16,12 +16,17 @@ import Tooltip from './Tooltip.jsx'
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
 //   selectedNations -- ordered; order drives colour
 //   style -- forwarded to Section (entrance stagger)
-export default function ComparisonView({ data, selectedNations, style }) {
+export default function ComparisonView({ data, storm, selectedNations, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
 
   if (!data) return <EmptyState tone="panel" style={style}>Comparison -- waiting on data.</EmptyState>
+  if (!storm) {
+    return (
+      <EmptyState tone="panel" style={style}>Pick a storm from the timeline to compare recovery.</EmptyState>
+    )
+  }
   if (!selectedNations || selectedNations.length < 2) {
     return (
       <EmptyState tone="panel" style={style}>
@@ -34,7 +39,9 @@ export default function ComparisonView({ data, selectedNations, style }) {
     <Section tone="panel" style={style}>
       <div ref={containerRef} className="relative">
         <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">Compare recovery</h2>
-        <p className="mb-8 max-w-prose text-sm opacity-70">Event year ({EVENT_YEAR}) versus the latest year on record.</p>
+        <p className="mb-8 max-w-prose text-sm opacity-70">
+          {storm.name}&rsquo;s year ({storm.year}) versus the latest year on record.
+        </p>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Keyed by position, not by name. Keying by name would tear the
               card down and build a new one whenever the second pick changed,
@@ -46,6 +53,7 @@ export default function ComparisonView({ data, selectedNations, style }) {
               key={i}
               nation={nation}
               data={data}
+              eventYear={storm.year}
               color={palette.selection[i]}
               index={i}
               showTooltip={showTooltip}
@@ -60,20 +68,20 @@ export default function ComparisonView({ data, selectedNations, style }) {
 }
 
 
-function NationSummary({ nation, data, color, index, showTooltip, hideTooltip }) {
+function NationSummary({ nation, data, eventYear, color, index, showTooltip, hideTooltip }) {
   return (
     <div
       className="animate-pop-in rounded-2xl border-t-4 bg-surface/80 p-6 shadow-sm"
       style={{ borderColor: color, animationDelay: `${index * 100}ms` }}
     >
       <h3 className="font-serif text-xl font-semibold tracking-tight">{nation}</h3>
-      <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">Since {EVENT_YEAR}</p>
+      <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">Since {eventYear}</p>
       <ul className="divide-y divide-ink/10 text-sm">
         {CHAIN_METRICS.map((m) => {
           const rows = (data[m.key] ?? [])
             .filter((d) => d.nation === nation)
             .sort((a, b) => a.year - b.year)
-          const eventRow = rows.find((r) => r.year === EVENT_YEAR)
+          const eventRow = rows.find((r) => r.year === eventYear)
           const latestRow = rows[rows.length - 1]
 
           return (

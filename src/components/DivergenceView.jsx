@@ -9,7 +9,7 @@ import { useTheme } from '../hooks/useTheme.jsx'
 import { useInView } from '../hooks/useInView.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { chartColorsFor } from '../utils/theme.js'
-import { CHAIN_METRICS, EVENT_YEAR } from '../utils/metrics.js'
+import { CHAIN_METRICS } from '../utils/metrics.js'
 import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.js'
 import { motionDuration } from '../utils/motion.js'
 
@@ -34,7 +34,7 @@ const LEGEND_DASH = ['none', '7 4', '2 3', '9 3 2 3']
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
 //   style -- forwarded to Section (entrance stagger)
-export default function DivergenceView({ data, style }) {
+export default function DivergenceView({ data, storm, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
@@ -44,11 +44,15 @@ export default function DivergenceView({ data, style }) {
   const frameRef = useRef(null)
 
   const nations = useMemo(() => NATIONS.map((n) => n.name), [])
+  const eventYear = storm?.year ?? null
   const panels = useMemo(
-    () => buildDivergencePanels(data, CHAIN_METRICS, nations, EVENT_YEAR),
-    [data, nations]
+    () => (eventYear ? buildDivergencePanels(data, CHAIN_METRICS, nations, eventYear) : []),
+    [data, nations, eventYear]
   )
-  const years = useMemo(() => divergenceYearRange(panels, EVENT_YEAR), [panels])
+  const years = useMemo(
+    () => (eventYear ? divergenceYearRange(panels, eventYear) : [0, 0]),
+    [panels, eventYear]
+  )
 
   function play() {
     cancelAnimationFrame(frameRef.current)
@@ -77,10 +81,17 @@ export default function DivergenceView({ data, style }) {
   }, [inView, panels.length])
 
   if (!data) return <EmptyState tone="panel" style={style}>The divergence -- waiting on data.</EmptyState>
+  if (!storm) {
+    return (
+      <EmptyState tone="panel" style={style}>
+        Pick a storm from the timeline to see how the four nations moved apart after it.
+      </EmptyState>
+    )
+  }
   if (panels.length === 0) {
     return (
       <EmptyState tone="panel" style={style}>
-        No metric in this chain has enough post-{EVENT_YEAR} data to index.
+        No metric in this chain has enough data after {storm.year} to index.
       </EmptyState>
     )
   }
@@ -95,13 +106,13 @@ export default function DivergenceView({ data, style }) {
             One storm, one starting point
           </p>
           <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
-            Where the four nations part ways
+            Where the four nations part ways after {storm.name}
           </h2>
           <p className="mb-6 max-w-prose text-sm opacity-75">
-            Each line begins at 100 &mdash; that nation&rsquo;s own figure in {EVENT_YEAR}, the year
-            Harold crossed all four. Nothing else is adjusted, and no country is measured against
-            another. Every line therefore starts in the same place, and the only thing left for the
-            chart to show is the distance that opens up afterwards.
+            Each line begins at 100 &mdash; that nation&rsquo;s own figure in {storm.year}. Nothing
+            else is adjusted, and no country is measured against another. Every line therefore
+            starts in the same place, and the only thing left for the chart to show is the distance
+            that opens up afterwards.
           </p>
 
           <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -167,10 +178,10 @@ export default function DivergenceView({ data, style }) {
             measured.
           </p>
           <p className="mt-2 max-w-prose text-xs italic opacity-70">
-            The further right the sweep runs, the less of what it shows belongs to the storm.
-            Fiji&rsquo;s crop yield falls sharply in 2024, four years after Harold and well outside
-            anything a single cyclone explains. Read the separation as the shape of four different
-            recoveries, not as a measurement of one storm&rsquo;s reach.
+            The further right the sweep runs, the less of what it shows belongs to the storm. Years
+            after an event, a line carries drought, markets, a pandemic and policy alongside
+            anything a cyclone did. Read the separation as the shape of four different recoveries,
+            not as a measurement of one storm&rsquo;s reach.
           </p>
 
           <Tooltip tooltip={tooltip} />

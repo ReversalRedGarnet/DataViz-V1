@@ -6,6 +6,8 @@
 // this at runtime, so renaming one side means renaming the other.
 export const PAGE_SECTIONS = [
   { id: 'top', label: 'Overview' },
+  { id: 'timeline', label: 'How Often, and to Whom' },
+  { id: 'exclusions', label: 'What the Rule Left Out' },
   { id: 'storm-journey', label: 'Follow the Storm' },
   { id: 'storm-profile', label: 'Storm Profile' },
   { id: 'big-picture', label: 'The Bigger Picture' },

@@ -3,7 +3,7 @@ import NoDataNote from './NoDataNote.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useElementWidth } from '../hooks/useElementWidth.js'
 import { useInView } from '../hooks/useInView.js'
-import { resetSvg } from '../utils/d3helpers.js'
+import { resetSvg, slug } from '../utils/d3helpers.js'
 import { renderMetricChart, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 
 // One "selected nations, over time" chart card: heading, chart or placeholder,
@@ -21,6 +21,12 @@ import { renderMetricChart, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 //     ripple chain passes this: its metrics are a causal order, and the number
 //     is the one place that order is stated rather than implied by layout.
 //   ripple -- emit a ring as the card arrives, for the same section
+//   dimNations -- names to draw at reduced strength. Used where a nation is
+//     shown for comparison rather than because the event reached it: a country
+//     a storm missed is the closest thing this data has to a control, so it
+//     stays on the chart rather than being filtered out, but it must not read
+//     as though it were struck. Applied as a class after the draw, the same way
+//     the cross-chart highlight works, so the renderers need no knowledge of it.
 //   caveat -- what this series cannot be read as, printed under the chart
 //   className -- layout hook (e.g. sm:col-span-2 for an odd one out)
 //
@@ -42,6 +48,7 @@ export default function TrendChart({
   index = 0,
   stage,
   ripple = false,
+  dimNations,
   caveat,
   className = '',
 }) {
@@ -68,6 +75,20 @@ export default function TrendChart({
       theme,
     })
   }, [inView, node, width, allRows, nations, valueField, chartType, format, yTickFormat, showTooltip, hideTooltip, theme])
+
+  // Reduced strength for nations shown only as comparison. A separate effect
+  // from the draw so that changing which storm is selected re-dims without
+  // redrawing the chart and replaying its entrance.
+  useEffect(() => {
+    if (!node) return
+    const dim = new Set((dimNations ?? []).map(slug))
+    for (const mark of node.querySelectorAll('.nation-mark')) {
+      const isDim = [...mark.classList].some(
+        (c) => c.startsWith('nation-') && dim.has(c.slice('nation-'.length))
+      )
+      mark.classList.toggle('nation-unstruck', isDim)
+    }
+  })
 
   return (
     <div

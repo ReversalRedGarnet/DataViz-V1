@@ -1,5 +1,8 @@
-// Cyclone Harold, April 2020: the before/after anchor for this page.
-export const EVENT_YEAR = 2020
+// The before/after anchor is no longer a constant: it is a property of
+// whichever storm the reader has selected (see src/content/storms.js). The old
+// module-level EVENT_YEAR is gone deliberately rather than left as a default,
+// because a default would silently anchor a 2015 storm's charts to 2020 and
+// nothing would look wrong.
 
 // Filenames match data-pipeline/clean_data.py's DATASETS dict.
 //

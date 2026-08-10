@@ -1,4 +1,4 @@
-import { METRICS, EVENT_YEAR } from './metrics.js'
+import { CHAIN_METRICS } from './metrics.js'
 import { pctChange } from './rows.js'
 
 // One bullet per metric, comparing the two selected nations from the event year
@@ -11,7 +11,7 @@ import { pctChange } from './rows.js'
 // as a gap in outcome when part of it is a gap in the calendar. Where the two
 // end years differ, the bullet says so and names both.
 //
-// Returns [{ key, text }], always exactly METRICS.length entries.
+// Returns [{ key, text }], always exactly CHAIN_METRICS.length entries.
 
 
 function formatPct(p) {
@@ -20,15 +20,15 @@ function formatPct(p) {
   return `${sign}${p.toFixed(0)}%`
 }
 
-export function buildComparativeInsights(data, nationA, nationB) {
+export function buildComparativeInsights(data, nationA, nationB, eventYear) {
   if (!data) return []
 
-  return METRICS.map((m) => {
+  return CHAIN_METRICS.map((m) => {
     const rowsA = (data[m.key] ?? []).filter((d) => d.nation === nationA).sort((a, b) => a.year - b.year)
     const rowsB = (data[m.key] ?? []).filter((d) => d.nation === nationB).sort((a, b) => a.year - b.year)
-    const eventA = rowsA.find((r) => r.year === EVENT_YEAR)
+    const eventA = rowsA.find((r) => r.year === eventYear)
     const latestA = rowsA[rowsA.length - 1]
-    const eventB = rowsB.find((r) => r.year === EVENT_YEAR)
+    const eventB = rowsB.find((r) => r.year === eventYear)
     const latestB = rowsB[rowsB.length - 1]
 
     const hasA = Boolean(eventA && latestA)
@@ -51,12 +51,12 @@ export function buildComparativeInsights(data, nationA, nationB) {
 
     // The event year can also be the last year on record: no post-event data
     // at all, not a 0% change. "X went from N to N" would read as a result.
-    const noNewDataA = latestA.year === EVENT_YEAR
-    const noNewDataB = latestB.year === EVENT_YEAR
+    const noNewDataA = latestA.year === eventYear
+    const noNewDataB = latestB.year === eventYear
     if (noNewDataA && noNewDataB) {
       return {
         key: m.key,
-        text: `${m.label}: neither ${nationA} nor ${nationB} has data beyond ${EVENT_YEAR} in the official dataset.`,
+        text: `${m.label}: neither ${nationA} nor ${nationB} has data beyond ${eventYear} in the official dataset.`,
       }
     }
     if (noNewDataA || noNewDataB) {
@@ -66,7 +66,7 @@ export function buildComparativeInsights(data, nationA, nationB) {
       const trackedEvent = noNewDataA ? eventB : eventA
       return {
         key: m.key,
-        text: `${m.label}: ${stalled} has no data beyond ${EVENT_YEAR}, while ${tracked} went from ${m.format(
+        text: `${m.label}: ${stalled} has no data beyond ${eventYear}, while ${tracked} went from ${m.format(
           trackedEvent[m.field]
         )} to ${m.format(trackedRow[m.field])} by ${trackedRow.year}.`,
       }
@@ -104,7 +104,7 @@ export function buildComparativeInsights(data, nationA, nationB) {
         eventB[m.field]
       )} to ${m.format(latestB[m.field])} by ${latestB.year}${
         changeB ? ` (${changeB})` : ''
-      } -- ${comparison} since ${EVENT_YEAR}.${windowNote}`,
+      } -- ${comparison} since ${eventYear}.${windowNote}`,
     }
   })
 }
