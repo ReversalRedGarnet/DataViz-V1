@@ -41,8 +41,11 @@ export default function Header({ onHeightChange, availableIds }) {
     return () => observer.disconnect()
   }, [onHeightChange])
 
+  // No bottom border on the <header>: ScrollProgress now draws that edge
+  // itself, as the water the canoe travels on. A border here would double the
+  // line the canoe is supposed to be riding.
   return (
-    <header ref={headerRef} className="fixed inset-x-0 top-0 z-40 border-b border-ink/10 bg-sand shadow-sm">
+    <header ref={headerRef} className="fixed inset-x-0 top-0 z-40 bg-sand shadow-sm">
       {/* No overflow-hidden on the header itself: the section menu below opens
           past its bottom edge and would be clipped by it. The backdrop clips
           itself instead.
@@ -73,7 +76,10 @@ export default function Header({ onHeightChange, availableIds }) {
           </div>
         </div>
       </div>
-      <div className="relative">
+      {/* -mt pulls the bar up so the waterline lands on the header's edge
+          rather than below it; overflow-visible on the svg lets the canoe and
+          paddle rise above without being clipped. */}
+      <div className="relative -mt-1">
         <ScrollProgress />
       </div>
     </header>

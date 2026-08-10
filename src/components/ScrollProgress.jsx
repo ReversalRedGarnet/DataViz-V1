@@ -1,20 +1,36 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTheme } from '../hooks/useTheme.jsx'
+import { prefersReducedMotion } from '../utils/motion.js'
 import { CHART_INK } from '../utils/theme.js'
 
-// The scroll-linked wave and canoe at the bottom of Header. Same tile geometry
-// as PacificBorder so it reads as the same motif. Distance travelled is ocean
-// blue, distance ahead faint ink -- via CHART_INK, since a fixed dark stroke
-// would vanish on a dark header.
+// The scroll readout at the bottom of Header: a canoe travelling along the
+// header's own bottom edge, with the distance already covered drawn behind it.
+//
+// The zig-zag wave this replaced was a second decorative motif competing with
+// the header's ripple backdrop and the section dividers, and it visually
+// detached the canoe from the header by floating it on a line of its own. Now
+// the header's edge IS the water. There is one line, it is the boundary the
+// layout already had, and the canoe sits on it.
 //
 // The canoe is a readout of scroll position, not an animation, so it no more
-// needs to respect prefers-reduced-motion than a scrollbar thumb does.
-const TILE_WIDTH = 20
-const BASELINE_Y = 12
-const CREST_Y = 4
-const BAR_HEIGHT = 44
+// needs to respect prefers-reduced-motion than a scrollbar thumb does. What it
+// does now respect is smoothness: the position is eased toward its target
+// rather than snapped, so a fast flick reads as travel rather than teleporting.
+// Just tall enough to hold the canoe and its paddle above the rule it rides.
+const BAR_HEIGHT = 26
+// The waterline: the canoe's keel sits here, and the travelled/remaining rules
+// are drawn along it.
+const WATER_Y = 21
 const CANOE_SCALE = 0.55
 const OCEAN = '#5B8FA3'
+
+// How quickly the drawn position chases the true scroll position, per frame.
+// Low enough to smooth a flick, high enough that it never feels laggy or
+// detached from the reader's input.
+const EASE = 0.18
+// Below this, snap. Otherwise the rAF loop runs forever chasing a fraction of
+// a pixel it will never close, keeping the CPU awake on an idle page.
+const SETTLE_PX = 0.4
 
 // Hull: shallow crescent, hook at the stern, taller curl at the bow --
 // simplified to a silhouette that survives this scale.
@@ -25,21 +41,14 @@ const HULL_PATH =
 const PADDLE_BLADE_PATH =
   'M -3.6,10 C -4.2,13 -4.2,16.5 -2.6,19.5 C -1.4,21.7 1.4,21.7 2.6,19.5 C 4.2,16.5 4.2,13 3.6,10 C 2.4,7.5 -2.4,7.5 -3.6,10 Z'
 
-function buildWavePoints(width) {
-  const tileCount = Math.ceil(width / TILE_WIDTH) + 2
-  const points = [[0, BASELINE_Y]]
-  for (let i = 0; i < tileCount; i++) {
-    const x0 = i * TILE_WIDTH
-    points.push([x0 + 5, CREST_Y], [x0 + 10, BASELINE_Y], [x0 + 15, CREST_Y], [x0 + 20, BASELINE_Y])
-  }
-  return points
-}
-
 export default function ScrollProgress() {
   const wrapperRef = useRef(null)
   const [width, setWidth] = useState(0)
-  const [progress, setProgress] = useState(0) // 0..1
+  const [progress, setProgress] = useState(0) // 0..1, the true scroll fraction
+  const [drawn, setDrawn] = useState(0) // 0..1, the eased position actually drawn
   const rafRef = useRef(null)
+  const chaseRef = useRef(null)
+  const drawnRef = useRef(0)
   const { theme } = useTheme()
   const ink = CHART_INK[theme] ?? CHART_INK.light
 
@@ -86,46 +95,100 @@ export default function ScrollProgress() {
     }
   }, [])
 
+  // Chase the true position rather than jumping to it. Runs only while there is
+  // a gap to close, and stops itself once inside SETTLE_PX, so an idle page does
+  // no work.
+  useEffect(() => {
+    if (prefersReducedMotion()) {
+      drawnRef.current = progress
+      setDrawn(progress)
+      return
+    }
+
+    function step() {
+      const gap = progress - drawnRef.current
+      if (Math.abs(gap * width) < SETTLE_PX) {
+        drawnRef.current = progress
+        setDrawn(progress)
+        chaseRef.current = null
+        return
+      }
+      drawnRef.current += gap * EASE
+      setDrawn(drawnRef.current)
+      chaseRef.current = requestAnimationFrame(step)
+    }
+
+    if (chaseRef.current == null) chaseRef.current = requestAnimationFrame(step)
+    return () => {
+      if (chaseRef.current) {
+        cancelAnimationFrame(chaseRef.current)
+        chaseRef.current = null
+      }
+    }
+  }, [progress, width])
+
   // The wrapper always renders (ResizeObserver needs its ref); the SVG waits
-  // for a real measurement to avoid a flash of a zero-width wave.
-  const wavePoints = width ? buildWavePoints(width) : []
-  const waveStr = wavePoints.map(([x, y]) => `${x},${y}`).join(' ')
-  const progressX = progress * width
-  const waveGroupY = BAR_HEIGHT - 16 // wave's own local coords are 0..16 tall
-  // Aligns the hull's keel (local y ~= +5) to the wave's baseline
-  // rather than the canoe's own (0,0) origin.
-  const canoeY = BAR_HEIGHT - 4 - 5 * CANOE_SCALE
+  // for a real measurement to avoid a flash at zero width.
+  const progressX = drawn * width
+  // Aligns the hull's keel (local y ~= +5) to the waterline rather than the
+  // canoe's own (0,0) origin.
+  const canoeY = WATER_Y - 5 * CANOE_SCALE
+  // A gentle bob and pitch, driven by distance travelled rather than by time:
+  // the canoe rides the water while it moves and sits still when the reader
+  // does. Time-driven idle motion would be movement with nothing behind it.
+  const bob = Math.sin(drawn * Math.PI * 9) * 1.1
+  const pitch = Math.cos(drawn * Math.PI * 9) * 2.5
 
   return (
     <div ref={wrapperRef} className="w-full">
       {width > 0 && (
-        <svg aria-hidden="true" width={width} height={BAR_HEIGHT} viewBox={`0 0 ${width} ${BAR_HEIGHT}`} className="block">
-          <clipPath id="scroll-progress-ahead">
-            <rect x={progressX} y="0" width={Math.max(width - progressX, 0)} height={BAR_HEIGHT} />
-          </clipPath>
-          <clipPath id="scroll-progress-behind">
-            <rect x="0" y="0" width={progressX} height={BAR_HEIGHT} />
-          </clipPath>
+        <svg
+          aria-hidden="true"
+          width={width}
+          height={BAR_HEIGHT}
+          viewBox={`0 0 ${width} ${BAR_HEIGHT}`}
+          className="block overflow-visible"
+        >
+          {/* The water ahead: the header's own bottom edge, unremarkable until
+              it has been travelled. */}
+          <line
+            x1="0"
+            x2={width}
+            y1={WATER_Y}
+            y2={WATER_Y}
+            stroke={ink}
+            strokeOpacity="0.16"
+            strokeWidth="1.5"
+          />
 
-          <g transform={`translate(0,${waveGroupY})`}>
-            <polyline
-              points={waveStr}
-              fill="none"
-              stroke={ink}
-              strokeOpacity="0.18"
-              strokeWidth="1.5"
-              clipPath="url(#scroll-progress-ahead)"
-            />
-            <polyline
-              points={waveStr}
-              fill="none"
-              stroke={OCEAN}
-              strokeWidth="2"
-              clipPath="url(#scroll-progress-behind)"
-            />
-          </g>
+          {/* The wake. Thicker and ocean-blue, so distance covered reads at a
+              glance without needing a second motif to carry it. */}
+          <line
+            x1="0"
+            x2={progressX}
+            y1={WATER_Y}
+            y2={WATER_Y}
+            stroke={OCEAN}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
 
-          <g transform={`translate(${progressX},${canoeY}) scale(${CANOE_SCALE})`}>
+          {/* A short bright lead into the hull, so the canoe looks like it is
+              pulling the wake rather than sitting on top of a line. */}
+          <line
+            x1={Math.max(0, progressX - 26)}
+            x2={progressX}
+            y1={WATER_Y}
+            y2={WATER_Y}
+            stroke={OCEAN}
+            strokeOpacity="0.45"
+            strokeWidth="5"
+            strokeLinecap="round"
+          />
+
+          <g
+            transform={`translate(${progressX},${canoeY + bob}) rotate(${pitch}) scale(${CANOE_SCALE})`}
+          >
             <path d={HULL_PATH} fill={ink} />
             <g transform="translate(-1,-4) rotate(-32)">
               <ellipse cx="0" cy="-21" rx="1.9" ry="3" fill={ink} />
