@@ -9,6 +9,35 @@
 
 @layer base {
   /*
+    Hide the browser scrollbar. The canoe in the header is the scroll readout,
+    and two position indicators competing at the edges of the same page is one
+    too many.
+
+    Deliberate trade-off, recorded because it is a real cost and not a free win.
+    A scrollbar is an affordance as well as a readout: it can be grabbed and
+    dragged, and some people navigate long pages that way. Hiding it takes that
+    away, and nothing here gives it back.
+
+    What is NOT given up: the page still scrolls by wheel, trackpad, touch,
+    keyboard (arrows, Page Up/Down, Home/End, Space) and by find-in-page,
+    because `scrollbar-width: none` hides the control without changing the
+    scroll container. Only the drag gesture is lost.
+
+    Applied to the document, not to `*`. A blanket rule would also strip the
+    scrollbars from any internal scrolling region -- a long tooltip, an
+    overflowing table on a narrow screen -- where there is no canoe to replace
+    them and the content would simply look truncated.
+  */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* legacy Edge */
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  /*
     Theme colors are defined as CSS variables so Tailwind utilities
     automatically adapt to light and dark mode.
   */

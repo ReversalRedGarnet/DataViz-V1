@@ -58,11 +58,16 @@ function markerTooltipContent(nation, selected) {
 //   nations -- array of { name, lat, lon, blurb }, defaults to the
 //     cyclone-nation set. Other hazard pages pass their own since
 //     which nations have usable data varies by hazard.
+//   storm -- the selected storm, or null. Nations it did not reach are faded
+//     and their aria-labels say so. They stay selectable on purpose: a country
+//     the storm missed is the nearest thing this data has to a control, and the
+//     ripple chain draws it for exactly that reason. Fading is a statement
+//     about the storm, not a restriction on the reader.
 //   selected -- array of up to two nation names, in the order picked
 //   onToggle -- (name) => void, called on marker click / Enter / Space
 //   onClear -- () => void, clears the current selection
 //   style -- forwarded to the underlying Section
-export default function MapView({ nations = NATIONS, selected, onToggle, onClear, style }) {
+export default function MapView({ nations = NATIONS, storm, selected, onToggle, onClear, style }) {
   const svgRef = useRef(null)
   const gRef = useRef(null)
   const zoomRef = useRef(null)
@@ -294,6 +299,27 @@ export default function MapView({ nations = NATIONS, selected, onToggle, onClear
     // palette the charts use, and that palette flips with the theme.
   }, [selected, theme])
 
+  // Fade the nations this storm never reached, matching .nation-unstruck in the
+  // charts so the map and the chain agree about who was hit. Opacity only --
+  // pointer events are untouched, because these markers must stay clickable.
+  useEffect(() => {
+    if (!gRef.current) return
+    gRef.current
+      .selectAll('g.marker')
+      .transition()
+      .duration(motionDuration(200))
+      .style('opacity', (d) => (!storm || storm.nations.includes(d.name) ? 1 : 0.42))
+
+    // The visual fade is invisible to a screen reader, so the label carries it.
+    gRef.current
+      .selectAll('g.marker')
+      .attr('aria-label', (d) =>
+        !storm || storm.nations.includes(d.name)
+          ? `Select ${d.name}`
+          : `Select ${d.name}. Not struck by ${storm.name}; shown for comparison.`
+      )
+  }, [storm])
+
   // No-ops if setup() hasn't finished; that race is covered by themeRef.
   useEffect(() => {
     if (!gRef.current) return
@@ -339,7 +365,11 @@ export default function MapView({ nations = NATIONS, selected, onToggle, onClear
         <svg
           ref={svgRef}
           role="img"
-          aria-label={`Map of the Pacific with ${nations.length} selectable nations`}
+          aria-label={
+            storm
+              ? `Map of the Pacific with ${nations.length} selectable nations. ${storm.name} struck ${storm.nations.length} of them.`
+              : `Map of the Pacific with ${nations.length} selectable nations`
+          }
           className="h-auto w-full overflow-hidden rounded-2xl border-2 border-ink/15 shadow-sm"
         />
         {/* Top-right: a bottom-right column covered Tonga's label. */}

@@ -74,7 +74,7 @@ function pageSections(data, selection, storm, onSelectStorm) {
     {
       id: 'map',
       tone: 'plain',
-      element: <MapView selected={selected} onToggle={toggle} onClear={clear} />,
+      element: <MapView storm={storm} selected={selected} onToggle={toggle} onClear={clear} />,
     },
     {
       id: 'ripple-chain',

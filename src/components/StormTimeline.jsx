@@ -44,23 +44,32 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
 
       {/* The count, stated before the timeline, because it is the actual claim
           and the timeline is only where it comes from. */}
+      {/* The cards take focus so a keyboard user can reach the cross-chart
+          highlight, which is otherwise pointer-only. A focusable element with
+          no accessible name is worse than one that cannot be focused at all --
+          it becomes a stop on the tab order that announces nothing -- so each
+          carries its own full sentence and the decorative split between the
+          number and its label is hidden from assistive tech. */}
       <ul className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {counts.map(({ nation, count }) => (
           <li
             key={nation}
             tabIndex={0}
-            className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label={`${count} severe cyclones struck ${nation} between ${ROSTER_START} and ${ROSTER_END}.`}
+            className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
             {...highlightHandlers(nation, setHighlight)}
           >
-            <p className="font-serif text-3xl font-semibold leading-none tabular-nums">{count}</p>
-            <p className="mt-1.5 text-xs leading-snug opacity-70">
+            <p aria-hidden="true" className="font-serif text-3xl font-semibold leading-none tabular-nums">
+              {count}
+            </p>
+            <p aria-hidden="true" className="mt-1.5 text-xs leading-snug opacity-70">
               severe cyclones struck {nation}
             </p>
           </li>
         ))}
       </ul>
 
-      <ol className="relative space-y-2">
+      <ol aria-label={`Severe cyclones by year, ${ROSTER_START} to ${ROSTER_END}`} className="relative space-y-2">
         {YEARS.map((year) => {
           const storms = STORMS.filter((s) => s.year === year)
           return (
@@ -82,7 +91,8 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
                         type="button"
                         onClick={() => onSelect(active ? null : storm.id)}
                         aria-pressed={active}
-                        className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                        aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of four nations.`}
+                        className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand ${
                           active
                             ? 'border-accent bg-accent/10 font-semibold'
                             : 'border-ink/15 hover:border-ink/35 hover:bg-surface/60'

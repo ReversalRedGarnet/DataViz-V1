@@ -21,16 +21,54 @@ Rather than asking *which country is worst*, Ripple asks *why do places hit by t
 
 ---
 
-## Scope (locked)
+## Scope
 
-To ship a finished, polished piece solo in ~4 weeks, this project is intentionally narrow:
+Six storms, four nations, ten years. The roster is not a selection of interesting
+cyclones; it is everything that passed a rule fixed before the list was drawn:
 
-- **One hazard event** — Cyclone Harold, April 2020 — not a general hazard catalogue.
-- **Four countries/territories** (Vanuatu, Fiji, Tonga, Solomon Islands), all struck by the same cyclone within the same week but left in visibly different places a year later — not an open-ended country explorer.
-- **One real ripple chain**, built from actual linked official data (disaster → economic loss → crop yield → power generation → tourist arrivals), not an illustrative diagram.
-- **One comparison view** letting any two of the four be placed side by side through that same chain, so the "why do outcomes differ" question is visible without extra explanatory text.
+> **A severe tropical cyclone that made landfall or had major impact in two or
+> more of the four in-scope nations, between 2015 and 2024.**
 
-Anything beyond this (time sliders, story/exploration mode toggle, downloadable reports, full vulnerability-dimension dashboard) is a **v2 idea**, not part of this submission.
+| Storm | Year | In-scope nations struck |
+|---|---|---|
+| Pam | 2015 | Solomon Islands, Vanuatu |
+| Winston | 2016 | Tonga, Fiji |
+| Gita | 2018 | Tonga, Fiji |
+| Harold | 2020 | Solomon Islands, Vanuatu, Fiji, Tonga |
+| Judy & Kevin | 2023 | Solomon Islands, Vanuatu |
+| Lola | 2023 | Solomon Islands, Vanuatu |
+
+Judy and Kevin are counted as one event: they struck Vanuatu two days apart and
+every official assessment reports them together.
+
+**Excluded by the same rule:** Yasa (2020), Ana (2021), Cody (2022) — Fiji only;
+Rae (2022) — not severe, no deaths. These are named on the site itself, because
+a roster nobody can check is not evidence. Yasa is the one that costs the
+argument something: a second severe cyclone in 2020 would have made that year
+look far worse. It is excluded anyway, or it is not a rule.
+
+**The opening claim is a count, not a trend.** Each of these four nations was
+struck three or four times in ten years. That is plain event-counting against a
+stated rule — no statistical inference, nothing requiring an IPCC confidence
+level to stand up. An earlier plan was to open on year-clustering, and it was
+dropped when the roster failed to support it: only one year in ten holds more
+than one of these storms. The recurrence is in the countries, not the calendar.
+
+### What the site shows
+
+- **A timeline** of all six storms across the ten-year window, nothing selected
+  on load. Picking one drives every section below it.
+- **A ripple chain** of five linked records — people affected, crop yield,
+  livestock yield, power generation, tourist arrivals — anchored to the selected
+  storm's year. Nations that storm did not reach stay on the chart, faded: a
+  country the storm missed is the nearest thing this data has to a control.
+- **A storm profile and journey** per storm, comparing category at closest
+  approach against reported deaths, from hand-researched national assessments.
+- **A divergence view** indexing each nation to its own event-year figure, so
+  the fan-out is visible without ranking anyone against anyone else.
+- **Capacity and physical context** — weather-station counts, sea surface
+  temperature, emissions per head — records that are complete precisely because
+  they need nobody to file a report.
 
 ---
 
@@ -46,17 +84,80 @@ Anything beyond this (time sliders, story/exploration mode toggle, downloadable 
 
 ## Data Sources
 
-All five datasets are drawn from the official 2026 list on the Pacific Data Hub's .Stat Explorer, covering Vanuatu, Fiji, Tonga, and Solomon Islands:
+**Ten indicators, all from the official 2026 list** on the Pacific Data Hub's
+.Stat Explorer, covering Solomon Islands, Vanuatu, Fiji and Tonga across
+2013–2024.
 
-- Number of directly affected persons attributed to disasters
-- Direct disaster economic loss (thin coverage — only Fiji has a real 2020 figure in the official data)
+*Chain — consequences of a disaster:*
+- Directly affected persons attributed to disasters
 - Crop yield
-- Tourist arrivals (no data for Solomon Islands; 2020 is confounded by COVID)
+- Livestock yield
 - Power generation
+- Tourist arrivals
 
-All sources were exported manually as CSV from [stats.pacificdata.org](https://stats.pacificdata.org/), cleaned by `data-pipeline/clean_data.py`, and are listed in full in the in-app citation panel. The same list should go in the competition submission form per the competition rules.
+*Capacity:*
+- Meteorological monitoring network
 
-**Supplementary sources** (not from the official list; used only for the "storm itself" category-vs-deaths comparison, not for any ripple-chain metric): the Australian Bureau of Meteorology's official cyclone history, and UN OCHA/ReliefWeb humanitarian situation reports. Both are linked in the in-app citation panel alongside the primary five.
+*Physical context:*
+- Sea surface temperature anomaly
+- Greenhouse gas emissions per capita
+
+*Supporting:*
+- Mid-year population estimates (denominator for share-of-population figures)
+- Direct disaster economic loss (footnote only — ten country-years in twelve)
+
+The grouping is an argument, not a filing convenience. The chain metrics are the
+patchy ones, because a disaster figure only exists if a country had the capacity
+to assess and file it after being hit — which is exactly what a disaster
+destroys, and exactly what the least-resourced countries have least of. The
+capacity and context records are complete because they are structural or
+satellite-derived and need nobody to report them. That asymmetry is one of the
+things the data says.
+
+Exported unfiltered from [stats.pacificdata.org](https://stats.pacificdata.org/)
+and cleaned by `data-pipeline/clean_data.py`, which prints a coverage report per
+metric and per storm on every run.
+
+### Three deliberate departures from the source data
+
+**Zero treated as unreported** in the people-affected series. That series cannot
+distinguish "nobody was affected" from "nothing was submitted", and the
+difference is not academic: Vanuatu's official figure for 2015, the year Cyclone
+Pam became the most destructive storm in its history, is zero. The rule is
+applied to every zero in that series rather than only to years a storm is known
+to have struck, so no individual figure is overridden on our judgement. Ten
+nation-years are affected, and the pipeline names them on each run.
+
+**Sea level exported, then cut from the charts.** The portal reports it to the
+nearest 0.1 m, giving three distinct values across twelve years. It underwrites
+the best-attributed mechanism available — higher seas carry a storm surge
+further inland — so the point is made in prose in the context section rather
+than in a chart that would claim more precision than the record has.
+
+**No global comparator on the emissions chart.** The source gives the unit only
+as "tonnes", without stating whether it counts CO₂ alone or all greenhouse gases
+as CO₂-equivalent, or whether land use is included. A comparator on a different
+accounting basis would look like a fair comparison and would not be one.
+
+### Supplementary sources
+
+Used only for the per-storm facts in the profile and journey sections, never for
+a chain metric. Each storm carries its own pair in `src/content/storms.js`:
+government post-disaster needs assessments, RSMC Nadi and national
+meteorological services, and UN OCHA / ReliefWeb situation reports. Where figures
+conflict, the order of preference is national disaster management office, then
+OCHA situation reports, then agency appeals — appeals last because they are
+written before assessment finishes and usually report people *exposed* rather
+than people *affected*.
+
+Note that the Bureau of Meteorology only keeps history pages for the Australian
+region, so it covers Harold and none of the others. There is a live trap in the
+obvious guess: `bom.gov.au` has a page for a "Cyclone Pam" that is a different
+1974 Australian storm.
+
+Where no figure was ever published, the site shows "not reported" rather than
+zero — including a separate band above the storm-profile chart, since every
+unreported stop on this roster is the secondary nation in its storm.
 
 ---
 
@@ -86,49 +187,31 @@ All sources were exported manually as CSV from [stats.pacificdata.org](https://s
 
 ---
 
-## Build Plan
-
-| Phase | Focus | Est. time |
-|---|---|---|
-| 1 | Lock the hazard + country set, pull real numbers | 2–3 days |
-| 2 | Build the Pandas data pipeline into clean static JSON | 2–3 days |
-| 3 | Scaffold React + build core D3 ripple-chain charts | 4–5 days |
-| 4 | Build the comparison view | 3–4 days |
-| 5 | Polish: transitions, citations panel, accessibility, mobile pass | 4–5 days |
-| 6 | Write framing text, test, submit with buffer before Aug 31 | 3–4 days |
-
----
-
 ## Rules Compliance Checklist
 
-- [x] Uses at least one dataset from the official 2026 list
-- [ ] All additional data sources are open data and listed in the submission form
-- [ ] Final dataviz is made public (deployed + link submitted)
+- [x] Uses at least one dataset from the official 2026 list — ten of them
+- [x] All additional data sources are open data
+- [x] Final dataviz is deployed and publicly reachable
+- [ ] Source list filed in the submission form
 - [ ] Submitted before August 31, 2026
 
 ---
 
 ## Current Status
 
-Built, deployed, and through several rounds of UI/UX polish — tooltips, motion, per-metric chart types, the "Big Picture" section, comparative insights, two-tone section dividers, and the Hero framing copy naming Cyclone Harold directly.
+Built, deployed, and through several rounds of hardening: light/dark theming,
+real-pixel chart rendering, scroll-linked motion that respects
+`prefers-reduced-motion`, per-metric attribution caveats printed under the charts
+rather than buried in a methodology note, cross-chart nation highlighting, and
+screen-reader data tables under every visualization.
 
-The most recent pass brought forward every hardening change developed in the parallel multi-hazard build, adapted to this single-page shape:
+The multi-storm restructure is complete — timeline, per-storm ripple chain,
+storm-aware map, exclusions section, and full profile and journey records for
+all six storms.
 
-- **Theming** — light/dark mode with a pre-paint script so a dark-mode visitor never sees a frame of the light palette. Every chart, map and divider colour is theme-aware and contrast-checked against both backgrounds (`src/utils/theme.js`).
-- **Charts redrawn in real pixels** — a `ResizeObserver` measures each card first (`useElementWidth`) instead of scaling a fixed viewBox to fit, which previously multiplied every font size and stroke width by whatever ratio the container imposed.
-- **Motion** — entrance animations hold until a card is actually on screen (`useInView`), and every transition checks `prefers-reduced-motion` through one shared helper.
-- **Attribution caveats** — each metric carries a note about what it cannot be read as, printed under its chart rather than buried in a methodology note, because the misreading happens at the moment the chart is looked at.
-- **Cross-chart highlight** — pointing at a country anywhere on the page dims it out of every other chart at once.
-- **Divergence view** — each nation indexed to its own event-year figure, so the fan-out is visible without ranking anyone against anyone else.
-- **Storm journey**, an animated track section; original tiling backdrops; social preview metadata; and a redrawn cursor pair.
-
-Left before submission: the multi-storm pivot (see below), a fresh accessibility/mobile pass, and the competition submission itself.
-
-### Next: multi-storm scope
-
-The roster is widening from Cyclone Harold alone to every severe tropical cyclone that made landfall or had major impact in two or more Pacific nations since ~2015 — Pam, Winston, Gita, Harold, Yasa, Judy & Kevin, and Lola. Ana, Cody and Rae fall outside that rule and are deliberately excluded; that exclusion logic belongs on the site itself, since it is what makes the roster defensible rather than cherry-picked.
-
-That work needs three things this repo does not yet have: a decided architecture for showing more than one storm, a re-export of the Pacific Data Hub series across the full 2015–2024 range, and population denominators so "share of population affected" figures mean something. The "Scope (locked)" section above still describes the shipped single-storm build and will be rewritten when the pivot lands.
+Remaining before submission: replace the deployment-domain placeholders in
+`index.html` with the production URL, and file the competition submission form
+with the source list above.
 
 ---
 
