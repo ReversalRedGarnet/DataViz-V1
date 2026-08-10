@@ -52,8 +52,13 @@ function HamburgerIcon({ open }) {
 // already gives fragment navigation a smooth scroll and the right header
 // clearance, and this way each section is a shareable URL. Renders nothing if
 // the registry is empty.
-export default function SectionNav() {
-  const sections = PAGE_SECTIONS
+export default function SectionNav({ availableIds }) {
+  // While the story is gated, most sections are not in the document at all.
+  // Listing them anyway would give the reader links that scroll nowhere, so the
+  // menu shows only what currently exists.
+  const sections = availableIds
+    ? PAGE_SECTIONS.filter((s) => availableIds.includes(s.id))
+    : PAGE_SECTIONS
   const [open, setOpen] = useState(false)
   const containerRef = useRef(null)
 

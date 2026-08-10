@@ -10,6 +10,7 @@ import DivergenceView from './components/DivergenceView.jsx'
 import ContextPanel from './components/ContextPanel.jsx'
 import StormTimeline from './components/StormTimeline.jsx'
 import ExclusionsPanel from './components/ExclusionsPanel.jsx'
+import StoryGate from './components/StoryGate.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
@@ -57,6 +58,10 @@ const DATA_SOURCES = [
 // those dividers. Keep it in step with what the section renders or the wave
 // seam shows a visible colour mismatch. Every id here must also appear in
 // content/pageSections.js, which is what the header's jump-to menu links to.
+// Sections before the gate are always present; the rest appear once a storm is
+// chosen. Split into two lists rather than filtered from one, so the gate's
+// position is a structural fact of this file rather than an index somebody has
+// to keep in step.
 function pageSections(data, selection, storm, onSelectStorm) {
   const { selected, toggle, clear } = selection
 
@@ -68,6 +73,12 @@ function pageSections(data, selection, storm, onSelectStorm) {
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
     { id: 'exclusions', tone: 'panel', element: <ExclusionsPanel /> },
+
+    // --- the gate -------------------------------------------------------
+    ...(storm ? [] : [{ id: 'gate', tone: 'plain', element: <StoryGate /> }]),
+    ...(!storm
+      ? []
+      : [
     { id: 'storm-journey', tone: 'panel', element: <StormJourney storm={storm} /> },
     { id: 'storm-profile', tone: 'plain', element: <StormProfile storm={storm} /> },
     { id: 'big-picture', tone: 'panel', element: <BigPicture data={data} storm={storm} /> },
@@ -89,6 +100,7 @@ function pageSections(data, selection, storm, onSelectStorm) {
       element: <ComparisonView data={data} storm={storm} selectedNations={selected} />,
     },
     { id: 'sources', tone: 'ink', element: <CitationPanel sources={DATA_SOURCES} /> },
+        ]),
   ]
 }
 
@@ -109,6 +121,8 @@ function AppShell() {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
   }, [headerHeight])
 
+  const sections = pageSections(data, selection, storm, setStormId)
+
   return (
     <>
       {/* Visually hidden until focused -- lets keyboard users jump past the
@@ -120,15 +134,20 @@ function AppShell() {
         Skip to main content
       </a>
 
-      <Header onHeightChange={setHeaderHeight} />
+      <Header onHeightChange={setHeaderHeight} availableIds={sections.map((s) => s.id)} />
 
       {/* The charts and comparison view below update silently otherwise. */}
       <div aria-live="polite" className="sr-only">
-        {selectionAnnouncement(selection.selected, 'Showing its ripple chain below.')}
+        {storm
+          ? `${storm.name} selected. The rest of the story is now available below. ${selectionAnnouncement(
+              selection.selected,
+              'Showing its ripple chain.'
+            )}`
+          : 'Pick a storm from the timeline to continue.'}
       </div>
 
       <main id="main-content" className="min-h-screen" style={{ paddingTop: headerHeight }}>
-        <PageSections sections={pageSections(data, selection, storm, setStormId)} />
+        <PageSections sections={sections} />
       </main>
     </>
   )

@@ -509,10 +509,15 @@ export function renderStormProfileChart(
       .attr('stroke-opacity', 0.25)
       .attr('stroke-dasharray', '3 3')
 
+    // Right-aligned. Left-aligned it sat on top of the unreported stop's own
+    // name label, which is drawn at the same height and starts near the left
+    // whenever that stop is a low category -- which, on this roster, it always
+    // is.
     svg
       .append('text')
-      .attr('x', margin.left)
-      .attr('y', margin.top - 4)
+      .attr('x', width - margin.right)
+      .attr('text-anchor', 'end')
+      .attr('y', margin.top + 2)
       .attr('font-size', AXIS_FONT)
       .attr('font-style', 'italic')
       .attr('fill', ink)
@@ -597,7 +602,7 @@ export function renderStormProfileChart(
     .join('text')
     .attr('class', 'storm-label')
     .attr('x', labelX)
-    .attr('y', (d) => markY(d) - 14)
+    .attr('y', (d) => markY(d) - (d.deaths == null ? 11 : 14))
     .attr('text-anchor', 'middle')
     .attr('font-size', AXIS_FONT)
     .attr('font-weight', 600)

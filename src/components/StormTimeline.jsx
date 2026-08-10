@@ -35,12 +35,23 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
         How often, and to whom
       </h2>
-      <p className="prose-column mb-6 max-w-prose text-sm opacity-80">
-        Every severe tropical cyclone that struck two or more of these four nations between{' '}
-        {ROSTER_START} and {ROSTER_END}. The rule was fixed before the list was drawn, and the
-        storms it excludes are shown further down &mdash; including one that would have suited the
-        argument. Pick any storm to follow what happened after it.
-      </p>
+      <div className="prose-column mb-6 max-w-prose space-y-3 text-sm opacity-80">
+        <p>
+          Every severe tropical cyclone that struck two or more of these four nations between{' '}
+          {ROSTER_START} and {ROSTER_END}. The rule was fixed before the list was drawn, and the
+          storms it excludes are shown further down &mdash; including one that would have suited
+          the argument.
+        </p>
+        <p>
+          These four countries were not chosen for their stories either. Solomon Islands, Vanuatu,
+          Fiji and Tonga sit along the same corridor of the South Pacific cyclone basin, which
+          makes them the group most often struck by the <em>same</em> storm rather than merely by
+          storms of their own. That shared exposure is the entire basis for comparing them: when
+          one weather system reaches all four, the differences in what it leaves behind cannot be
+          explained by the weather.
+        </p>
+        <p>Pick any storm to follow what happened after it.</p>
+      </div>
 
       {/* The count, stated before the timeline, because it is the actual claim
           and the timeline is only where it comes from. */}

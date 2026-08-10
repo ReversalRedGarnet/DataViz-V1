@@ -20,8 +20,8 @@ import { loadLandTopology } from '../utils/loadLand.js'
 // The map carries nothing the steps don't already say in text, so it's hidden
 // from assistive technology entirely rather than given a description that would
 // duplicate the list beside it.
-const WIDTH = 640
-const HEIGHT = 430
+const WIDTH = 800
+const HEIGHT = 540
 
 // One coordinate set for the whole site: these are the same approximate
 // capital-city positions the interactive map uses.
@@ -66,6 +66,13 @@ export default function StormJourney({ storm, style }) {
   const stepsRef = useRef(null)
   const sceneRef = useRef(null)
   const [built, setBuilt] = useState(false)
+
+  // Drop the previous storm's scene immediately, so the progress effect below
+  // cannot animate a track that belongs to a map no longer on screen.
+  useEffect(() => {
+    sceneRef.current = null
+    setBuilt(false)
+  }, [storm?.id])
   const { theme } = useTheme()
   const active = useActiveStep(stepsRef, STEPS.length)
   const hasSteps = STEPS.length > 0
@@ -166,7 +173,13 @@ export default function StormJourney({ storm, style }) {
     return () => {
       cancelled = true
     }
-  }, [])
+    // Keyed to the storm, not built once. With nothing selected on load this
+    // component renders an empty state instead of the <svg>, so a mount-only
+    // effect found no node, built nothing, and never ran again -- the map stayed
+    // blank for every storm. It also has to rebuild on a *change* of storm,
+    // since the projection is fitted to that storm's stops and the track is
+    // drawn through them in order.
+  }, [storm?.id])
 
   // Everything that depends on where the reader has got to, plus the theme's
   // colours, in one pass: both change the same attributes, and splitting them

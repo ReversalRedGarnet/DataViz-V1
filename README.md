@@ -23,8 +23,17 @@ Rather than asking *which country is worst*, Ripple asks *why do places hit by t
 
 ## Scope
 
-Six storms, four nations, ten years. The roster is not a selection of interesting
-cyclones; it is everything that passed a rule fixed before the list was drawn:
+Six storms, four nations, ten years.
+
+**The four countries were not chosen for their stories.** Solomon Islands,
+Vanuatu, Fiji and Tonga sit along the same corridor of the South Pacific cyclone
+basin, which makes them the group most often struck by the *same* storm rather
+than merely by storms of their own. That shared exposure is the entire basis for
+comparing them: when one weather system reaches all four, the differences in what
+it leaves behind cannot be explained by the weather.
+
+**The roster is not a selection of interesting cyclones** either; it is
+everything that passed a rule fixed before the list was drawn:
 
 > **A severe tropical cyclone that made landfall or had major impact in two or
 > more of the four in-scope nations, between 2015 and 2024.**

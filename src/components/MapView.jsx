@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import Section from './Section.jsx'
@@ -85,6 +85,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   // The setup effect runs once, so its D3 closures would capture `selected` at
   // mount and never see a later pick. A ref keeps the hint current without
   // rebuilding the map, which would reset pan and zoom.
+  const [built, setBuilt] = useState(false)
   const selectedRef = useRef(selected)
   useEffect(() => {
     selectedRef.current = selected
@@ -132,6 +133,13 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 
       const g = svg.append('g')
       gRef.current = g
+      // Signals that the async setup has finished. Effects that style the
+      // markers key off this: they run once on mount, find nothing built yet
+      // because the coastline is still loading, and would otherwise never run
+      // again if their own dependency never changes afterwards. That is exactly
+      // what happened to the storm fade once the map stopped being rendered
+      // until after a storm was already chosen -- the fade simply never applied.
+      setBuilt(true)
 
       // Classed so the theme effect below can recolour these in place.
       const initialColors = MAP_COLORS[themeRef.current] ?? MAP_COLORS.light
@@ -297,7 +305,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       })
     // `theme` is a dependency because the pin colours live in the same
     // palette the charts use, and that palette flips with the theme.
-  }, [selected, theme])
+  }, [selected, theme, built])
 
   // Fade the nations this storm never reached, matching .nation-unstruck in the
   // charts so the map and the chain agree about who was hit. Opacity only --
@@ -318,7 +326,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
           ? `Select ${d.name}`
           : `Select ${d.name}. Not struck by ${storm.name}; shown for comparison.`
       )
-  }, [storm])
+  }, [storm, built])
 
   // No-ops if setup() hasn't finished; that race is covered by themeRef.
   useEffect(() => {

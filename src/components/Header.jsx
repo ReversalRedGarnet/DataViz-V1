@@ -25,7 +25,7 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 //     padding-top and keep the in-page anchor offset current. Measured rather
 //     than hardcoded so it can't drift out of sync with a future copy or
 //     font-size change.
-export default function Header({ onHeightChange }) {
+export default function Header({ onHeightChange, availableIds }) {
   const headerRef = useRef(null)
 
   // useLayoutEffect, not useEffect: this measurement drives another element's
@@ -68,7 +68,7 @@ export default function Header({ onHeightChange }) {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <SectionNav />
+            <SectionNav availableIds={availableIds} />
             <ThemeToggle />
           </div>
         </div>
