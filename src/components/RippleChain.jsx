@@ -58,23 +58,22 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
         <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
           After {storm.name}, {storm.year}
         </h2>
-        <p className="mb-3 max-w-prose text-sm opacity-70">
-          Five linked records, in the order the damage travels: who was hit, then the harvest, the
-          herds, the power supply and the visitors that follow.
-        </p>
+        {/* "2020 in particular carries the pandemic alongside the storm" read
+            as though the storm were always Harold. The caveat belongs to the
+            data window, not to the selected event. */}
         <p className="mb-4 max-w-prose text-sm opacity-70">
-          Read this as a sequence of plausible links rather than a measured causal path. Every
-          series here is an annual national total that no cyclone has to itself, and 2020 in
-          particular carries the pandemic alongside the storm. The note under each chart says what
-          that particular record cannot be asked to prove.
+          Five linked records, in the order the damage travels: who was hit, then the harvest, the
+          herds, the power supply and the visitors. Read it as plausible links, not a measured
+          causal path &mdash; every series is an annual national total no cyclone has to itself,
+          and its 2020&ndash;21 stretch carries the pandemic too. The note under each chart says
+          what that record cannot prove.
         </p>
         <SelectionLegend selected={selectedNations} />
         {unstruck.length > 0 && (
           <p className="mt-3 max-w-prose text-xs italic opacity-70">
             {unstruck.join(' and ')} {unstruck.length === 1 ? 'was' : 'were'} not struck by{' '}
-            {storm.name} and {unstruck.length === 1 ? 'is' : 'are'} drawn faded. Left on the chart
-            rather than removed: a country the storm missed is the closest thing these records have
-            to a comparison.
+            {storm.name}, and {unstruck.length === 1 ? 'is' : 'are'} drawn faded rather than
+            removed: the closest thing these records have to a comparison.
           </p>
         )}
         <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">

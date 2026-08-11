@@ -25,13 +25,9 @@ export default function ExclusionsPanel({ style }) {
       <div className="prose-column mb-6 max-w-prose space-y-3 text-sm opacity-80">
         <p>
           The roster is every severe tropical cyclone that struck two or more of these four nations
-          between {ROSTER_START} and {ROSTER_END}. Six storms met it. These four did not, and they
-          are listed here so the rule can be checked rather than taken on trust.
-        </p>
-        <p>
-          A list of storms chosen after the fact can be made to support almost any claim. The only
-          real defence is to fix the rule first, apply it evenly, and show what it discarded &mdash;
-          including the discards that made the argument weaker.
+          between {ROSTER_START} and {ROSTER_END}. Six met it. These four did not, and they are
+          listed so the rule can be checked rather than taken on trust &mdash; including the
+          exclusion that made the argument weaker.
         </p>
       </div>
 
@@ -63,10 +59,9 @@ export default function ExclusionsPanel({ style }) {
       </ul>
 
       <p className="mt-6 max-w-prose text-xs italic opacity-70">
-        Fiji appears three times in this list. That is not a judgement about Fiji &mdash; it is what
-        a two-nation threshold does to a country large enough and placed such that storms reach it
-        alone. A different threshold would produce a different roster, which is exactly why the one
-        used here is stated rather than assumed.
+        Fiji appears three times here. That is not a judgement about Fiji &mdash; it is what a
+        two-nation threshold does to a country storms reach alone. A different threshold would
+        produce a different roster, which is why this one is stated rather than assumed.
       </p>
     </Section>
   )

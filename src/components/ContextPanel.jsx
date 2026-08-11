@@ -58,10 +58,10 @@ export default function ContextPanel({ data, style }) {
           Who can measure, and what is changing
         </h2>
         <p className="prose-column mb-8 max-w-prose text-sm opacity-75">
-          Every record in the chain above has holes in it. These two do not, and the reason is the
-          same reason the others do: a disaster figure only exists if a country had the capacity to
-          assess and file it after being hit, while the records below are structural or measured
-          from orbit and need nobody to report them.
+          Every record in the chain above has holes in it. These two do not, for the same reason
+          the others do: a disaster figure only exists if a country had the capacity to assess and
+          file it after being hit, while the records below are structural or measured from orbit
+          and need nobody to report them.
         </p>
 
         {capacity && (
@@ -70,12 +70,12 @@ export default function ContextPanel({ data, style }) {
               Who can observe their own weather
             </h3>
             <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
-              The number of meteorological monitoring stations in each national network, unchanged
-              in every year on record. Set this ranking beside the gaps in the chain above and it
-              is the same ranking. Solomon Islands has the fewest stations, no tourist arrivals
-              reported at all, and a single economic-loss figure in twelve years. Uneven data is
-              not only a limitation of this project; it is a real and unequal distribution of the
-              ability to describe what happened to you.
+              Monitoring stations per national network, unchanged in every year on record. Set this
+              ranking beside the gaps in the chain above and it is the same ranking: Solomon
+              Islands has the fewest stations, no tourist arrivals reported at all, and a single
+              economic-loss figure in twelve years. Uneven data is not only a limitation of this
+              project &mdash; it is an unequal distribution of the ability to describe what
+              happened to you.
             </p>
             <div className="grid grid-cols-1 gap-5">
               {CAPACITY_METRICS.map((m, i) => (
@@ -103,21 +103,18 @@ export default function ContextPanel({ data, style }) {
               What is changing underneath
             </h3>
             <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
-              Two regional records, all four nations on each. These are the only climate claims
-              this site makes with confidence, and both are claims about trends rather than about
-              any individual storm. Warmer seas raise the ceiling on how intense a cyclone can
-              become; emissions per head say who is doing the warming. The note under each chart
-              says where its limits are.
+              Two regional records, all four nations on each &mdash; the only climate claims this
+              site makes with confidence, and both about trends rather than any individual storm.
+              Warmer seas raise the ceiling on how intense a cyclone can become; emissions per head
+              say who is doing the warming.
             </p>
             <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
-              A third mechanism belongs here and is stated rather than charted. Sea level rise
-              worsens storm surge — a storm arriving on a higher ocean reaches further inland,
-              whatever caused the storm — and it is the best-attributed link of the three, with
-              IPCC AR6 rating the human contribution to sea level rise since 1971 very likely. The
-              regional record for it is reported only to the nearest 0.1&nbsp;m, which across
-              twelve years gives three distinct values and hides any movement under 10&nbsp;cm.
-              Charting it would claim a precision the measurement does not have, so it is left as a
-              sentence.
+              A third mechanism is stated rather than charted. Sea level rise worsens storm surge —
+              a storm arriving on a higher ocean reaches further inland — and it is the
+              best-attributed link of the three, with IPCC AR6 rating the human contribution since
+              1971 very likely. The regional record is reported only to the nearest 0.1&nbsp;m,
+              giving three distinct values across twelve years and hiding any movement under
+              10&nbsp;cm. Charting it would claim a precision the measurement does not have.
             </p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CONTEXT_METRICS.map((m, i) => (

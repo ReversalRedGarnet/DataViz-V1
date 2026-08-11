@@ -72,18 +72,21 @@ export default function StormProfile({ storm, style }) {
 
         <div className="prose-column max-w-prose space-y-3 text-sm opacity-80">
           <p>
-            {storm.name} struck {formatNationList(storm.nations)} in {storm.year}. Although it was
-            the same weather system throughout, its intensity changed as it travelled: a country
-            may have taken a direct landfall at full strength, or met a weaker system, or been
-            reached only by rough seas and coastal flooding.
+            {storm.name} struck {formatNationList(storm.nations)} in {storm.year}. The same weather
+            system throughout, and a different storm on arrival: a direct landfall at full strength
+            in one country, a weakened system or only rough seas and coastal flooding in another.
           </p>
 
           {storm.note && <p>{storm.note}</p>}
 
+          {/* The dropped clause was "and that mismatch is the argument this
+              whole page is built on". It told the reader what to conclude from
+              a chart directly above the chart, and on a two-stop storm --
+              Judy & Kevin, one stated zero and one unreported -- there is no
+              visible mismatch for it to point at. */}
           <p>
-            The chart below sets the storm&rsquo;s category at its closest approach to each nation
-            against the reported loss of life. The two do not reliably move together, and that
-            mismatch is the argument this whole page is built on.
+            Below: category at closest approach against reported deaths. The two do not reliably
+            move together.
           </p>
         </div>
 

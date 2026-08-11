@@ -59,6 +59,73 @@ function lengthAtPoint(pathNode, [px, py]) {
   return best
 }
 
+// The colour-and-progress pass, as a plain function rather than only an effect
+// body, because whoever builds a scene has to be the one who paints it.
+//
+// It used to live only in an effect keyed on [active, theme, built]. On the
+// first storm the coastline is fetched over the network, so setBuilt(false) and
+// setBuilt(true) land in different React batches, `built` transitions and the
+// effect runs. On every storm after that the topology is cached, the await
+// resolves in a microtask, both updates collapse into one batch, `built` never
+// changes value and the effect never runs -- leaving the ocean rect and the
+// land path with no fill attribute at all. SVG's default fill is black, which
+// is why the second storm rendered a black rectangle the size of the map.
+function paintScene(scene, { active, theme }) {
+  const mapColors = MAP_COLORS[theme] ?? MAP_COLORS.light
+  const palette = chartColorsFor(theme)
+  const ink = CHART_INK[theme] ?? CHART_INK.light
+  const duration = motionDuration(650)
+
+  scene.g.select('rect.ocean-bg').attr('fill', mapColors.ocean)
+  scene.g.select('path.land').attr('fill', mapColors.land).attr('stroke', mapColors.coastline)
+
+  const reached = scene.stopLengths[active]
+  scene.track
+    .attr('stroke', palette.single)
+    .transition()
+    .duration(duration)
+    .ease(d3.easeCubicInOut)
+    .attr('stroke-dashoffset', scene.totalLength - reached)
+
+  const head = scene.trackNode.getPointAtLength(reached)
+  scene.eye
+    .attr('opacity', 1)
+    .transition()
+    .duration(duration)
+    .ease(d3.easeCubicInOut)
+    .attr('transform', `translate(${head.x},${head.y})`)
+  scene.eye.selectAll('path.cyclone-arm').attr('fill', palette.single).attr('fill-opacity', 0.85)
+  scene.eye.select('circle.cyclone-core').attr('fill', mapColors.land)
+
+  const stops = scene.g.selectAll('g.stop')
+  stops
+    .select('circle.stop-dot')
+    .attr('stroke', palette.markRing)
+    .transition()
+    .duration(motionDuration(300))
+    .attr('fill', (_, i) => (i <= active ? palette.single : mapColors.coastline))
+    .attr('r', (_, i) => (i === active ? 8 : 6))
+  stops
+    .select('circle.stop-halo')
+    .attr('stroke', palette.single)
+    .transition()
+    .duration(motionDuration(300))
+    .attr('stroke-opacity', (_, i) => (i === active ? 0.55 : 0))
+    .attr('r', (_, i) => (i === active ? 15 : 9))
+  stops
+    .select('text.stop-name')
+    .attr('fill', ink)
+    .transition()
+    .duration(motionDuration(300))
+    .attr('fill-opacity', (_, i) => (i <= active ? 0.95 : 0.4))
+  stops
+    .select('text.stop-meta')
+    .attr('fill', ink)
+    .transition()
+    .duration(motionDuration(300))
+    .attr('fill-opacity', (_, i) => (i <= active ? 0.7 : 0))
+}
+
 // Props:
 //   style -- forwarded to the underlying Section (entrance stagger)
 export default function StormJourney({ storm, style }) {
@@ -77,6 +144,15 @@ export default function StormJourney({ storm, style }) {
   const { theme } = useTheme()
   const active = useActiveStep(stepsRef, STEPS.length)
   const hasSteps = STEPS.length > 0
+
+  // Read inside build(), which resolves after the render that set them. Held in
+  // refs rather than taken as effect dependencies: either one changing must
+  // repaint the scene, not rebuild it. Assigned during render, matching the
+  // setHighlightRef pattern in MapView.
+  const activeRef = useRef(active)
+  activeRef.current = active
+  const themeRef = useRef(theme)
+  themeRef.current = theme
 
   // Built once. The coastline fetch is the same static file the interactive
   // map uses, so this costs nothing extra after that section has loaded.
@@ -103,12 +179,23 @@ export default function StormJourney({ storm, style }) {
         }
       )
 
+      // Filled at creation, not left for the paint pass to reach. An SVG shape
+      // with no fill attribute is black, so any gap between building this and
+      // colouring it is a black rectangle on screen -- for one frame at best.
+      const initial = MAP_COLORS[themeRef.current] ?? MAP_COLORS.light
+
       const g = svg.append('g')
-      g.append('rect').attr('class', 'ocean-bg').attr('width', WIDTH).attr('height', HEIGHT)
+      g.append('rect')
+        .attr('class', 'ocean-bg')
+        .attr('width', WIDTH)
+        .attr('height', HEIGHT)
+        .attr('fill', initial.ocean)
       g.append('path')
         .attr('class', 'land')
         .datum(feature(land50m, land50m.objects.land))
         .attr('d', d3.geoPath(projection))
+        .attr('fill', initial.land)
+        .attr('stroke', initial.coastline)
         .attr('stroke-width', 0.5)
 
       const positions = STEPS.map((s) => projection(s.lonLat))
@@ -167,6 +254,9 @@ export default function StormJourney({ storm, style }) {
       spinner.append('circle').attr('class', 'cyclone-core').attr('r', 2.6)
 
       sceneRef.current = { g, track, trackNode, totalLength, stopLengths, eye }
+      // Painted here, by the code that built it. `built` cannot be relied on to
+      // trigger the effect below -- see the note on paintScene.
+      paintScene(sceneRef.current, { active: activeRef.current, theme: themeRef.current })
       setBuilt(true)
     }
 
@@ -182,67 +272,13 @@ export default function StormJourney({ storm, style }) {
     // drawn through them in order.
   }, [storm?.id])
 
-  // Everything that depends on where the reader has got to, plus the theme's
-  // colours, in one pass: both change the same attributes, and splitting them
-  // means two effects racing to set the same fills.
+  // Repaint on progress or theme. The scene is also painted at the end of
+  // build(), so this effect is the update path rather than the first paint;
+  // storm?.id is a dependency anyway, at the cost of one redundant repaint per
+  // storm, so that a rebuild can never leave an unpainted scene on screen.
   useEffect(() => {
-    const scene = sceneRef.current
-    if (!scene) return
-
-    const mapColors = MAP_COLORS[theme] ?? MAP_COLORS.light
-    const palette = chartColorsFor(theme)
-    const ink = CHART_INK[theme] ?? CHART_INK.light
-    const duration = motionDuration(650)
-
-    scene.g.select('rect.ocean-bg').attr('fill', mapColors.ocean)
-    scene.g.select('path.land').attr('fill', mapColors.land).attr('stroke', mapColors.coastline)
-
-    const reached = scene.stopLengths[active]
-    scene.track
-      .attr('stroke', palette.single)
-      .transition()
-      .duration(duration)
-      .ease(d3.easeCubicInOut)
-      .attr('stroke-dashoffset', scene.totalLength - reached)
-
-    const head = scene.trackNode.getPointAtLength(reached)
-    scene.eye
-      .attr('opacity', 1)
-      .transition()
-      .duration(duration)
-      .ease(d3.easeCubicInOut)
-      .attr('transform', `translate(${head.x},${head.y})`)
-    scene.eye.selectAll('path.cyclone-arm').attr('fill', palette.single).attr('fill-opacity', 0.85)
-    scene.eye.select('circle.cyclone-core').attr('fill', mapColors.land)
-
-    const stops = scene.g.selectAll('g.stop')
-    stops
-      .select('circle.stop-dot')
-      .attr('stroke', palette.markRing)
-      .transition()
-      .duration(motionDuration(300))
-      .attr('fill', (_, i) => (i <= active ? palette.single : mapColors.coastline))
-      .attr('r', (_, i) => (i === active ? 8 : 6))
-    stops
-      .select('circle.stop-halo')
-      .attr('stroke', palette.single)
-      .transition()
-      .duration(motionDuration(300))
-      .attr('stroke-opacity', (_, i) => (i === active ? 0.55 : 0))
-      .attr('r', (_, i) => (i === active ? 15 : 9))
-    stops
-      .select('text.stop-name')
-      .attr('fill', ink)
-      .transition()
-      .duration(motionDuration(300))
-      .attr('fill-opacity', (_, i) => (i <= active ? 0.95 : 0.4))
-    stops
-      .select('text.stop-meta')
-      .attr('fill', ink)
-      .transition()
-      .duration(motionDuration(300))
-      .attr('fill-opacity', (_, i) => (i <= active ? 0.7 : 0))
-  }, [active, theme, built])
+    if (sceneRef.current) paintScene(sceneRef.current, { active, theme })
+  }, [active, theme, built, storm?.id])
 
   const blocked = sectionGuard({
     data: true,
@@ -270,8 +306,8 @@ export default function StormJourney({ storm, style }) {
         Follow {storm.name}
       </h2>
       <p className="max-w-prose text-sm opacity-75">
-        {storm.name} reached {STEPS.length} of these four countries, and was a different storm by
-        the time it arrived at each. Scroll to travel with it.
+        {storm.name} reached {STEPS.length} of these four countries, and was a different storm at
+        each. Scroll to travel with it.
       </p>
 
       <div className="mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
@@ -282,10 +318,13 @@ export default function StormJourney({ storm, style }) {
             preserveAspectRatio="xMidYMid meet"
             className="mx-auto block h-auto max-h-[38vh] w-full rounded-2xl border-2 border-ink/15 shadow-sm md:max-h-none"
           />
+          {/* "four documented impact points" was hardcoded. Only Harold has
+              four stops; the other five storms have two, and the caption was
+              asserting a number the map beside it visibly contradicted. */}
           <p className="mt-2 text-xs italic leading-snug opacity-65">
-            The line is drawn between the four documented impact points, not traced from the
-            official track. Dates, categories and tolls come from the Bureau of Meteorology and UN
-            OCHA, both cited in full below.
+            The line joins documented impact points; it is not the official track. Dates,
+            categories and tolls come from national meteorological services and UN OCHA, cited in
+            full below.
           </p>
         </div>
 
@@ -308,9 +347,17 @@ export default function StormJourney({ storm, style }) {
               </h3>
               <p className="mt-2 text-sm font-medium">{step.lead}</p>
               <p className="mt-3 text-sm opacity-80">{step.fact}</p>
+              {/* A null toll is never reported, not zero, and this line used
+                  to render it as the empty string followed by the word
+                  "deaths". Same distinction the profile chart's unreported
+                  band makes, in the one place a reader meets it first. */}
               <p className="mt-3 text-xs uppercase tracking-[0.12em] opacity-60">
-                {step.categoryLabel} &middot; {step.deaths}{' '}
-                {step.deaths === 1 ? 'death' : 'deaths'}
+                {step.categoryLabel} &middot;{' '}
+                {step.deaths == null
+                  ? 'deaths not reported'
+                  : `${step.deaths} ${step.deaths === 1 ? 'death' : 'deaths'}${
+                      step.deathsKind === 'indirect' ? ', indirect' : ''
+                    }`}
               </p>
             </li>
           ))}

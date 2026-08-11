@@ -37,21 +37,8 @@ export default function BigPicture({ data, storm, style }) {
 
         <div className="prose-column max-w-prose space-y-3 text-sm opacity-80">
           <p>
-            Each of these storms was a shared disaster, but recovery was shaped by far more than
-            the weather. Population size, infrastructure, economic capacity, and national
-            preparedness all influenced how a country experienced the aftermath &mdash; which is
-            why the same storm can leave two neighbours in very different places.
-          </p>
-
-          <p>
-            Rather than focusing on one nation at a time, this section compares the region as a
-            whole. By looking at key indicators side by side, patterns begin to emerge that are
-            difficult to see in isolation.
-          </p>
-
-          <p>
-            Together, these snapshots provide a foundation for the detailed comparisons explored
-            throughout the rest of this project.
+            A shared disaster, and a recovery shaped by far more than the weather. All four nations
+            at the same moment, before the rest of the story takes them one at a time.
           </p>
         </div>
 
@@ -73,7 +60,7 @@ export default function BigPicture({ data, storm, style }) {
               index={2}
               label="Hardest- vs. least-hit"
               value={stats.ratio ? `${stats.ratio.toLocaleString()}×` : 'n/a'}
-              detail={`${stats.maxNation} vs. ${stats.minNation} -- the same event`}
+              detail={`${stats.maxNation} vs. ${stats.minNation}, as reported for ${storm.year}`}
             />
             <StatTile
               index={3}
@@ -92,8 +79,7 @@ export default function BigPicture({ data, storm, style }) {
               Regional Snapshot — {storm.year}
             </h3>
             <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
-              Each chart presents a single snapshot from {storm.year}, allowing all four nations to
-              be compared at the same moment rather than over time. Countries {storm.name} did not
+              All four nations at one moment rather than over time. Countries {storm.name} did not
               reach are shown too &mdash; the point of a same-moment comparison is that it includes
               them.
             </p>
@@ -141,6 +127,11 @@ function StatTile({ index, label, value, detail }) {
   )
 }
 
+// The hardest/least-hit ratio is drawn from every nation with a figure that
+// year, not only the ones the storm reached. That is the right population for a
+// regional snapshot, but it means the two named nations were not necessarily
+// both struck -- so the tile no longer says "the same event", which for five of
+// the six storms was not true.
 function computeStats(data, eventYear) {
   if (!data || !eventYear) return null
   const rows = data.affected_persons ?? []

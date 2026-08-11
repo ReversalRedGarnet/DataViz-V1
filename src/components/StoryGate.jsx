@@ -28,8 +28,8 @@ export default function StoryGate({ style }) {
         </h2>
         <p className="mx-auto max-w-md text-sm opacity-75">
           The rest of this story follows one cyclone at a time &mdash; where it went, who it
-          reached, and what the record shows in the years after. Choose any of the six above.
-          You can change your mind at any point, and everything below will follow the new one.
+          reached, and what the record shows in the years after. Choose any of the six above; you
+          can change your mind at any point.
         </p>
       </div>
     </Section>

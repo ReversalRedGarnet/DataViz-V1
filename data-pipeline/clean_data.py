@@ -71,7 +71,12 @@ STORMS = [
     ("Winston", 2016, ["Fiji", "Tonga"]),
     ("Gita", 2018, ["Tonga", "Fiji"]),
     ("Harold", 2020, ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]),
-    ("Judy & Kevin", 2023, ["Vanuatu", "Solomon Islands", "Fiji"]),
+    # Fiji is deliberately absent: it had forecast coverage only, with no damage
+    # assessment published. Kept in step with src/content/storms.js, which is
+    # the roster of record -- a roster that disagrees with itself across two
+    # files in the repo is exactly what the exclusions section exists to rule
+    # out.
+    ("Judy & Kevin", 2023, ["Vanuatu", "Solomon Islands"]),
     ("Lola", 2023, ["Vanuatu", "Solomon Islands"]),
 ]
 

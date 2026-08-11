@@ -19,9 +19,19 @@ const SWEEP_MS = 3400
 // Caveats that belong to a specific metric rather than to the section. Kept
 // here rather than in metrics.js because they're about what this indexed view
 // implies, not about the underlying figures.
-const METRIC_NOTES = {
-  tourist_arrivals:
-    'Arrivals in 2020 were already collapsed by COVID-19 border closures, so this traces recovery from that floor rather than from the cyclone alone.',
+//
+// A function of the baseline year, not a constant. As a constant it printed the
+// 2020 sentence under every storm, and for a 2015 baseline that sentence is
+// simply false -- arrivals in 2015 were not collapsed by anything. COVID is
+// still relevant to an earlier baseline, because the sweep crosses 2020-21 on
+// its way to the present, so the note changes form rather than disappearing.
+function metricNotes(eventYear) {
+  const baselineIsCollapsed = eventYear === 2020 || eventYear === 2021
+  return {
+    tourist_arrivals: baselineIsCollapsed
+      ? 'Arrivals in the baseline year were already collapsed by COVID-19 border closures, so this traces recovery from that floor rather than from the cyclone alone.'
+      : 'The 2020\u201321 stretch of this line is dominated by COVID-19 border closures, not by the storm.',
+  }
 }
 
 // A small line preview, so the legend shows the dash pattern and not just the
@@ -54,6 +64,7 @@ export default function DivergenceView({ data, storm, style }) {
     () => (eventYear ? divergenceYearRange(panels, eventYear) : [0, 0]),
     [panels, eventYear]
   )
+  const notes = useMemo(() => metricNotes(eventYear), [eventYear])
 
   function play() {
     cancelAnimationFrame(frameRef.current)
@@ -112,9 +123,8 @@ export default function DivergenceView({ data, storm, style }) {
           </h2>
           <p className="mb-6 max-w-prose text-sm opacity-75">
             Each line begins at 100 &mdash; that nation&rsquo;s own figure in {storm.year}. Nothing
-            else is adjusted, and no country is measured against another. Every line therefore
-            starts in the same place, and the only thing left for the chart to show is the distance
-            that opens up afterwards.
+            else is adjusted and no country is measured against another, so the only thing left for
+            the chart to show is the distance that opens up afterwards.
           </p>
 
           <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -164,7 +174,7 @@ export default function DivergenceView({ data, storm, style }) {
                 years={years}
                 progress={progress}
                 format={panel.metric.format}
-                note={METRIC_NOTES[panel.metric.key]}
+                note={notes[panel.metric.key]}
                 missing={panel.missing}
                 showTooltip={showTooltip}
                 hideTooltip={hideTooltip}
@@ -174,16 +184,14 @@ export default function DivergenceView({ data, storm, style }) {
           </div>
 
           <p className="mt-6 max-w-prose text-xs italic opacity-70">
-            People affected is left out of this view, and economic loss is not in the chain at
-            all. Both are reported in scattered years rather than continuously, and running a
-            gappy record through an index would draw a confident line across years nobody
-            measured.
+            People affected is left out of this view and economic loss is not in the chain at all:
+            both are reported in scattered years, and an index across gaps draws a confident line
+            over years nobody measured.
           </p>
           <p className="mt-2 max-w-prose text-xs italic opacity-70">
-            The further right the sweep runs, the less of what it shows belongs to the storm. Years
-            after an event, a line carries drought, markets, a pandemic and policy alongside
-            anything a cyclone did. Read the separation as the shape of four different recoveries,
-            not as a measurement of one storm&rsquo;s reach.
+            The further right the sweep runs, the less of what it shows belongs to {storm.name}.
+            Read the separation as the shape of four different recoveries, not as a measurement of
+            one storm&rsquo;s reach.
           </p>
 
           <Tooltip tooltip={tooltip} />
