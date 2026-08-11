@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Section from './Section.jsx'
 import EmptyState from './EmptyState.jsx'
+import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
 import DivergenceChart from './DivergenceChart.jsx'
 import { NATIONS } from './MapView.jsx'
@@ -80,14 +81,15 @@ export default function DivergenceView({ data, storm, style }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, panels.length])
 
-  if (!data) return <EmptyState tone="panel" style={style}>The divergence -- waiting on data.</EmptyState>
-  if (!storm) {
-    return (
-      <EmptyState tone="panel" style={style}>
-        Pick a storm from the timeline to see how the four nations moved apart after it.
-      </EmptyState>
-    )
-  }
+  const blocked = sectionGuard({
+    data,
+    storm,
+    style,
+    tone: 'panel',
+    subject: 'The divergence',
+    prompt: 'see how the four nations moved apart after it',
+  })
+  if (blocked) return blocked
   if (panels.length === 0) {
     return (
       <EmptyState tone="panel" style={style}>

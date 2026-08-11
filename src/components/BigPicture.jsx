@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import Section from './Section.jsx'
-import EmptyState from './EmptyState.jsx'
+import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
@@ -20,13 +20,15 @@ export default function BigPicture({ data, storm, style }) {
   )
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
 
-  if (!storm) {
-    return (
-      <EmptyState tone="panel" style={style}>
-        Pick a storm from the timeline to see how the region looked that year.
-      </EmptyState>
-    )
-  }
+  const blocked = sectionGuard({
+    data,
+    storm,
+    style,
+    tone: 'panel',
+    subject: 'The bigger picture',
+    prompt: 'see how the region looked that year',
+  })
+  if (blocked) return blocked
 
   return (
     <Section tone="panel" style={style}>

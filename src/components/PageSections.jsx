@@ -20,7 +20,7 @@ import { NationHighlightProvider } from '../hooks/useNationHighlight.jsx'
 //       colour the dividers above and below it (see sectionColorsFor); the
 //       section decides its own background itself, either by hardcoding it
 //       (DroughtSnapshot's tone="panel") or by taking a tone prop of its own
-//       (Home's PageHero). Keep the two in step or the wave seam shows a
+//       (the page's PageHero). Keep the two in step or the wave seam shows a
 //       visible colour mismatch.
 //     element -- the section itself. Cloned with the stagger delay, so call
 //       sites don't pass `style` or track their own index.

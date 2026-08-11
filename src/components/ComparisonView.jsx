@@ -6,6 +6,7 @@ import { useTooltip } from '../hooks/useTooltip.js'
 import { useCountUp } from '../hooks/useCountUp.js'
 import Section from './Section.jsx'
 import EmptyState from './EmptyState.jsx'
+import { sectionGuard } from './sectionGuard.jsx'
 import NoDataNote from './NoDataNote.jsx'
 import Tooltip from './Tooltip.jsx'
 
@@ -21,12 +22,15 @@ export default function ComparisonView({ data, storm, selectedNations, style }) 
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
 
-  if (!data) return <EmptyState tone="panel" style={style}>Comparison -- waiting on data.</EmptyState>
-  if (!storm) {
-    return (
-      <EmptyState tone="panel" style={style}>Pick a storm from the timeline to compare recovery.</EmptyState>
-    )
-  }
+  const blocked = sectionGuard({
+    data,
+    storm,
+    style,
+    tone: 'panel',
+    subject: 'Comparison',
+    prompt: 'compare recovery',
+  })
+  if (blocked) return blocked
   if (!selectedNations || selectedNations.length < 2) {
     return (
       <EmptyState tone="panel" style={style}>

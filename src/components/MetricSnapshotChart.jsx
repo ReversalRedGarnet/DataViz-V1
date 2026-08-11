@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
 import NoDataNote from './NoDataNote.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
-import { useElementWidth } from '../hooks/useElementWidth.js'
-import { useInView } from '../hooks/useInView.js'
-import { resetSvg } from '../utils/d3helpers.js'
+import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { renderSnapshotChart, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 
 // One "all nations, one moment" bar chart card: heading, chart or placeholder,
@@ -40,17 +38,13 @@ export default function MetricSnapshotChart({
   caveat,
   className = '',
 }) {
-  const [ref, node, width] = useElementWidth()
-  // Same reasoning as TrendChart: the bars grow in on arrival, so the draw
-  // waits until the card is somewhere a reader can see it happen.
-  const [cardRef, inView] = useInView()
-  const { theme } = useTheme()
-
-  useEffect(() => {
-    if (!inView || !rows || rows.length === 0 || !node || !width) return
-    const svg = resetSvg(node, width, CHART_HEIGHT)
-    renderSnapshotChart(svg, { width, rows, format, showTooltip, hideTooltip, yTickFormat, theme })
-  }, [inView, node, width, rows, format, yTickFormat, showTooltip, hideTooltip, theme])
+  const { svgRef, cardRef, inView } = useChartCanvas({
+    height: CHART_HEIGHT,
+    ready: rows?.length > 0,
+    deps: [rows, format, yTickFormat, showTooltip, hideTooltip],
+    draw: (svg, { width, theme }) =>
+      renderSnapshotChart(svg, { width, rows, format, showTooltip, hideTooltip, yTickFormat, theme }),
+  })
 
   return (
     <div
@@ -62,7 +56,7 @@ export default function MetricSnapshotChart({
     >
       {label && <h3 className="mb-2 text-sm font-semibold">{label}</h3>}
       {rows.length > 0 ? (
-        <svg ref={ref} role="img" aria-label={ariaLabel} className="block w-full" style={{ height: CHART_HEIGHT }} />
+        <svg ref={svgRef} role="img" aria-label={ariaLabel} className="block w-full" style={{ height: CHART_HEIGHT }} />
       ) : (
         <NoDataNote
           showTooltip={showTooltip}

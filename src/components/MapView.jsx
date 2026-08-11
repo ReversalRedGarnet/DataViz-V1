@@ -17,7 +17,7 @@ import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 // is a static export from the 'world-atlas' package, fetched at runtime so it
 // stays out of the main bundle.
 //
-// Default nation set: the four countries Cyclone Harold hit. Coordinates are
+// Default nation set: the four countries this project compares. Coordinates are
 // approximate (capital city), which is fine for an illustrative map and not for
 // navigation. Other hazard pages pass their own set via the `nations` prop.
 export const NATIONS = [

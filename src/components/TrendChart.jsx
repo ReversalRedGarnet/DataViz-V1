@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
 import NoDataNote from './NoDataNote.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
-import { useElementWidth } from '../hooks/useElementWidth.js'
-import { useInView } from '../hooks/useInView.js'
-import { resetSvg, slug } from '../utils/d3helpers.js'
+import { useChartCanvas } from '../hooks/useChartCanvas.js'
+import { slug } from '../utils/d3helpers.js'
 import { renderMetricChart, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 
 // One "selected nations, over time" chart card: heading, chart or placeholder,
@@ -52,29 +51,28 @@ export default function TrendChart({
   caveat,
   className = '',
 }) {
-  const [ref, node, width] = useElementWidth()
-  const [cardRef, inView] = useInView()
-  const { theme } = useTheme()
   const nationsMissing = nations.filter((n) => !allRows.some((d) => d.nation === n))
   // Only worth explaining where a reported zero is actually on screen.
   const hasReportedZero = chartType === 'bar' && allRows.some((d) => d[valueField] === 0)
 
-  useEffect(() => {
-    if (!inView || !allRows || allRows.length === 0 || !node || !width) return
-    const svg = resetSvg(node, width, CHART_HEIGHT)
-    renderMetricChart(svg, {
-      width,
-      allRows,
-      nations,
-      valueField,
-      chartType,
-      format,
-      showTooltip,
-      hideTooltip,
-      yTickFormat,
-      theme,
-    })
-  }, [inView, node, width, allRows, nations, valueField, chartType, format, yTickFormat, showTooltip, hideTooltip, theme])
+  const { svgRef, cardRef, node, inView } = useChartCanvas({
+    height: CHART_HEIGHT,
+    ready: allRows?.length > 0,
+    deps: [allRows, nations, valueField, chartType, format, yTickFormat, showTooltip, hideTooltip],
+    draw: (svg, { width, theme }) =>
+      renderMetricChart(svg, {
+        width,
+        allRows,
+        nations,
+        valueField,
+        chartType,
+        format,
+        showTooltip,
+        hideTooltip,
+        yTickFormat,
+        theme,
+      }),
+  })
 
   // Reduced strength for nations shown only as comparison. A separate effect
   // from the draw so that changing which storm is selected re-dims without
@@ -114,7 +112,7 @@ export default function TrendChart({
         {label}
       </h3>
       {allRows.length > 0 ? (
-        <svg ref={ref} role="img" aria-label={label} className="block w-full" style={{ height: CHART_HEIGHT }} />
+        <svg ref={svgRef} role="img" aria-label={label} className="block w-full" style={{ height: CHART_HEIGHT }} />
       ) : (
         <NoDataNote
           showTooltip={showTooltip}

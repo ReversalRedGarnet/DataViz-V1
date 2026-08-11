@@ -8,6 +8,7 @@ import { useInView } from '../hooks/useInView.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/chartRenderers.jsx'
 import EmptyState from './EmptyState.jsx'
+import { sectionGuard } from './sectionGuard.jsx'
 import { formatNationList } from '../utils/formatNationList.js'
 
 // Per-nation storm facts live in src/content/storms.js, in the order each storm
@@ -42,9 +43,14 @@ export default function StormProfile({ storm, style }) {
     renderStormProfileChart(svg, { width, rows, showTooltip, hideTooltip, theme })
   }, [inView, node, width, rows, showTooltip, hideTooltip, theme])
 
-  if (!storm) {
-    return <EmptyState style={style}>Pick a storm from the timeline to see how it compared.</EmptyState>
-  }
+  const blocked = sectionGuard({
+    data: true,
+    storm,
+    style,
+    subject: 'Storm profile',
+    prompt: 'see how it compared',
+  })
+  if (blocked) return blocked
   if (!rows) {
     return (
       <EmptyState style={style}>

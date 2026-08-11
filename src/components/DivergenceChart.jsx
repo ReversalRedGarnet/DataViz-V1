@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useTheme } from '../hooks/useTheme.jsx'
-import { useElementWidth } from '../hooks/useElementWidth.js'
-import { resetSvg } from '../utils/d3helpers.js'
+import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/chartRenderers.jsx'
 
 // One panel of the divergence section. Unlike every other chart card on the
@@ -31,30 +30,35 @@ export default function DivergenceChart({
   hideTooltip,
   className = '',
 }) {
-  const [ref, node, width] = useElementWidth()
-  const { theme } = useTheme()
   const apiRef = useRef(null)
   // The build effect needs the current sweep position without taking progress
   // as a dependency, which would rebuild the chart on every frame.
   const progressRef = useRef(progress)
 
-  useEffect(() => {
-    if (!node || !width || series.length === 0) return
-    const svg = resetSvg(node, width, DIVERGENCE_HEIGHT)
-    apiRef.current = buildDivergenceChart(svg, {
-      width,
-      series,
-      years,
-      format,
-      showTooltip,
-      hideTooltip,
-      theme,
-    })
-    apiRef.current.update(progressRef.current)
-    return () => {
-      apiRef.current = null
-    }
-  }, [node, width, series, years, format, showTooltip, hideTooltip, theme])
+  // waitForInView is off: this chart is driven by a scroll position the parent
+  // already computes from its own visibility, so gating on a second visibility
+  // check would only delay the first frame.
+  const { svgRef } = useChartCanvas({
+    height: DIVERGENCE_HEIGHT,
+    ready: series.length > 0,
+    waitForInView: false,
+    deps: [series, years, format, showTooltip, hideTooltip],
+    draw: (svg, { width, theme }) => {
+      apiRef.current = buildDivergenceChart(svg, {
+        width,
+        series,
+        years,
+        format,
+        showTooltip,
+        hideTooltip,
+        theme,
+      })
+      apiRef.current.update(progressRef.current)
+      return () => {
+        apiRef.current = null
+      }
+    },
+  })
 
   useEffect(() => {
     progressRef.current = progress
@@ -66,7 +70,7 @@ export default function DivergenceChart({
       <h3 className="mb-1 text-sm font-semibold">{label}</h3>
       <p className="mb-2 text-xs opacity-60">Indexed to each nation&rsquo;s own {years[0]} figure = 100</p>
       <svg
-        ref={ref}
+        ref={svgRef}
         role="img"
         aria-label={`${label}, each nation indexed to its own ${years[0]} figure`}
         className="block w-full"

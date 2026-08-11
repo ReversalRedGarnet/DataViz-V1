@@ -1,7 +1,7 @@
 import Section from './Section.jsx'
 
 // The site's one hero pattern, shared by every page. Hero.jsx is this with
-// Cyclone Harold's copy hardcoded.
+// any one storm's copy hardcoded.
 //
 // Props:
 //   kicker -- short uppercase framing line above the headline

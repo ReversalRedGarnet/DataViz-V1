@@ -6,6 +6,7 @@ import { useTooltip } from '../hooks/useTooltip.js'
 import Section from './Section.jsx'
 import SelectionLegend from './SelectionLegend.jsx'
 import EmptyState from './EmptyState.jsx'
+import { sectionGuard } from './sectionGuard.jsx'
 import TrendChart from './TrendChart.jsx'
 import InsightsPanel from './InsightsPanel.jsx'
 import Tooltip from './Tooltip.jsx'
@@ -37,10 +38,14 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
     return buildComparativeInsights(data, selectedNations[0], selectedNations[1], storm.year)
   }, [data, storm, selectedNations])
 
-  if (!data) return <EmptyState style={style}>Ripple chain -- waiting on data.</EmptyState>
-  if (!storm) {
-    return <EmptyState style={style}>Pick a storm from the timeline above to follow what came after it.</EmptyState>
-  }
+  const blocked = sectionGuard({
+    data,
+    storm,
+    style,
+    subject: 'Ripple chain',
+    prompt: 'follow what came after it',
+  })
+  if (blocked) return blocked
   if (!selectedNations || selectedNations.length === 0) {
     return <EmptyState style={style}>Click a country on the map above to see its ripple chain.</EmptyState>
   }

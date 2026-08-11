@@ -23,11 +23,13 @@ const CAPACITY_YEAR = 2024
 // do. Drawn as a snapshot bar chart, since a flat line over twelve years would
 // be a chart of nothing.
 //
-// Context: sea surface temperature, sea level and emissions per head, drawn for
-// all four nations at once. These are complete records precisely because they
-// need nobody to report them, and they carry the only climate claims this site
-// can make with confidence. All three are trends. None of them is evidence
-// about an individual storm, and each chart's own caveat says so.
+// Context: sea surface temperature and emissions per head, drawn for all four
+// nations at once. These are complete records precisely because they need
+// nobody to report them, and they carry the only climate claims this site can
+// make with confidence. Both are trends; neither is evidence about an
+// individual storm, and each chart's own caveat says so. Sea level belongs in
+// this group and is stated in prose instead -- the portal reports it to 0.1 m,
+// which is too coarse to chart honestly.
 //
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }

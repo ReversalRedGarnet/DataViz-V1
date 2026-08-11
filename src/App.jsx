@@ -74,7 +74,6 @@ function pageSections(data, selection, storm, onSelectStorm) {
     },
     { id: 'exclusions', tone: 'panel', element: <ExclusionsPanel /> },
 
-    // --- the gate -------------------------------------------------------
     ...(storm ? [] : [{ id: 'gate', tone: 'plain', element: <StoryGate /> }]),
     ...(!storm
       ? []

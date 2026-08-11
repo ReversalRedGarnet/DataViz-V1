@@ -4,6 +4,7 @@ import { feature } from 'topojson-client'
 import Section from './Section.jsx'
 import { NATIONS } from './MapView.jsx'
 import EmptyState from './EmptyState.jsx'
+import { sectionGuard } from './sectionGuard.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useActiveStep } from '../hooks/useActiveStep.js'
 import { chartColorsFor, MAP_COLORS, CHART_INK } from '../utils/theme.js'
@@ -243,13 +244,15 @@ export default function StormJourney({ storm, style }) {
       .attr('fill-opacity', (_, i) => (i <= active ? 0.7 : 0))
   }, [active, theme, built])
 
-  if (!storm) {
-    return (
-      <EmptyState tone="panel" style={style}>
-        Pick a storm from the timeline to travel with it.
-      </EmptyState>
-    )
-  }
+  const blocked = sectionGuard({
+    data: true,
+    storm,
+    style,
+    tone: 'panel',
+    subject: 'Storm journey',
+    prompt: 'travel with it',
+  })
+  if (blocked) return blocked
   if (!hasSteps) {
     return (
       <EmptyState tone="panel" style={style}>
