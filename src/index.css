@@ -211,11 +211,34 @@ html.theme-sweep::view-transition-new(root) {
 }
 
 @layer utilities {
-  /* Primary entrance animation used throughout the site. */
+  /*
+    Primary entrance animation used throughout the site.
+
+    Rebalanced from the original: the scale was doing most of the work at 0.94
+    and the travel almost none at 8px, which reads as a card inflating in place
+    rather than arriving. Reversed -- a barely-there scale change and a much
+    longer rise -- so the motion has a direction.
+
+    The overshoot curve is kept but softened. A back-out with a 1.56 overshoot
+    on a large card is a bounce, and a bounce on a page about disasters is the
+    wrong register; this one settles rather than springs.
+
+    Only `opacity` and `transform` are animated, deliberately. Those two are the
+    properties a browser can hand to the compositor and run off the main thread;
+    anything else -- a blur that clears, an animated box-shadow, a colour fade
+    on a large surface -- forces a repaint every frame. A third of this site's
+    likely audience is on mid-range Android over Pacific mobile data, and an
+    entrance animation that stutters is worse than one that is plain.
+
+    No `will-change` either. It is genuinely useful for an element about to
+    animate and genuinely costly on a dozen sections that finished animating
+    minutes ago, and CSS gives no way to clear it afterwards. Browsers already
+    promote compositor-friendly animations like this one without being asked.
+  */
   @keyframes pop-in {
     from {
       opacity: 0;
-      transform: scale(0.94) translateY(8px);
+      transform: scale(0.985) translateY(18px);
     }
 
     to {
@@ -225,7 +248,7 @@ html.theme-sweep::view-transition-new(root) {
   }
 
   .animate-pop-in {
-    animation: pop-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation: pop-in 620ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
   }
 
   /*
@@ -256,7 +279,24 @@ html.theme-sweep::view-transition-new(root) {
     border-radius: 9999px;
     opacity: 0;
     pointer-events: none;
-    animation: ripple-out 1000ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    animation: ripple-out 1150ms cubic-bezier(0.19, 0.72, 0.3, 1) both;
+  }
+
+  /*
+    A second, later ring from the same origin. Real ripples arrive in a train,
+    not one at a time, and a single ring reads as a click feedback effect
+    rather than as something propagating outward through the chain. Drawn
+    fainter and slightly behind, so it supports the first rather than competing
+    with it.
+  */
+  .ripple-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(var(--color-accent));
+    border-radius: inherit;
+    opacity: 0.55;
+    animation: ripple-out 1150ms cubic-bezier(0.19, 0.72, 0.3, 1) 220ms both;
   }
 
   /*
@@ -287,7 +327,13 @@ html.theme-sweep::view-transition-new(root) {
     annotations keep full strength because they carry no nation class.
   */
   .nation-mark {
-    transition: opacity 180ms ease-out;
+    /*
+      Slightly slower on the way in than the way out is not possible with one
+      transition, so this splits the difference at 200ms with a curve that
+      leaves quickly and arrives gently -- dimming should feel like attention
+      moving, not like a light switch.
+    */
+    transition: opacity 200ms cubic-bezier(0.33, 0.9, 0.4, 1);
   }
 
   .nation-dimmed {
