@@ -417,3 +417,214 @@ html.theme-sweep::view-transition-new(root) {
     display: none;
   }
 }
+
+@layer components {
+  /*
+    SLIDESHOW LAYOUT
+    ================
+
+    The stage. A horizontal flex track inside a clipped viewport: every panel is
+    `flex: 0 0 100%`, so each one has the full, correct, constant width whether
+    or not it happens to be the panel on screen. That is the load-bearing
+    property of this whole layout -- ResizeObserver keeps firing for off-stage
+    charts, useElementWidth keeps returning real pixels, and no chart ever has to
+    be re-measured because it was mounted into a box of zero width.
+
+    Panels scroll vertically inside themselves. The stage pages horizontally.
+    The two gestures never share an axis, which is why there is no swipe-to-page
+    binding anywhere in this build: a horizontal page gesture layered over a
+    vertical scroller is how a phone reader ends up feeling fought.
+  */
+  .slide-viewport {
+    position: relative;
+    overflow: hidden;
+    /* dvh, not vh: mobile browser chrome makes vh lie by roughly the height of
+       the address bar, which would put every panel's footer below the fold. */
+    height: calc(100dvh - var(--header-height));
+  }
+
+  .slide-track {
+    display: flex;
+    height: 100%;
+    will-change: transform;
+    transition: transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .slide-panel {
+    flex: 0 0 100%;
+    height: 100%;
+    overflow-y: auto;
+    /* Stops a panel's scroll chaining out to the document when it bottoms out,
+       which on iOS reads as the whole page bouncing. */
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    /* Off-stage panels fade rather than sitting at full strength just off the
+       edge -- with a fast pager the neighbour is briefly visible mid-transition
+       and a hard-edged one reads as a rendering fault. */
+    opacity: 1;
+    transition: opacity 320ms ease-out;
+  }
+
+  .slide-panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .slide-panel[data-active='false'] {
+    opacity: 0;
+  }
+
+  /* Sections set their own vertical padding for a document. In a panel they
+     also have to fill one, or a short section (the gate, the sources) leaves
+     the page background showing under it. */
+  .slide-panel-inner {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+  }
+
+  .slide-panel-inner > section {
+    flex: 1 0 auto;
+  }
+
+  /*
+    "There is more down there." The one affordance the slideshow has to add
+    back rather than merely preserve: the document scrollbar is hidden site-wide
+    because the canoe replaced it, and the panels hide theirs too, so nothing
+    else on screen says a panel continues past its bottom edge.
+
+    Sits outside the track so it stays put while the panel scrolls under it.
+  */
+  .slide-more {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    padding-bottom: 0.6rem;
+    padding-top: 2.5rem;
+    color: rgb(var(--color-ink));
+    background: linear-gradient(to top, rgb(var(--color-sand)) 12%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 260ms ease-out;
+  }
+
+  .slide-more.is-visible {
+    opacity: 0.75;
+    animation: slide-more-nudge 2.4s ease-in-out infinite;
+  }
+
+  .slide-more-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  @keyframes slide-more-nudge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide-more.is-visible {
+      animation: none;
+    }
+  }
+
+  /* A panel is one screen. The document's generous section padding wastes a
+     third of it, so it is tightened in slideshow layout only. */
+  .slide-viewport:not(.is-document) .slide-panel-inner > section {
+    padding-top: 1.75rem;
+    padding-bottom: 1.5rem;
+  }
+
+  /* The map inside StormJourney is sticky against its scrolling ancestor. In
+     document layout that ancestor is the page, so it has to clear the fixed
+     header; in a panel the ancestor is the panel itself, which already starts
+     below the header, and the same offset would push the map a header's height
+     down the panel. */
+  .slide-viewport:not(.is-document) .journey-sticky {
+    top: 0.5rem;
+  }
+
+  /*
+    DOCUMENT LAYOUT -- the escape hatch
+    ==================================
+
+    The same tree, unwrapped. Cheap only because nothing is conditionally
+    rendered: switching layout is a class change, not a re-render, so no chart
+    is rebuilt and no state is lost in either direction.
+
+    This is what gives back find-in-page, printing, scroll restoration and the
+    browser's own scroll gestures -- and it is the fallback if the stage
+    misbehaves on a reader's browser. A judge who cannot search the page cannot
+    check the roster claims, and checkability is the argument the whole piece is
+    making.
+  */
+  .slide-viewport.is-document {
+    overflow: visible;
+    height: auto;
+  }
+
+  .slide-viewport.is-document .slide-track {
+    display: block;
+    height: auto;
+    /* The inline transform is only written in slideshow layout, but a stale one
+       from a mid-transition switch would offset the entire document. */
+    transform: none !important;
+    transition: none;
+  }
+
+  .slide-viewport.is-document .slide-panel {
+    height: auto;
+    overflow: visible;
+    opacity: 1;
+  }
+
+  .slide-viewport.is-document .slide-panel-inner {
+    display: block;
+    min-height: 0;
+  }
+
+  /* Printing is always the document. */
+  @media print {
+    .slide-viewport {
+      overflow: visible !important;
+      height: auto !important;
+    }
+    .slide-track {
+      display: block !important;
+      transform: none !important;
+    }
+    .slide-panel {
+      height: auto !important;
+      overflow: visible !important;
+      opacity: 1 !important;
+    }
+    .slide-footer {
+      display: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide-track {
+      transition: none;
+    }
+    .slide-panel {
+      transition: none;
+    }
+  }
+}
+
+/*
+  In slideshow layout the document itself must not scroll -- the panels do. Set
+  on <html> by App.jsx so the two layouts cannot both claim the scroll at once.
+*/
+html.is-slides,
+html.is-slides body {
+  overflow: hidden;
+  height: 100%;
+}

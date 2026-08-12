@@ -58,7 +58,7 @@ export default function ContextPanel({ data, style }) {
           Who can measure, and what is changing
         </h2>
         <p className="prose-column mb-8 max-w-prose text-sm opacity-75">
-          Every record in the chain above has holes in it. These two do not, for the same reason
+          Every record in the ripple chain has holes in it. These two do not, for the same reason
           the others do: a disaster figure only exists if a country had the capacity to assess and
           file it after being hit, while the records below are structural or measured from orbit
           and need nobody to report them.
@@ -71,7 +71,7 @@ export default function ContextPanel({ data, style }) {
             </h3>
             <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
               Monitoring stations per national network, unchanged in every year on record. Set this
-              ranking beside the gaps in the chain above and it is the same ranking: Solomon
+              ranking beside the gaps in the ripple chain and it is the same ranking: Solomon
               Islands has the fewest stations, no tourist arrivals reported at all, and a single
               economic-loss figure in twelve years. Uneven data is not only a limitation of this
               project &mdash; it is an unequal distribution of the ability to describe what

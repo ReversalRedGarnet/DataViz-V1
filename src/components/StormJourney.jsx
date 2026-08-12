@@ -7,6 +7,7 @@ import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useActiveStep } from '../hooks/useActiveStep.js'
+import { useScrollRoot } from '../hooks/useScrollRoot.jsx'
 import { chartColorsFor, MAP_COLORS, CHART_INK } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
@@ -142,7 +143,12 @@ export default function StormJourney({ storm, style }) {
     setBuilt(false)
   }, [storm?.id])
   const { theme } = useTheme()
-  const active = useActiveStep(stepsRef, STEPS.length)
+  // The steps are read against whatever box is actually scrolling them: the
+  // viewport in document layout, the slide panel in slideshow layout. Without
+  // this the -45% band would be measured against the window, and every step in
+  // a panel scrolled below the fold would report itself as active at once.
+  const scrollRoot = useScrollRoot()
+  const active = useActiveStep(stepsRef, STEPS.length, scrollRoot)
   const hasSteps = STEPS.length > 0
 
   // Read inside build(), which resolves after the render that set them. Held in
@@ -311,7 +317,7 @@ export default function StormJourney({ storm, style }) {
       </p>
 
       <div className="mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
-        <div className="sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 md:pt-0">
+        <div className="journey-sticky sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 md:pt-0">
           <svg
             ref={svgRef}
             aria-hidden="true"
@@ -324,7 +330,7 @@ export default function StormJourney({ storm, style }) {
           <p className="mt-2 text-xs italic leading-snug opacity-65">
             The line joins documented impact points; it is not the official track. Dates,
             categories and tolls come from national meteorological services and UN OCHA, cited in
-            full below.
+            full in the sources.
           </p>
         </div>
 

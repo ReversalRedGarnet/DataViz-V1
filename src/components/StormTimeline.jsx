@@ -39,7 +39,8 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
         <p>
           Every severe cyclone that struck two or more of these four nations,{' '}
           {ROSTER_START}&ndash;{ROSTER_END}. The rule was fixed before the list was drawn; what it
-          excludes is shown below &mdash; including one storm that would have suited the argument.
+          excludes is shown in the next section &mdash; including one storm that would have
+          suited the argument.
         </p>
         <p>
           These four sit along the same corridor of the South Pacific basin, so they are struck by

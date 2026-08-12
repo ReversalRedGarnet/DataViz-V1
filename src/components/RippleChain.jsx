@@ -47,7 +47,7 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
   })
   if (blocked) return blocked
   if (!selectedNations || selectedNations.length === 0) {
-    return <EmptyState style={style}>Click a country on the map above to see its ripple chain.</EmptyState>
+    return <EmptyState style={style}>Choose a country in the map section to see its ripple chain.</EmptyState>
   }
 
   const unstruck = selectedNations.filter((n) => !storm.nations.includes(n))

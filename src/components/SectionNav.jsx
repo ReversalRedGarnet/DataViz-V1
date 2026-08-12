@@ -52,7 +52,11 @@ function HamburgerIcon({ open }) {
 // already gives fragment navigation a smooth scroll and the right header
 // clearance, and this way each section is a shareable URL. Renders nothing if
 // the registry is empty.
-export default function SectionNav({ availableIds }) {
+// `onNavigate` is supplied in slideshow layout, where a fragment link has
+// nothing to scroll to -- the target panel is off-stage rather than below. The
+// href is kept regardless so each section is still a shareable URL and the menu
+// still works if the handler is absent.
+export default function SectionNav({ availableIds, onNavigate }) {
   // While the story is gated, most sections are not in the document at all.
   // Listing them anyway would give the reader links that scroll nowhere, so the
   // menu shows only what currently exists.
@@ -104,7 +108,13 @@ export default function SectionNav({ availableIds }) {
               <a
                 role="menuitem"
                 href={`#${section.id}`}
-                onClick={() => setOpen(false)}
+                onClick={(event) => {
+                  if (onNavigate) {
+                    event.preventDefault()
+                    onNavigate(section.id)
+                  }
+                  setOpen(false)
+                }}
                 className="block px-4 py-2 text-sm text-ink/80 transition-colors hover:bg-ink/5 hover:text-ink"
               >
                 {section.label}

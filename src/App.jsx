@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Header from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
 import StormJourney from './components/StormJourney.jsx'
@@ -14,6 +14,8 @@ import StoryGate from './components/StoryGate.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
+import { useDeck } from './hooks/useDeck.js'
+import { PAGE_SECTIONS } from './content/pageSections.js'
 import { ThemeProvider } from './hooks/useTheme.jsx'
 import { useSelection, selectionAnnouncement } from './hooks/useSelection.js'
 import { useMetricData } from './hooks/useMetricData.js'
@@ -62,6 +64,8 @@ const DATA_SOURCES = [
 // chosen. Split into two lists rather than filtered from one, so the gate's
 // position is a structural fact of this file rather than an index somebody has
 // to keep in step.
+const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label]))
+
 function pageSections(data, selection, storm, onSelectStorm) {
   const { selected, toggle, clear } = selection
 
@@ -100,7 +104,7 @@ function pageSections(data, selection, storm, onSelectStorm) {
     },
     { id: 'sources', tone: 'ink', element: <CitationPanel sources={DATA_SOURCES} /> },
         ]),
-  ]
+  ].map((section) => ({ ...section, label: SECTION_LABELS[section.id] ?? section.id }))
 }
 
 function AppShell() {
@@ -113,6 +117,26 @@ function AppShell() {
   const storm = stormById(stormId)
   const [headerHeight, setHeaderHeight] = useState(0)
 
+  // Progress through the whole piece: which slide, plus how far down that
+  // slide. The canoe reads the same quantity it always did -- it just has to be
+  // told, now that there is no document scroll left to derive it from.
+  const [panelFraction, setPanelFraction] = useState(0)
+  const onProgress = useCallback((fraction) => setPanelFraction(fraction), [])
+
+  // Slideshow by default; the single-document layout is one click away and is
+  // remembered, because a reader who needed it once (find-in-page, printing, a
+  // browser the stage misbehaves on) will need it again.
+  const [layout, setLayout] = useState(() => {
+    if (typeof window === 'undefined') return 'slides'
+    return window.localStorage.getItem('ripple-layout') === 'document' ? 'document' : 'slides'
+  })
+  useEffect(() => {
+    window.localStorage.setItem('ripple-layout', layout)
+    // The document itself must not scroll while the panels do, or a wheel
+    // gesture at a panel's end drags the whole stage.
+    document.documentElement.classList.toggle('is-slides', layout === 'slides')
+  }, [layout])
+
   // Keep the CSS scroll offset in step with the measured header height, so a
   // jump-to-section link doesn't land with its heading hidden behind the fixed
   // header (see --header-height in index.css).
@@ -120,7 +144,20 @@ function AppShell() {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
   }, [headerHeight])
 
-  const sections = pageSections(data, selection, storm, setStormId)
+  // Choosing a storm replaces the gate with the storm sections at the same
+  // index, so the reader steps straight into the journey rather than being
+  // returned to the top. Declared above `sections` because it is read while
+  // building it.
+  const selectStorm = useCallback((id) => {
+    setStormId(id)
+    setPanelFraction(0)
+  }, [])
+
+  const sections = pageSections(data, selection, storm, selectStorm)
+  const slides = layout === 'slides'
+  const { active, go, goToId } = useDeck(sections, { enabled: slides })
+
+  const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
 
   return (
     <>
@@ -133,7 +170,17 @@ function AppShell() {
         Skip to main content
       </a>
 
-      <Header onHeightChange={setHeaderHeight} availableIds={sections.map((s) => s.id)} />
+      <Header
+        onHeightChange={setHeaderHeight}
+        availableIds={sections.map((s) => s.id)}
+        progress={slides ? deckProgress : undefined}
+        layout={layout}
+        onLayoutChange={setLayout}
+        onNavigate={slides ? goToId : undefined}
+        storm={storm}
+        selectedNations={selection.selected}
+        onClearNations={selection.clear}
+      />
 
       {/* The charts and comparison view below update silently otherwise. */}
       <div aria-live="polite" className="sr-only">
@@ -145,8 +192,18 @@ function AppShell() {
           : 'Pick a storm from the timeline to continue.'}
       </div>
 
-      <main id="main-content" className="min-h-screen" style={{ paddingTop: headerHeight }}>
-        <PageSections sections={sections} />
+      <main
+        id="main-content"
+        className={slides ? '' : 'min-h-screen'}
+        style={{ paddingTop: headerHeight }}
+      >
+        <PageSections
+          sections={sections}
+          layout={layout}
+          active={active}
+          onNavigate={go}
+          onProgress={onProgress}
+        />
       </main>
     </>
   )
