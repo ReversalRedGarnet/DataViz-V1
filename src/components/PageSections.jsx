@@ -5,6 +5,8 @@ import { sectionColorsFor } from '../utils/theme.js'
 import { delayStyle } from '../utils/motion.js'
 import { NationHighlightProvider } from '../hooks/useNationHighlight.jsx'
 import { ScrollRootProvider } from '../hooks/useScrollRoot.jsx'
+import BackgroundPattern from './BackgroundPattern.jsx'
+import { HEADER_BACKDROP } from '../content/patterns.js'
 
 // Every section of the piece, in order, rendered two ways from one tree.
 //
@@ -187,7 +189,11 @@ function SlidePanel({
       inert={slides && !isActive ? '' : undefined}
       aria-hidden={slides && !isActive ? 'true' : undefined}
     >
-      <ScrollRootProvider node={node}>
+      {/* null in document layout, deliberately. The panel is only a scroll
+          container while the deck is paging; used as an observer root when it
+          is not, the -45%/-10% bands would sit at fixed points inside a very
+          tall box and never move past anything. */}
+      <ScrollRootProvider node={slides ? node : null}>
         <div className="slide-panel-inner">
           {cloneElement(section.element, { style: delayStyle(slides ? 0 : index) })}
 
@@ -209,10 +215,18 @@ function SlidePanel({
 // The section's own end, and where to go from it. Named destinations rather
 // than bare arrows: a reader deciding whether to move on should be able to see
 // what they are moving on to.
+//
+// Built to match the header exactly -- same sand fill, same ripple backdrop,
+// same edge shadow -- so the deck reads as one frame with the content moving
+// through it, rather than a page with unrelated furniture at each end. Pinned
+// to the bottom of the panel rather than scrolling away with the content, for
+// the same reason the header is fixed: navigation that disappears when you
+// start reading is navigation you have to go looking for.
 function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate }) {
   return (
-    <div className="slide-footer">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 pb-16 pt-2 sm:px-8">
+    <div className="slide-footer relative bg-sand shadow-[0_-1px_2px_0_rgb(0_0_0/0.05)]">
+      <BackgroundPattern backdrop={HEADER_BACKDROP} />
+      <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2.5 sm:px-8">
         {prevLabel ? (
           <button
             type="button"

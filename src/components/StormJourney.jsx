@@ -132,7 +132,10 @@ function paintScene(scene, { active, theme }) {
 export default function StormJourney({ storm, style }) {
   const STEPS = buildSteps(storm)
   const svgRef = useRef(null)
-  const stepsRef = useRef(null)
+  // Published through state, not a ref: in slideshow layout this element is
+  // also the IntersectionObserver root, and a ref's .current is still null on
+  // the render where that root has to be chosen.
+  const [stepsNode, setStepsNode] = useState(null)
   const sceneRef = useRef(null)
   const [built, setBuilt] = useState(false)
 
@@ -143,12 +146,15 @@ export default function StormJourney({ storm, style }) {
     setBuilt(false)
   }, [storm?.id])
   const { theme } = useTheme()
-  // The steps are read against whatever box is actually scrolling them: the
-  // viewport in document layout, the slide panel in slideshow layout. Without
-  // this the -45% band would be measured against the window, and every step in
-  // a panel scrolled below the fold would report itself as active at once.
+  // The steps are read against whatever box is actually scrolling them.
+  //
+  // In slideshow layout that is the steps column itself -- the map is pinned
+  // and only the right-hand column moves -- so the column is both the container
+  // and the observer root. In document layout the page scrolls, and the root is
+  // the viewport (null). ScrollRootProvider publishes null in document layout,
+  // which is what distinguishes the two here.
   const scrollRoot = useScrollRoot()
-  const active = useActiveStep(stepsRef, STEPS.length, scrollRoot)
+  const active = useActiveStep(stepsNode, STEPS.length, scrollRoot ? stepsNode : null)
   const hasSteps = STEPS.length > 0
 
   // Read inside build(), which resolves after the render that set them. Held in
@@ -304,7 +310,7 @@ export default function StormJourney({ storm, style }) {
   }
 
   return (
-    <Section tone="panel" style={style}>
+    <Section tone="panel" className="journey-section" style={style}>
       <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
         {STEPS[0].date} &ndash; {STEPS[STEPS.length - 1].date}
       </p>
@@ -313,10 +319,10 @@ export default function StormJourney({ storm, style }) {
       </h2>
       <p className="max-w-prose text-sm opacity-75">
         {storm.name} reached {STEPS.length} of these four countries, and was a different storm at
-        each. Scroll to travel with it.
+        each. Scroll the column on the right to travel with it.
       </p>
 
-      <div className="mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
+      <div className="journey-split mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
         <div className="journey-sticky sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 md:pt-0">
           <svg
             ref={svgRef}
@@ -334,7 +340,7 @@ export default function StormJourney({ storm, style }) {
           </p>
         </div>
 
-        <ol ref={stepsRef} className="mt-4 md:mt-0">
+        <ol ref={setStepsNode} className="journey-steps mt-4 md:mt-0">
           {STEPS.map((step, i) => (
             <li
               key={step.name}

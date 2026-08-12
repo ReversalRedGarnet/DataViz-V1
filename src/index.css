@@ -100,7 +100,9 @@
     overflow-x: hidden;
 
     /* Smooth theme transitions. */
-    transition: background-color 200ms ease-out, color 200ms ease-out;
+    transition:
+      background-color 200ms ease-out,
+      color 200ms ease-out;
   }
 
   /*
@@ -115,26 +117,26 @@
   affect navigation, and the z-index puts the new theme on top -- without it
   the circle would be clipping a layer that's already behind.
 */
-html.theme-sweep::view-transition-old(root) {
-  animation: none;
-  z-index: 1;
-}
-
-html.theme-sweep::view-transition-new(root) {
-  animation: none;
-  z-index: 999;
-  mix-blend-mode: normal;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* The root cross-fade is decoration; the toggle already opts out in JS. */
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  html.theme-sweep::view-transition-old(root) {
     animation: none;
+    z-index: 1;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
+  html.theme-sweep::view-transition-new(root) {
+    animation: none;
+    z-index: 999;
+    mix-blend-mode: normal;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The root cross-fade is decoration; the toggle already opts out in JS. */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
     body {
       transition: none;
     }
@@ -153,17 +155,21 @@ html.theme-sweep::view-transition-new(root) {
     only shape this site replaces.
   */
   html {
-    cursor: url('/cursors/arrow-light.svg') 1 1, default;
+    cursor:
+      url("/cursors/arrow-light.svg") 1 1,
+      default;
   }
 
   html.dark {
-    cursor: url('/cursors/arrow-dark.svg') 1 1, default;
+    cursor:
+      url("/cursors/arrow-dark.svg") 1 1,
+      default;
   }
 
   a[href],
   button,
   summary,
-  [role='button'],
+  [role="button"],
   .marker,
   .chart-mark {
     cursor: pointer;
@@ -290,7 +296,7 @@ html.theme-sweep::view-transition-new(root) {
     with it.
   */
   .ripple-ring::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     border: 1px solid rgb(var(--color-accent));
@@ -469,7 +475,7 @@ html.theme-sweep::view-transition-new(root) {
     display: none;
   }
 
-  .slide-panel[data-active='false'] {
+  .slide-panel[data-active="false"] {
     opacity: 0;
   }
 
@@ -497,7 +503,8 @@ html.theme-sweep::view-transition-new(root) {
   .slide-more {
     position: absolute;
     inset-inline: 0;
-    bottom: 0;
+    /* Clears the pinned footer rather than sitting under it. */
+    bottom: 3.1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -505,7 +512,11 @@ html.theme-sweep::view-transition-new(root) {
     padding-bottom: 0.6rem;
     padding-top: 2.5rem;
     color: rgb(var(--color-ink));
-    background: linear-gradient(to top, rgb(var(--color-sand)) 12%, transparent);
+    background: linear-gradient(
+      to top,
+      rgb(var(--color-sand)) 12%,
+      transparent
+    );
     opacity: 0;
     pointer-events: none;
     transition: opacity 260ms ease-out;
@@ -524,8 +535,13 @@ html.theme-sweep::view-transition-new(root) {
   }
 
   @keyframes slide-more-nudge {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(3px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -541,13 +557,106 @@ html.theme-sweep::view-transition-new(root) {
     padding-bottom: 1.5rem;
   }
 
+  /*
+    The footer is the header's twin at the other edge of the frame: pinned
+    rather than scrolling, so paging controls never have to be hunted for.
+    sticky, not fixed, because it belongs to the panel -- fixed would leave one
+    footer floating over all twelve of them.
+  */
+  .slide-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin-top: auto;
+  }
+
+  /*
+    FOLLOW THE STORM
+    ================
+
+    The one section that pages differently from the rest. Its left column is
+    the map, and it is pinned; only the right column scrolls, so the reader
+    moves the storm along its track without the map itself drifting up the
+    screen. That means the panel around it must not scroll at all -- otherwise
+    the outer scroll and the inner one compete for the same wheel gesture and
+    whichever wins is a matter of where the pointer happened to be.
+
+    So this section is height-locked to exactly one panel, the same as every
+    other slide, and the overflow is handed to the step column alone.
+  */
+  @media (min-width: 768px) {
+    .slide-viewport:not(.is-document) .journey-section {
+      display: flex;
+      min-height: 0;
+      flex: 1 1 auto;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .slide-viewport:not(.is-document) .journey-section > div {
+      display: flex;
+      min-height: 0;
+      flex: 1 1 auto;
+      flex-direction: column;
+    }
+
+    .slide-viewport:not(.is-document) .journey-split {
+      min-height: 0;
+      flex: 1 1 auto;
+      margin-top: 1.25rem;
+    }
+
+    .slide-viewport:not(.is-document) .journey-steps {
+      min-height: 0;
+      height: 100%;
+      overflow-y: auto;
+      /* The one scrollbar on the site left deliberately visible. index.css hides
+         the document's because the canoe replaced it, and that reasoning was
+         explicitly scoped to the document -- an internal region with no canoe of
+         its own needs the affordance, and this is the only place on the site
+         where a reader has to know to scroll something that is not the page. */
+      padding-right: 0.75rem;
+    }
+
+    /* A step is most of the column, so the -45% band can only ever hold one, and
+       the country being described sits centred against the map beside it. */
+    .slide-viewport:not(.is-document) .journey-steps > li {
+      display: flex;
+      min-height: 78%;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide-viewport:not(.is-document) .journey-steps > li:last-child {
+      min-height: 60%;
+    }
+  }
+
   /* The map inside StormJourney is sticky against its scrolling ancestor. In
      document layout that ancestor is the page, so it has to clear the fixed
      header; in a panel the ancestor is the panel itself, which already starts
      below the header, and the same offset would push the map a header's height
      down the panel. */
   .slide-viewport:not(.is-document) .journey-sticky {
+    /* Stacked layout: still sticky, but the panel already starts below the
+       header, so the document offset would push it a header's height down. */
     top: 0.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .slide-viewport:not(.is-document) .journey-sticky {
+      position: static;
+      display: flex;
+      height: 100%;
+      min-height: 0;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide-viewport:not(.is-document) .journey-sticky svg {
+      min-height: 0;
+      max-height: 100%;
+    }
   }
 
   /*
