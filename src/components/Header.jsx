@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef } from 'react'
 import ScrollProgress from './ScrollProgress.jsx'
 import SectionNav from './SectionNav.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
-import LayoutToggle from './LayoutToggle.jsx'
 import DeckStatus from './DeckStatus.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'
@@ -31,8 +30,6 @@ export default function Header({
   onHeightChange,
   availableIds,
   progress,
-  layout,
-  onLayoutChange,
   onNavigate,
   storm,
   selectedNations,
@@ -84,7 +81,6 @@ export default function Header({
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <SectionNav availableIds={availableIds} onNavigate={onNavigate} />
-            <LayoutToggle layout={layout} onChange={onLayoutChange} />
             <ThemeToggle />
           </div>
         </div>

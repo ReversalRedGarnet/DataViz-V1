@@ -128,19 +128,11 @@ function AppShell() {
   const [panelFraction, setPanelFraction] = useState(0)
   const onProgress = useCallback((fraction) => setPanelFraction(fraction), [])
 
-  // Slideshow by default; the single-document layout is one click away and is
-  // remembered, because a reader who needed it once (find-in-page, printing, a
-  // browser the stage misbehaves on) will need it again.
-  const [layout, setLayout] = useState(() => {
-    if (typeof window === 'undefined') return 'slides'
-    return window.localStorage.getItem('ripple-layout') === 'document' ? 'document' : 'slides'
-  })
+  // The deck is the only layout. html gets is-slides permanently so the
+  // document itself never scrolls -- the panels do.
   useEffect(() => {
-    window.localStorage.setItem('ripple-layout', layout)
-    // The document itself must not scroll while the panels do, or a wheel
-    // gesture at a panel's end drags the whole stage.
-    document.documentElement.classList.toggle('is-slides', layout === 'slides')
-  }, [layout])
+    document.documentElement.classList.add('is-slides')
+  }, [])
 
   // Keep the CSS scroll offset in step with the measured header height, so a
   // jump-to-section link doesn't land with its heading hidden behind the fixed
@@ -159,8 +151,7 @@ function AppShell() {
   }, [])
 
   const sections = pageSections(data, selection, storm, selectStorm)
-  const slides = layout === 'slides'
-  const { active, direction, go, goToId } = useDeck(sections, { enabled: slides })
+  const { active, direction, go, goToId } = useDeck(sections)
 
   const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
 
@@ -178,10 +169,8 @@ function AppShell() {
       <Header
         onHeightChange={setHeaderHeight}
         availableIds={sections.map((s) => s.id)}
-        progress={slides ? deckProgress : undefined}
-        layout={layout}
-        onLayoutChange={setLayout}
-        onNavigate={slides ? goToId : undefined}
+        progress={deckProgress}
+        onNavigate={goToId}
         storm={storm}
         selectedNations={selection.selected}
         onClearNations={selection.clear}
@@ -197,14 +186,9 @@ function AppShell() {
           : 'Pick a storm from the timeline to continue.'}
       </div>
 
-      <main
-        id="main-content"
-        className={slides ? '' : 'min-h-screen'}
-        style={{ paddingTop: headerHeight }}
-      >
+      <main id="main-content" style={{ paddingTop: headerHeight }}>
         <PageSections
           sections={sections}
-          layout={layout}
           active={active}
           direction={direction}
           onNavigate={go}

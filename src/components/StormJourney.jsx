@@ -8,6 +8,7 @@ import { sectionGuard } from './sectionGuard.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useActiveStep } from '../hooks/useActiveStep.js'
 import { useScrollRoot } from '../hooks/useScrollRoot.jsx'
+import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import { chartColorsFor, MAP_COLORS, CHART_INK } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
@@ -146,15 +147,23 @@ export default function StormJourney({ storm, style }) {
     setBuilt(false)
   }, [storm?.id])
   const { theme } = useTheme()
-  // The steps are read against whatever box is actually scrolling them.
+  // The steps are read against whatever box is actually scrolling them, and
+  // that changes at the split breakpoint.
   //
-  // In slideshow layout that is the steps column itself -- the map is pinned
-  // and only the right-hand column moves -- so the column is both the container
-  // and the observer root. In document layout the page scrolls, and the root is
-  // the viewport (null). ScrollRootProvider publishes null in document layout,
-  // which is what distinguishes the two here.
-  const scrollRoot = useScrollRoot()
-  const active = useActiveStep(stepsNode, STEPS.length, scrollRoot ? stepsNode : null)
+  // Wide: the map is pinned beside the steps and only the step column moves, so
+  // the column is both the container and the observer root.
+  // Narrow: the columns stack and the panel scrolls as one, so the root is the
+  // panel's scroll region and the column is just a list inside it.
+  //
+  // Getting this wrong is not a cosmetic failure. An observer rooted on an
+  // element that does not scroll has a band that never moves, so a step that
+  // has once intersected goes on intersecting, entries stop firing, and the
+  // active step can only ever go forwards -- the map reaches the last country
+  // and will not come back. That was the scroll-reversal bug on desktop, and
+  // until now the narrow layout still had it.
+  const panelScroll = useScrollRoot()
+  const isSplit = useMediaQuery('(min-width: 768px)')
+  const active = useActiveStep(stepsNode, STEPS.length, isSplit ? stepsNode : panelScroll)
   const hasSteps = STEPS.length > 0
 
   // Read inside build(), which resolves after the render that set them. Held in

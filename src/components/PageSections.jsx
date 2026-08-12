@@ -1,113 +1,71 @@
-import { Fragment, cloneElement, useEffect, useRef, useState } from 'react'
-import PacificBorder from './PacificBorder.jsx'
-import { useTheme } from '../hooks/useTheme.jsx'
-import { sectionColorsFor } from '../utils/theme.js'
-import { delayStyle } from '../utils/motion.js'
+import { useEffect, useRef, useState } from 'react'
 import { NationHighlightProvider } from '../hooks/useNationHighlight.jsx'
 import { ScrollRootProvider } from '../hooks/useScrollRoot.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'
 
-// Every section of the piece, in order, rendered two ways from one tree.
+// The deck. Every section of the piece, in order, as slides.
 //
 // THE RULE THIS FILE EXISTS TO ENFORCE: nothing is ever conditionally rendered.
-// All sections are mounted all of the time, in both layouts. In slideshow mode
-// the off-stage ones sit in a horizontal flex track at full width with live
-// layout -- they are translated out of sight, not removed.
+// All sections are mounted all of the time. The off-stage ones sit in a
+// horizontal flex track at full width with live layout -- translated out of
+// sight, not removed.
 //
 // That is not a stylistic preference, it is the whole design. Every chart on
 // this site measures a real DOM node (useElementWidth) and waits for a real
 // IntersectionObserver callback (useInView) before drawing. An unmounted
-// section has no box, so a conditionally-rendered slideshow would hand every
-// chart a width of zero and then rely on an async retry to fix it -- which is
-// precisely the failure mode that has produced every rendering bug in this
-// project so far. Keeping the boxes alive means the measurement path never
-// changes, and none of that risk is taken on.
-//
-// It also buys the escape hatch: because both layouts are the same tree, the
-// single-document reading mode is a CSS class rather than a different render.
-// That is what gives find-in-page, printing and scroll restoration back to a
-// reader -- or a judge -- who needs them.
+// section has no box, so a conditionally-rendered deck would hand every chart a
+// width of zero and then rely on an async retry to fix it -- which is precisely
+// the failure mode that has produced every rendering bug in this project. The
+// boxes stay alive, so the measurement path never changes.
 //
 // Props:
-//   sections -- [{ id, tone, element, label }], in order
-//   layout -- 'slides' | 'document'
-//   active -- index of the on-stage section (slideshow layout only)
-//   onNavigate -- (index) => void, for the in-panel Next/Back controls
+//   sections -- [{ id, element, label, requires }], in order
+//   active -- index of the on-stage section
+//   direction -- 1 forward, -1 back; the enter animation reads it
+//   onNavigate -- (index) => void
 //   onProgress -- (fraction 0..1) => void, the active panel's own scroll
-//     position, so the canoe can keep reading progress through a long section
-export default function PageSections({ sections, layout, active, direction, onNavigate, onProgress }) {
-  const { theme } = useTheme()
-  const colors = sectionColorsFor(theme)
-  const slides = layout === 'slides'
-
-  // Whether the panel currently on stage has more below the fold.
-  //
-  // This matters more here than it would anywhere else: the browser scrollbar
-  // is hidden site-wide (index.css) because the canoe replaced it, and the
-  // panels hide theirs too. Between them a reader gets no indication at all
-  // that a slide continues past its bottom edge -- and most of them do. Without
-  // this hint the piece silently loses half its content to anyone who takes a
-  // full-height panel at face value.
+export default function PageSections({ sections, active, direction, onNavigate, onProgress }) {
+  // Whether the panel on stage has more below the fold. The document scrollbar
+  // is hidden site-wide and the panels hide theirs, so without this nothing on
+  // screen says a slide continues past its bottom edge -- and most do.
   const [more, setMore] = useState(false)
 
   return (
     <NationHighlightProvider>
-      <div
-        className={slides ? 'slide-viewport' : 'slide-viewport is-document'}
-        // The enter animation reads this: content arrives from the side the
-        // reader travelled from, so Back feels like retracing rather than like
-        // more forward motion.
-        data-dir={direction < 0 ? 'back' : 'forward'}
-      >
-        <div
-          className="slide-track"
-          style={slides ? { transform: `translateX(-${active * 100}%)` } : undefined}
-        >
+      <div className="slide-viewport" data-dir={direction < 0 ? 'back' : 'forward'}>
+        <div className="slide-track" style={{ transform: `translateX(-${active * 100}%)` }}>
           {sections.map((section, i) => (
-            <Fragment key={section.id}>
-              <SlidePanel
-                section={section}
-                index={i}
-                total={sections.length}
-                isActive={!slides || i === active}
-                slides={slides}
-                nextLabel={sections[i + 1]?.label}
-                prevLabel={sections[i - 1]?.label}
-                onNavigate={onNavigate}
-                onProgress={onProgress}
-                onOverflow={setMore}
-              />
-              {/* The wave divider is a horizontal seam between two stacked
-                  backgrounds. Side by side it has nothing to divide, so it is
-                  rendered only in document layout. */}
-              {!slides && i < sections.length - 1 && (
-                <PacificBorder
-                  colorAbove={colors[section.tone]}
-                  colorBelow={colors[sections[i + 1].tone]}
-                />
-              )}
-            </Fragment>
+            <SlidePanel
+              key={section.id}
+              section={section}
+              index={i}
+              total={sections.length}
+              isActive={i === active}
+              nextLabel={sections[i + 1]?.label}
+              prevLabel={sections[i - 1]?.label}
+              onNavigate={onNavigate}
+              onProgress={onProgress}
+              onOverflow={setMore}
+            />
           ))}
         </div>
 
-        {slides && (
-          // Outside the track, so it holds still while a panel scrolls beneath
-          // it. aria-hidden because it duplicates no information -- a screen
-          // reader is already walking the panel's content directly.
-          <div className={more ? 'slide-more is-visible' : 'slide-more'} aria-hidden="true">
-            <span className="slide-more-label">More in this section</span>
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-              <path
-                d="M6 9l6 6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        )}
+        {/* Outside the track, so it holds still while a panel scrolls beneath
+            it. aria-hidden because a screen reader is already walking the
+            panel's content directly. */}
+        <div className={more ? 'slide-more is-visible' : 'slide-more'} aria-hidden="true">
+          <span className="slide-more-label">More in this section</span>
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+            <path
+              d="M6 9l6 6 6-6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
       </div>
     </NationHighlightProvider>
   )
@@ -118,7 +76,6 @@ function SlidePanel({
   index,
   total,
   isActive,
-  slides,
   nextLabel,
   prevLabel,
   onNavigate,
@@ -129,17 +86,15 @@ function SlidePanel({
   // ScrollRootProvider re-renders once the element exists and every observer
   // inside it binds to the right root. A ref would still be null on the render
   // that matters.
-  // The scroll box is the panel's inner region now, not the panel itself, so
-  // it is what charts must measure their visibility against.
   const [node, setNode] = useState(null)
   const hasActivated = useRef(false)
 
   // Arriving at a panel puts you at its top and moves focus to its heading --
   // otherwise a keyboard or screen-reader user pages the deck and nothing they
-  // can perceive has changed. Skipped on the very first activation, so the page
-  // does not steal focus on load.
+  // can perceive has changed. Skipped on the first activation so the page does
+  // not steal focus on load.
   useEffect(() => {
-    if (!slides || !isActive || !node) return
+    if (!isActive || !node) return
     if (!hasActivated.current) {
       hasActivated.current = true
       return
@@ -153,12 +108,12 @@ function SlidePanel({
       heading.setAttribute('tabindex', '-1')
       heading.focus({ preventScroll: true })
     }
-  }, [slides, isActive, node])
+  }, [isActive, node])
 
-  // Only the on-stage panel reports progress. The others sit wherever the
-  // reader last left them and would fight over the readout.
+  // Only the on-stage panel reports. The others sit wherever the reader last
+  // left them and would fight over the readout.
   useEffect(() => {
-    if (!slides || !isActive || !node) return
+    if (!isActive || !node) return
     let frame = null
     const report = () => {
       frame = null
@@ -190,7 +145,7 @@ function SlidePanel({
       clearTimeout(settle)
       if (frame) cancelAnimationFrame(frame)
     }
-  }, [slides, isActive, node, onProgress, onOverflow])
+  }, [isActive, node, onProgress, onOverflow])
 
   return (
     <div
@@ -201,35 +156,29 @@ function SlidePanel({
       // walks off the side of the screen and the reader cannot tell where it
       // went. React 18 does not special-case this attribute, hence the empty
       // string rather than a boolean.
-      inert={slides && !isActive ? '' : undefined}
-      aria-hidden={slides && !isActive ? 'true' : undefined}
+      inert={!isActive ? '' : undefined}
+      aria-hidden={!isActive ? 'true' : undefined}
     >
-      {/* null in document layout, deliberately. The panel is only a scroll
-          container while the deck is paging; used as an observer root when it
-          is not, the -45%/-10% bands would sit at fixed points inside a very
-          tall box and never move past anything. */}
-      <ScrollRootProvider node={slides ? node : null}>
+      <ScrollRootProvider node={node}>
         <div className="slide-panel-inner">
           {/* The scroll happens here, one level in, not on the panel itself.
               That is what keeps every slide exactly one screen tall with its
               footer in the same place: overflow belongs to the content region,
               and the frame around it never moves. A section that manages its
               own internal scrolling -- Follow the Storm, with its pinned map --
-              simply fills this box without overflowing it. */}
+              fills this box without overflowing it. */}
           <div className="slide-scroll" ref={setNode}>
-            {cloneElement(section.element, { style: delayStyle(slides ? 0 : index) })}
+            {section.element}
           </div>
 
-          {slides && (
-            <SlideFooter
-              index={index}
-              total={total}
-              nextLabel={nextLabel}
-              prevLabel={prevLabel}
-              onNavigate={onNavigate}
-              requires={section.requires}
-            />
-          )}
+          <SlideFooter
+            index={index}
+            total={total}
+            nextLabel={nextLabel}
+            prevLabel={prevLabel}
+            onNavigate={onNavigate}
+            requires={section.requires}
+          />
         </div>
       </ScrollRootProvider>
     </div>
@@ -242,10 +191,7 @@ function SlidePanel({
 //
 // Built to match the header exactly -- same sand fill, same ripple backdrop,
 // same edge shadow -- so the deck reads as one frame with the content moving
-// through it, rather than a page with unrelated furniture at each end. Pinned
-// to the bottom of the panel rather than scrolling away with the content, for
-// the same reason the header is fixed: navigation that disappears when you
-// start reading is navigation you have to go looking for.
+// through it, rather than a page with unrelated furniture at each end.
 function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires }) {
   // A truly disabled button swallows the click, so a reader who presses it gets
   // no answer at all -- and the most likely reason for pressing it is not

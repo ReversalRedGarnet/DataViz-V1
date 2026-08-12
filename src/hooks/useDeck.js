@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // Left/Right and PageUp/PageDown page the deck. Up/Down are NOT bound: they
 // belong to the panel's own internal scroll, and taking them would make a long
 // section unreadable by keyboard.
-export function useDeck(sections, { enabled = true } = {}) {
+export function useDeck(sections) {
   const [active, setActive] = useState(0)
   // Which way the deck last moved. The incoming slide's contents animate in
   // from the side the reader came from, so a Back press reads as retracing
@@ -67,7 +67,6 @@ export function useDeck(sections, { enabled = true } = {}) {
   // Deep links, both directions. The id is the same one the section menu and
   // the single-document layout use, so a URL means the same thing in either.
   useEffect(() => {
-    if (!enabled) return
     const fromHash = window.location.hash.replace('#', '')
     if (fromHash) goToId(fromHash)
     function onHashChange() {
@@ -79,20 +78,18 @@ export function useDeck(sections, { enabled = true } = {}) {
     // Runs once: re-running on every sections change would drag the reader back
     // to the hash's section every time they picked a storm.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled])
+  }, [])
 
   useEffect(() => {
-    if (!enabled) return
     const id = sections[active]?.id
     if (!id) return
     // replaceState, not a hash assignment: assigning to location.hash pushes a
     // history entry per slide, so Back would walk the reader through every
     // section they had visited rather than out of the piece.
     window.history.replaceState(null, '', `#${id}`)
-  }, [active, sections, enabled])
+  }, [active, sections])
 
   useEffect(() => {
-    if (!enabled) return
     function onKeyDown(event) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
       const target = event.target
@@ -117,7 +114,7 @@ export function useDeck(sections, { enabled = true } = {}) {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [enabled, go])
+  }, [go])
 
   return { active, direction, go, goToId, count }
 }

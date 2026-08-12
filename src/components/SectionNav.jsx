@@ -52,10 +52,10 @@ function HamburgerIcon({ open }) {
 // already gives fragment navigation a smooth scroll and the right header
 // clearance, and this way each section is a shareable URL. Renders nothing if
 // the registry is empty.
-// `onNavigate` is supplied in slideshow layout, where a fragment link has
-// nothing to scroll to -- the target panel is off-stage rather than below. The
-// href is kept regardless so each section is still a shareable URL and the menu
-// still works if the handler is absent.
+// A fragment link has nothing to scroll to: the target panel is off-stage
+// rather than below, so the menu drives the deck instead. The href is kept so
+// each section is still a shareable URL that the hash sync in useDeck will
+// honour on load.
 export default function SectionNav({ availableIds, onNavigate }) {
   // While the story is gated, most sections are not in the document at all.
   // Listing them anyway would give the reader links that scroll nowhere, so the

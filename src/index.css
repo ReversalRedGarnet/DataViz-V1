@@ -628,7 +628,7 @@ html.theme-sweep::view-transition-new(root) {
 
   /* A panel is one screen. The document's generous section padding wastes a
      third of it, so it is tightened in slideshow layout only. */
-  .slide-viewport:not(.is-document) .slide-scroll > * {
+  .slide-viewport .slide-scroll > * {
     padding-top: 1.75rem;
     padding-bottom: 1.5rem;
   }
@@ -639,7 +639,7 @@ html.theme-sweep::view-transition-new(root) {
     a screen and took Explore the Pacific with it. Clamped to a share of the
     panel so this slide is the same height as every other one.
   */
-  .slide-viewport:not(.is-document) .map-frame svg {
+  .slide-viewport .map-frame svg {
     /* width stays 100%, deliberately. An SVG with a viewBox has an aspect ratio
        but no intrinsic width, so `width: auto` alongside an auto height lets
        some engines fall back to the 300x150 replaced-element default. Keeping a
@@ -683,7 +683,7 @@ html.theme-sweep::view-transition-new(root) {
     other slide, and the overflow is handed to the step column alone.
   */
   @media (min-width: 768px) {
-    .slide-viewport:not(.is-document) .slide-scroll > .journey-section {
+    .slide-viewport .slide-scroll > .journey-section {
       display: flex;
       min-height: 0;
       flex: 1 1 auto;
@@ -691,14 +691,14 @@ html.theme-sweep::view-transition-new(root) {
       overflow: hidden;
     }
 
-    .slide-viewport:not(.is-document) .journey-section > div {
+    .slide-viewport .journey-section > div {
       display: flex;
       min-height: 0;
       flex: 1 1 auto;
       flex-direction: column;
     }
 
-    .slide-viewport:not(.is-document) .journey-split {
+    .slide-viewport .journey-split {
       min-height: 0;
       flex: 1 1 auto;
       margin-top: 1.25rem;
@@ -711,7 +711,7 @@ html.theme-sweep::view-transition-new(root) {
       align-items: stretch;
     }
 
-    .slide-viewport:not(.is-document) .journey-steps {
+    .slide-viewport .journey-steps {
       min-height: 0;
       height: 100%;
       overflow-y: auto;
@@ -726,18 +726,18 @@ html.theme-sweep::view-transition-new(root) {
 
     /* A step is most of the column, so the -45% band can only ever hold one, and
        the country being described sits centred against the map beside it. */
-    .slide-viewport:not(.is-document) .journey-steps::-webkit-scrollbar {
+    .slide-viewport .journey-steps::-webkit-scrollbar {
       display: none;
     }
 
-    .slide-viewport:not(.is-document) .journey-steps > li {
+    .slide-viewport .journey-steps > li {
       display: flex;
       min-height: 78%;
       flex-direction: column;
       justify-content: center;
     }
 
-    .slide-viewport:not(.is-document) .journey-steps > li:last-child {
+    .slide-viewport .journey-steps > li:last-child {
       min-height: 60%;
     }
   }
@@ -747,14 +747,14 @@ html.theme-sweep::view-transition-new(root) {
      header; in a panel the ancestor is the panel itself, which already starts
      below the header, and the same offset would push the map a header's height
      down the panel. */
-  .slide-viewport:not(.is-document) .journey-sticky {
+  .slide-viewport .journey-sticky {
     /* Stacked layout: still sticky, but the panel already starts below the
        header, so the document offset would push it a header's height down. */
     top: 0.5rem;
   }
 
   @media (min-width: 768px) {
-    .slide-viewport:not(.is-document) .journey-sticky {
+    .slide-viewport .journey-sticky {
       position: static;
       display: flex;
       height: 100%;
@@ -763,7 +763,7 @@ html.theme-sweep::view-transition-new(root) {
       justify-content: center;
     }
 
-    .slide-viewport:not(.is-document) .journey-sticky svg {
+    .slide-viewport .journey-sticky svg {
       min-height: 0;
       max-height: 100%;
     }
@@ -1022,61 +1022,32 @@ html.theme-sweep::view-transition-new(root) {
   }
 
   /*
-    DOCUMENT LAYOUT -- the escape hatch
-    ==================================
+    Print is the one place the deck unrolls.
+    ========================================
 
-    The same tree, unwrapped. Cheap only because nothing is conditionally
-    rendered: switching layout is a class change, not a re-render, so no chart
-    is rebuilt and no state is lost in either direction.
+    Kept after the single-document reading mode was removed, and worth keeping:
+    it costs nothing, since no reader ever sees it, and a paginated deck cannot
+    be printed at all -- twelve slides would come out as one clipped page. This
+    is also the only remaining route to a searchable copy of the whole piece. A
+    judge who wants to check a roster claim can print to PDF and search that,
+    which matters because find-in-page now only reaches the slide on screen:
+    the off-stage panels are inert, and Chrome excludes inert content from it.
 
-    This is what gives back find-in-page, printing, scroll restoration and the
-    browser's own scroll gestures -- and it is the fallback if the stage
-    misbehaves on a reader's browser. A judge who cannot search the page cannot
-    check the roster claims, and checkability is the argument the whole piece is
-    making.
+    Nothing here needs a class on the tree, because nothing is conditionally
+    rendered -- all twelve sections are always in the DOM, so unrolling them is
+    purely a matter of undoing the layout.
   */
-  .slide-viewport.is-document {
-    overflow: visible;
-    height: auto;
-  }
-
-  .slide-viewport.is-document .slide-track {
-    display: block;
-    height: auto;
-    /* The inline transform is only written in slideshow layout, but a stale one
-       from a mid-transition switch would offset the entire document. */
-    transform: none !important;
-    transition: none;
-  }
-
-  .slide-viewport.is-document .slide-panel {
-    height: auto;
-    overflow: visible;
-    opacity: 1;
-  }
-
-  .slide-viewport.is-document .slide-panel-inner {
-    display: block;
-    height: auto;
-    min-height: 0;
-  }
-
-  .slide-viewport.is-document .slide-scroll {
-    display: block;
-    overflow: visible;
-    min-height: 0;
-  }
-
-  /* Printing is always the document. */
   @media print {
     .slide-viewport {
       overflow: visible !important;
       height: auto !important;
     }
+
     .slide-track {
       display: block !important;
       transform: none !important;
     }
+
     .slide-panel,
     .slide-panel-inner,
     .slide-scroll {
@@ -1085,7 +1056,14 @@ html.theme-sweep::view-transition-new(root) {
       overflow: visible !important;
       opacity: 1 !important;
     }
-    .slide-footer {
+
+    .slide-panel[inert],
+    .slide-panel[aria-hidden="true"] {
+      display: block !important;
+    }
+
+    .slide-footer,
+    .slide-more {
       display: none !important;
     }
   }
@@ -1101,8 +1079,10 @@ html.theme-sweep::view-transition-new(root) {
 }
 
 /*
-  In slideshow layout the document itself must not scroll -- the panels do. Set
-  on <html> by App.jsx so the two layouts cannot both claim the scroll at once.
+  The document itself never scrolls -- the panels do. Applied to <html> by
+  App.jsx on mount rather than written into the stylesheet unconditionally, so
+  that a page which fails to boot still scrolls normally instead of presenting
+  a locked, empty screen.
 */
 html.is-slides,
 html.is-slides body {
