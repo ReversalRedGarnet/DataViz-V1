@@ -13,6 +13,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // section unreadable by keyboard.
 export function useDeck(sections, { enabled = true } = {}) {
   const [active, setActive] = useState(0)
+  // Which way the deck last moved. The incoming slide's contents animate in
+  // from the side the reader came from, so a Back press reads as retracing
+  // rather than as more of the same forward motion.
+  const [direction, setDirection] = useState(1)
   const count = sections.length
   const countRef = useRef(count)
   countRef.current = count
@@ -28,10 +32,18 @@ export function useDeck(sections, { enabled = true } = {}) {
   const go = useCallback((next) => {
     setActive((current) => {
       const target = Math.max(0, Math.min(countRef.current - 1, typeof next === 'function' ? next(current) : next))
-      if (target <= current) return target
-      for (let i = current; i < target; i += 1) {
-        if (gateRef.current[i]) return i
+      if (target < current) {
+        setDirection(-1)
+        return target
       }
+      if (target === current) return target
+      for (let i = current; i < target; i += 1) {
+        if (gateRef.current[i]) {
+          if (i !== current) setDirection(1)
+          return i
+        }
+      }
+      setDirection(1)
       return target
     })
   }, [])
@@ -107,5 +119,5 @@ export function useDeck(sections, { enabled = true } = {}) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [enabled, go])
 
-  return { active, go, goToId, count }
+  return { active, direction, go, goToId, count }
 }

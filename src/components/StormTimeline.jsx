@@ -99,7 +99,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
                         onClick={() => onSelect(active ? null : storm.id)}
                         aria-pressed={active}
                         aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of four nations.`}
-                        className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand ${
+                        className={`press-target rounded-lg border px-3 py-2 text-left text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand ${
                           active
                             ? 'border-accent bg-accent/10 font-semibold'
                             : 'border-ink/15 hover:border-ink/35 hover:bg-surface/60'

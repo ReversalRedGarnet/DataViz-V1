@@ -36,7 +36,7 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 //   onNavigate -- (index) => void, for the in-panel Next/Back controls
 //   onProgress -- (fraction 0..1) => void, the active panel's own scroll
 //     position, so the canoe can keep reading progress through a long section
-export default function PageSections({ sections, layout, active, onNavigate, onProgress }) {
+export default function PageSections({ sections, layout, active, direction, onNavigate, onProgress }) {
   const { theme } = useTheme()
   const colors = sectionColorsFor(theme)
   const slides = layout === 'slides'
@@ -53,7 +53,13 @@ export default function PageSections({ sections, layout, active, onNavigate, onP
 
   return (
     <NationHighlightProvider>
-      <div className={slides ? 'slide-viewport' : 'slide-viewport is-document'}>
+      <div
+        className={slides ? 'slide-viewport' : 'slide-viewport is-document'}
+        // The enter animation reads this: content arrives from the side the
+        // reader travelled from, so Back feels like retracing rather than like
+        // more forward motion.
+        data-dir={direction < 0 ? 'back' : 'forward'}
+      >
         <div
           className="slide-track"
           style={slides ? { transform: `translateX(-${active * 100}%)` } : undefined}
@@ -138,7 +144,10 @@ function SlidePanel({
       hasActivated.current = true
       return
     }
-    node.scrollTo({ top: 0 })
+    // Guarded: Element.scrollTo is absent in some environments, and the reset
+    // is a nicety -- it must not take the focus move down with it.
+    if (typeof node.scrollTo === 'function') node.scrollTo({ top: 0 })
+    else node.scrollTop = 0
     const heading = node.querySelector('h1, h2')
     if (heading) {
       heading.setAttribute('tabindex', '-1')
@@ -233,6 +242,16 @@ function SlidePanel({
 // the same reason the header is fixed: navigation that disappears when you
 // start reading is navigation you have to go looking for.
 function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires }) {
+  // A truly disabled button swallows the click, so a reader who presses it gets
+  // no answer at all -- and the most likely reason for pressing it is not
+  // having noticed what it is asking for. aria-disabled keeps it announced as
+  // unavailable and still reachable, and the press answers with a shake.
+  const [nudging, setNudging] = useState(false)
+  const refuse = () => {
+    setNudging(false)
+    requestAnimationFrame(() => setNudging(true))
+  }
+
   return (
     <div className="slide-footer relative bg-sand shadow-[0_-1px_2px_0_rgb(0_0_0/0.05)]">
       <BackgroundPattern backdrop={HEADER_BACKDROP} />
@@ -241,12 +260,9 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
           <button
             type="button"
             onClick={() => onNavigate(index - 1)}
-            className="group flex min-w-0 items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-left text-sm transition-colors hover:border-ink/35 hover:bg-surface/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="deck-btn deck-btn-back"
           >
-            <span
-              aria-hidden="true"
-              className="opacity-50 transition-transform group-hover:-translate-x-0.5"
-            >
+            <span aria-hidden="true" className="deck-btn-arrow">
               &larr;
             </span>
             <span className="min-w-0">
@@ -260,7 +276,7 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
           <span />
         )}
 
-        <span className="shrink-0 text-xs tabular-nums opacity-50">
+        <span className="deck-count shrink-0 text-xs tabular-nums opacity-50" aria-hidden="true">
           {index + 1} / {total}
         </span>
 
@@ -271,15 +287,13 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
           // does not say why is just a broken one.
           <button
             type="button"
-            onClick={() => onNavigate(index + 1)}
-            disabled={Boolean(requires)}
+            onClick={() => (requires ? refuse() : onNavigate(index + 1))}
+            onAnimationEnd={() => setNudging(false)}
             aria-disabled={Boolean(requires)}
             title={requires || undefined}
-            className={
-              requires
-                ? 'flex min-w-0 cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-ink/25 px-3 py-2 text-right text-sm opacity-60'
-                : 'group flex min-w-0 items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-right text-sm font-medium transition-colors hover:bg-accent/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent'
-            }
+            className={`deck-btn deck-btn-next${requires ? ' is-blocked' : ''}${
+              nudging ? ' is-refusing' : ''
+            }`}
           >
             <span className="min-w-0">
               <span className="block text-[0.65rem] uppercase tracking-[0.14em] opacity-55">
@@ -287,10 +301,7 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
               </span>
               <span className="block truncate">{requires || nextLabel}</span>
             </span>
-            <span
-              aria-hidden="true"
-              className="opacity-50 transition-transform group-hover:translate-x-0.5"
-            >
+            <span aria-hidden="true" className="deck-btn-arrow">
               {requires ? '\u2014' : '\u2192'}
             </span>
           </button>

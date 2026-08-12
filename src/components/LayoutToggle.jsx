@@ -19,7 +19,7 @@ export default function LayoutToggle({ layout, onChange }) {
       aria-pressed={!slides}
       title={slides ? 'Read as one page' : 'Read as slides'}
       aria-label={slides ? 'Read as one page' : 'Read as slides'}
-      className="flex h-9 w-9 items-center justify-center rounded-md text-ink transition-colors hover:bg-ink/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="press-target flex h-9 w-9 items-center justify-center rounded-md text-ink hover:bg-ink/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
     >
       <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true" fill="none">
         {slides ? (

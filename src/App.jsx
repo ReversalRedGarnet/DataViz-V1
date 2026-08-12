@@ -160,7 +160,7 @@ function AppShell() {
 
   const sections = pageSections(data, selection, storm, selectStorm)
   const slides = layout === 'slides'
-  const { active, go, goToId } = useDeck(sections, { enabled: slides })
+  const { active, direction, go, goToId } = useDeck(sections, { enabled: slides })
 
   const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
 
@@ -206,6 +206,7 @@ function AppShell() {
           sections={sections}
           layout={layout}
           active={active}
+          direction={direction}
           onNavigate={go}
           onProgress={onProgress}
         />
