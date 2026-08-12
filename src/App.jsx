@@ -88,6 +88,11 @@ function pageSections(data, selection, storm, onSelectStorm) {
     {
       id: 'map',
       tone: 'plain',
+      // Everything from here on is driven by the map's selection: the ripple
+      // chain, the comparison and the divergence panels all read it. Paging
+      // past without a country picked would show three empty states in a row
+      // and read as a broken site rather than an unanswered question.
+      requires: selected.length === 0 ? 'Pick a country on the map' : null,
       element: <MapView storm={storm} selected={selected} onToggle={toggle} onClear={clear} />,
     },
     {

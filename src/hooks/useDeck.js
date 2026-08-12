@@ -17,10 +17,22 @@ export function useDeck(sections, { enabled = true } = {}) {
   const countRef = useRef(count)
   countRef.current = count
 
+  // A section carrying `requires` holds the deck at itself until the reader has
+  // done what it asks. Enforced here rather than only on the Next button, so
+  // the keyboard and the section menu cannot walk around it -- and enforced as
+  // a clamp rather than a refusal, so jumping from slide 2 to slide 9 still
+  // moves the reader as far as the gate instead of doing nothing.
+  const gateRef = useRef([])
+  gateRef.current = sections.map((s) => Boolean(s.requires))
+
   const go = useCallback((next) => {
     setActive((current) => {
-      const target = typeof next === 'function' ? next(current) : next
-      return Math.max(0, Math.min(countRef.current - 1, target))
+      const target = Math.max(0, Math.min(countRef.current - 1, typeof next === 'function' ? next(current) : next))
+      if (target <= current) return target
+      for (let i = current; i < target; i += 1) {
+        if (gateRef.current[i]) return i
+      }
+      return target
     })
   }, [])
 

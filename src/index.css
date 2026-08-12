@@ -459,11 +459,13 @@ html.theme-sweep::view-transition-new(root) {
   .slide-panel {
     flex: 0 0 100%;
     height: 100%;
-    overflow-y: auto;
-    /* Stops a panel's scroll chaining out to the document when it bottoms out,
-       which on iOS reads as the whole page bouncing. */
-    overscroll-behavior: contain;
-    scrollbar-width: none;
+    /* The panel itself never scrolls. Overflow belongs one level in, to
+       .slide-scroll, so that the frame -- panel edges and footer -- holds still
+       at exactly one screen on every slide while only the content moves. When
+       the panel scrolled, a tall section (the snapshot grid, the divergence
+       panels) carried its footer away down the page with it and the deck's
+       height changed from slide to slide. */
+    overflow: hidden;
     /* Off-stage panels fade rather than sitting at full strength just off the
        edge -- with a fast pager the neighbour is briefly visible mid-transition
        and a hard-edged one reads as a rendering fault. */
@@ -471,8 +473,27 @@ html.theme-sweep::view-transition-new(root) {
     transition: opacity 320ms ease-out;
   }
 
-  .slide-panel::-webkit-scrollbar {
+  .slide-scroll {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    /* Stops the inner scroll chaining out when it bottoms out, which on iOS
+       reads as the whole page bouncing. */
+    overscroll-behavior: contain;
+    /* Hidden, like the document's. The "more in this section" hint below is
+       what carries the affordance, and a scrollbar appearing on some slides and
+       not others is the visual inconsistency this whole pass is undoing. */
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .slide-scroll::-webkit-scrollbar {
     display: none;
+  }
+
+  .slide-scroll > section {
+    flex: 1 0 auto;
   }
 
   .slide-panel[data-active="false"] {
@@ -486,10 +507,6 @@ html.theme-sweep::view-transition-new(root) {
     display: flex;
     min-height: 100%;
     flex-direction: column;
-  }
-
-  .slide-panel-inner > section {
-    flex: 1 0 auto;
   }
 
   /*
@@ -552,9 +569,23 @@ html.theme-sweep::view-transition-new(root) {
 
   /* A panel is one screen. The document's generous section padding wastes a
      third of it, so it is tightened in slideshow layout only. */
-  .slide-viewport:not(.is-document) .slide-panel-inner > section {
+  .slide-viewport:not(.is-document) .slide-scroll > section {
     padding-top: 1.75rem;
     padding-bottom: 1.5rem;
+  }
+
+  /*
+    The map is the tallest single object on the site and it has no natural
+    ceiling -- it is sized from its own width, so on a wide window it grew past
+    a screen and took Explore the Pacific with it. Clamped to a share of the
+    panel so this slide is the same height as every other one.
+  */
+  .slide-viewport:not(.is-document) .map-frame svg {
+    max-height: 52vh;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+    display: block;
   }
 
   /*
@@ -585,7 +616,7 @@ html.theme-sweep::view-transition-new(root) {
     other slide, and the overflow is handed to the step column alone.
   */
   @media (min-width: 768px) {
-    .slide-viewport:not(.is-document) .journey-section {
+    .slide-viewport:not(.is-document) .slide-scroll > .journey-section {
       display: flex;
       min-height: 0;
       flex: 1 1 auto;
@@ -610,16 +641,21 @@ html.theme-sweep::view-transition-new(root) {
       min-height: 0;
       height: 100%;
       overflow-y: auto;
-      /* The one scrollbar on the site left deliberately visible. index.css hides
-         the document's because the canoe replaced it, and that reasoning was
-         explicitly scoped to the document -- an internal region with no canoe of
-         its own needs the affordance, and this is the only place on the site
-         where a reader has to know to scroll something that is not the page. */
+      /* Hidden like every other scrollbar on the site. This was left visible
+         at first, as the one place with no other affordance -- but a scrollbar
+         appearing on exactly one slide reads as a rendering fault rather than
+         an invitation, and the section's own line now says to scroll the right
+         column. */
+      scrollbar-width: none;
       padding-right: 0.75rem;
     }
 
     /* A step is most of the column, so the -45% band can only ever hold one, and
        the country being described sits centred against the map beside it. */
+    .slide-viewport:not(.is-document) .journey-steps::-webkit-scrollbar {
+      display: none;
+    }
+
     .slide-viewport:not(.is-document) .journey-steps > li {
       display: flex;
       min-height: 78%;
@@ -698,6 +734,12 @@ html.theme-sweep::view-transition-new(root) {
     min-height: 0;
   }
 
+  .slide-viewport.is-document .slide-scroll {
+    display: block;
+    overflow: visible;
+    min-height: 0;
+  }
+
   /* Printing is always the document. */
   @media print {
     .slide-viewport {
@@ -708,7 +750,8 @@ html.theme-sweep::view-transition-new(root) {
       display: block !important;
       transform: none !important;
     }
-    .slide-panel {
+    .slide-panel,
+    .slide-scroll {
       height: auto !important;
       overflow: visible !important;
       opacity: 1 !important;

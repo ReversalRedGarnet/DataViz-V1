@@ -123,6 +123,8 @@ function SlidePanel({
   // ScrollRootProvider re-renders once the element exists and every observer
   // inside it binds to the right root. A ref would still be null on the render
   // that matters.
+  // The scroll box is the panel's inner region now, not the panel itself, so
+  // it is what charts must measure their visibility against.
   const [node, setNode] = useState(null)
   const hasActivated = useRef(false)
 
@@ -178,7 +180,6 @@ function SlidePanel({
 
   return (
     <div
-      ref={setNode}
       id={section.id}
       className="slide-panel"
       data-active={isActive ? 'true' : 'false'}
@@ -195,7 +196,15 @@ function SlidePanel({
           tall box and never move past anything. */}
       <ScrollRootProvider node={slides ? node : null}>
         <div className="slide-panel-inner">
-          {cloneElement(section.element, { style: delayStyle(slides ? 0 : index) })}
+          {/* The scroll happens here, one level in, not on the panel itself.
+              That is what keeps every slide exactly one screen tall with its
+              footer in the same place: overflow belongs to the content region,
+              and the frame around it never moves. A section that manages its
+              own internal scrolling -- Follow the Storm, with its pinned map --
+              simply fills this box without overflowing it. */}
+          <div className="slide-scroll" ref={setNode}>
+            {cloneElement(section.element, { style: delayStyle(slides ? 0 : index) })}
+          </div>
 
           {slides && (
             <SlideFooter
@@ -204,6 +213,7 @@ function SlidePanel({
               nextLabel={nextLabel}
               prevLabel={prevLabel}
               onNavigate={onNavigate}
+              requires={section.requires}
             />
           )}
         </div>
@@ -222,7 +232,7 @@ function SlidePanel({
 // to the bottom of the panel rather than scrolling away with the content, for
 // the same reason the header is fixed: navigation that disappears when you
 // start reading is navigation you have to go looking for.
-function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate }) {
+function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires }) {
   return (
     <div className="slide-footer relative bg-sand shadow-[0_-1px_2px_0_rgb(0_0_0/0.05)]">
       <BackgroundPattern backdrop={HEADER_BACKDROP} />
@@ -255,22 +265,33 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate }) {
         </span>
 
         {nextLabel ? (
+          // `requires` holds up the deck until the reader has done the thing
+          // the next slides depend on. Shown as the button's own label rather
+          // than as a message elsewhere on the page: a disabled control that
+          // does not say why is just a broken one.
           <button
             type="button"
             onClick={() => onNavigate(index + 1)}
-            className="group flex min-w-0 items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-right text-sm font-medium transition-colors hover:bg-accent/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            disabled={Boolean(requires)}
+            aria-disabled={Boolean(requires)}
+            title={requires || undefined}
+            className={
+              requires
+                ? 'flex min-w-0 cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-ink/25 px-3 py-2 text-right text-sm opacity-60'
+                : 'group flex min-w-0 items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-right text-sm font-medium transition-colors hover:bg-accent/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent'
+            }
           >
             <span className="min-w-0">
               <span className="block text-[0.65rem] uppercase tracking-[0.14em] opacity-55">
-                Next
+                {requires ? 'To continue' : 'Next'}
               </span>
-              <span className="block truncate">{nextLabel}</span>
+              <span className="block truncate">{requires || nextLabel}</span>
             </span>
             <span
               aria-hidden="true"
               className="opacity-50 transition-transform group-hover:translate-x-0.5"
             >
-              &rarr;
+              {requires ? '\u2014' : '\u2192'}
             </span>
           </button>
         ) : (

@@ -365,7 +365,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         Tap a marker to select it, tap a second one to compare. Drag to pan, pinch to zoom, or use
         the buttons.
       </p>
-      <div ref={containerRef} className="relative">
+      <div ref={containerRef} className="map-frame relative">
         {/* overflow-hidden is load-bearing: the ocean rect is drawn far past
             the viewBox so panning never reveals empty space, and without a clip
             its laid-out width pushed the whole page into horizontal overflow.
