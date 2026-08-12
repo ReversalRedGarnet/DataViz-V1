@@ -16,14 +16,21 @@ import { useEffect, useState } from 'react'
 // Without IntersectionObserver, every step is treated as read: the sequence
 // then renders in its finished state rather than stuck on step one, which is
 // also what the reduced-motion path wants.
-export function useActiveStep(containerRef, count) {
+// `root` is the scrolling box the steps live in: null for the viewport, or a
+// panel element in slideshow layout. The -45% margins still do their job -- they
+// collapse the observer's root to a thin band across the middle of whatever
+// container is given, and a band shorter than any step can only ever hold one.
+export function useActiveStep(container, count, root = null) {
   const [active, setActive] = useState(0)
 
   useEffect(() => {
-    const root = containerRef.current
-    if (!root) return
+    // `container` may be a ref or the element itself. Callers that need the
+    // element to also be the observer root have to pass the node, because a
+    // ref's .current is still null on the render where the root is chosen.
+    const el = container && 'current' in container ? container.current : container
+    if (!el) return
 
-    const steps = Array.from(root.querySelectorAll('[data-step]'))
+    const steps = Array.from(el.querySelectorAll('[data-step]'))
     if (steps.length === 0) return
 
     if (typeof IntersectionObserver === 'undefined') {
@@ -37,11 +44,18 @@ export function useActiveStep(containerRef, count) {
           if (entry.isIntersecting) setActive(Number(entry.target.dataset.step))
         }
       },
-      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+      // This used to read `const root = containerRef.current` a few lines up,
+      // shadowing the parameter and making the steps' own container the
+      // observer root. That container does not scroll, so the -45% band sat at
+      // a fixed place in the list and never moved: a step that had once
+      // intersected went on intersecting, entries stopped firing, and the
+      // active step could only ever go forwards. Scrolling back up left the
+      // map showing the furthest point reached, with no way to reverse it.
+      { root: root ?? null, rootMargin: '-45% 0px -45% 0px', threshold: 0 }
     )
     steps.forEach((step) => observer.observe(step))
     return () => observer.disconnect()
-  }, [containerRef, count])
+  }, [container, count, root])
 
   return active
 }

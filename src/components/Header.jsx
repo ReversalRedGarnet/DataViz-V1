@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import ScrollProgress from './ScrollProgress.jsx'
 import SectionNav from './SectionNav.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
+import DeckStatus from './DeckStatus.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'
 
@@ -25,7 +26,15 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 //     padding-top and keep the in-page anchor offset current. Measured rather
 //     than hardcoded so it can't drift out of sync with a future copy or
 //     font-size change.
-export default function Header({ onHeightChange, availableIds }) {
+export default function Header({
+  onHeightChange,
+  availableIds,
+  progress,
+  onNavigate,
+  storm,
+  selectedNations,
+  onClearNations,
+}) {
   const headerRef = useRef(null)
 
   // useLayoutEffect, not useEffect: this measurement drives another element's
@@ -71,16 +80,21 @@ export default function Header({ onHeightChange, availableIds }) {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <SectionNav availableIds={availableIds} />
+            <SectionNav availableIds={availableIds} onNavigate={onNavigate} />
             <ThemeToggle />
           </div>
         </div>
+        {/* The map is on one slide and the charts it drives are on the next
+            three, so the reader can no longer see a pick and its consequence at
+            the same time. This carries the current selection across every
+            slide, and lets it be cleared without paging back to the map. */}
+        <DeckStatus storm={storm} selectedNations={selectedNations} onClearNations={onClearNations} />
       </div>
       {/* -mt pulls the bar up so the waterline lands on the header's edge
           rather than below it; overflow-visible on the svg lets the canoe and
           paddle rise above without being clipped. */}
       <div className="relative -mt-1">
-        <ScrollProgress />
+        <ScrollProgress progress={progress} />
       </div>
     </header>
   )

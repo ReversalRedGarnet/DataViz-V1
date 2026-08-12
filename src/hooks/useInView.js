@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useScrollRoot } from './useScrollRoot.jsx'
 
 // "Has this element been scrolled into view yet?" Returns [ref, inView].
 //
@@ -16,7 +17,17 @@ import { useCallback, useEffect, useState } from 'react'
 // every entrance. Anything without IntersectionObserver -- or without a DOM at
 // all, which is how the server-rendered check runs -- reports visible
 // immediately rather than rendering a page of permanently hidden cards.
-export function useInView({ rootMargin = '0px 0px -10% 0px', threshold = 0.12, once = true } = {}) {
+// `root` defaults to whatever ScrollRootProvider is above this component --
+// the viewport in document layout, the panel's own scroll box in slideshow
+// layout. Pass it explicitly to override.
+export function useInView({
+  rootMargin = '0px 0px -10% 0px',
+  threshold = 0.12,
+  once = true,
+  root: rootOverride,
+} = {}) {
+  const contextRoot = useScrollRoot()
+  const root = rootOverride === undefined ? contextRoot : rootOverride
   const [node, setNode] = useState(null)
   const [inView, setInView] = useState(false)
 
@@ -38,11 +49,14 @@ export function useInView({ rootMargin = '0px 0px -10% 0px', threshold = 0.12, o
           setInView(false)
         }
       },
-      { rootMargin, threshold }
+      { root, rootMargin, threshold }
     )
     observer.observe(node)
     return () => observer.disconnect()
-  }, [node, rootMargin, threshold, once])
+    // `root` is a dependency: in slideshow layout it arrives one render after
+    // the node does, because the panel publishes its own element via state.
+    // Without it here the observer would stay bound to the viewport forever.
+  }, [node, root, rootMargin, threshold, once])
 
   return [ref, inView]
 }

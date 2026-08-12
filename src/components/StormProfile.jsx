@@ -54,7 +54,7 @@ export default function StormProfile({ storm, style }) {
   if (!rows) {
     return (
       <EmptyState style={style}>
-        {storm.name} has a full ripple chain below, but its per-nation impact record has not been
+        {storm.name} has a full ripple chain, but its per-nation impact record has not been
         compiled yet.
       </EmptyState>
     )

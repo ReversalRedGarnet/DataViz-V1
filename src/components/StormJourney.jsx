@@ -7,6 +7,8 @@ import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useActiveStep } from '../hooks/useActiveStep.js'
+import { useScrollRoot } from '../hooks/useScrollRoot.jsx'
+import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import { chartColorsFor, MAP_COLORS, CHART_INK } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
@@ -131,7 +133,10 @@ function paintScene(scene, { active, theme }) {
 export default function StormJourney({ storm, style }) {
   const STEPS = buildSteps(storm)
   const svgRef = useRef(null)
-  const stepsRef = useRef(null)
+  // Published through state, not a ref: in slideshow layout this element is
+  // also the IntersectionObserver root, and a ref's .current is still null on
+  // the render where that root has to be chosen.
+  const [stepsNode, setStepsNode] = useState(null)
   const sceneRef = useRef(null)
   const [built, setBuilt] = useState(false)
 
@@ -142,7 +147,23 @@ export default function StormJourney({ storm, style }) {
     setBuilt(false)
   }, [storm?.id])
   const { theme } = useTheme()
-  const active = useActiveStep(stepsRef, STEPS.length)
+  // The steps are read against whatever box is actually scrolling them, and
+  // that changes at the split breakpoint.
+  //
+  // Wide: the map is pinned beside the steps and only the step column moves, so
+  // the column is both the container and the observer root.
+  // Narrow: the columns stack and the panel scrolls as one, so the root is the
+  // panel's scroll region and the column is just a list inside it.
+  //
+  // Getting this wrong is not a cosmetic failure. An observer rooted on an
+  // element that does not scroll has a band that never moves, so a step that
+  // has once intersected goes on intersecting, entries stop firing, and the
+  // active step can only ever go forwards -- the map reaches the last country
+  // and will not come back. That was the scroll-reversal bug on desktop, and
+  // until now the narrow layout still had it.
+  const panelScroll = useScrollRoot()
+  const isSplit = useMediaQuery('(min-width: 768px)')
+  const active = useActiveStep(stepsNode, STEPS.length, isSplit ? stepsNode : panelScroll)
   const hasSteps = STEPS.length > 0
 
   // Read inside build(), which resolves after the render that set them. Held in
@@ -298,7 +319,7 @@ export default function StormJourney({ storm, style }) {
   }
 
   return (
-    <Section tone="panel" style={style}>
+    <Section tone="panel" className="journey-section" style={style}>
       <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
         {STEPS[0].date} &ndash; {STEPS[STEPS.length - 1].date}
       </p>
@@ -307,11 +328,11 @@ export default function StormJourney({ storm, style }) {
       </h2>
       <p className="max-w-prose text-sm opacity-75">
         {storm.name} reached {STEPS.length} of these four countries, and was a different storm at
-        each. Scroll to travel with it.
+        each. Scroll the column on the right to travel with it.
       </p>
 
-      <div className="mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
-        <div className="sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 md:pt-0">
+      <div className="journey-split mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
+        <div className="journey-sticky sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 md:pt-0">
           <svg
             ref={svgRef}
             aria-hidden="true"
@@ -324,11 +345,11 @@ export default function StormJourney({ storm, style }) {
           <p className="mt-2 text-xs italic leading-snug opacity-65">
             The line joins documented impact points; it is not the official track. Dates,
             categories and tolls come from national meteorological services and UN OCHA, cited in
-            full below.
+            full in the sources.
           </p>
         </div>
 
-        <ol ref={stepsRef} className="mt-4 md:mt-0">
+        <ol ref={setStepsNode} className="journey-steps mt-4 md:mt-0">
           {STEPS.map((step, i) => (
             <li
               key={step.name}

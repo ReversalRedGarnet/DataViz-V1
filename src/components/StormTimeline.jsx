@@ -39,7 +39,8 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
         <p>
           Every severe cyclone that struck two or more of these four nations,{' '}
           {ROSTER_START}&ndash;{ROSTER_END}. The rule was fixed before the list was drawn; what it
-          excludes is shown below &mdash; including one storm that would have suited the argument.
+          excludes is shown in the next section &mdash; including one storm that would have
+          suited the argument.
         </p>
         <p>
           These four sit along the same corridor of the South Pacific basin, so they are struck by
@@ -98,7 +99,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
                         onClick={() => onSelect(active ? null : storm.id)}
                         aria-pressed={active}
                         aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of four nations.`}
-                        className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand ${
+                        className={`press-target rounded-lg border px-3 py-2 text-left text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand ${
                           active
                             ? 'border-accent bg-accent/10 font-semibold'
                             : 'border-ink/15 hover:border-ink/35 hover:bg-surface/60'

@@ -8,6 +8,7 @@ export const PAGE_SECTIONS = [
   { id: 'top', label: 'Overview' },
   { id: 'timeline', label: 'How Often, and to Whom' },
   { id: 'exclusions', label: 'What the Rule Left Out' },
+  { id: 'gate', label: 'Pick a Storm' },
   { id: 'storm-journey', label: 'Follow the Storm' },
   { id: 'storm-profile', label: 'Storm Profile' },
   { id: 'big-picture', label: 'The Bigger Picture' },

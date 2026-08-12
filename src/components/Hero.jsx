@@ -29,7 +29,7 @@ export default function Hero({ style }) {
         'power supply, the visitors afterwards \u2014 asking why the same ' +
         'weather produces such different aftermaths.'
       }
-      cta="Pick a storm from the timeline below."
+      cta="Pick a storm from the timeline to begin."
       style={style}
     />
   )

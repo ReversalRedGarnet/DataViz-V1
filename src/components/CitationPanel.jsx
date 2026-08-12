@@ -92,7 +92,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
         <div className="text-sand/60 dark:text-ink/60 text-xs">
           <p>
             © {YEAR} Aziel Douglas Orihao. Code licensed under MIT (see LICENSE in the repository).
-            Underlying datasets belong to their original sources, listed above, under their own
+            Underlying datasets belong to their original sources, listed here, under their own
             respective licenses.
           </p>
         </div>

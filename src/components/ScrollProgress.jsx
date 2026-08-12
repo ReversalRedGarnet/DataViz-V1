@@ -41,7 +41,11 @@ const HULL_PATH =
 const PADDLE_BLADE_PATH =
   'M -3.6,10 C -4.2,13 -4.2,16.5 -2.6,19.5 C -1.4,21.7 1.4,21.7 2.6,19.5 C 4.2,16.5 4.2,13 3.6,10 C 2.4,7.5 -2.4,7.5 -3.6,10 Z'
 
-export default function ScrollProgress() {
+// Props:
+//   progress -- 0..1, supplied by the deck in slideshow layout, where there is
+//     no document scroll left for this to read. Omitted in document layout, and
+//     it falls back to watching window.scrollY as before.
+export default function ScrollProgress({ progress: externalProgress }) {
   const wrapperRef = useRef(null)
   const [width, setWidth] = useState(0)
   const [progress, setProgress] = useState(0) // 0..1, the true scroll fraction
@@ -67,7 +71,15 @@ export default function ScrollProgress() {
     return () => observer.disconnect()
   }, [])
 
+  // In slideshow layout the deck owns the number: the document does not scroll,
+  // so scrollY is pinned at 0 and the canoe would never leave the shore.
   useEffect(() => {
+    if (externalProgress == null) return
+    setProgress(Math.min(1, Math.max(0, externalProgress)))
+  }, [externalProgress])
+
+  useEffect(() => {
+    if (externalProgress != null) return
     function computeProgress() {
       const scrollable = document.documentElement.scrollHeight - window.innerHeight
       const pct = scrollable > 0 ? window.scrollY / scrollable : 0
@@ -93,7 +105,7 @@ export default function ScrollProgress() {
       bodyObserver.disconnect()
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [])
+  }, [externalProgress])
 
   // Chase the true position rather than jumping to it. Runs only while there is
   // a gap to close, and stops itself once inside SETTLE_PX, so an idle page does
