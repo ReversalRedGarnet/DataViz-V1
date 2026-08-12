@@ -500,12 +500,24 @@ html.theme-sweep::view-transition-new(root) {
     opacity: 0;
   }
 
-  /* Sections set their own vertical padding for a document. In a panel they
-     also have to fill one, or a short section (the gate, the sources) leaves
-     the page background showing under it. */
+  /*
+    height, not min-height. This was `min-height: 100%` -- a floor with no
+    ceiling -- so on any section taller than one screen the flex column simply
+    grew to fit its content. Nothing then overflowed .slide-scroll, so it never
+    scrolled (How Often and to Whom, Follow the Storm), and the footer was
+    pushed past the panel's own overflow:hidden clip and vanished (At a Glance,
+    and every other tall slide).
+
+    Bounding it here is what makes the whole arrangement work: the column is
+    exactly one panel tall, the footer takes the height it needs, and
+    .slide-scroll shrinks into what is left and scrolls its own content.
+    min-height:0 is the companion to that -- without it a flex child refuses to
+    shrink below its content and the ceiling is ignored again.
+  */
   .slide-panel-inner {
     display: flex;
-    min-height: 100%;
+    height: 100%;
+    min-height: 0;
     flex-direction: column;
   }
 
@@ -520,8 +532,9 @@ html.theme-sweep::view-transition-new(root) {
   .slide-more {
     position: absolute;
     inset-inline: 0;
-    /* Clears the pinned footer rather than sitting under it. */
-    bottom: 3.1rem;
+    /* Clears the pinned footer rather than sitting under it. The footer is two
+       lines of button plus its own padding; 4.75rem is that, measured. */
+    bottom: 4.75rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -581,11 +594,14 @@ html.theme-sweep::view-transition-new(root) {
     panel so this slide is the same height as every other one.
   */
   .slide-viewport:not(.is-document) .map-frame svg {
+    /* width stays 100%, deliberately. An SVG with a viewBox has an aspect ratio
+       but no intrinsic width, so `width: auto` alongside an auto height lets
+       some engines fall back to the 300x150 replaced-element default. Keeping a
+       definite width and clamping the height lets preserveAspectRatio do the
+       scaling, and the ocean rect is drawn far past the viewBox so the letterbox
+       fills with sea rather than with a gap. */
+    height: auto;
     max-height: 52vh;
-    width: auto;
-    max-width: 100%;
-    margin-inline: auto;
-    display: block;
   }
 
   /*
@@ -599,6 +615,11 @@ html.theme-sweep::view-transition-new(root) {
     bottom: 0;
     z-index: 20;
     margin-top: auto;
+    /* Never shrinks. It is the fixed part of the frame -- if it gives up height
+       under pressure from a tall section, the footer's position stops being the
+       same on every slide, which is the whole point of it living out here
+       rather than inside the scrolling region. */
+    flex: 0 0 auto;
   }
 
   /*
@@ -635,6 +656,13 @@ html.theme-sweep::view-transition-new(root) {
       min-height: 0;
       flex: 1 1 auto;
       margin-top: 1.25rem;
+      /* The section carries md:items-start, which sizes both columns to their
+         own content -- so the step column's height:100% resolved against a row
+         as tall as the whole list and it never scrolled. An explicit single
+         row of minmax(0, 1fr), stretched, gives both columns exactly the
+         height that is available and no more. */
+      grid-template-rows: minmax(0, 1fr);
+      align-items: stretch;
     }
 
     .slide-viewport:not(.is-document) .journey-steps {
@@ -731,6 +759,7 @@ html.theme-sweep::view-transition-new(root) {
 
   .slide-viewport.is-document .slide-panel-inner {
     display: block;
+    height: auto;
     min-height: 0;
   }
 
@@ -751,7 +780,9 @@ html.theme-sweep::view-transition-new(root) {
       transform: none !important;
     }
     .slide-panel,
+    .slide-panel-inner,
     .slide-scroll {
+      display: block !important;
       height: auto !important;
       overflow: visible !important;
       opacity: 1 !important;
