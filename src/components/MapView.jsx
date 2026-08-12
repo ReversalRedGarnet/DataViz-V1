@@ -20,24 +20,42 @@ import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 // Default nation set: the four countries this project compares. Coordinates are
 // approximate (capital city), which is fine for an illustrative map and not for
 // navigation. Other hazard pages pass their own set via the `nations` prop.
+// No blurbs here any more. Each of these carried a sentence written for Cyclone
+// Harold -- "Hit hardest by Cyclone Harold, April 2020", a ferry capsize that
+// belongs to one week in 2020 -- and they were printed under every marker
+// whichever storm was selected. Static text about a specific event has no place
+// in a component that six different events flow through, so what a marker says
+// is now read from the selected storm's own record.
 export const NATIONS = [
-  { name: 'Fiji', lat: -18.14, lon: 178.44, blurb: 'Struck by the same cyclone; moderate, uneven impact.' },
-  {
-    name: 'Solomon Islands',
-    lat: -9.43,
-    lon: 159.95,
-    blurb: 'A different kind of impact that same week: a ferry capsize, not storm strength.',
-  },
-  { name: 'Vanuatu', lat: -17.73, lon: 168.32, blurb: 'Hit hardest by Cyclone Harold, April 2020.' },
-  { name: 'Tonga', lat: -21.14, lon: -175.2, blurb: 'The lightest direct impact of the four.' },
+  { name: 'Fiji', lat: -18.14, lon: 178.44 },
+  { name: 'Solomon Islands', lat: -9.43, lon: 159.95 },
+  { name: 'Vanuatu', lat: -17.73, lon: 168.32 },
+  { name: 'Tonga', lat: -21.14, lon: -175.2 },
 ]
 
 const WIDTH = 700
 const HEIGHT = 460
 
+// What the selected storm did to this nation, in the storm's own words -- the
+// date and category from its profile, and the death toll with the same
+// reported/unreported distinction the profile chart makes. A nation the storm
+// never reached says so, because a marker with nothing under it reads as
+// missing data rather than as a country that was spared.
+function stormBlurb(nation, storm) {
+  if (!storm) return nation.blurb ?? null
+  const entry = storm.profile?.find((p) => p.name === nation.name)
+  if (!entry) return `${storm.name} did not reach ${nation.name}.`
+
+  const toll =
+    entry.deaths == null
+      ? 'Deaths never reported.'
+      : `${entry.deaths} ${entry.deaths === 1 ? 'death' : 'deaths'} reported.`
+  return `${entry.date}. ${entry.categoryLabel}. ${toll}`
+}
+
 // Built from live selection state so the "tap to select / compare / deselect"
 // hint is accurate whenever the hover, focus or tap happens.
-function markerTooltipContent(nation, selected) {
+function markerTooltipContent(nation, selected, storm) {
   const i = selected.indexOf(nation.name)
   let status
   if (i !== -1) status = 'Selected -- tap again to deselect.'
@@ -45,10 +63,12 @@ function markerTooltipContent(nation, selected) {
   else if (selected.length === 1) status = 'Tap to compare with your first pick.'
   else status = 'Tap to select.'
 
+  const blurb = stormBlurb(nation, storm)
+
   return (
     <>
       <p className="font-semibold">{nation.name}</p>
-      <p className="opacity-80">{nation.blurb}</p>
+      {blurb && <p className="opacity-80">{blurb}</p>}
       <p className="mt-1 opacity-70">{status}</p>
     </>
   )
@@ -90,6 +110,15 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   useEffect(() => {
     selectedRef.current = selected
   }, [selected])
+
+  // Same reasoning again, for the storm. The setup effect deliberately does not
+  // re-run when the storm changes -- rebuilding would throw away the reader's
+  // pan and zoom -- so without a ref the D3 handlers would keep describing
+  // whichever storm happened to be selected when the map was first built.
+  const stormRef = useRef(storm)
+  useEffect(() => {
+    stormRef.current = storm
+  }, [storm])
 
   // Same reasoning, for the map's initial ocean/land paint.
   const themeRef = useRef(theme)
@@ -188,7 +217,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .on('click', (event, d) => {
           onToggle(d.name)
           // selectedRef hasn't caught this toggle yet: one beat behind, once.
-          showTooltip(event, markerTooltipContent(d, selectedRef.current))
+          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
         })
         .on('keydown', (event, d) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -198,7 +227,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         })
         .on('pointerenter pointermove', (event, d) => {
           setHighlightRef.current(d.name)
-          showTooltip(event, markerTooltipContent(d, selectedRef.current))
+          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
         })
         .on('pointerleave', () => {
           setHighlightRef.current(null)
@@ -206,7 +235,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         })
         .on('focus', (event, d) => {
           setHighlightRef.current(d.name)
-          showTooltip(event, markerTooltipContent(d, selectedRef.current))
+          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
         })
         .on('blur', () => {
           setHighlightRef.current(null)

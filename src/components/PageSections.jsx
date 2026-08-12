@@ -174,6 +174,10 @@ function SlidePanel({
     }
     node.addEventListener('scroll', onScroll, { passive: true })
     report()
+    // Measured again once the entrance animation has finished. A transform
+    // contributes to the scrollable overflow area while it runs, so the first
+    // reading is taken against a box that is still moving.
+    const settle = setTimeout(report, 720)
     // Content height changes without a scroll event -- picking a second country
     // grows the comparison panel, and a chart drawing for the first time grows
     // whatever holds it.
@@ -183,6 +187,7 @@ function SlidePanel({
     return () => {
       node.removeEventListener('scroll', onScroll)
       resize.disconnect()
+      clearTimeout(settle)
       if (frame) cancelAnimationFrame(frame)
     }
   }, [slides, isActive, node, onProgress, onOverflow])

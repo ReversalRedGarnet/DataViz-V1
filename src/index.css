@@ -514,6 +514,10 @@ html.theme-sweep::view-transition-new(root) {
     /* Stops the inner scroll chaining out when it bottoms out, which on iOS
        reads as the whole page bouncing. */
     overscroll-behavior: contain;
+    /* Explicit. Setting overflow-y alone makes overflow-x compute to auto, and
+       the slide-enter animation translates sideways -- so the entrance was
+       briefly adding horizontal scrollable area to every panel. */
+    overflow-x: hidden;
     /* Hidden, like the document's. The "more in this section" hint below is
        what carries the affordance, and a scrollbar appearing on some slides and
        not others is the visual inconsistency this whole pass is undoing. */
@@ -526,7 +530,15 @@ html.theme-sweep::view-transition-new(root) {
     display: none;
   }
 
-  .slide-scroll > section {
+  /*
+    `> *`, not `> section`. Most sections render a <section>, but the sources
+    panel renders a <footer> -- so it fell through to the default flex:0 1 auto,
+    shrank below its own content, and clipped it with its own overflow-hidden.
+    That is the page that ended mid-list with no way to scroll to the rest: the
+    scroll container saw no overflow to scroll, because the child had already
+    hidden it.
+  */
+  .slide-scroll > * {
     flex: 1 0 auto;
   }
 
@@ -616,7 +628,7 @@ html.theme-sweep::view-transition-new(root) {
 
   /* A panel is one screen. The document's generous section padding wastes a
      third of it, so it is tightened in slideshow layout only. */
-  .slide-viewport:not(.is-document) .slide-scroll > section {
+  .slide-viewport:not(.is-document) .slide-scroll > * {
     padding-top: 1.75rem;
     padding-bottom: 1.5rem;
   }
@@ -790,10 +802,13 @@ html.theme-sweep::view-transition-new(root) {
       both;
   }
 
+  /* Sideways only. A vertical component inflates the scroll container's
+     scrollHeight while it runs, and the overflow hint measures exactly that --
+     so a slide with nothing below the fold still advertised more to read. */
   @keyframes slide-enter-forward {
     from {
       opacity: 0;
-      transform: translate3d(34px, 6px, 0);
+      transform: translate3d(34px, 0, 0);
     }
 
     to {
@@ -805,7 +820,7 @@ html.theme-sweep::view-transition-new(root) {
   @keyframes slide-enter-back {
     from {
       opacity: 0;
-      transform: translate3d(-34px, 6px, 0);
+      transform: translate3d(-34px, 0, 0);
     }
 
     to {
