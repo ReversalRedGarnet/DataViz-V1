@@ -15,18 +15,21 @@ const TONES = {
   ink: 'bg-ink text-sand dark:bg-panel dark:text-ink',
 }
 
-// `center` is for slides whose content is a single short block -- the opening
-// claim, the story gate. Left alone they sit against the top edge of a panel
-// with a screen's worth of empty space under them, which reads as a section
-// that failed to load rather than one that is deliberately spare. The rule
-// itself lives in styles/slideshow.css, scoped to the deck.
+// There is no `center` prop any more. Vertical centring used to be opted into
+// section by section, which was a guess at the reader's window: a section
+// marked centred went on centring after it had outgrown the panel, and an
+// unmarked one sat against the top edge with a screen of dead space under it on
+// a tall monitor. It is now measured per panel instead -- see the data-fits
+// block in PageSections.jsx and the rule it drives in styles/slideshow.css --
+// so every slide centres exactly while it fits and top-aligns the moment it
+// does not.
+//
 // `lock` is for slides whose content is bounded by construction -- a heading, a
 // few short paragraphs, one fixed-height chart -- where a scrollbar is always a
 // layout fault rather than more to read. See styles/slideshow.css for what it
 // does and why it is gated on viewport height.
 export default function Section({
   tone = 'panel',
-  center = false,
   lock = false,
   className = '',
   style,
@@ -36,8 +39,8 @@ export default function Section({
   return (
     <section
       className={`animate-pop-in px-6 py-14 sm:px-8 md:py-20 ${TONES[tone] ?? TONES.panel} ${
-        center ? 'section-center' : ''
-      } ${lock ? 'section-lock' : ''} ${className}`}
+        lock ? 'section-lock' : ''
+      } ${className}`}
       style={style}
       {...rest}
     >

@@ -26,7 +26,13 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
     >
       <BackgroundPattern backdrop={FOOTER_BACKDROP} />
 
-      <div className="relative max-w-5xl mx-auto text-sm space-y-8">
+      {/* w-full is not decoration. This panel is a slide, and a slide that fits
+          its window is laid out as a flex column (see the data-fits rule in
+          styles/slideshow.css) -- where `mx-auto` on an auto-width child stops
+          meaning "centre a full-width column" and starts meaning "shrink to the
+          content and centre that". An explicit width keeps the column the same
+          measure in both layouts. */}
+      <div className="relative mx-auto w-full max-w-5xl space-y-8 text-sm">
         <div>
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-80">Data sources</h2>
           {sources.length === 0 ? (
