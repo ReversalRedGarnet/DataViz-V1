@@ -64,7 +64,7 @@ export default function StormProfile({ storm, style }) {
   const indirect = rows.filter((r) => r.deathsKind === 'indirect')
 
   return (
-    <Section style={style}>
+    <Section lock style={style}>
       <div ref={containerRef} className="relative mx-auto max-w-3xl">
         <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
           {storm.name} at a glance

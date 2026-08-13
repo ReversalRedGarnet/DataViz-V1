@@ -20,9 +20,14 @@ const TONES = {
 // with a screen's worth of empty space under them, which reads as a section
 // that failed to load rather than one that is deliberately spare. The rule
 // itself lives in styles/slideshow.css, scoped to the deck.
+// `lock` is for slides whose content is bounded by construction -- a heading, a
+// few short paragraphs, one fixed-height chart -- where a scrollbar is always a
+// layout fault rather than more to read. See styles/slideshow.css for what it
+// does and why it is gated on viewport height.
 export default function Section({
   tone = 'panel',
   center = false,
+  lock = false,
   className = '',
   style,
   children,
@@ -32,7 +37,7 @@ export default function Section({
     <section
       className={`animate-pop-in px-6 py-14 sm:px-8 md:py-20 ${TONES[tone] ?? TONES.panel} ${
         center ? 'section-center' : ''
-      } ${className}`}
+      } ${lock ? 'section-lock' : ''} ${className}`}
       style={style}
       {...rest}
     >
