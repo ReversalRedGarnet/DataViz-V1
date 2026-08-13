@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
 import NoDataNote from './NoDataNote.jsx'
-import { useTheme } from '../hooks/useTheme.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { slug } from '../utils/d3helpers.js'
-import { renderMetricChart, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
+import { renderMetricChart, CHART_HEIGHT } from '../utils/charts/index.js'
 
 // One "selected nations, over time" chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every trends section

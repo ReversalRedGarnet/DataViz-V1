@@ -18,31 +18,18 @@ from pathlib import Path
 
 import pandas as pd
 
-RAW_DIR = Path(__file__).parent / "raw"
-OUT_DIR = Path(__file__).parent.parent / "public" / "data"
-
-# Project scope.
-NATIONS = ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]
-
-NATION_CODES = {
-    "Solomon Islands": ["SB", "SLB"],
-    "Vanuatu": ["VU", "VUT"],
-    "Fiji": ["FJ", "FJI"],
-    "Tonga": ["TO", "TON"],
-}
-
-# Analysis period.
-#
-# Opens in 2013, not 2016: the storm roster now starts at Cyclone Pam (March
-# 2015), and a chart of an event year is meaningless without baseline years
-# before it. Two clear years ahead of the earliest storm is the minimum that
-# lets a reader see what "normal" looked like first.
-#
-# Widening this costs nothing at export time -- the portal dumps whole
-# dataflows and this script does the filtering -- so the only reason not to
-# reach further back is that the older figures get patchier.
-YEAR_MIN = 2013
-YEAR_MAX = 2024
+from common import (
+    COUNTRY_COL_CANDIDATES,
+    NATIONS,
+    OUT_DIR,
+    RAW_DIR,
+    TIME_COL_CANDIDATES,
+    VALUE_COL_CANDIDATES,
+    YEAR_MAX,
+    YEAR_MIN,
+    find_col,
+    matches_nation,
+)
 
 # The storm roster, for the coverage report at the end of a run. Each entry is
 # the year a chart would have to anchor on, and the in-scope nations that storm
@@ -246,40 +233,6 @@ DATASETS = {
     },
 }
 
-COUNTRY_COL_CANDIDATES = [
-    "GEO_PICT",
-    "REF_AREA",
-    "Pacific Island Countries and territories",
-    "Country",
-]
-
-TIME_COL_CANDIDATES = ["TIME_PERIOD", "Year"]
-VALUE_COL_CANDIDATES = ["OBS_VALUE", "Value"]
-
-
-def _find_col(df, candidates, label):
-    """Return the first matching column name from a list of candidates."""
-    for candidate in candidates:
-        if candidate in df.columns:
-            return candidate
-
-    raise KeyError(
-        f"Couldn't find a {label} column. Columns in this file are: "
-        f"{list(df.columns)} -- add the correct column name to the "
-        f"candidate list near the top of this file."
-    )
-
-
-def _matches_nation(raw_value, nation) -> bool:
-    """Match a country by name or ISO code."""
-    raw_value = str(raw_value).strip()
-
-    if raw_value.lower() == nation.lower():
-        return True
-
-    return raw_value.upper() in NATION_CODES.get(nation, [])
-
-
 def _resolve_source(csv_name: str, config: dict):
     """First filename in this dataset's candidate list that exists in raw/."""
     for candidate in config.get("csv_candidates", [csv_name]):
@@ -311,15 +264,15 @@ def clean_one(path, config: dict) -> list:
         df = df[df[config["unit_col"]] == config["unit_value"]]
         print(f"  filtered to unit {config['unit_value']}: {len(df)} rows")
 
-    country_col = _find_col(df, COUNTRY_COL_CANDIDATES, "country")
-    time_col = _find_col(df, TIME_COL_CANDIDATES, "year")
-    value_col = _find_col(df, VALUE_COL_CANDIDATES, "value")
+    country_col = find_col(df, COUNTRY_COL_CANDIDATES, "country")
+    time_col = find_col(df, TIME_COL_CANDIDATES, "year")
+    value_col = find_col(df, VALUE_COL_CANDIDATES, "value")
 
     rows = []
     dropped_zeros = []
 
     for nation in NATIONS:
-        matched = df[df[country_col].apply(_matches_nation, args=(nation,))]
+        matched = df[df[country_col].apply(matches_nation, args=(nation,))]
         in_range = matched[
             matched[time_col].astype(int).between(YEAR_MIN, YEAR_MAX)
         ]

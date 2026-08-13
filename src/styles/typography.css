@@ -1,0 +1,17 @@
+/*
+  Reading-column treatments, opted into per block.
+*/
+
+@layer components {
+  /*
+    Justified text only earns its keep in a real reading column, and only with
+    hyphenation -- unhyphenated justification opens rivers of white space, and
+    the narrower the column the worse it gets. Opt in per block rather than on
+    every <p>, so captions, chart notes and centred hero lines aren't dragged
+    into it.
+  */
+  .prose-column p {
+    text-align: justify;
+    hyphens: auto;
+  }
+}

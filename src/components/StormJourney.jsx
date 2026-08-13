@@ -9,7 +9,7 @@ import { useTheme } from '../hooks/useTheme.jsx'
 import { useActiveStep } from '../hooks/useActiveStep.js'
 import { useScrollRoot } from '../hooks/useScrollRoot.jsx'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
-import { chartColorsFor, MAP_COLORS, CHART_INK } from '../utils/theme.js'
+import { chartTheme, MAP_COLORS } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
 import { loadLandTopology } from '../utils/loadLand.js'
@@ -74,8 +74,7 @@ function lengthAtPoint(pathNode, [px, py]) {
 // is why the second storm rendered a black rectangle the size of the map.
 function paintScene(scene, { active, theme }) {
   const mapColors = MAP_COLORS[theme] ?? MAP_COLORS.light
-  const palette = chartColorsFor(theme)
-  const ink = CHART_INK[theme] ?? CHART_INK.light
+  const { ink, palette } = chartTheme(theme)
   const duration = motionDuration(650)
 
   scene.g.select('rect.ocean-bg').attr('fill', mapColors.ocean)

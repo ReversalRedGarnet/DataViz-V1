@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { prefersReducedMotion } from '../utils/motion.js'
-import { CHART_INK } from '../utils/theme.js'
+import { chartTheme } from '../utils/theme.js'
 
 // The scroll readout at the bottom of Header: a canoe travelling along the
 // header's own bottom edge, with the distance already covered drawn behind it.
@@ -54,7 +54,7 @@ export default function ScrollProgress({ progress: externalProgress }) {
   const chaseRef = useRef(null)
   const drawnRef = useRef(0)
   const { theme } = useTheme()
-  const ink = CHART_INK[theme] ?? CHART_INK.light
+  const { ink } = chartTheme(theme)
 
   // The wrapper's own width, not window.innerWidth: innerWidth includes the
   // scrollbar, and this sits in a header laid out against the narrower
