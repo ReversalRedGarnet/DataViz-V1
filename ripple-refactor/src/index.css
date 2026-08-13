@@ -1,0 +1,116 @@
+/*
+  Entry stylesheet. The rules live in ./styles/ -- this file fixes the order,
+  which is load-bearing.
+
+  The @import statements come first because postcss-import requires it, and it
+  costs nothing: everything in those four files sits inside an @layer, and
+  Tailwind hoists layered rules into the directives below regardless of where
+  they were written.
+
+  What cannot move is unlayered CSS. It keeps its source position, so the two
+  blocks at the bottom of this file have to stay after the directives -- above
+  them, preflight would win.
+*/
+
+@import './styles/base.css';
+@import './styles/typography.css';
+@import './styles/animations.css';
+@import './styles/slideshow.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  View Transitions. The default root cross-fade is what a page-to-page
+  navigation should look like, so it's left alone.
+
+  The theme toggle wants the opposite: the outgoing page must sit still and
+  fully opaque underneath while the new theme is wiped over it by the expanding
+  circle in ThemeToggle.jsx. Cross-fading both layers at once would wash the
+  whole page out to grey halfway through. Scoped to the sweep class so it can't
+  affect navigation, and the z-index puts the new theme on top -- without it
+  the circle would be clipping a layer that's already behind.
+*/
+html.theme-sweep::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+
+html.theme-sweep::view-transition-new(root) {
+  animation: none;
+  z-index: 999;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The root cross-fade is decoration; the toggle already opts out in JS. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in,
+  .animate-tooltip-pop-in,
+  .cyclone-spin,
+  .deck-status,
+  .slide-panel[data-active="true"] .deck-count,
+  .slide-viewport[data-dir="forward"]
+    .slide-panel[data-active="true"]
+    .slide-scroll
+    > section,
+  .slide-viewport[data-dir="back"]
+    .slide-panel[data-active="true"]
+    .slide-scroll
+    > section,
+  .press-target[aria-pressed="true"] {
+    animation: none;
+  }
+
+  /* The refusal shake is the exception: it is the only feedback a blocked
+     button gives, so it is kept and shortened rather than removed. Hover and
+     press displacement go -- they are decoration -- while the colour changes
+     stay, because those carry state. */
+  .deck-btn.is-refusing {
+    animation-duration: 120ms;
+  }
+
+  .deck-btn,
+  .deck-btn-arrow,
+  .press-target {
+    transition-property: background-color, border-color, box-shadow;
+  }
+
+  .deck-btn:hover,
+  .deck-btn:active,
+  .deck-btn-back:hover .deck-btn-arrow,
+  .deck-btn-next:hover:not(.is-blocked) .deck-btn-arrow,
+  .press-target:hover,
+  .press-target:active {
+    transform: none;
+  }
+
+  /* The dimming still happens -- it carries meaning -- but instantly. */
+  .nation-mark {
+    transition: none;
+  }
+
+  /* Purely decorative, and the only thing it does is move. */
+  .ripple-ring {
+    display: none;
+  }
+}
+
+/*
+  The document itself never scrolls -- the panels do. Applied to <html> by
+  App.jsx on mount rather than written into the stylesheet unconditionally, so
+  that a page which fails to boot still scrolls normally instead of presenting
+  a locked, empty screen.
+*/
+html.is-slides,
+html.is-slides body {
+  overflow: hidden;
+  height: 100%;
+}
