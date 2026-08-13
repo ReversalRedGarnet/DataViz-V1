@@ -1,3 +1,0 @@
-Files removed in this changeset — delete these from your branch:
-
-  src/utils/chartRenderers.jsx    (split into src/utils/charts/)
