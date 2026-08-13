@@ -18,7 +18,7 @@ import Section from './Section.jsx'
 // sequencing.
 export default function StoryGate({ style }) {
   return (
-    <Section style={style}>
+    <Section center style={style}>
       <div className="mx-auto max-w-prose rounded-2xl border border-dashed border-ink/25 bg-surface/50 px-6 py-10 text-center">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
           Your turn

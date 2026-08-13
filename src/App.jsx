@@ -51,15 +51,16 @@ const DATA_SOURCES = [
 ]
 
 // The page, top to bottom. PageSections owns the shape: it gives each entry its
-// anchor id, its place in the entrance stagger, and the wave divider above and
-// below it coloured to match the two tones it sits between -- so an id, a
-// stagger position and a divider colour can't drift apart the way they could
-// when App kept a parallel SECTION_TONES array and destructured it positionally.
+// anchor id and its place in the entrance stagger, so the two can't drift apart
+// the way they could when App kept parallel arrays and destructured them
+// positionally.
 //
-// `tone` is the background the section actually paints, read only to colour
-// those dividers. Keep it in step with what the section renders or the wave
-// seam shows a visible colour mismatch. Every id here must also appear in
-// content/pageSections.js, which is what the header's jump-to menu links to.
+// There is no per-section `tone` here any more. It existed to colour the wave
+// divider between two sections, and once that divider was removed the field was
+// read by nothing while still looking like the colour knob -- so a section's
+// background is now set where it is painted, in the component's own <Section>.
+// Every id here must also appear in content/pageSections.js, which is what the
+// header's jump-to menu links to.
 // Sections before the gate are always present; the rest appear once a storm is
 // chosen. Split into two lists rather than filtered from one, so the gate's
 // position is a structural fact of this file rather than an index somebody has
@@ -70,24 +71,22 @@ function pageSections(data, selection, storm, onSelectStorm) {
   const { selected, toggle, clear } = selection
 
   return [
-    { id: 'top', tone: 'plain', element: <Hero /> },
+    { id: 'top', element: <Hero /> },
     {
       id: 'timeline',
-      tone: 'plain',
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
-    { id: 'exclusions', tone: 'panel', element: <ExclusionsPanel /> },
+    { id: 'exclusions', element: <ExclusionsPanel /> },
 
-    ...(storm ? [] : [{ id: 'gate', tone: 'plain', element: <StoryGate /> }]),
+    ...(storm ? [] : [{ id: 'gate', element: <StoryGate /> }]),
     ...(!storm
       ? []
       : [
-    { id: 'storm-journey', tone: 'panel', element: <StormJourney storm={storm} /> },
-    { id: 'storm-profile', tone: 'plain', element: <StormProfile storm={storm} /> },
-    { id: 'big-picture', tone: 'panel', element: <BigPicture data={data} storm={storm} /> },
+    { id: 'storm-journey', element: <StormJourney storm={storm} /> },
+    { id: 'storm-profile', element: <StormProfile storm={storm} /> },
+    { id: 'big-picture', element: <BigPicture data={data} storm={storm} /> },
     {
       id: 'map',
-      tone: 'plain',
       // Everything from here on is driven by the map's selection: the ripple
       // chain, the comparison and the divergence panels all read it. Paging
       // past without a country picked would show three empty states in a row
@@ -97,17 +96,15 @@ function pageSections(data, selection, storm, onSelectStorm) {
     },
     {
       id: 'ripple-chain',
-      tone: 'plain',
       element: <RippleChain data={data} storm={storm} selectedNations={selected} />,
     },
-    { id: 'divergence', tone: 'panel', element: <DivergenceView data={data} storm={storm} /> },
-    { id: 'context', tone: 'plain', element: <ContextPanel data={data} /> },
+    { id: 'divergence', element: <DivergenceView data={data} storm={storm} /> },
+    { id: 'context', element: <ContextPanel data={data} /> },
     {
       id: 'compare',
-      tone: 'panel',
       element: <ComparisonView data={data} storm={storm} selectedNations={selected} />,
     },
-    { id: 'sources', tone: 'ink', element: <CitationPanel sources={DATA_SOURCES} /> },
+    { id: 'sources', element: <CitationPanel sources={DATA_SOURCES} /> },
         ]),
   ].map((section) => ({ ...section, label: SECTION_LABELS[section.id] ?? section.id }))
 }

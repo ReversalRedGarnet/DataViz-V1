@@ -8,14 +8,24 @@ import Section from './Section.jsx'
 //   headline -- the page's one real <h1>
 //   body -- lead paragraph(s); a string or any React node
 //   cta -- optional closing line; omitted entirely when not passed
-//   tone -- forwarded to Section, default 'plain'. Only Home.jsx
-//     overrides this (to 'ink') -- see Home.jsx's own note.
+//   tone -- forwarded to Section, default 'panel'.
+//   center -- forwarded to Section; the opening hero uses it so the claim sits
+//     in the middle of the slide rather than at the top of it.
 //   headlineClassName -- replaces the default h1 sizing when passed;
 //     Home.jsx uses this for a bigger display size.
 //   style -- forwarded to Section
-export default function PageHero({ kicker, headline, body, cta, tone = 'plain', headlineClassName, style }) {
+export default function PageHero({
+  kicker,
+  headline,
+  body,
+  cta,
+  tone = 'panel',
+  center = false,
+  headlineClassName,
+  style,
+}) {
   return (
-    <Section tone={tone} className="text-center" style={style}>
+    <Section tone={tone} center={center} className="text-center" style={style}>
       <p
         className={`mx-auto max-w-2xl text-xs font-semibold uppercase tracking-[0.16em] md:text-sm ${
           tone === 'ink' ? 'opacity-70' : 'text-accent'

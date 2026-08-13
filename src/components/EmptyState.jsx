@@ -1,8 +1,8 @@
 import Section from './Section.jsx'
 
-// "Nothing to show yet" placeholder. `tone` must match the tone the filled-in
-// state of the same section uses, or the wave divider above it -- told a fixed
-// tone per section -- will mismatch the background actually painted.
+// "Nothing to show yet" placeholder. `tone` defaults through to Section's own
+// default, so an empty section paints the same background as its filled-in
+// state without the caller having to say so.
 export default function EmptyState({ tone, style, children }) {
   return (
     <Section tone={tone} style={style}>

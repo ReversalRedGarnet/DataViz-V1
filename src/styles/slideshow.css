@@ -170,6 +170,23 @@
     }
   }
 
+  /*
+    Slides whose content is one short block, vertically centred in the panel
+    instead of sitting against its top edge with a screen of dead space below.
+    Deck-scoped: in the document layout a section is one of many and belongs at
+    the top of its own box.
+  */
+  .slide-viewport .slide-scroll > .section-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* `safe` is the guard for a short viewport: once the block no longer fits,
+       true centring pushes its top edge above the scroll origin, where there is
+       no way to scroll back up to it. Engines without `safe` ignore this line
+       and keep the plain centring above. */
+    justify-content: safe center;
+  }
+
   /* A panel is one screen. The document's generous section padding wastes a
      third of it, so it is tightened in slideshow layout only. */
   .slide-viewport .slide-scroll > * {
