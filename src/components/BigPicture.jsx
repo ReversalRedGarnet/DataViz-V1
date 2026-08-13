@@ -43,7 +43,7 @@ export default function BigPicture({ data, storm, style }) {
         </div>
 
         {stats ? (
-          <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile
               index={0}
               label="What happened"
@@ -74,16 +74,16 @@ export default function BigPicture({ data, storm, style }) {
         )}
 
         {snapshots && (
-          <div className="mt-8">
+          <div className="mt-6">
             <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
               Regional Snapshot — {storm.year}
             </h3>
-            <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
+            <p className="prose-column mb-3 max-w-prose text-sm opacity-80">
               All four nations at one moment rather than over time. Countries {storm.name} did not
               reach are shown too &mdash; the point of a same-moment comparison is that it includes
               them.
             </p>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {CHAIN_METRICS.map((m, i) => {
                 const rows = snapshots[m.key]
                 const nationsMissing = missingNations(NATION_NAMES, rows)
@@ -117,12 +117,12 @@ export default function BigPicture({ data, storm, style }) {
 function StatTile({ index, label, value, detail }) {
   return (
     <div
-      className="animate-pop-in rounded-xl border border-ink/10 bg-surface/60 p-5"
+      className="animate-pop-in rounded-xl border border-ink/10 bg-surface/60 p-4"
       style={{ animationDelay: `${index * 90}ms` }}
     >
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{label}</p>
-      <p className="mt-2 text-3xl font-semibold leading-none tabular-nums">{value}</p>
-      <p className="mt-2 text-xs opacity-70">{detail}</p>
+      <p className="mt-1.5 text-2xl font-semibold leading-none tabular-nums">{value}</p>
+      <p className="mt-1.5 text-xs opacity-70">{detail}</p>
     </div>
   )
 }

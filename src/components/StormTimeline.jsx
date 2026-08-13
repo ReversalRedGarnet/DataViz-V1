@@ -29,101 +29,116 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
 
   return (
     <Section style={style}>
-      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
-        {ROSTER_START}&ndash;{ROSTER_END} &middot; Six severe cyclones &middot; Four Pacific nations
-      </p>
-      <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
-        How often, and to whom
-      </h2>
-      <div className="prose-column mb-6 max-w-prose space-y-3 text-sm opacity-80">
-        <p>
-          Every severe cyclone that struck two or more of these four nations,{' '}
-          {ROSTER_START}&ndash;{ROSTER_END}. The rule was fixed before the list was drawn; what it
-          excludes is shown in the next section &mdash; including one storm that would have
-          suited the argument.
-        </p>
-        <p>
-          These four sit along the same corridor of the South Pacific basin, so they are struck by
-          the <em>same</em> storm rather than merely by storms of their own. When one system
-          reaches all four, what it leaves behind cannot be explained by the weather.
-        </p>
+      {/*
+        Two columns on a wide screen, and the reason is the slide, not the
+        aesthetics: stacked, this section runs about a screen and a half, so the
+        reader met the claim and had to scroll for the roster that backs it.
+        The prose column was already capped at max-w-prose, which left the right
+        half of the slide empty -- so the evidence moves into that space and the
+        whole argument lands in one view. Below lg it stacks and scrolls, which
+        is the honest fallback: on a phone there is no width to trade.
+      */}
+      <div className="grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start">
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+            {ROSTER_START}&ndash;{ROSTER_END} &middot; Six severe cyclones &middot; Four Pacific nations
+          </p>
+          <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+            How often, and to whom
+          </h2>
+          <div className="prose-column max-w-prose space-y-3 text-sm opacity-80">
+            <p>
+              Every severe cyclone that struck two or more of these four nations,{' '}
+              {ROSTER_START}&ndash;{ROSTER_END}. The rule was fixed before the list was drawn; what it
+              excludes is shown in the next section &mdash; including one storm that would have
+              suited the argument.
+            </p>
+            <p>
+              These four sit along the same corridor of the South Pacific basin, so they are struck by
+              the <em>same</em> storm rather than merely by storms of their own. When one system
+              reaches all four, what it leaves behind cannot be explained by the weather.
+            </p>
+          </div>
+
+          <p className="mt-5 max-w-prose text-xs italic opacity-70">
+            Counting years rather than nations would tell a different and weaker story: only one year
+            in ten holds more than one of these storms. The recurrence here is in the countries, not
+            in the calendar.
+          </p>
+        </div>
+
+        <div>
+          {/* The count, stated before the timeline, because it is the actual claim
+              and the timeline is only where it comes from. */}
+          {/* The cards take focus so a keyboard user can reach the cross-chart
+              highlight, which is otherwise pointer-only. A focusable element with
+              no accessible name is worse than one that cannot be focused at all --
+              it becomes a stop on the tab order that announces nothing -- so each
+              carries its own full sentence and the decorative split between the
+              number and its label is hidden from assistive tech. */}
+          <ul className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {counts.map(({ nation, count }) => (
+              <li
+                key={nation}
+                tabIndex={0}
+                aria-label={`${count} severe cyclones struck ${nation} between ${ROSTER_START} and ${ROSTER_END}.`}
+                className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
+                {...highlightHandlers(nation, setHighlight)}
+              >
+                <p aria-hidden="true" className="font-serif text-2xl font-semibold leading-none tabular-nums">
+                  {count}
+                </p>
+                <p aria-hidden="true" className="mt-1 text-xs leading-snug opacity-70">
+                  severe cyclones struck {nation}
+                </p>
+              </li>
+            ))}
+          </ul>
+
+          <ol aria-label={`Severe cyclones by year, ${ROSTER_START} to ${ROSTER_END}`} className="relative space-y-1.5">
+            {YEARS.map((year) => {
+              const storms = STORMS.filter((s) => s.year === year)
+              return (
+                <li key={year} className="flex items-start gap-3">
+                  <span className="w-11 shrink-0 pt-1.5 text-xs font-medium tabular-nums opacity-50">
+                    {year}
+                  </span>
+                  {storms.length === 0 ? (
+                    // An empty year is drawn, not skipped: the gaps are part of
+                    // what the ten-year axis is showing.
+                    <span aria-hidden="true" className="mt-3 h-px flex-1 bg-ink/10" />
+                  ) : (
+                    <span className="flex flex-1 flex-wrap gap-2">
+                      {storms.map((storm) => {
+                        const active = storm.id === selectedId
+                        return (
+                          <button
+                            key={storm.id}
+                            type="button"
+                            onClick={() => onSelect(active ? null : storm.id)}
+                            aria-pressed={active}
+                            aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of four nations.`}
+                            className={`press-target rounded-lg border px-3 py-1.5 text-left text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
+                              active
+                                ? 'border-accent bg-accent/10 font-semibold'
+                                : 'border-ink/15 hover:border-ink/35 hover:bg-surface/60'
+                            }`}
+                          >
+                            <span className="block">{storm.label}</span>
+                            <span className="block text-xs opacity-65">
+                              {storm.nations.length} of 4 nations
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </span>
+                  )}
+                </li>
+              )
+            })}
+          </ol>
+        </div>
       </div>
-
-      {/* The count, stated before the timeline, because it is the actual claim
-          and the timeline is only where it comes from. */}
-      {/* The cards take focus so a keyboard user can reach the cross-chart
-          highlight, which is otherwise pointer-only. A focusable element with
-          no accessible name is worse than one that cannot be focused at all --
-          it becomes a stop on the tab order that announces nothing -- so each
-          carries its own full sentence and the decorative split between the
-          number and its label is hidden from assistive tech. */}
-      <ul className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {counts.map(({ nation, count }) => (
-          <li
-            key={nation}
-            tabIndex={0}
-            aria-label={`${count} severe cyclones struck ${nation} between ${ROSTER_START} and ${ROSTER_END}.`}
-            className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
-            {...highlightHandlers(nation, setHighlight)}
-          >
-            <p aria-hidden="true" className="font-serif text-3xl font-semibold leading-none tabular-nums">
-              {count}
-            </p>
-            <p aria-hidden="true" className="mt-1.5 text-xs leading-snug opacity-70">
-              severe cyclones struck {nation}
-            </p>
-          </li>
-        ))}
-      </ul>
-
-      <ol aria-label={`Severe cyclones by year, ${ROSTER_START} to ${ROSTER_END}`} className="relative space-y-2">
-        {YEARS.map((year) => {
-          const storms = STORMS.filter((s) => s.year === year)
-          return (
-            <li key={year} className="flex items-start gap-3">
-              <span className="w-11 shrink-0 pt-2 text-xs font-medium tabular-nums opacity-50">
-                {year}
-              </span>
-              {storms.length === 0 ? (
-                // An empty year is drawn, not skipped: the gaps are part of
-                // what the ten-year axis is showing.
-                <span aria-hidden="true" className="mt-4 h-px flex-1 bg-ink/10" />
-              ) : (
-                <span className="flex flex-1 flex-wrap gap-2">
-                  {storms.map((storm) => {
-                    const active = storm.id === selectedId
-                    return (
-                      <button
-                        key={storm.id}
-                        type="button"
-                        onClick={() => onSelect(active ? null : storm.id)}
-                        aria-pressed={active}
-                        aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of four nations.`}
-                        className={`press-target rounded-lg border px-3 py-2 text-left text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sand ${
-                          active
-                            ? 'border-accent bg-accent/10 font-semibold'
-                            : 'border-ink/15 hover:border-ink/35 hover:bg-surface/60'
-                        }`}
-                      >
-                        <span className="block">{storm.label}</span>
-                        <span className="block text-xs opacity-65">
-                          {storm.nations.length} of 4 nations
-                        </span>
-                      </button>
-                    )
-                  })}
-                </span>
-              )}
-            </li>
-          )
-        })}
-      </ol>
-
-      <p className="mt-6 max-w-prose text-xs italic opacity-70">
-        Counting years rather than nations would tell a different and weaker story: only one year
-        in ten holds more than one of these storms. The recurrence here is in the countries, not
-        in the calendar.
-      </p>
     </Section>
   )
 }

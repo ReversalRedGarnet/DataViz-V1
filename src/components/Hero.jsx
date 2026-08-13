@@ -30,6 +30,7 @@ export default function Hero({ style }) {
         'weather produces such different aftermaths.'
       }
       cta="Pick a storm from the timeline to begin."
+      center
       style={style}
     />
   )

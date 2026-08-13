@@ -170,6 +170,50 @@
     }
   }
 
+  /*
+    Slides whose content is one short block, vertically centred in the panel
+    instead of sitting against its top edge with a screen of dead space below.
+    Deck-scoped: in the document layout a section is one of many and belongs at
+    the top of its own box.
+  */
+  .slide-viewport .slide-scroll > .section-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* `safe` is the guard for a short viewport: once the block no longer fits,
+       true centring pushes its top edge above the scroll origin, where there is
+       no way to scroll back up to it. Engines without `safe` ignore this line
+       and keep the plain centring above. */
+    justify-content: safe center;
+  }
+
+  /*
+    Slides that must never scroll, because their content is bounded by
+    construction: a heading, a few short paragraphs and one fixed-height chart.
+
+    overflow:hidden here is doing two separate jobs. It caps the section at one
+    panel, and -- the reason this class exists -- it stops any descendant that
+    escapes its own box from extending .slide-scroll's scrollable region. That
+    escape is what was leaving a few hundred pixels of empty space under the
+    chart and letting the panel scroll down into nothing, on a slide whose
+    visible content ended well short of the fold.
+
+    Gated on viewport height. Below this the content may genuinely not fit, and
+    clipping it would hide the chart rather than tidy the layout -- so a short
+    window gets an honest scrollbar back.
+  */
+  @media (min-height: 640px) {
+    .slide-viewport .slide-scroll > .section-lock {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+
   /* A panel is one screen. The document's generous section padding wastes a
      third of it, so it is tightened in slideshow layout only. */
   .slide-viewport .slide-scroll > * {
