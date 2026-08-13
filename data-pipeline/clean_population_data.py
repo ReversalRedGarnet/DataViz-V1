@@ -35,24 +35,21 @@ rather than guessing.
 """
 
 import json
-from pathlib import Path
 
 import pandas as pd
 
-RAW_DIR = Path(__file__).parent / "raw"
-OUT_DIR = Path(__file__).parent.parent / "public" / "data"
-
-NATIONS = ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]
-
-NATION_CODES = {
-    "Solomon Islands": ["SB", "SLB"],
-    "Vanuatu": ["VU", "VUT"],
-    "Fiji": ["FJ", "FJI"],
-    "Tonga": ["TO", "TON"],
-}
-
-YEAR_MIN = 2013
-YEAR_MAX = 2024
+from common import (
+    COUNTRY_COL_CANDIDATES,
+    NATIONS,
+    OUT_DIR,
+    RAW_DIR,
+    TIME_COL_CANDIDATES,
+    VALUE_COL_CANDIDATES,
+    YEAR_MAX,
+    YEAR_MIN,
+    find_col,
+    matches_nation,
+)
 
 RAW_FILE = "population.csv"
 OUT_FILE = "population.json"
@@ -66,33 +63,6 @@ INDICATOR_CODE = "MIDYEARPOPEST"
 # Total, not a breakdown: an export left at its default filters may carry sex
 # and age dimensions, and summing across them would double count.
 DIMENSION_TOTALS = {"SEX": "_T", "AGE": "_T", "URBANIZATION": "_T"}
-
-COUNTRY_COL_CANDIDATES = [
-    "GEO_PICT",
-    "REF_AREA",
-    "Pacific Island Countries and territories",
-    "Country",
-]
-TIME_COL_CANDIDATES = ["TIME_PERIOD", "Year"]
-VALUE_COL_CANDIDATES = ["OBS_VALUE", "Value"]
-
-
-def _find_col(df, candidates, label):
-    for candidate in candidates:
-        if candidate in df.columns:
-            return candidate
-    raise KeyError(
-        f"Couldn't find a {label} column. Columns in this file are: "
-        f"{list(df.columns)} -- add the correct column name to the candidate "
-        f"list near the top of this file."
-    )
-
-
-def _matches_nation(raw_value, nation) -> bool:
-    raw_value = str(raw_value).strip()
-    if raw_value.lower() == nation.lower():
-        return True
-    return raw_value.upper() in NATION_CODES.get(nation, [])
 
 
 def clean_population() -> None:
@@ -121,13 +91,13 @@ def clean_population() -> None:
         if column in df.columns:
             df = df[df[column] == total]
 
-    country_col = _find_col(df, COUNTRY_COL_CANDIDATES, "country")
-    time_col = _find_col(df, TIME_COL_CANDIDATES, "year")
-    value_col = _find_col(df, VALUE_COL_CANDIDATES, "value")
+    country_col = find_col(df, COUNTRY_COL_CANDIDATES, "country")
+    time_col = find_col(df, TIME_COL_CANDIDATES, "year")
+    value_col = find_col(df, VALUE_COL_CANDIDATES, "value")
 
     records = []
     for nation in NATIONS:
-        rows = df[df[country_col].apply(lambda v: _matches_nation(v, nation))]
+        rows = df[df[country_col].apply(lambda v: matches_nation(v, nation))]
         for _, row in rows.iterrows():
             year = int(row[time_col])
             if not (YEAR_MIN <= year <= YEAR_MAX):

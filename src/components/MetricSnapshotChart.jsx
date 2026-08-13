@@ -1,8 +1,6 @@
-import { useEffect } from 'react'
 import NoDataNote from './NoDataNote.jsx'
-import { useTheme } from '../hooks/useTheme.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
-import { renderSnapshotChart, CHART_HEIGHT } from '../utils/chartRenderers.jsx'
+import { renderSnapshotChart, CHART_HEIGHT } from '../utils/charts/index.js'
 
 // One "all nations, one moment" bar chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every snapshot

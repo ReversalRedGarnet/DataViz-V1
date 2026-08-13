@@ -11,9 +11,3 @@ export function prefersReducedMotion() {
 export function motionDuration(ms) {
   return prefersReducedMotion() ? 0 : ms
 }
-
-// Entrance stagger for a page's Nth section. The animation itself is already
-// disabled under prefers-reduced-motion, so the delay needs no guard.
-export function delayStyle(index) {
-  return { animationDelay: `${index * 90}ms` }
-}

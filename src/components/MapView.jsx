@@ -250,12 +250,16 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .attr('fill', 'transparent')
         .attr('pointer-events', 'all')
 
+      // Resolved once: themeRef can't change mid-append, and three lookups for
+      // one palette invited them to drift apart.
+      const markerPalette = chartColorsFor(themeRef.current)
+
       marker
         .append('circle')
         .attr('class', 'marker-dot')
         .attr('r', 7)
-        .attr('fill', chartColorsFor(themeRef.current).idle)
-        .attr('stroke', chartColorsFor(themeRef.current).markRing)
+        .attr('fill', markerPalette.idle)
+        .attr('stroke', markerPalette.markRing)
         .attr('stroke-width', 1.5)
         .style('transition', 'r 150ms ease-out')
 
@@ -266,7 +270,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .attr('y', 4)
         .attr('font-size', 9)
         .attr('font-weight', 700)
-        .attr('fill', chartColorsFor(themeRef.current).onMark)
+        .attr('fill', markerPalette.onMark)
         .style('pointer-events', 'none')
 
       marker

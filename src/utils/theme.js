@@ -52,31 +52,6 @@ export function chartColorsFor(theme) {
   return CHART_COLORS_BY_THEME[theme] ?? CHART_COLORS_BY_THEME.light
 }
 
-// Fill colors per Section `tone`, for PacificBorder to paint the regions
-// either side of its wave. An SVG fill attribute can't read a CSS custom
-// property, so these deliberately duplicate the :root/.dark variables in
-// index.css and must be kept in step with them.
-const SECTION_COLORS_BY_THEME = {
-  light: {
-    plain: '#FAF7F0', // tailwind 'sand'
-    panel: '#F1EADC', // deeper neutral, for editorial-aside sections
-    ink: '#24333A', // tailwind 'ink', the footer's background
-  },
-  dark: {
-    plain: '#181E21',
-    panel: '#222A2E',
-    // Same value as panel, by design: in dark mode the 'ink' tone renders as
-    // dark:bg-panel rather than flipping to the light tone, which read as too
-    // bright. The wave seam shows a colour mismatch if this drifts from it.
-    ink: '#222A2E',
-  },
-}
-
-export function sectionColorsFor(theme) {
-  return SECTION_COLORS_BY_THEME[theme] ?? SECTION_COLORS_BY_THEME.light
-}
-
-
 // Axis text and gridlines for D3 charts, tracking the theme the same way the
 // marks above do.
 export const CHART_INK = {
@@ -99,4 +74,19 @@ export const CHART_SURFACE = {
 export const MAP_COLORS = {
   light: { ocean: '#7FBFD9', land: '#FAF7F0', coastline: '#C9DCE2' },
   dark: { ocean: '#2E4A57', land: '#293236', coastline: '#3E4B50' },
+}
+
+
+// The three values every D3 renderer opens by reading, resolved together.
+// They are always wanted as a set, and each was previously fetched with its
+// own `?? .light` fallback -- six chances for one of them to be spelled
+// differently and leave a chart half-themed. Destructure what you need:
+//
+//   const { ink, surface, palette } = chartTheme(theme)
+export function chartTheme(theme) {
+  return {
+    ink: CHART_INK[theme] ?? CHART_INK.light,
+    surface: CHART_SURFACE[theme] ?? CHART_SURFACE.light,
+    palette: chartColorsFor(theme),
+  }
 }

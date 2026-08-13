@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { useTheme } from '../hooks/useTheme.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
-import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/chartRenderers.jsx'
+import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/charts/index.js'
 
 // One panel of the divergence section. Unlike every other chart card on the
 // site this one is built once and then driven: the section above it owns a
