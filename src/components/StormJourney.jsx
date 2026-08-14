@@ -23,6 +23,14 @@ import { loadLandTopology } from '../utils/loadLand.js'
 // The map carries nothing the steps don't already say in text, so it's hidden
 // from assistive technology entirely rather than given a description that would
 // duplicate the list beside it.
+// Shown under the map on desktop and after the step list on mobile, where the
+// map is a pinned band with no room beneath it for four lines of citation. One
+// string, rendered in two places and only ever displayed in one -- `hidden`
+// removes the other from the accessibility tree, so this does not read twice.
+const TRACK_NOTE =
+  'The line joins documented impact points; it is not the official track. Dates, categories and ' +
+  'tolls come from national meteorological services and UN OCHA, cited in full in the sources.'
+
 const WIDTH = 800
 const HEIGHT = 540
 
@@ -336,16 +344,12 @@ export default function StormJourney({ storm, style }) {
             ref={svgRef}
             aria-hidden="true"
             preserveAspectRatio="xMidYMid meet"
-            className="mx-auto block h-auto max-h-[38vh] w-full rounded-2xl border-2 border-ink/15 shadow-sm md:max-h-none"
+            className="mx-auto block h-auto max-h-[22vh] w-full rounded-2xl border-2 border-ink/15 shadow-sm md:max-h-none"
           />
           {/* "four documented impact points" was hardcoded. Only Harold has
               four stops; the other five storms have two, and the caption was
               asserting a number the map beside it visibly contradicted. */}
-          <p className="mt-2 text-xs italic leading-snug opacity-65">
-            The line joins documented impact points; it is not the official track. Dates,
-            categories and tolls come from national meteorological services and UN OCHA, cited in
-            full in the sources.
-          </p>
+          <p className="mt-2 hidden text-xs italic leading-snug opacity-65 md:block">{TRACK_NOTE}</p>
         </div>
 
         <ol ref={setStepsNode} className="journey-steps mt-4 md:mt-0">
@@ -353,7 +357,7 @@ export default function StormJourney({ storm, style }) {
             <li
               key={step.name}
               data-step={i}
-              className="flex min-h-[58vh] flex-col justify-center border-l-2 py-6 pl-5 transition-[opacity,border-color] duration-500 motion-reduce:transition-none"
+              className="flex min-h-[58vh] flex-col justify-start border-l-2 pb-6 pl-5 pt-[28vh] transition-[opacity,border-color] duration-500 motion-reduce:transition-none md:justify-center md:pt-6"
               style={{
                 opacity: i === active ? 1 : 0.42,
                 borderColor: i === active ? 'rgb(var(--color-accent))' : 'rgb(var(--color-ink) / 0.15)',
@@ -382,6 +386,13 @@ export default function StormJourney({ storm, style }) {
             </li>
           ))}
         </ol>
+
+        {/* Mobile placement of the same note. It sits after the steps rather
+            than under the map, because on a phone the map is a pinned band and
+            anything inside it is pinned too -- four lines of citation following
+            the reader down the screen, in the space the step text needs. It is
+            md:hidden, so on desktop this is not a third grid child. */}
+        <p className="mt-4 text-xs italic leading-snug opacity-65 md:hidden">{TRACK_NOTE}</p>
       </div>
     </Section>
   )
