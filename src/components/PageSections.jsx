@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NationHighlightProvider } from '../hooks/useNationHighlight.jsx'
 import { ScrollRootProvider } from '../hooks/useScrollRoot.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
@@ -110,6 +110,56 @@ function SlidePanel({
     }
   }, [isActive, node])
 
+  // Does this panel's content fit inside it? Answered by measurement rather
+  // than by a flag on the section, because it is not a property of the section:
+  // the same block centres on a desktop and overflows on a laptop, and half of
+  // these slides change height as the reader picks countries or a chart draws
+  // for the first time. A hand-placed `center` class can only ever be right for
+  // one window.
+  //
+  // Measured for every panel, on stage or off. Off-stage panels have live
+  // layout -- the rule this file exists to enforce -- so their boxes are
+  // already the right size, and a slide that arrives already centred saves the
+  // reader a visible jump on the frame after it lands.
+  const [fits, setFits] = useState(false)
+
+  // useLayoutEffect, not useEffect: this measurement decides how the panel is
+  // laid out, so it has to resolve before the browser paints. After paint, the
+  // first frame of every short slide would show it top-aligned and then snap.
+  useLayoutEffect(() => {
+    if (!node) return
+    let frame = null
+    const measure = () => {
+      frame = null
+      // A pixel of slack. Sub-pixel rounding routinely leaves scrollHeight a
+      // fraction above clientHeight on a panel that is plainly not scrolling,
+      // and without the tolerance those slides never centre.
+      setFits(node.scrollHeight - node.clientHeight <= 1)
+    }
+    const schedule = () => {
+      if (frame == null) frame = requestAnimationFrame(measure)
+    }
+    // This cannot oscillate, and the reason is worth keeping: the section
+    // already fills the panel whenever it fits (`.slide-scroll > *` grows and
+    // never shrinks), so centring only repositions content inside a box whose
+    // height is unchanged. The measurement that turned centring on therefore
+    // reads exactly the same with centring applied.
+    const resize = new ResizeObserver(schedule)
+    resize.observe(node)
+    if (node.firstElementChild) resize.observe(node.firstElementChild)
+    measure()
+    // Same settle as the progress readout below. A chart that draws on
+    // activation changes the answer a few hundred milliseconds after the panel
+    // arrives, and nothing resizes an observed box when the growth happens
+    // inside a descendant that overflows its own.
+    const settle = setTimeout(measure, 720)
+    return () => {
+      resize.disconnect()
+      clearTimeout(settle)
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }, [node, isActive])
+
   // Only the on-stage panel reports. The others sit wherever the reader last
   // left them and would fight over the readout.
   useEffect(() => {
@@ -167,7 +217,7 @@ function SlidePanel({
               and the frame around it never moves. A section that manages its
               own internal scrolling -- Follow the Storm, with its pinned map --
               fills this box without overflowing it. */}
-          <div className="slide-scroll" ref={setNode}>
+          <div className="slide-scroll" data-fits={fits ? 'true' : 'false'} ref={setNode}>
             {section.element}
           </div>
 

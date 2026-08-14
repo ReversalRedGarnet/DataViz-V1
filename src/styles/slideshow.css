@@ -171,19 +171,37 @@
   }
 
   /*
-    Slides whose content is one short block, vertically centred in the panel
-    instead of sitting against its top edge with a screen of dead space below.
-    Deck-scoped: in the document layout a section is one of many and belongs at
-    the top of its own box.
+    VERTICAL CENTRING, BY MEASUREMENT
+    =================================
+
+    A slide short enough to fit its panel is centred in it; a slide taller than
+    the panel sits against the top edge and scrolls normally. That is the whole
+    behaviour, and which of the two a slide gets is decided per panel, on every
+    resize, by PageSections.jsx -- published here as data-fits on the scroll
+    box.
+
+    This replaced a hand-placed `center` class on individual sections. A class
+    can only ever be right for one window size: the marked sections went on
+    centring after they had outgrown the panel, and the unmarked ones sat
+    against the top edge with a screen of dead space beneath them on a tall
+    monitor. Both are the same bug seen from opposite ends, and neither is
+    fixable without measuring.
+
+    Note what is *not* here: no rule for the overflowing case. It is the
+    untouched default, so the tall-slide path -- the one every scroll, footer
+    and progress behaviour in this file was tuned against -- is bit-for-bit
+    what it was before centring existed.
   */
-  .slide-viewport .slide-scroll > .section-center {
+  .slide-viewport .slide-scroll[data-fits="true"] > * {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /* `safe` is the guard for a short viewport: once the block no longer fits,
-       true centring pushes its top edge above the scroll origin, where there is
-       no way to scroll back up to it. Engines without `safe` ignore this line
-       and keep the plain centring above. */
+    /* Backstop for the frames between content growing and the measurement
+       catching up. Once the block stops fitting, true centring pushes its top
+       edge above the scroll origin where there is no way to reach it; `safe`
+       falls back to start alignment instead. Engines without `safe` ignore
+       this line and keep the plain centring above -- which is why the JS
+       measurement is the mechanism and this is only the guard rail. */
     justify-content: safe center;
   }
 
