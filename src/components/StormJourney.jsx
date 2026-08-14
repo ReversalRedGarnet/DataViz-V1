@@ -325,7 +325,7 @@ export default function StormJourney({ storm, style }) {
       <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
         Follow {storm.name}
       </h2>
-      <p className="max-w-prose text-sm opacity-75">
+      <p className="prose-column prose-wide text-sm opacity-75">
         {storm.name} reached {STEPS.length} of these four countries, and was a different storm at
         each. Scroll the column on the right to travel with it.
       </p>

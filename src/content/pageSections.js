@@ -16,6 +16,6 @@ export const PAGE_SECTIONS = [
   { id: 'divergence', label: 'Where They Part Ways' },
   { id: 'context', label: 'Capacity & Context' },
   { id: 'compare', label: 'Compare Recovery' },
-  { id: 'exclusions', label: 'What the Rule Left Out' },
+  { id: 'method', label: 'How This Was Made' },
   { id: 'sources', label: 'Sources' },
 ]

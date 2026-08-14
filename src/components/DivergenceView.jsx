@@ -183,12 +183,12 @@ export default function DivergenceView({ data, storm, style }) {
             ))}
           </div>
 
-          <p className="mt-6 max-w-prose text-xs italic opacity-70">
+          <p className="prose-wide mt-6 text-xs italic opacity-70">
             People affected is left out of this view and economic loss is not in the chain at all:
             both are reported in scattered years, and an index across gaps draws a confident line
             over years nobody measured.
           </p>
-          <p className="mt-2 max-w-prose text-xs italic opacity-70">
+          <p className="prose-wide mt-2 text-xs italic opacity-70">
             The further right the sweep runs, the less of what it shows belongs to {storm.name}.
             Read the separation as the shape of four different recoveries, not as a measurement of
             one storm&rsquo;s reach.

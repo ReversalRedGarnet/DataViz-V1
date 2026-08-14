@@ -23,33 +23,22 @@
   }
 
   /*
-    Prose that fills the panel instead of stacking down its left third.
+    Prose that spans the panel: one continuous column, full width.
 
-    A slide is a landscape box, and one reading column in it leaves the right
-    half empty. But simply dropping the max-width is not the fix: full-bleed
-    lines here run to about 140 characters, roughly twice the measure prose
-    stays readable at, and the eye loses its place returning to the left edge.
+    A slide is a landscape box, and a reading column parked in its left third
+    leaves the right half empty on every section that carries full-width charts
+    beneath it. This drops the measure cap so the text runs the width of the
+    content column that everything else on the slide is already using.
 
-    So the block takes the full width and splits into two columns. The panel
-    fills, and each line stays near the 65 characters it was already set at.
-    Two columns and not three: a third would cut the measure short enough that
-    justification starts opening rivers again, which is the problem .prose-column
-    exists to avoid.
+    Long lines are the cost, and .prose-column is what pays it down -- justified
+    text with hyphenation keeps the right edge from fraying and stops the line
+    breaking at awkward places. Pair the two on any block that takes this class.
 
-    Single column below md -- on a phone the panel is not wide enough to divide.
+    Opt in per block. Sections whose prose sits beside something -- the timeline
+    roster, the storm journey's step column -- have no empty width to reclaim,
+    and stretching their text would push the thing it is introducing off-screen.
   */
   .prose-wide {
     max-width: none;
-  }
-
-  @media (min-width: 768px) {
-    .prose-wide {
-      column-count: 2;
-      column-gap: 2.5rem;
-      /* One line stranded at the foot or head of a column reads as a fault
-         rather than a break; two is the least that looks deliberate. */
-      orphans: 2;
-      widows: 2;
-    }
   }
 }

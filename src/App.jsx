@@ -9,7 +9,7 @@ import RippleChain from './components/RippleChain.jsx'
 import DivergenceView from './components/DivergenceView.jsx'
 import ContextPanel from './components/ContextPanel.jsx'
 import StormTimeline from './components/StormTimeline.jsx'
-import ExclusionsPanel from './components/ExclusionsPanel.jsx'
+import MethodPanel from './components/MethodPanel.jsx'
 import StoryGate from './components/StoryGate.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
@@ -102,11 +102,10 @@ function pageSections(data, selection, storm, onSelectStorm) {
       id: 'compare',
       element: <ComparisonView data={data} storm={storm} selectedNations={selected} />,
     },
-    // Moved to the back from its old slot after the timeline. Up front it
-    // interrupted the argument to answer an objection nobody had made yet --
-    // the reader met the roster and was immediately handed a list of storms
-    // that were not in it. It reads as method, so it sits with the method.
-    { id: 'exclusions', element: <ExclusionsPanel /> },
+    // Method sits second to last, immediately before the sources it explains.
+    // It began as an exclusions-only slide in third place, where it broke off
+    // the argument to answer an objection nobody had raised yet.
+    { id: 'method', element: <MethodPanel /> },
     { id: 'sources', element: <CitationPanel sources={DATA_SOURCES} /> },
         ]),
   ].map((section) => ({ ...section, label: SECTION_LABELS[section.id] ?? section.id }))

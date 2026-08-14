@@ -38,7 +38,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
           {sources.length === 0 ? (
             <p className="text-sand/60 dark:text-ink/60">No data sources listed yet.</p>
           ) : (
-            <ul className="prose-wide space-y-1.5">
+            <ul className="space-y-1.5">
               {sources.map((s) => (
                 <li key={s.url}>
                   <a
@@ -57,37 +57,20 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-80">{aboutTitle}</h2>
           {children ?? (
             <>
-              <p className="text-sand/85 dark:text-ink/85">
+              {/* Trimmed to a pointer. The gaps, the zero-as-unreported rule and
+                  the uneven-reporting finding were five paragraphs of caveat
+                  sitting under a list of links; they are the subject of the
+                  method slide before this one, and stating them twice made
+                  neither slide readable. */}
+              <p className="prose-column prose-wide text-sand/85 dark:text-ink/85">
                 Figures are drawn from official Pacific Data Hub statistics for Solomon Islands,
-                Vanuatu, Fiji, and Tonga, covering 2013 to 2024. Data coverage varies by country
-                and metric — direct disaster economic loss in particular is patchy, tourist
-                arrivals are absent for Solomon Islands entirely, and no disaster figures are
-                reported for any of these countries after 2022. Missing figures are labelled as
-                unavailable rather than left blank without explanation.
+                Vanuatu, Fiji and Tonga, covering 2013 to 2024. Coverage varies by country and by
+                metric, and missing figures are labelled unavailable rather than left blank. How
+                the roster was chosen, what the gaps are and where they fall is set out on the
+                previous slide.
               </p>
 
-              <p className="text-sand/85 dark:text-ink/85 mt-3">
-                Those gaps are not evenly distributed, and the site treats that as a finding rather
-                than a disclaimer. The nations with the fewest weather stations are the same ones
-                missing most often from the disaster records — which is why observing capacity is
-                charted here alongside the consequences it fails to capture.
-              </p>
-
-              <p className="text-sand/85 dark:text-ink/85 mt-3">
-                One deliberate departure from the source data: in the people-affected series, a
-                figure of exactly zero is treated as unreported and shown as missing. That series
-                does not distinguish “nobody was affected” from “nothing was submitted”, and the
-                difference is not academic — Vanuatu's official figure for 2015, the year Cyclone
-                Pam became the most destructive storm in its history, is zero. The rule is applied
-                to every zero in that series rather than only to years a storm is known to have
-                struck, so no individual figure is being overridden on our judgement.
-              </p>
-              <p className="text-sand/85 dark:text-ink/85 mt-3">
-                Even the data about these disasters is unevenly distributed — some nations have the
-                infrastructure to measure and report losses in detail, others don't. As disasters
-                grow more frequent, that gap will matter almost as much as the disasters themselves.
-              </p>
-              <p className="text-sand/85 dark:text-ink/85 mt-3">
+              <p className="prose-column prose-wide text-sand/85 dark:text-ink/85 mt-3">
                 This site is illustrative and isn't intended to inform policy, funding, or financial
                 decisions.
               </p>

@@ -1,0 +1,193 @@
+import Section from './Section.jsx'
+import { EXCLUDED, ROSTER_START, ROSTER_END } from '../content/storms.js'
+
+// How the site was made, and what it cannot say.
+//
+// This replaced the old exclusions-only panel, which sat third in the deck and
+// interrupted the argument to answer an objection nobody had raised yet. The
+// roster's exclusions are still here -- they are the part a sceptical reader
+// most needs, since any list of six storms can be made to support almost any
+// claim if the chooser is free to stop once the pattern looks right -- but they
+// are now one section of a methods page rather than a slide of their own.
+//
+// It also takes the limitations prose that used to live on the sources slide,
+// which had grown into five paragraphs of caveat under a list of links.
+//
+// PLANNED WORK is the one block here that is not a statement of fact about the
+// build. Replace it with your own roadmap before submitting -- it is written
+// from what the code currently does not do, not from anything you have told me
+// you intend.
+
+const BUILD = [
+  { label: 'Interface', value: 'React 18, built with Vite' },
+  { label: 'Charts and map', value: 'D3 (no charting library), TopoJSON, Natural Earth land via world-atlas' },
+  { label: 'Styling', value: 'Tailwind CSS, PostCSS' },
+  { label: 'Data pipeline', value: 'Python and pandas, run offline; the site ships static JSON' },
+]
+
+const LIMITS = [
+  {
+    title: 'Annual national totals, not storm totals',
+    body: 'Every series here is a yearly figure for a whole country. A year holding two cyclones reports them as one number, and the 2020–21 stretch carries the pandemic as well as the weather. Nothing on this site isolates the effect of a single storm, and the note under each chart says what that record cannot prove.',
+  },
+  {
+    title: 'A reported zero is not the same as no harm',
+    body: `In the people-affected series a figure of exactly zero is treated as unreported and drawn as missing. That series does not distinguish "nobody was affected" from "nothing was submitted", and the difference is not academic: Vanuatu's official figure for 2015, the year Cyclone Pam became the most destructive storm in its history, is zero. The rule is applied to every zero in the series rather than only to years a storm is known to have struck, so no individual figure is overridden on our judgement.`,
+  },
+  {
+    title: 'The gaps are not evenly spread',
+    body: 'Direct economic loss is patchy throughout, tourist arrivals are absent for Solomon Islands entirely, and no disaster figures are reported for any of these countries after 2022. The nations with the fewest weather stations are the same ones missing most often from the disaster records, which is why observing capacity is charted here rather than mentioned in a footnote.',
+  },
+  {
+    title: 'Sea level rise is described, not charted',
+    body: 'It is the best-attributed of the three mechanisms, with IPCC AR6 rating the human contribution since 1971 very likely. The regional record is reported only to the nearest 0.1 m, which gives three distinct values across twelve years and hides any movement under 10 cm. Charting it would claim a precision the measurement does not have.',
+  },
+]
+
+const PLANNED = [
+  'Per-storm figures where a national statistics office publishes them, so the chain can separate one cyclone from the year around it.',
+  'Sub-national data for the larger nations, since a national total hides which islands were actually hit.',
+  'A longer baseline than 2013, which is currently set by how far back the portal figures stay complete rather than by the argument.',
+  'Recovery timelines: how long each series takes to return to its pre-storm level, which is the question the comparison slide raises and does not answer.',
+]
+
+export default function MethodPanel({ style }) {
+  return (
+    <Section tone="panel" style={style}>
+      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+        Method, data and limitations
+      </p>
+      <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+        How this was made
+      </h2>
+      <div className="prose-column prose-wide mb-8 space-y-3 text-sm opacity-80">
+        <p>
+          Everything on the preceding slides rests on two choices: which storms count, and which
+          figures are trusted to describe them. Both are stated here so they can be checked rather
+          than taken on trust, along with what the records do not support and what the site does
+          not yet do.
+        </p>
+      </div>
+
+      {/* The roster rule and its casualties. Yasa is first and given more room:
+          it is the exclusion that costs the argument something, and a list
+          containing only convenient omissions would be doing the same selective
+          work it claims to prevent. */}
+      <div className="mb-8">
+        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+          The roster rule, and what it left out
+        </h3>
+        <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">
+          <p>
+            The roster is every severe tropical cyclone that struck two or more of these four
+            nations between {ROSTER_START} and {ROSTER_END}. Six met it. The rule was fixed before
+            the list was drawn. Four storms did not meet it and are named below, including the one
+            whose exclusion makes the case weaker.
+          </p>
+        </div>
+
+        <ul aria-label="Storms excluded by the roster rule" className="grid gap-3 sm:grid-cols-2">
+          {EXCLUDED.map((storm, i) => (
+            <li
+              key={storm.name}
+              className={`rounded-xl border border-ink/10 bg-surface/60 p-4 ${
+                i === 0 ? 'sm:col-span-2' : ''
+              }`}
+            >
+              <p className="font-serif text-base font-semibold">
+                {storm.name} <span className="text-sm font-normal opacity-60">{storm.year}</span>
+              </p>
+              <p className="mt-1 text-sm opacity-80">{storm.reason}</p>
+              {storm.cost && (
+                <p className="mt-2 border-l-2 border-accent pl-3 text-sm italic opacity-80">
+                  {storm.cost}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        <p className="prose-wide mt-4 text-xs italic opacity-70">
+          Fiji appears three times here. That is not a judgement about Fiji &mdash; it is what a
+          two-nation threshold does to a country storms reach alone. A different threshold would
+          produce a different roster, which is why this one is stated rather than assumed.
+        </p>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+          Where the figures come from
+        </h3>
+        <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
+          <p>
+            All indicator data is drawn from the Pacific Data Hub, the Pacific Community's
+            statistical portal, for Solomon Islands, Vanuatu, Fiji and Tonga across 2013 to 2024.
+            The portal exports whole dataflows; the filtering to these four nations and these
+            twelve years happens in a Python cleaning step, not by hand, so the same rule is
+            applied to every series. Storm dates, categories and death tolls are not portal data
+            &mdash; they come from national meteorological services and UN OCHA, cited per storm.
+            Every source is linked in full on the next slide.
+          </p>
+          <p>
+            The window opens in 2013 rather than at the first storm on the roster because a chart
+            of an event year means nothing without baseline years before it.
+          </p>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+          What the data cannot say
+        </h3>
+        <ul className="space-y-3">
+          {LIMITS.map((limit) => (
+            <li key={limit.title} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
+              <p className="text-sm font-semibold">{limit.title}</p>
+              <p className="prose-column prose-wide mt-1 text-sm opacity-80">{limit.body}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+          How it is built
+        </h3>
+        <dl className="grid gap-3 sm:grid-cols-2">
+          {BUILD.map((row) => (
+            <div key={row.label} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.12em] opacity-60">
+                {row.label}
+              </dt>
+              <dd className="mt-1 text-sm opacity-85">{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="prose-column prose-wide mt-3 text-sm opacity-80">
+          Charts are drawn directly in D3 rather than through a charting library, so every axis,
+          label and empty state is a decision made here rather than a default inherited from
+          somewhere else. The cleaning scripts are committed alongside the site, and the JSON they
+          produce is what ships &mdash; there is no live API call, and the figures cannot change
+          under the argument after it has been read.
+        </p>
+      </div>
+
+      <div>
+        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+          What is not here yet
+        </h3>
+        <ul className="prose-column prose-wide space-y-2 text-sm opacity-80">
+          {PLANNED.map((item) => (
+            <li key={item} className="border-l-2 border-ink/15 pl-3">
+              {item}
+            </li>
+          ))}
+        </ul>
+        <p className="prose-wide mt-4 text-xs italic opacity-70">
+          This site is illustrative. It is not intended to inform policy, funding or financial
+          decisions.
+        </p>
+      </div>
+    </Section>
+  )
+}

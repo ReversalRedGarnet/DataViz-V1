@@ -70,7 +70,7 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
         </p>
         <SelectionLegend selected={selectedNations} />
         {unstruck.length > 0 && (
-          <p className="mt-3 max-w-prose text-xs italic opacity-70">
+          <p className="prose-wide mt-3 text-xs italic opacity-70">
             {unstruck.join(' and ')} {unstruck.length === 1 ? 'was' : 'were'} not struck by{' '}
             {storm.name}, and {unstruck.length === 1 ? 'is' : 'are'} drawn faded rather than
             removed: the closest thing these records have to a comparison.
@@ -98,7 +98,7 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
           ))}
         </div>
 
-        <p className="mt-6 max-w-prose text-xs italic opacity-70">
+        <p className="prose-wide mt-6 text-xs italic opacity-70">
           Direct economic loss is deliberately not a link here. {FOOTNOTE_METRICS[0].caveat} A chart
           of it would be mostly empty space, and an empty chart argues that little was lost.
         </p>
