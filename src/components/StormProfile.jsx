@@ -10,6 +10,7 @@ import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/charts/ind
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { formatNationList } from '../utils/formatNationList.js'
+import VisuallyHidden from './VisuallyHidden.jsx'
 
 // Per-nation storm facts live in src/content/storms.js, in the order each storm
 // reached the nations it struck -- which is also the order the journey section
@@ -126,45 +127,41 @@ export default function StormProfile({ storm, style }) {
             the chart above conveys the shape, this gives the same
             numbers as text.
 
-            whitespace-normal overrides the nowrap that .sr-only sets
-            (and which inherits down into every cell): the "Local
-            detail" column below holds full prose sentences, and
-            table layout doesn't let a table's rendered width shrink
-            below its content's min-content width -- with nowrap
-            inherited, that min-content width was the length of the
-            single longest unbroken sentence, which stretched this
-            table (and, since it's position:absolute, the whole page)
-            to roughly 2000px wide on every screen size, invisibly.
-            Letting the text wrap keeps min-content down to the
-            longest unbreakable *word* instead. */}
-        <table className="sr-only whitespace-normal">
-          <caption>{storm.name}: category at closest approach and deaths, by nation</caption>
-          <thead>
-            <tr>
-              <th scope="col">Country</th>
-              <th scope="col">Category at closest approach</th>
-              <th scope="col">Deaths</th>
-              <th scope="col">Local detail</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.name}>
-                <td>{row.name}</td>
-                <td>{row.categoryLabel}</td>
-                <td>
-                  {row.deaths == null
-                    ? 'Not reported'
-                    : `${row.deaths}${row.deathsKind === 'indirect' ? ' (indirect)' : ''}`}
-                </td>
-                <td>
-                  {row.fact}
-                  {row.deathsNote ? ` ${row.deathsNote}` : ''}
-                </td>
+            VisuallyHidden, not className="sr-only" on the table itself.
+            .sr-only cannot collapse a table box at all -- see that
+            component for the full account. This table was the worst
+            case of it, because the "Local detail" column holds prose
+            sentences. */}
+        <VisuallyHidden>
+          <table>
+            <caption>{storm.name}: category at closest approach and deaths, by nation</caption>
+            <thead>
+              <tr>
+                <th scope="col">Country</th>
+                <th scope="col">Category at closest approach</th>
+                <th scope="col">Deaths</th>
+                <th scope="col">Local detail</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.name}>
+                  <td>{row.name}</td>
+                  <td>{row.categoryLabel}</td>
+                  <td>
+                    {row.deaths == null
+                      ? 'Not reported'
+                      : `${row.deaths}${row.deathsKind === 'indirect' ? ' (indirect)' : ''}`}
+                  </td>
+                  <td>
+                    {row.fact}
+                    {row.deathsNote ? ` ${row.deathsNote}` : ''}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </VisuallyHidden>
 
         <Tooltip tooltip={tooltip} />
       </div>

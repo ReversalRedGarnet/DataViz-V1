@@ -3,6 +3,7 @@ import NoDataNote from './NoDataNote.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { slug } from '../utils/d3helpers.js'
 import { renderMetricChart, CHART_HEIGHT } from '../utils/charts/index.js'
+import VisuallyHidden from './VisuallyHidden.jsx'
 
 // One "selected nations, over time" chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every trends section
@@ -142,25 +143,27 @@ export default function TrendChart({
           {caveat}
         </p>
       )}
-      <table className="sr-only whitespace-normal">
-        <caption>{label} by year and country</caption>
-        <thead>
-          <tr>
-            <th scope="col">Country</th>
-            <th scope="col">Year</th>
-            <th scope="col">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {allRows.map((d) => (
-            <tr key={`${d.nation}-${d.year}`}>
-              <td>{d.nation}</td>
-              <td>{d.year}</td>
-              <td>{d[valueField]}</td>
+      <VisuallyHidden>
+        <table>
+          <caption>{label} by year and country</caption>
+          <thead>
+            <tr>
+              <th scope="col">Country</th>
+              <th scope="col">Year</th>
+              <th scope="col">Value</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {allRows.map((d) => (
+              <tr key={`${d.nation}-${d.year}`}>
+                <td>{d.nation}</td>
+                <td>{d.year}</td>
+                <td>{d[valueField]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </VisuallyHidden>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/charts/index.js'
+import VisuallyHidden from './VisuallyHidden.jsx'
 
 // One panel of the divergence section. Unlike every other chart card on the
 // site this one is built once and then driven: the section above it owns a
@@ -81,29 +82,31 @@ export default function DivergenceChart({
           No usable record for {missing.join(' or ')} on this metric.
         </p>
       )}
-      <table className="sr-only whitespace-normal">
-        <caption>{label}, indexed to each nation&rsquo;s own {years[0]} figure</caption>
-        <thead>
-          <tr>
-            <th scope="col">Country</th>
-            <th scope="col">Year</th>
-            <th scope="col">Value</th>
-            <th scope="col">Index ({years[0]} = 100)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {series.flatMap((s) =>
-            s.points.map((p) => (
-              <tr key={`${s.nation}-${p.year}`}>
-                <td>{s.nation}</td>
-                <td>{p.year}</td>
-                <td>{format(p.raw)}</td>
-                <td>{p.index.toFixed(1)}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      <VisuallyHidden>
+        <table>
+          <caption>{label}, indexed to each nation&rsquo;s own {years[0]} figure</caption>
+          <thead>
+            <tr>
+              <th scope="col">Country</th>
+              <th scope="col">Year</th>
+              <th scope="col">Value</th>
+              <th scope="col">Index ({years[0]} = 100)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {series.flatMap((s) =>
+              s.points.map((p) => (
+                <tr key={`${s.nation}-${p.year}`}>
+                  <td>{s.nation}</td>
+                  <td>{p.year}</td>
+                  <td>{format(p.raw)}</td>
+                  <td>{p.index.toFixed(1)}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </VisuallyHidden>
     </div>
   )
 }

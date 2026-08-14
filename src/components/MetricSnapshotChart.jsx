@@ -1,6 +1,7 @@
 import NoDataNote from './NoDataNote.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { renderSnapshotChart, CHART_HEIGHT } from '../utils/charts/index.js'
+import VisuallyHidden from './VisuallyHidden.jsx'
 
 // One "all nations, one moment" bar chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every snapshot
@@ -78,23 +79,25 @@ export default function MetricSnapshotChart({
           {caveat}
         </p>
       )}
-      <table className="sr-only whitespace-normal">
-        <caption>{ariaLabel}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Country</th>
-            <th scope="col">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((d) => (
-            <tr key={d.nation}>
-              <td>{d.nation}</td>
-              <td>{d.value}</td>
+      <VisuallyHidden>
+        <table>
+          <caption>{ariaLabel}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Country</th>
+              <th scope="col">Value</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((d) => (
+              <tr key={d.nation}>
+                <td>{d.nation}</td>
+                <td>{d.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </VisuallyHidden>
     </div>
   )
 }
