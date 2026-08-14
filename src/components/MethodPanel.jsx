@@ -13,6 +13,13 @@ import { EXCLUDED, ROSTER_START, ROSTER_END } from '../content/storms.js'
 // It also takes the limitations prose that used to live on the sources slide,
 // which had grown into five paragraphs of caveat under a list of links.
 //
+// The closing section is the one part here that argues rather than qualifies.
+// Every limitation above concerns what the records fail to capture; that one
+// concerns who the record is readable by, which is the same inequality one
+// step further on. It is deliberately not filed under PLANNED -- listing it as
+// future work would make it read as a feature that got descoped rather than as
+// part of what the site is about.
+//
 // PLANNED WORK is the one block here that is not a statement of fact about the
 // build. Replace it with your own roadmap before submitting -- it is written
 // from what the code currently does not do, not from anything you have told me
@@ -44,6 +51,21 @@ const LIMITS = [
   },
 ]
 
+// The languages actually spoken in the four nations this site is about, which
+// is the point of the closing note. Not a wish list of languages in general:
+// naming one that is not spoken in any of the four would undercut the argument
+// it is being used to make.
+//
+// Fiji is listed with both of its own official languages. iTaukei and Fiji
+// Hindi are distinct languages with distinct speakers, and collapsing them into
+// one line would repeat in miniature the flattening the note is objecting to.
+const LANGUAGES = [
+  { nation: 'Solomon Islands', tongues: 'Solomon Islands Pijin, alongside some seventy vernaculars' },
+  { nation: 'Vanuatu', tongues: 'Bislama, alongside more than a hundred vernaculars' },
+  { nation: 'Fiji', tongues: 'iTaukei and Fiji Hindi, both official' },
+  { nation: 'Tonga', tongues: 'Tongan' },
+]
+
 const PLANNED = [
   'Per-storm figures where a national statistics office publishes them, so the chain can separate one cyclone from the year around it.',
   'Sub-national data for the larger nations, since a national total hides which islands were actually hit.',
@@ -64,8 +86,8 @@ export default function MethodPanel({ style }) {
         <p>
           Everything on the preceding slides rests on two choices: which storms count, and which
           figures are trusted to describe them. Both are stated here so they can be checked rather
-          than taken on trust, along with what the records do not support and what the site does
-          not yet do.
+          than taken on trust, along with what the records do not support, what the site does not
+          yet do, and who it is &mdash; and is not &mdash; legible to.
         </p>
       </div>
 
@@ -172,7 +194,7 @@ export default function MethodPanel({ style }) {
         </p>
       </div>
 
-      <div>
+      <div className="mb-8">
         <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
           What is not here yet
         </h3>
@@ -183,7 +205,55 @@ export default function MethodPanel({ style }) {
             </li>
           ))}
         </ul>
-        <p className="prose-wide mt-4 text-xs italic opacity-70">
+      </div>
+
+      {/* The closing note, and the one that is an argument rather than a
+          caveat. It is last because it turns the site's own method back on
+          itself: every limitation above is about what the records fail to
+          capture, and this one is about who the record -- and this site --
+          is legible to. Stated as the same finding, not as a roadmap item,
+          because filing it under future work would make it sound like a
+          feature that was descoped rather than a gap that is the subject. */}
+      <div>
+        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+          Whose language the record is kept in
+        </h3>
+        <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
+          <p>
+            This site is written in English. So is every figure it draws on: the portal exports,
+            the national statistics releases, the disaster assessments filed after each cyclone.
+            English is the language of the institutions that count, and it is not the first
+            language of most of the people being counted.
+          </p>
+        </div>
+
+        <ul aria-label="First languages of the four nations" className="mt-4 grid gap-3 sm:grid-cols-2">
+          {LANGUAGES.map((row) => (
+            <li key={row.nation} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
+              <p className="text-sm font-semibold">{row.nation}</p>
+              <p className="mt-1 text-sm opacity-80">{row.tongues}</p>
+            </li>
+          ))}
+        </ul>
+
+        <div className="prose-column prose-wide mt-4 space-y-3 text-sm opacity-80">
+          <p>
+            That is the same asymmetry the rest of this page documents, one step further along.
+            Solomon Islands has the fewest weather stations and the largest gaps in the disaster
+            record; it is also the nation whose people are least likely to be able to read the
+            record that was kept about them, or this account of it. A harvest failure recorded in
+            a language the farmer does not read has been counted, but not returned.
+          </p>
+          <p>
+            Translating this site is therefore not a feature it is missing. It is the same finding
+            it is already making, and it is not work that machine translation can do: Pijin,
+            Bislama, iTaukei, Fiji Hindi and Tongan need speakers, not software, and this project
+            does not yet have them. Naming that plainly seemed better than leaving it unsaid, or
+            than shipping something approximate in languages the site is not equipped to get right.
+          </p>
+        </div>
+
+        <p className="prose-wide mt-6 text-xs italic opacity-70">
           This site is illustrative. It is not intended to inform policy, funding or financial
           decisions.
         </p>
