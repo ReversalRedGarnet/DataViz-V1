@@ -192,7 +192,21 @@
     and progress behaviour in this file was tuned against -- is bit-for-bit
     what it was before centring existed.
   */
-  .slide-viewport .slide-scroll[data-fits="true"] > * {
+  /*
+    Follow the Storm is excluded, and the exclusion is structural rather than
+    cosmetic. That section does not sit inside its panel -- it *is* the panel:
+    it fills the height and hands the overflow to its step column alone, and
+    every height in that chain (section -> wrapper -> split grid -> steps list)
+    resolves from the section filling the box. Centring content inside it aligns
+    against free space that is not supposed to exist, and the step column stops
+    being a bounded scroller. When it stops scrolling, the IntersectionObserver
+    band in useActiveStep.js never moves, no step ever becomes active, and the
+    map sits on the first country with the track undrawn.
+
+    It also fits by construction -- it has overflow:hidden and is exactly one
+    panel tall -- so it would match this rule on every window there is.
+  */
+  .slide-viewport .slide-scroll[data-fits="true"] > *:not(.journey-section) {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -295,6 +309,11 @@
       flex: 1 1 auto;
       flex-direction: column;
       overflow: hidden;
+      /* Stated, not inherited by luck. This section must fill its panel, so
+         its children align from the start edge and take the height they are
+         given -- see the data-fits exclusion above for what centring here
+         costs. */
+      justify-content: normal;
     }
 
     .slide-viewport .journey-section > div {
