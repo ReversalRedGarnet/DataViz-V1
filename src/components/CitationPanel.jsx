@@ -38,7 +38,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
           {sources.length === 0 ? (
             <p className="text-sand/60 dark:text-ink/60">No data sources listed yet.</p>
           ) : (
-            <ul className="max-w-prose space-y-1.5">
+            <ul className="prose-wide space-y-1.5">
               {sources.map((s) => (
                 <li key={s.url}>
                   <a
@@ -53,7 +53,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
           )}
         </div>
 
-        <div className="prose-column max-w-prose">
+        <div className="prose-column prose-wide">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-80">{aboutTitle}</h2>
           {children ?? (
             <>

@@ -22,7 +22,7 @@ export default function ExclusionsPanel({ style }) {
       <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
         What the rule left out
       </h2>
-      <div className="prose-column mb-6 max-w-prose space-y-3 text-sm opacity-80">
+      <div className="prose-column prose-wide mb-6 space-y-3 text-sm opacity-80">
         <p>
           The roster is every severe tropical cyclone that struck two or more of these four nations
           between {ROSTER_START} and {ROSTER_END}. Six met it. These four did not, and they are

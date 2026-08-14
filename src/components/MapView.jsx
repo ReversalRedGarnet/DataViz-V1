@@ -394,7 +394,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   return (
     <Section style={style}>
       <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">Explore the Pacific</h2>
-      <p className="mb-5 max-w-prose text-sm opacity-70">
+      <p className="prose-column prose-wide mb-5 text-sm opacity-70">
         Tap a marker to select it, tap a second one to compare. Drag to pan, pinch to zoom, or use
         the buttons.
       </p>

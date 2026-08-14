@@ -61,7 +61,7 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
         {/* "2020 in particular carries the pandemic alongside the storm" read
             as though the storm were always Harold. The caveat belongs to the
             data window, not to the selected event. */}
-        <p className="mb-4 max-w-prose text-sm opacity-70">
+        <p className="prose-column prose-wide mb-4 text-sm opacity-70">
           Five linked records, in the order the damage travels: who was hit, then the harvest, the
           herds, the power supply and the visitors. Read it as plausible links, not a measured
           causal path &mdash; every series is an annual national total no cyclone has to itself,

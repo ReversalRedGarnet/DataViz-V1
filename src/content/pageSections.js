@@ -7,7 +7,6 @@
 export const PAGE_SECTIONS = [
   { id: 'top', label: 'Overview' },
   { id: 'timeline', label: 'How Often, and to Whom' },
-  { id: 'exclusions', label: 'What the Rule Left Out' },
   { id: 'gate', label: 'Pick a Storm' },
   { id: 'storm-journey', label: 'Follow the Storm' },
   { id: 'storm-profile', label: 'Storm Profile' },
@@ -17,5 +16,6 @@ export const PAGE_SECTIONS = [
   { id: 'divergence', label: 'Where They Part Ways' },
   { id: 'context', label: 'Capacity & Context' },
   { id: 'compare', label: 'Compare Recovery' },
+  { id: 'exclusions', label: 'What the Rule Left Out' },
   { id: 'sources', label: 'Sources' },
 ]

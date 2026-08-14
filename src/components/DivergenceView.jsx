@@ -121,7 +121,7 @@ export default function DivergenceView({ data, storm, style }) {
           <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
             Where the four nations part ways after {storm.name}
           </h2>
-          <p className="mb-6 max-w-prose text-sm opacity-75">
+          <p className="prose-column prose-wide mb-6 text-sm opacity-75">
             Each line begins at 100 &mdash; that nation&rsquo;s own figure in {storm.year}. Nothing
             else is adjusted and no country is measured against another, so the only thing left for
             the chart to show is the distance that opens up afterwards.

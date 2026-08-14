@@ -76,8 +76,6 @@ function pageSections(data, selection, storm, onSelectStorm) {
       id: 'timeline',
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
-    { id: 'exclusions', element: <ExclusionsPanel /> },
-
     ...(storm ? [] : [{ id: 'gate', element: <StoryGate /> }]),
     ...(!storm
       ? []
@@ -104,6 +102,11 @@ function pageSections(data, selection, storm, onSelectStorm) {
       id: 'compare',
       element: <ComparisonView data={data} storm={storm} selectedNations={selected} />,
     },
+    // Moved to the back from its old slot after the timeline. Up front it
+    // interrupted the argument to answer an objection nobody had made yet --
+    // the reader met the roster and was immediately handed a list of storms
+    // that were not in it. It reads as method, so it sits with the method.
+    { id: 'exclusions', element: <ExclusionsPanel /> },
     { id: 'sources', element: <CitationPanel sources={DATA_SOURCES} /> },
         ]),
   ].map((section) => ({ ...section, label: SECTION_LABELS[section.id] ?? section.id }))

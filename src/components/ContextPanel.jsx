@@ -57,7 +57,7 @@ export default function ContextPanel({ data, style }) {
         <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
           Who can measure, and what is changing
         </h2>
-        <p className="prose-column mb-8 max-w-prose text-sm opacity-75">
+        <p className="prose-column prose-wide mb-8 text-sm opacity-75">
           Every record in the ripple chain has holes in it. These two do not, for the same reason
           the others do: a disaster figure only exists if a country had the capacity to assess and
           file it after being hit, while the records below are structural or measured from orbit
@@ -69,7 +69,7 @@ export default function ContextPanel({ data, style }) {
             <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
               Who can observe their own weather
             </h3>
-            <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
+            <p className="prose-column prose-wide mb-4 text-sm opacity-80">
               Monitoring stations per national network, unchanged in every year on record. Set this
               ranking beside the gaps in the ripple chain and it is the same ranking: Solomon
               Islands has the fewest stations, no tourist arrivals reported at all, and a single
@@ -102,20 +102,22 @@ export default function ContextPanel({ data, style }) {
             <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
               What is changing underneath
             </h3>
-            <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
-              Two regional records, all four nations on each &mdash; the only climate claims this
-              site makes with confidence, and both about trends rather than any individual storm.
-              Warmer seas raise the ceiling on how intense a cyclone can become; emissions per head
-              say who is doing the warming.
-            </p>
-            <p className="prose-column mb-4 max-w-prose text-sm opacity-80">
-              A third mechanism is stated rather than charted. Sea level rise worsens storm surge —
-              a storm arriving on a higher ocean reaches further inland — and it is the
-              best-attributed link of the three, with IPCC AR6 rating the human contribution since
-              1971 very likely. The regional record is reported only to the nearest 0.1&nbsp;m,
-              giving three distinct values across twelve years and hiding any movement under
-              10&nbsp;cm. Charting it would claim a precision the measurement does not have.
-            </p>
+            <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">
+              <p>
+                Two regional records, all four nations on each &mdash; the only climate claims this
+                site makes with confidence, and both about trends rather than any individual storm.
+                Warmer seas raise the ceiling on how intense a cyclone can become; emissions per head
+                say who is doing the warming.
+              </p>
+              <p>
+                A third mechanism is stated rather than charted. Sea level rise worsens storm surge —
+                a storm arriving on a higher ocean reaches further inland — and it is the
+                best-attributed link of the three, with IPCC AR6 rating the human contribution since
+                1971 very likely. The regional record is reported only to the nearest 0.1&nbsp;m,
+                giving three distinct values across twelve years and hiding any movement under
+                10&nbsp;cm. Charting it would claim a precision the measurement does not have.
+              </p>
+            </div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CONTEXT_METRICS.map((m, i) => (
                 <TrendChart

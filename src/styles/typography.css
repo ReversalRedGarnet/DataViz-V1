@@ -9,9 +9,47 @@
     the narrower the column the worse it gets. Opt in per block rather than on
     every <p>, so captions, chart notes and centred hero lines aren't dragged
     into it.
+
+    The class matches the element it is on as well as the paragraphs inside it.
+    It used to be `.prose-column p` alone, which silently did nothing wherever
+    the class sat on a <p> directly -- so a section that wrapped its prose in a
+    div was justified and one that marked up each paragraph was not, with no
+    way to tell from the markup which you were getting.
   */
+  .prose-column,
   .prose-column p {
     text-align: justify;
     hyphens: auto;
+  }
+
+  /*
+    Prose that fills the panel instead of stacking down its left third.
+
+    A slide is a landscape box, and one reading column in it leaves the right
+    half empty. But simply dropping the max-width is not the fix: full-bleed
+    lines here run to about 140 characters, roughly twice the measure prose
+    stays readable at, and the eye loses its place returning to the left edge.
+
+    So the block takes the full width and splits into two columns. The panel
+    fills, and each line stays near the 65 characters it was already set at.
+    Two columns and not three: a third would cut the measure short enough that
+    justification starts opening rivers again, which is the problem .prose-column
+    exists to avoid.
+
+    Single column below md -- on a phone the panel is not wide enough to divide.
+  */
+  .prose-wide {
+    max-width: none;
+  }
+
+  @media (min-width: 768px) {
+    .prose-wide {
+      column-count: 2;
+      column-gap: 2.5rem;
+      /* One line stranded at the foot or head of a column reads as a fault
+         rather than a break; two is the least that looks deliberate. */
+      orphans: 2;
+      widows: 2;
+    }
   }
 }
