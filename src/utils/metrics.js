@@ -137,10 +137,32 @@ export const FOOTNOTE_METRICS = [
   },
 ]
 
+// Not a metric in any of the three groups above, and deliberately not a member
+// of CHAIN_METRICS: nothing charts population on its own, and adding it there
+// would put a fifth bar in the regional snapshot saying only that Fiji is the
+// biggest country. It exists as a denominator.
+//
+// The reason it earns a place at all is that raw counts flatten exactly the
+// thing this site is about. In 2020 Vanuatu reported roughly 246,800 people
+// affected and Fiji roughly 235,900 -- as two bars those read as the same
+// event. Against their populations they are 83% and 26%, which is a different
+// story about the same year. See shareOfPopulationRows in utils/rows.js.
+const POPULATION_METRIC = {
+  key: 'population',
+  file: 'population.json',
+  field: 'population',
+  label: 'Population',
+  // The page is complete without it: losing this file costs the share-of-
+  // population view and nothing else, so it must not be able to blank the
+  // site the way a missing chain metric legitimately does. See useMetricData.
+  optional: true,
+}
+
 // Everything the page loads. Order is irrelevant here; it only drives fetches.
 export const METRICS = [
   ...CHAIN_METRICS,
   ...CAPACITY_METRICS,
   ...CONTEXT_METRICS,
   ...FOOTNOTE_METRICS,
+  POPULATION_METRIC,
 ]

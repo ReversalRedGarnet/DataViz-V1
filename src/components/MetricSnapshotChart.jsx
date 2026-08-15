@@ -21,6 +21,10 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 //   caveat -- what this series cannot be read as, printed under the chart in
 //     the same place and style TrendChart uses, so the two chart types don't
 //     put the same kind of note in two different places
+//   control -- optional node beside the heading, for a chart that offers the
+//     reader a choice about how it is drawn. Kept generic rather than built in:
+//     only one chart currently has one, and hard-coding it here would put a
+//     people-affected concern inside the shared card.
 //   className -- layout hook (e.g. sm:col-span-2 for an odd one out)
 export default function MetricSnapshotChart({
   label,
@@ -35,6 +39,7 @@ export default function MetricSnapshotChart({
   hideTooltip,
   index = 0,
   caveat,
+  control,
   className = '',
 }) {
   const { svgRef, cardRef, inView } = useChartCanvas({
@@ -53,7 +58,12 @@ export default function MetricSnapshotChart({
       } ${className}`}
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      {label && <h3 className="mb-2 text-sm font-semibold">{label}</h3>}
+      {(label || control) && (
+        <div className="mb-2 flex items-start justify-between gap-3">
+          {label && <h3 className="text-sm font-semibold">{label}</h3>}
+          {control}
+        </div>
+      )}
       {rows.length > 0 ? (
         <svg ref={svgRef} role="img" aria-label={ariaLabel} className="block w-full" style={{ height: CHART_HEIGHT }} />
       ) : (
@@ -92,7 +102,7 @@ export default function MetricSnapshotChart({
             {rows.map((d) => (
               <tr key={d.nation}>
                 <td>{d.nation}</td>
-                <td>{d.value}</td>
+                <td>{format ? format(d.value) : d.value}</td>
               </tr>
             ))}
           </tbody>

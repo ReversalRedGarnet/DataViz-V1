@@ -51,3 +51,30 @@ export function pctChange(from, to) {
   if (!from) return null
   return ((to - from) / Math.abs(from)) * 100
 }
+
+// Snapshot rows restated as a percentage of each nation's population that
+// year. Takes the { nation, value } rows snapshotRowsByMetric returns, so it
+// converts a count of people and nothing else -- applied to crop yield or GWh
+// it would produce a number with no meaning.
+//
+// A nation with no population figure for `year` is dropped rather than carried
+// at its raw value. The two are not interchangeable, and a bar silently left
+// in people while its neighbours are in percent is worse than a visible gap:
+// callers pass the result through missingNations(), so a dropped nation is
+// reported as missing in the same way a nation absent from the source is.
+//
+// A population of zero is treated the same way. It cannot occur in real data,
+// which is the reason to let it through as a gap rather than divide by it.
+export function shareOfPopulationRows(rows, populationRows, year) {
+  if (!rows) return null
+  const population = new Map(
+    (populationRows ?? [])
+      .filter((d) => d.year === year)
+      .map((d) => [d.nation, d.population])
+  )
+  return rows.flatMap((d) => {
+    const total = population.get(d.nation)
+    if (!total) return []
+    return [{ ...d, value: (d.value / total) * 100 }]
+  })
+}

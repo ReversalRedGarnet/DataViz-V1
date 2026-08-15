@@ -42,6 +42,10 @@ const LIMITS = [
     body: `In the people-affected series a figure of exactly zero is treated as unreported and drawn as missing. That series does not distinguish "nobody was affected" from "nothing was submitted", and the difference is not academic: Vanuatu's official figure for 2015, the year Cyclone Pam became the most destructive storm in its history, is zero. The rule is applied to every zero in the series rather than only to years a storm is known to have struck, so no individual figure is overridden on our judgement.`,
   },
   {
+    title: 'Two sources give two different shares',
+    body: 'The regional snapshot can restate people affected as a share of population, dividing the SPC series by SPC mid-year population estimates. The storm cards quote shares from government and PDNA assessments instead, which count a single event against their own population base. For Cyclone Winston the two give roughly 69% and 62% of Fiji. Neither figure is a correction of the other, and the site prints both rather than picking the one that reads more cleanly.',
+  },
+  {
     title: 'The gaps are not evenly spread',
     body: 'Direct economic loss is patchy throughout, tourist arrivals are absent for Solomon Islands entirely, and no disaster figures are reported for any of these countries after 2022. The nations with the fewest weather stations are the same ones missing most often from the disaster records, which is why observing capacity is charted here rather than mentioned in a footnote.',
   },

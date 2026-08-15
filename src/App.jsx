@@ -43,6 +43,10 @@ const DATA_SOURCES = [
     label: 'Power generation — Pacific Data Hub (SPC)',
     url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.POWER_GEN.&pd=,&to[TIME_PERIOD]=false',
   },
+  {
+    label: 'Mid-year population estimates — Pacific Data Hub (SPC)',
+    url: 'https://stats.pacificdata.org/',
+  },
   // Supplementary sources follow, drawn from the roster itself so a storm and
   // its citations cannot drift apart. Not from the official Pacific Data Hub
   // list, and used only for the "storm itself" facts in the profile and journey

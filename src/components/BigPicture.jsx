@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Section from './Section.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
@@ -7,13 +7,33 @@ import { useTooltip } from '../hooks/useTooltip.js'
 import { NATIONS } from './MapView.jsx'
 import { CHAIN_METRICS } from '../utils/metrics.js'
 import { formatNationList } from '../utils/formatNationList.js'
-import { missingNations, snapshotRowsByMetric } from '../utils/rows.js'
+import { missingNations, snapshotRowsByMetric, shareOfPopulationRows } from '../utils/rows.js'
 
 const NATION_NAMES = NATIONS.map((n) => n.name)
 
+// The one metric in the chain that is a count of people, and so the only one a
+// population denominator means anything for. Crop yield is already per hectare
+// and generation is already national; dividing either by population would
+// produce a number with no referent.
+const PER_CAPITA_KEY = 'affected_persons'
+
+// Short enough to sit on top of a bar. The longer phrasing lives in the card
+// heading and the aria-label, which is where a reader looks for the unit.
+const SHARE_FORMAT = (v) => `${v.toFixed(1)}%`
+const SHARE_TICK_FORMAT = (v) => `${v}%`
+
 export default function BigPicture({ data, storm, style }) {
   const eventYear = storm?.year ?? null
-  const stats = useMemo(() => computeStats(data, eventYear), [data, eventYear])
+  const [perCapita, setPerCapita] = useState(false)
+  const hasPopulation = (data?.population?.length ?? 0) > 0
+  // The effective mode, not the button state. If the denominator never
+  // arrived the tile falls back to counts, so it cannot end up disagreeing
+  // with the chart beside it.
+  const showShareStats = perCapita && hasPopulation
+  const stats = useMemo(
+    () => computeStats(data, eventYear, showShareStats),
+    [data, eventYear, showShareStats]
+  )
   const snapshots = useMemo(
     () => (eventYear ? snapshotRowsByMetric(data, CHAIN_METRICS, eventYear, NATION_NAMES) : null),
     [data, eventYear]
@@ -60,7 +80,13 @@ export default function BigPicture({ data, storm, style }) {
               index={2}
               label="Hardest- vs. least-hit"
               value={stats.ratio ? `${stats.ratio.toLocaleString()}×` : 'n/a'}
-              detail={`${stats.maxNation} vs. ${stats.minNation}, as reported for ${storm.year}`}
+              detail={
+                stats.maxNation
+                  ? `${stats.maxNation} vs. ${stats.minNation}, ${
+                      showShareStats ? 'as a share of population' : 'by reported count'
+                    } for ${storm.year}`
+                  : `No comparable figures for ${storm.year}`
+              }
             />
             <StatTile
               index={3}
@@ -85,18 +111,61 @@ export default function BigPicture({ data, storm, style }) {
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {CHAIN_METRICS.map((m, i) => {
-                const rows = snapshots[m.key]
+                // The toggle is offered only when the denominator actually
+                // arrived. population.json is optional, so a reader whose copy
+                // failed to load gets the counts silently rather than a control
+                // that produces an empty chart.
+                const offerToggle = m.key === PER_CAPITA_KEY && hasPopulation
+                const showShare = offerToggle && perCapita
+                // Derived at render rather than in the snapshots memo: the
+                // conversion is a map over at most four rows, and keeping it
+                // here means the memo above stays keyed on the data alone
+                // rather than on the toggle.
+                const baseRows = snapshots[m.key]
+                const rows = showShare
+                  ? shareOfPopulationRows(baseRows, data.population, eventYear)
+                  : baseRows
+                // With the toggle on, a nation can be absent for two different
+                // reasons: the source reported nothing for it, or it has no
+                // population figure to divide by. Calling the second "no data
+                // available" would be wrong -- the count exists, the
+                // denominator doesn't -- and this site's whole argument rests
+                // on a gap saying accurately what kind of gap it is.
                 const nationsMissing = missingNations(NATION_NAMES, rows)
+                const noDenominator = showShare
+                  ? nationsMissing.filter((n) => baseRows.some((r) => r.nation === n))
+                  : []
+                const notReported = nationsMissing.filter((n) => !noDenominator.includes(n))
+                const missingNote = [
+                  notReported.length > 0
+                    ? `No ${storm.year} data available for ${formatNationList(notReported)}.`
+                    : '',
+                  noDenominator.length > 0
+                    ? `No ${storm.year} population figure for ${formatNationList(noDenominator)}, so ${
+                        noDenominator.length > 1 ? 'they are' : 'it is'
+                      } left out of this view.`
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+                const label = showShare ? 'People affected (share of population)' : m.label
                 return (
                   <MetricSnapshotChart
                     key={m.key}
-                    label={m.label}
-                    ariaLabel={`${m.label}, ${storm.year}, by nation`}
+                    label={label}
+                    ariaLabel={`${label}, ${storm.year}, by nation`}
                     rows={rows}
                     nationsMissing={nationsMissing}
-                    missingNote={`No ${storm.year} data available for ${formatNationList(nationsMissing)}.`}
+                    missingNote={missingNote}
                     emptyNote={`Data not available for ${storm.year}.`}
-                    format={m.format}
+                    format={showShare ? SHARE_FORMAT : m.format}
+                    yTickFormat={showShare ? SHARE_TICK_FORMAT : undefined}
+                    caveat={showShare ? SHARE_CAVEAT : undefined}
+                    control={
+                      offerToggle ? (
+                        <PerCapitaToggle value={perCapita} onChange={setPerCapita} />
+                      ) : undefined
+                    }
                     showTooltip={showTooltip}
                     hideTooltip={hideTooltip}
                     index={i}
@@ -114,6 +183,40 @@ export default function BigPicture({ data, storm, style }) {
   )
 }
 
+// What the percentage version cannot be read as. The count already carries its
+// own caveats in metrics.js; these are the ones the division adds.
+//
+// The source note is here rather than only in the methods panel because this is
+// where the conflict becomes visible: the storm cards quote shares from
+// government and PDNA assessments, and dividing the SPC series gives a
+// different figure for the same event. Naming both is the only honest option --
+// silently printing 68.9% beside a card that says 62% invites the reader to
+// assume one of them is a mistake.
+const SHARE_CAVEAT =
+  'Each figure divided by that nation\u2019s mid-year population estimate for the same year. Still an annual, all-hazard total, so a year holding two cyclones is one number here as well. Percentages derived from the SPC series will not always match the shares quoted on the storm cards, which come from government and PDNA assessments counting a single event on their own population base: for Cyclone Winston the two give roughly 69% and 62% of Fiji. Both are reported figures; neither is a correction of the other.'
+
+function PerCapitaToggle({ value, onChange }) {
+  const option = (active) =>
+    `press-target rounded-md px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
+      active ? 'bg-accent/15 font-semibold text-accent' : 'opacity-70 hover:opacity-100'
+    }`
+
+  return (
+    <div
+      role="group"
+      aria-label="Measure people affected as a count or as a share of population"
+      className="flex shrink-0 items-center rounded-lg border border-ink/15 p-0.5 text-xs"
+    >
+      <button type="button" onClick={() => onChange(false)} aria-pressed={!value} className={option(!value)}>
+        Count
+      </button>
+      <button type="button" onClick={() => onChange(true)} aria-pressed={value} className={option(value)}>
+        Share
+      </button>
+    </div>
+  )
+}
+
 function StatTile({ index, label, value, detail }) {
   return (
     <div
@@ -127,27 +230,69 @@ function StatTile({ index, label, value, detail }) {
   )
 }
 
+// Rounded to a precision the gap can actually carry. The old rule rounded
+// every ratio to the nearest hundred, which reads as sensible against Harold's
+// 3,629x and silently turned every smaller gap into zero -- and zero is falsy,
+// so the tile printed "n/a" for Pam, Winston and Gita while holding perfectly
+// good figures for all three. Only one of the six storms ever showed a number.
+//
+// Per-capita ratios are smaller than raw ones almost by construction, since
+// dividing by population pulls the extremes together, so the toggle would have
+// made a rare bug into a common one.
+function roundRatio(value) {
+  if (value >= 100) return Math.round(value / 100) * 100
+  if (value >= 10) return Math.round(value)
+  return Math.round(value * 10) / 10
+}
+
 // The hardest/least-hit ratio is drawn from every nation with a figure that
 // year, not only the ones the storm reached. That is the right population for a
 // regional snapshot, but it means the two named nations were not necessarily
 // both struck -- so the tile no longer says "the same event", which for five of
 // the six storms was not true.
-function computeStats(data, eventYear) {
+//
+// The ratio follows the per-capita toggle, and has to: it is a comparison
+// between two nations at one moment, which is precisely the quantity a raw
+// count distorts. Left in counts while the chart beside it offered shares, the
+// tile would be making the error the chart exists to correct.
+//
+// The total affected does not follow the toggle, and must not. It is a sum of
+// people across four nations; shares of four different denominators do not add
+// up to anything, and a "112%" here would be meaningless.
+function computeStats(data, eventYear, perCapita) {
   if (!data || !eventYear) return null
   const rows = data.affected_persons ?? []
   const eventRows = rows.filter((d) => d.year === eventYear)
   if (eventRows.length === 0) return null
 
   const totalAffected = eventRows.reduce((sum, d) => sum + d.affected_persons, 0)
-  const max = eventRows.reduce((a, b) => (b.affected_persons > a.affected_persons ? b : a))
-  const min = eventRows.reduce((a, b) => (b.affected_persons < a.affected_persons ? b : a))
-  // Rounded to the nearest hundred -- the precise ratio reads as false
-  // precision on what's fundamentally a rough, order-of-magnitude gap.
-  const rawRatio = min.affected_persons > 0 ? max.affected_persons / min.affected_persons : null
-  const ratio = rawRatio ? Math.round(rawRatio / 100) * 100 : null
+
+  // Compared in whichever unit the reader has chosen. A nation with no
+  // population figure drops out of the per-capita comparison rather than being
+  // ranked against the others on a different basis.
+  const comparable = perCapita
+    ? shareOfPopulationRows(
+        eventRows.map((d) => ({ nation: d.nation, value: d.affected_persons })),
+        data.population,
+        eventYear
+      )
+    : eventRows.map((d) => ({ nation: d.nation, value: d.affected_persons }))
+
+  let maxNation = null
+  let minNation = null
+  let ratio = null
+  // Two nations or it isn't a comparison. Pam's year reports one country, and
+  // ranking it against itself would print a confident 1x.
+  if (comparable.length >= 2) {
+    const max = comparable.reduce((a, b) => (b.value > a.value ? b : a))
+    const min = comparable.reduce((a, b) => (b.value < a.value ? b : a))
+    maxNation = max.nation
+    minNation = min.nation
+    ratio = min.value > 0 ? roundRatio(max.value / min.value) : null
+  }
 
   const economicLossReported = (data.economic_loss ?? []).filter((d) => d.year === eventYear).length
 
-  return { totalAffected, maxNation: max.nation, minNation: min.nation, ratio, economicLossReported }
+  return { totalAffected, maxNation, minNation, ratio, economicLossReported }
 }
 
