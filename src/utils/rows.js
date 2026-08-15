@@ -3,8 +3,10 @@
 // return, so the snapshot/trend components differ only in their copy
 // and metric config, not in how they reshape data.
 
-// Sort comparator putting rows in the page's own nation order.
-export function byNationOrder(order) {
+// Sort comparator putting rows in the page's own nation order. Module-private:
+// snapshotRowsByMetric below is its only caller, and sorting rows outside that
+// function is how a chart ends up ordered differently from the one beside it.
+function byNationOrder(order) {
   return (a, b) => order.indexOf(a.nation) - order.indexOf(b.nation)
 }
 

@@ -23,7 +23,9 @@ export function zeroAnchoredDomain(values, pad = 1.1) {
 // So any non-zero value gets at least MIN_BAR_HEIGHT, and an exact zero gets a
 // printed "0" on the baseline instead of a bar (see drawZeroLabels). Giving
 // zero a stub was worse: it made a reported nothing taller than a reported 68.
-export const MIN_BAR_HEIGHT = 2
+// Module-private: barTopAndHeight below applies it, and a renderer applying the
+// floor itself would be a second copy of this rule to keep in step.
+const MIN_BAR_HEIGHT = 2
 
 export function barTopAndHeight(y, value) {
   const yZero = y(0)

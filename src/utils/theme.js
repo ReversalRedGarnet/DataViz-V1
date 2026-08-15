@@ -53,15 +53,17 @@ export function chartColorsFor(theme) {
 }
 
 // Axis text and gridlines for D3 charts, tracking the theme the same way the
-// marks above do.
-export const CHART_INK = {
+// marks above do. Module-private: chartTheme() below is the only way in, so a
+// renderer can't reach past it and resolve one of the three with its own
+// fallback, which is the half-themed-chart bug chartTheme() exists to prevent.
+const CHART_INK = {
   light: '#24333A',
   dark: '#F0ECE3',
 }
 
 // Halo around chart points, matching the card behind them so overlapping marks
 // stay distinct. Kept in step with --color-surface.
-export const CHART_SURFACE = {
+const CHART_SURFACE = {
   light: '#FFFFFF',
   dark: '#293236',
 }
