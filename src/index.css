@@ -92,6 +92,18 @@ html.theme-sweep::view-transition-new(root) {
     transform: none;
   }
 
+  /*
+    The press invitation on the timeline chips can't simply be switched off:
+    the ring is the affordance, and at rest it is fully transparent, so
+    `animation: none` alone would delete the signal rather than calm it. Held
+    still at the opacity it would otherwise pass through instead.
+  */
+  .awaiting-press::after {
+    animation: none;
+    opacity: 0.4;
+    transform: none;
+  }
+
   /* The dimming still happens -- it carries meaning -- but instantly. */
   .nation-mark {
     transition: none;

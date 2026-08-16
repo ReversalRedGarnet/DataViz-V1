@@ -145,6 +145,51 @@
     opacity: 0.42;
   }
 
+  /*
+    The invitation to press. The storm chips on the opening timeline are the
+    only control on that slide, and until one is pressed nothing else on the
+    page exists -- so a resting card with a border is not a strong enough
+    signal that the reader is meant to act. This puts a faint accent ring
+    through each chip, staggered along the axis so the six read as a sequence
+    rather than a blinking row. Applied only while no storm is selected; the
+    moment one is, the invitation has been taken and every ring stops.
+
+    Drawn on a pseudo-element and animated with transform and opacity alone,
+    for the reason given under .animate-pop-in above: an animated box-shadow on
+    six cards would repaint every frame, indefinitely, on exactly the hardware
+    this site is most likely to be read on. The ring scales past its card, so
+    the chip itself must not clip -- it carries no overflow rule, and the grid
+    cell it sits in is padded rather than tight.
+  */
+  @keyframes await-press {
+    0% {
+      opacity: 0;
+      transform: scale(1);
+    }
+
+    30% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1.09);
+    }
+  }
+
+  .awaiting-press::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border: 1.5px solid rgb(var(--color-accent));
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    animation: await-press 2600ms cubic-bezier(0.22, 0.7, 0.35, 1) infinite;
+    animation-delay: inherit;
+  }
+
   /* Entrance animation for anchored tooltips. */
   @keyframes tooltip-pop-in {
     from {
