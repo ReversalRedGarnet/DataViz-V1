@@ -10,7 +10,6 @@ import DivergenceView from './components/DivergenceView.jsx'
 import ContextPanel from './components/ContextPanel.jsx'
 import StormTimeline from './components/StormTimeline.jsx'
 import MethodPanel from './components/MethodPanel.jsx'
-import StoryGate from './components/StoryGate.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
@@ -65,10 +64,10 @@ const DATA_SOURCES = [
 // background is now set where it is painted, in the component's own <Section>.
 // Every id here must also appear in content/pageSections.js, which is what the
 // header's jump-to menu links to.
-// Sections before the gate are always present; the rest appear once a storm is
-// chosen. Split into two lists rather than filtered from one, so the gate's
-// position is a structural fact of this file rather than an index somebody has
-// to keep in step.
+// The first two sections are always present; the rest appear once a storm is
+// chosen. Split into two lists rather than filtered from one, so where the
+// story opens out is a structural fact of this file rather than an index
+// somebody has to keep in step.
 const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label]))
 
 function pageSections(data, selection, storm, onSelectStorm) {
@@ -78,9 +77,19 @@ function pageSections(data, selection, storm, onSelectStorm) {
     { id: 'top', element: <Hero /> },
     {
       id: 'timeline',
+      // The same hold the map uses further down, for the same reason: every
+      // section after this one is about one storm, so paging past without one
+      // chosen would walk the reader through nine slides with nothing in them.
+      //
+      // This replaces a dedicated gate slide that used to sit here -- a card
+      // reading "Pick a storm to carry on" that the reader reached by pressing
+      // Next. That was a slide spent asking for a click the reader was already
+      // looking at, and holding the deck here says the same thing without
+      // spending a slide on it. The refusal lands on the control the reader
+      // actually pressed, which is also where the answer is.
+      requires: storm ? null : 'Select a cyclone',
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
-    ...(storm ? [] : [{ id: 'gate', element: <StoryGate /> }]),
     ...(!storm
       ? []
       : [
@@ -144,10 +153,10 @@ function AppShell() {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
   }, [headerHeight])
 
-  // Choosing a storm replaces the gate with the storm sections at the same
-  // index, so the reader steps straight into the journey rather than being
-  // returned to the top. Declared above `sections` because it is read while
-  // building it.
+  // Choosing a storm appends the storm sections after the timeline and lifts
+  // the hold on it, so the reader carries on from the slide they were already
+  // on rather than being moved for having made a choice. Declared above
+  // `sections` because it is read while building it.
   const selectStorm = useCallback((id) => {
     setStormId(id)
     setPanelFraction(0)

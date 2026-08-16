@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // the Next/Previous controls, the section menu, and the keyboard.
 //
 // Deliberately an index into the live sections array rather than an id. The
-// array changes shape when a storm is picked -- the gate is replaced by nine
-// storm sections at the same position -- and an index means the reader lands on
-// the first of the new sections instead of being thrown back to the top.
+// array changes shape when a storm is picked -- ten storm sections appear after
+// the timeline -- and an index means the reader stays on the slide they were
+// already looking at instead of being thrown back to the top.
 //
 // Left/Right and PageUp/PageDown page the deck. Up/Down are NOT bound: they
 // belong to the panel's own internal scroll, and taking them would make a long
@@ -56,10 +56,10 @@ export function useDeck(sections) {
     [sections, go]
   )
 
-  // The gate collapses from four sections to twelve when a storm is chosen, and
-  // back again when it is cleared. Clearing while deep in the deck would leave
-  // `active` pointing past the end of the array at a section that no longer
-  // exists, so it is clamped whenever the shape changes.
+  // The deck grows from two sections to twelve when a storm is chosen, and
+  // collapses again when it is cleared. Clearing while deep in the deck would
+  // leave `active` pointing past the end of the array at a section that no
+  // longer exists, so it is clamped whenever the shape changes.
   useEffect(() => {
     setActive((current) => Math.max(0, Math.min(count - 1, current)))
   }, [count])
