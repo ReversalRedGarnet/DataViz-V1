@@ -23,11 +23,11 @@ export default function Hero({ style }) {
       kicker={`${ROSTER_START}\u2013${ROSTER_END} \u00b7 Six severe cyclones \u00b7 Four Pacific nations`}
       headline={`Between ${ROSTER_START} and ${ROSTER_END}, each of these four nations was struck three or four times. No two recovered the same way.`}
       body={
-        'Solomon Islands, Vanuatu, Fiji and Tonga share an ocean and a cyclone ' +
-        'season. They do not share what a cyclone leaves behind. Six severe ' +
-        'storms, followed through the official record \u2014 the harvest, the ' +
-        'power supply, the visitors afterwards \u2014 asking why the same ' +
-        'weather produces such different aftermaths.'
+        'Solomon Islands, Vanuatu, Fiji and Tonga share an ocean as well as a ' +
+        'cyclone season. The same storm may sweep through different territories, ' +
+        'yet the aftermath is seldom ever the same. Six severe storms, followed ' +
+        'through official records from trusted sources and examined across key ' +
+        'factors, reveal why the same weather can produce such different outcomes.'
       }
       cta="Pick a storm from the timeline to begin."
       center
