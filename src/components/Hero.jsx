@@ -21,7 +21,7 @@ export default function Hero({ style }) {
   return (
     <PageHero
       kicker={`${ROSTER_START}\u2013${ROSTER_END} \u00b7 Six severe cyclones \u00b7 Four Pacific nations`}
-      headline={`Between ${ROSTER_START} and ${ROSTER_END}, each of these four nations was struck three or four times. No two recovered the same way.`}
+      headline={`Between ${ROSTER_START} and ${ROSTER_END}, each of these nations was struck multiple times. No two recovered the same way.`}
       body={
         'Solomon Islands, Vanuatu, Fiji and Tonga share an ocean as well as a ' +
         'cyclone season. The same storm may sweep through different territories, ' +
