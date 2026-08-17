@@ -80,10 +80,10 @@ const PLANNED = [
 export default function MethodPanel({ style }) {
   return (
     <Section tone="panel" style={style}>
-      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+      <p className="type-eyebrow mb-1 text-accent">
         Method, data and limitations
       </p>
-      <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+      <h2 className="type-h2 mb-2">
         How this was made
       </h2>
       <div className="prose-column prose-wide mb-8 space-y-3 text-sm opacity-80">
@@ -100,7 +100,7 @@ export default function MethodPanel({ style }) {
           containing only convenient omissions would be doing the same selective
           work it claims to prevent. */}
       <div className="mb-8">
-        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+        <h3 className="type-subhead mb-1 text-accent">
           The roster rule, and what it left out
         </h3>
         <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">
@@ -120,7 +120,7 @@ export default function MethodPanel({ style }) {
                 i === 0 ? 'sm:col-span-2' : ''
               }`}
             >
-              <p className="font-serif text-base font-semibold">
+              <p className="text-base font-semibold">
                 {storm.name} <span className="text-sm font-normal opacity-60">{storm.year}</span>
               </p>
               <p className="mt-1 text-sm opacity-80">{storm.reason}</p>
@@ -141,7 +141,7 @@ export default function MethodPanel({ style }) {
       </div>
 
       <div className="mb-8">
-        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+        <h3 className="type-subhead mb-1 text-accent">
           Where the figures come from
         </h3>
         <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
@@ -162,7 +162,7 @@ export default function MethodPanel({ style }) {
       </div>
 
       <div className="mb-8">
-        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+        <h3 className="type-subhead mb-1 text-accent">
           What the data cannot say
         </h3>
         <ul className="space-y-3">
@@ -176,13 +176,13 @@ export default function MethodPanel({ style }) {
       </div>
 
       <div className="mb-8">
-        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+        <h3 className="type-subhead mb-1 text-accent">
           How it is built
         </h3>
         <dl className="grid gap-3 sm:grid-cols-2">
           {BUILD.map((row) => (
             <div key={row.label} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
-              <dt className="text-xs font-semibold uppercase tracking-[0.12em] opacity-60">
+              <dt className="type-eyebrow opacity-60">
                 {row.label}
               </dt>
               <dd className="mt-1 text-sm opacity-85">{row.value}</dd>
@@ -199,7 +199,7 @@ export default function MethodPanel({ style }) {
       </div>
 
       <div className="mb-8">
-        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+        <h3 className="type-subhead mb-1 text-accent">
           What is not here yet
         </h3>
         <ul className="prose-column prose-wide space-y-2 text-sm opacity-80">
@@ -219,7 +219,7 @@ export default function MethodPanel({ style }) {
           because filing it under future work would make it sound like a
           feature that was descoped rather than a gap that is the subject. */}
       <div>
-        <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+        <h3 className="type-subhead mb-1 text-accent">
           Whose language the record is kept in
         </h3>
         <div className="prose-column prose-wide space-y-3 text-sm opacity-80">

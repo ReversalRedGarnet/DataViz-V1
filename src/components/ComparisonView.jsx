@@ -42,7 +42,7 @@ export default function ComparisonView({ data, storm, selectedNations, style }) 
   return (
     <Section tone="panel" style={style}>
       <div ref={containerRef} className="relative">
-        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">Compare recovery</h2>
+        <h2 className="type-h2 mb-2">Compare recovery</h2>
         <p className="prose-column prose-wide mb-8 text-sm opacity-70">
           {storm.name}&rsquo;s year ({storm.year}) versus the latest year on record.
         </p>
@@ -78,8 +78,8 @@ function NationSummary({ nation, data, eventYear, color, index, showTooltip, hid
       className="animate-pop-in rounded-2xl border-t-4 bg-surface/80 p-6 shadow-sm"
       style={{ borderColor: color, animationDelay: `${index * 100}ms` }}
     >
-      <h3 className="font-serif text-xl font-semibold tracking-tight">{nation}</h3>
-      <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">Since {eventYear}</p>
+      <h3 className="type-h3">{nation}</h3>
+      <p className="type-eyebrow mb-5 text-accent">Since {eventYear}</p>
       <ul className="divide-y divide-ink/10 text-sm">
         {CHAIN_METRICS.map((m) => {
           const rows = (data[m.key] ?? [])

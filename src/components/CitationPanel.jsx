@@ -34,7 +34,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
           measure in both layouts. */}
       <div className="relative mx-auto w-full max-w-5xl space-y-8 text-sm">
         <div>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-80">Data sources</h2>
+          <h2 className="type-eyebrow mb-3 opacity-80">Data sources</h2>
           {sources.length === 0 ? (
             <p className="text-sand/60 dark:text-ink/60">No data sources listed yet.</p>
           ) : (
@@ -54,7 +54,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
         </div>
 
         <div className="prose-column prose-wide">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-80">{aboutTitle}</h2>
+          <h2 className="type-eyebrow mb-3 opacity-80">{aboutTitle}</h2>
           {children ?? (
             <>
               {/* Trimmed to a pointer. The gaps, the zero-as-unreported rule and

@@ -16,7 +16,7 @@ export default function DeckStatus({ storm, selectedNations, onClearNations }) {
 
   return (
     <div className="deck-status mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-ink/10 pt-2 text-xs">
-      <span className="font-semibold uppercase tracking-[0.14em] text-accent">
+      <span className="type-eyebrow text-accent">
         {storm.name} {storm.year}
       </span>
       {nations.length > 0 ? (

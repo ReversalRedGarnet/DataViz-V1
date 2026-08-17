@@ -53,7 +53,7 @@ export default function BigPicture({ data, storm, style }) {
   return (
     <Section tone="panel" style={style}>
       <div ref={containerRef} className="relative">
-        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">The Bigger Picture</h2>
+        <h2 className="type-h2 mb-2">The Bigger Picture</h2>
 
         <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
           <p>
@@ -101,7 +101,7 @@ export default function BigPicture({ data, storm, style }) {
 
         {snapshots && (
           <div className="mt-6">
-            <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+            <h3 className="type-subhead mb-1 text-accent">
               Regional Snapshot — {storm.year}
             </h3>
             <p className="prose-column prose-wide mb-3 text-sm opacity-80">
@@ -223,7 +223,7 @@ function StatTile({ index, label, value, detail }) {
       className="animate-pop-in rounded-xl border border-ink/10 bg-surface/60 p-4"
       style={{ animationDelay: `${index * 90}ms` }}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{label}</p>
+      <p className="type-eyebrow text-accent">{label}</p>
       <p className="mt-1.5 text-2xl font-semibold leading-none tabular-nums">{value}</p>
       <p className="mt-1.5 text-xs opacity-70">{detail}</p>
     </div>

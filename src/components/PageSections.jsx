@@ -267,7 +267,7 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
               &larr;
             </span>
             <span className="min-w-0">
-              <span className="block text-[0.65rem] uppercase tracking-[0.14em] opacity-55">
+              <span className="type-meta block opacity-55">
                 Back
               </span>
               <span className="block truncate font-medium">{prevLabel}</span>
@@ -304,7 +304,7 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
             }`}
           >
             <span className="min-w-0">
-              <span className="block text-[0.65rem] uppercase tracking-[0.14em] opacity-55">
+              <span className="type-meta block opacity-55">
                 {requires ? 'To continue' : 'Next'}
               </span>
               <span className="block truncate">{requires || nextLabel}</span>

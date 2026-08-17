@@ -105,10 +105,10 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
         down to a single sentence there is nothing left to put in a side column,
         and a timeline is the one chart that actually wants the full measure.
       */}
-      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+      <p className="type-eyebrow mb-1 text-accent">
         {ROSTER_START}&ndash;{ROSTER_END} &middot; Six severe cyclones &middot; Four Pacific nations
       </p>
-      <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+      <h2 className="type-h2 mb-2">
         How often, and to whom
       </h2>
       <p className="max-w-prose text-sm opacity-80">
@@ -131,7 +131,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
             className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
             {...highlightHandlers(nation, setHighlight)}
           >
-            <p aria-hidden="true" className="font-serif text-2xl font-semibold leading-none tabular-nums">
+            <p aria-hidden="true" className="type-figure text-2xl leading-none">
               {count}
             </p>
             <p aria-hidden="true" className="mt-1 text-xs leading-snug opacity-70">
@@ -143,7 +143,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
 
       {/* A UI label, not a sentence: the chips are the only control on the
           slide and the ring alone can't say what pressing one is for. */}
-      <p className="mt-7 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+      <p className="type-eyebrow mt-7 flex items-center gap-2 text-accent">
         <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
         Select a cyclone
       </p>

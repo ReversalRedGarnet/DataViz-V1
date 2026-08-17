@@ -327,15 +327,15 @@ export default function StormJourney({ storm, style }) {
 
   return (
     <Section tone="panel" className="journey-section" style={style}>
-      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+      <p className="type-eyebrow mb-1 text-accent">
         {STEPS[0].date} &ndash; {STEPS[STEPS.length - 1].date}
       </p>
-      <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+      <h2 className="type-h2 mb-2">
         Follow {storm.name}
       </h2>
       <p className="prose-column prose-wide text-sm opacity-75">
-        {storm.name} reached {STEPS.length} of these four countries, and was a different storm at
-        each. Scroll the column on the right to travel with it.
+        {storm.name} reached {STEPS.length} of these 4 countries. Scroll the column on the right to
+        witness its journey.
       </p>
 
       <div className="journey-split mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
@@ -363,10 +363,10 @@ export default function StormJourney({ storm, style }) {
                 borderColor: i === active ? 'rgb(var(--color-accent))' : 'rgb(var(--color-ink) / 0.15)',
               }}
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+              <p className="type-eyebrow text-accent">
                 {step.date}
               </p>
-              <h3 className="mt-1 font-serif text-xl font-semibold tracking-tight md:text-2xl">
+              <h3 className="type-h3 mt-1">
                 {step.name}
               </h3>
               <p className="mt-2 text-sm font-medium">{step.lead}</p>
@@ -375,7 +375,7 @@ export default function StormJourney({ storm, style }) {
                   to render it as the empty string followed by the word
                   "deaths". Same distinction the profile chart's unreported
                   band makes, in the one place a reader meets it first. */}
-              <p className="mt-3 text-xs uppercase tracking-[0.12em] opacity-60">
+              <p className="type-meta mt-3 opacity-60">
                 {step.categoryLabel} &middot;{' '}
                 {step.deaths == null
                   ? 'deaths not reported'
