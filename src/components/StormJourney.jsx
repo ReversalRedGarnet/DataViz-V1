@@ -5,20 +5,29 @@ import Section from './Section.jsx'
 import { NATIONS } from './MapView.jsx'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
+import JourneyScrubber from './JourneyScrubber.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
-import { useActiveStep } from '../hooks/useActiveStep.js'
-import { useScrollRoot } from '../hooks/useScrollRoot.jsx'
-import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import { chartTheme, MAP_COLORS } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 
-// The selected storm's route across the nations it struck, read by scrolling.
-// Stops come from the storm registry in the order the storm reached them. The
-// map is
-// sticky; the steps beside it are what moves, and each one advances the track,
-// the storm glyph and the marker states.
+// The selected storm's route across the nations it struck, driven by the reader.
+// Stops come from the storm registry in the order the storm reached them, and
+// the scrubber beside the map is what moves through them: dragging it, pressing
+// a stop, or arrowing along it advances the track, the storm glyph and the
+// marker states together.
+//
+// It used to advance on scroll. An IntersectionObserver watched a tall column
+// of steps and reported whichever one had crossed a band across the middle of
+// the panel, and the map followed. That mechanism is gone, along with the two
+// percentages in slideshow.css that manufactured the scroll travel it needed
+// and the note explaining why they could not be treated as spacing. Three
+// things are better for its going: the control is visible, so a reader knows
+// there is one; the position lives in the story state with everything else the
+// reader has chosen, so it can be reset when the storm changes rather than
+// left pointing at a stop the new storm does not have; and the section is no
+// longer one CSS edit away from silently refusing to advance.
 //
 // The map carries nothing the steps don't already say in text, so it's hidden
 // from assistive technology entirely rather than given a description that would
@@ -136,14 +145,13 @@ function paintScene(scene, { active, theme }) {
 }
 
 // Props:
+//   storm -- the selected storm
+//   index -- which documented stop is on the map, from the story state
+//   onIndex -- (i) => void, the only way that position changes
 //   style -- forwarded to the underlying Section (entrance stagger)
-export default function StormJourney({ storm, style }) {
+export default function StormJourney({ storm, index = 0, onIndex, style }) {
   const STEPS = buildSteps(storm)
   const svgRef = useRef(null)
-  // Published through state, not a ref: in slideshow layout this element is
-  // also the IntersectionObserver root, and a ref's .current is still null on
-  // the render where that root has to be chosen.
-  const [stepsNode, setStepsNode] = useState(null)
   const sceneRef = useRef(null)
   const [built, setBuilt] = useState(false)
 
@@ -154,24 +162,13 @@ export default function StormJourney({ storm, style }) {
     setBuilt(false)
   }, [storm?.id])
   const { theme } = useTheme()
-  // The steps are read against whatever box is actually scrolling them, and
-  // that changes at the split breakpoint.
-  //
-  // Wide: the map is pinned beside the steps and only the step column moves, so
-  // the column is both the container and the observer root.
-  // Narrow: the columns stack and the panel scrolls as one, so the root is the
-  // panel's scroll region and the column is just a list inside it.
-  //
-  // Getting this wrong is not a cosmetic failure. An observer rooted on an
-  // element that does not scroll has a band that never moves, so a step that
-  // has once intersected goes on intersecting, entries stop firing, and the
-  // active step can only ever go forwards -- the map reaches the last country
-  // and will not come back. That was the scroll-reversal bug on desktop, and
-  // until now the narrow layout still had it.
-  const panelScroll = useScrollRoot()
-  const isSplit = useMediaQuery('(min-width: 768px)')
-  const active = useActiveStep(stepsNode, STEPS.length, isSplit ? stepsNode : panelScroll)
+  // Clamped rather than trusted. The index is shared state and the stop list is
+  // per storm -- Harold has four stops, Pam has two -- so a stale index is a
+  // read past the end of an array rather than a cosmetic fault. useStory resets
+  // it on every storm change; this is the second lock on the same door.
   const hasSteps = STEPS.length > 0
+  const active = Math.min(Math.max(0, index), Math.max(0, STEPS.length - 1))
+  const step = STEPS[active]
 
   // Read inside build(), which resolves after the render that set them. Held in
   // refs rather than taken as effect dependencies: either one changing must
@@ -338,11 +335,11 @@ export default function StormJourney({ storm, style }) {
             had: the scope of this project is four countries today and the
             number is written down in one place, so this sentence should read
             it rather than repeat it. */}
-        {storm.name} reached {STEPS.length} of these {NATIONS.length} countries. Scroll the column
-        on the right to witness its journey.
+        {storm.name} reached {STEPS.length} of these {NATIONS.length} countries. Drag the control
+        beside the map, or use the arrow keys, to travel with it.
       </p>
 
-      <div className="journey-split mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">
+      <div className="journey-split mt-6 md:grid md:grid-cols-2 md:items-start md:gap-10">
         <div className="journey-sticky sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 md:pt-0">
           <svg
             ref={svgRef}
@@ -356,45 +353,48 @@ export default function StormJourney({ storm, style }) {
           <p className="mt-2 hidden text-xs italic leading-snug opacity-65 md:block">{TRACK_NOTE}</p>
         </div>
 
-        <ol ref={setStepsNode} className="journey-steps mt-4 md:mt-0">
-          {STEPS.map((step, i) => (
-            <li
-              key={step.name}
-              data-step={i}
-              className="flex min-h-[58vh] flex-col justify-start border-l-2 pb-6 pl-5 pt-[28vh] transition-[opacity,border-color] duration-500 motion-reduce:transition-none md:justify-center md:pt-6"
-              style={{
-                opacity: i === active ? 1 : 0.42,
-                borderColor: i === active ? 'rgb(var(--color-accent))' : 'rgb(var(--color-ink) / 0.15)',
-              }}
-            >
-              <p className="type-eyebrow text-accent">
-                {step.date}
-              </p>
-              <h3 className="type-h3 mt-1">
-                {step.name}
-              </h3>
-              <p className="mt-2 text-sm font-medium">{step.lead}</p>
-              <p className="mt-3 text-sm opacity-80">{step.fact}</p>
-              {/* A null toll is never reported, not zero, and this line used
-                  to render it as the empty string followed by the word
-                  "deaths". Same distinction the profile chart's unreported
-                  band makes, in the one place a reader meets it first. */}
-              <p className="type-meta mt-3 opacity-60">
-                {step.categoryLabel} &middot;{' '}
-                {step.deaths == null
-                  ? 'deaths not reported'
-                  : `${step.deaths} ${step.deaths === 1 ? 'death' : 'deaths'}${
-                      step.deathsKind === 'indirect' ? ', indirect' : ''
-                    }`}
-              </p>
-            </li>
-          ))}
-        </ol>
+        <div className="journey-detail mt-5 md:mt-0">
+          <JourneyScrubber
+            stops={STEPS}
+            index={active}
+            onIndex={onIndex}
+            label={`${storm.name}: move between documented impact points`}
+          />
 
-        {/* Mobile placement of the same note. It sits after the steps rather
+          {/* The stop itself. No aria-live on it, deliberately: the slider
+              above already announces the stop it lands on through its
+              valuetext, and a live region here would say the same country
+              twice on every press -- which is how an accessible control
+              becomes an unusable one. */}
+          <article className="journey-stop mt-5 border-l-2 border-accent pl-5">
+            <p className="type-eyebrow text-accent">{step.date}</p>
+            <h3 className="type-h3 mt-1">{step.name}</h3>
+            <p className="mt-2 text-sm font-medium">{step.lead}</p>
+            <p className="mt-3 text-sm opacity-80">{step.fact}</p>
+            {/* A null toll is never reported, not zero, and this line used
+                to render it as the empty string followed by the word
+                "deaths". Same distinction the profile chart's unreported
+                band makes, in the one place a reader meets it first. */}
+            <p className="type-meta mt-3 opacity-60">
+              {step.categoryLabel} &middot;{' '}
+              {step.deaths == null
+                ? 'deaths not reported'
+                : `${step.deaths} ${step.deaths === 1 ? 'death' : 'deaths'}${
+                    step.deathsKind === 'indirect' ? ', indirect' : ''
+                  }`}
+            </p>
+            {step.deathsNote && (
+              <p className="mt-2 border-l-2 border-ink/15 pl-3 text-xs italic leading-snug opacity-70">
+                {step.deathsNote}
+              </p>
+            )}
+          </article>
+        </div>
+
+        {/* Mobile placement of the same note. It sits after the detail rather
             than under the map, because on a phone the map is a pinned band and
             anything inside it is pinned too -- four lines of citation following
-            the reader down the screen, in the space the step text needs. It is
+            the reader down the screen, in the space the stop text needs. It is
             md:hidden, so on desktop this is not a third grid child. */}
         <p className="mt-4 text-xs italic leading-snug opacity-65 md:hidden">{TRACK_NOTE}</p>
       </div>

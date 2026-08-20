@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import Section from './Section.jsx'
 import { NATIONS } from './MapView.jsx'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { STORMS, ROSTER_START, ROSTER_END, strikeCounts } from '../content/storms.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
+import { formatNationList } from '../utils/formatNationList.js'
 
 const NATION_NAMES = NATIONS.map((n) => n.name)
 const YEARS = Array.from({ length: ROSTER_END - ROSTER_START + 1 }, (_, i) => ROSTER_START + i)
@@ -66,23 +68,40 @@ function CoverageDots({ struck }) {
 // `awaiting` is true only while no storm at all is chosen. It drives the faint
 // accent ring that marks these as the thing to press; once the reader has
 // pressed one, the invitation has been accepted and every ring stops.
-function StormCard({ storm, active, awaiting, onSelect, delay = 0, row = false }) {
+function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, row = false }) {
   return (
     <button
       type="button"
       onClick={() => onSelect(active ? null : storm.id)}
+      // Pointer and focus both, always together. The preview below is the only
+      // place a storm's own facts appear before it is chosen, and a preview
+      // reachable only by hover is a preview that does not exist on a phone or
+      // to a keyboard -- so every one of these four events writes to the same
+      // state, and pressing the card commits it.
+      onPointerEnter={() => onPreview(storm.id)}
+      onPointerLeave={() => onPreview(null)}
+      onFocus={() => onPreview(storm.id)}
+      onBlur={() => onPreview(null)}
       aria-pressed={active}
       aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of ${NATION_COUNT_WORD} nations.`}
       style={awaiting ? { animationDelay: `${delay}ms` } : undefined}
-      className={`press-target relative cursor-pointer rounded-lg border px-2.5 py-2 text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
+      className={`press-target storm-card relative min-h-[44px] cursor-pointer rounded-lg border px-2.5 py-2 text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
         active
-          ? 'border-accent bg-accent/10 font-semibold'
+          ? 'is-active border-accent bg-accent/10 font-semibold'
           : 'border-ink/20 bg-surface/70 hover:border-accent/60 hover:bg-surface'
       } ${awaiting ? 'awaiting-press' : ''} ${
         row ? 'flex w-full items-center justify-between gap-3' : ''
       }`}
     >
-      <span className="block text-xs leading-tight">{storm.label}</span>
+      <span className="flex items-center gap-1.5 text-xs leading-tight">
+        {/* The selected card is the story's current state, so it says so with
+            a mark as well as a colour -- the brief's "do not rely on colour
+            alone", applied to the one control the whole page hangs off. */}
+        {active && (
+          <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+        )}
+        <span className="truncate">{storm.label}</span>
+      </span>
       <span className={`flex items-center gap-1.5 ${row ? 'shrink-0' : 'mt-1.5'}`}>
         <CoverageDots struck={storm.nations} />
         <span className="text-[10px] leading-none tabular-nums opacity-60">
@@ -93,11 +112,61 @@ function StormCard({ storm, active, awaiting, onSelect, delay = 0, row = false }
   )
 }
 
+// The storm under the reader's attention, in four facts and one sentence.
+//
+// Every word of it is already in the roster -- name, year, which of the four
+// nations it reached, and the storm's own opening line from its first stop.
+// Nothing is written here that a reader could not check against
+// content/storms.js, and no storm gets a sentence invented to make it sound
+// more interesting than the record makes it.
+//
+// It shows the hovered or focused storm if there is one, and otherwise the
+// selected storm, so the panel is never empty once a choice has been made and
+// the reader can always see what they picked. The box holds its height whether
+// or not it has anything in it: a timeline that grows a panel under the cursor
+// pushes the axis the reader is aiming at out from under them.
+function StormPreview({ storm, selected }) {
+  return (
+    <div className="storm-preview mt-4 min-h-[7.5rem] rounded-xl border border-ink/10 bg-surface/60 p-4">
+      {storm ? (
+        <>
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h3 className="type-h3 text-base">{storm.name}</h3>
+            <span className="type-eyebrow text-accent">{storm.year}</span>
+            {selected && (
+              <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                Selected
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs opacity-70">
+            Reached {formatNationList(storm.nations)} &mdash; {storm.nations.length} of{' '}
+            {NATION_COUNT_WORD} nations in scope.
+          </p>
+          <p className="mt-2 max-w-prose text-sm opacity-85">
+            {storm.note ?? storm.profile?.[0]?.lead ?? ''}
+          </p>
+        </>
+      ) : (
+        <p className="text-sm opacity-60">
+          Point at a cyclone, or tab to one, to see where it went. Press it to follow it.
+        </p>
+      )}
+    </div>
+  )
+}
+
 export default function StormTimeline({ selectedId, onSelect, style }) {
   const { setHighlight } = useNationHighlight()
   const counts = strikeCounts(NATION_NAMES)
   const awaiting = selectedId == null
   const axisLabel = `Severe cyclones by year, ${ROSTER_START} to ${ROSTER_END}`
+  // Hover/focus only. The committed choice lives in App's story state; this is
+  // the transient one, and keeping the two apart is what lets the reader look
+  // at a second storm without losing the one they are following.
+  const [previewId, setPreviewId] = useState(null)
+  const shownId = previewId ?? selectedId
+  const shown = STORMS.find((s) => s.id === shownId) ?? null
 
   // Stagger index, assigned in roster order rather than per year, so the rings
   // travel left to right across the axis instead of pulsing in unison.
@@ -184,6 +253,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
                     awaiting={awaiting}
                     delay={delayOf(storm.id)}
                     onSelect={onSelect}
+                    onPreview={setPreviewId}
                   />
                 ))}
               </div>
@@ -249,6 +319,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
                       awaiting={awaiting}
                       delay={delayOf(storm.id)}
                       onSelect={onSelect}
+                      onPreview={setPreviewId}
                       row
                     />
                   ))}
@@ -260,6 +331,12 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
           )
         })}
       </ol>
+
+      {/* One panel under both axes, deliberately not one per card. A preview
+          that opens inside the timeline would move every other card on the
+          slide whenever the pointer crossed one; a fixed place to look means
+          the reader's eye learns where the answer appears and stays there. */}
+      <StormPreview storm={shown} selected={shown != null && shown.id === selectedId} />
     </Section>
   )
 }

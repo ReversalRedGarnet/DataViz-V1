@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import Section from './Section.jsx'
 import Tooltip from './Tooltip.jsx'
+import CountryPicker from './CountryPicker.jsx'
 import MapControlIcon from './MapControlIcon.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
@@ -101,6 +102,19 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
+
+  // Which country the reader is pointing at, for the summary under the map.
+  // The tooltip already says this, and the tooltip is not enough on its own:
+  // it follows the pointer, so it cannot be read on a touch screen without
+  // covering the thing it describes, and it vanishes the moment focus moves.
+  // The summary is the same sentence in a place that holds still.
+  //
+  // Behind a ref for the same reason `selected` is: the D3 handlers are built
+  // once, in an effect that must not re-run, or the reader's pan and zoom are
+  // thrown away every time they point at something.
+  const [preview, setPreview] = useState(null)
+  const setPreviewRef = useRef(setPreview)
+  setPreviewRef.current = setPreview
 
   // The setup effect runs once, so its D3 closures would capture `selected` at
   // mount and never see a later pick. A ref keeps the hint current without
@@ -227,18 +241,22 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         })
         .on('pointerenter pointermove', (event, d) => {
           setHighlightRef.current(d.name)
+          setPreviewRef.current(d.name)
           showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
         })
         .on('pointerleave', () => {
           setHighlightRef.current(null)
+          setPreviewRef.current(null)
           hideTooltip()
         })
         .on('focus', (event, d) => {
           setHighlightRef.current(d.name)
+          setPreviewRef.current(d.name)
           showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
         })
         .on('blur', () => {
           setHighlightRef.current(null)
+          setPreviewRef.current(null)
           hideTooltip()
         })
 
@@ -391,12 +409,18 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       .call(zoomRef.current.transform, d3.zoomIdentity)
   }
 
+  // Pointed-at first, then the most recent pick. Falling back to the selection
+  // means the summary keeps saying something useful after the pointer leaves,
+  // which is the state a touch reader is in for all but the moment of the tap.
+  const summaryFor = preview ?? selected[selected.length - 1] ?? null
+
   return (
     <Section style={style}>
       <h2 className="type-h2 mb-2">Explore the Pacific</h2>
-      <p className="prose-column prose-wide prose-short mb-5 text-sm opacity-70">
-        Tap a marker to select it, tap a second one to compare. Drag to pan, pinch to zoom, or use
-        the buttons.
+      <p className="prose-column prose-wide prose-short mb-3 text-sm opacity-70">
+        Every country on this map is selectable. Tap a marker to select it, tap a second one to
+        compare, and the ripple chain, the divergence and the comparison all follow your pick. Drag
+        to pan, pinch to zoom, or use the buttons.
       </p>
       <div ref={containerRef} className="map-frame relative">
         {/* overflow-hidden is load-bearing: the ocean rect is drawn far past
@@ -444,16 +468,58 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         </div>
         <Tooltip tooltip={tooltip} />
       </div>
-      <div className="mt-3 min-h-[1.25rem]">
-        {selected.length > 0 && (
-          <button
-            type="button"
-            onClick={onClear}
-            className="animate-pop-in text-sm opacity-70 underline transition-opacity duration-150 hover:opacity-100"
-          >
-            Clear selection
-          </button>
+      {/* The summary, the picker and the reset, in that order: what you are
+          pointing at, the other way to point at it, and the way back out.
+
+          The height is reserved whether or not there is anything to say, so
+          moving the pointer across the map does not shunt the picker below it
+          up and down the slide. */}
+      <div className="mt-4 min-h-[3.5rem] rounded-xl border border-ink/10 bg-surface/50 px-4 py-3 text-sm">
+        {summaryFor ? (
+          <>
+            <p className="font-semibold">
+              {summaryFor}
+              {selected.includes(summaryFor) && (
+                <span className="ml-2 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                  Selected {selected.indexOf(summaryFor) + 1}
+                </span>
+              )}
+            </p>
+            <p className="mt-1 text-xs leading-snug opacity-75">
+              {stormBlurb({ name: summaryFor }, storm) ?? 'No storm selected.'}
+            </p>
+          </>
+        ) : (
+          <p className="opacity-60">
+            Point at a country, or tab to one, for what {storm ? storm.name : 'the storm'} did
+            there.
+          </p>
         )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+        <CountryPicker
+          nations={nations}
+          selected={selected}
+          storm={storm}
+          onToggle={onToggle}
+          onPreview={setPreview}
+        />
+        {/* Always present once there is something to clear, and a real
+            control rather than a line of underlined text: this is the way
+            back to an unselected map, and the reader should not have to
+            wonder whether it is a link. */}
+        <div className="min-h-[44px]">
+          {selected.length > 0 && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="press-target animate-pop-in min-h-[44px] rounded-full border border-ink/20 px-4 py-2 text-sm opacity-80 transition-opacity duration-150 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              Clear selection
+            </button>
+          )}
+        </div>
       </div>
     </Section>
   )

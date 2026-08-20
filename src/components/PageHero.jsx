@@ -11,6 +11,13 @@ import Section from './Section.jsx'
 //   tone -- forwarded to Section, default 'panel'.
 //   headlineClassName -- replaces the default h1 sizing when passed;
 //     Home.jsx uses this for a bigger display size.
+//   className -- forwarded to Section, appended to the centring class. The
+//     interactive hero uses it to become a positioned, clipping box for the
+//     atmosphere it draws behind itself.
+//   children -- anything the page wants under the lead paragraph: Hero.jsx puts
+//     its nation nodes, its storm dots and its call to action here. Passed as
+//     children rather than as more named props because what goes there is one
+//     page's composition, not a shape every hero shares.
 //   style -- forwarded to Section
 export default function PageHero({
   kicker,
@@ -19,10 +26,12 @@ export default function PageHero({
   cta,
   tone = 'panel',
   headlineClassName,
+  className = '',
+  children,
   style,
 }) {
   return (
-    <Section tone={tone} className="text-center" style={style}>
+    <Section tone={tone} className={`text-center ${className}`} style={style}>
       <p
         className={`type-eyebrow mx-auto max-w-2xl ${
           tone === 'ink' ? 'opacity-70' : 'text-accent'
@@ -39,6 +48,7 @@ export default function PageHero({
       </h1>
       <p className="mx-auto mt-6 max-w-2xl text-lg opacity-80">{body}</p>
       {cta && <p className="mx-auto mt-4 max-w-2xl text-lg font-medium opacity-80">{cta}</p>}
+      {children}
     </Section>
   )
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Header from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
 import StormJourney from './components/StormJourney.jsx'
@@ -11,15 +11,20 @@ import ContextPanel from './components/ContextPanel.jsx'
 import StormTimeline from './components/StormTimeline.jsx'
 import MethodPanel from './components/MethodPanel.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
+import DataDetective from './components/DataDetective.jsx'
+import StoryConclusion from './components/StoryConclusion.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
 import { useDeck } from './hooks/useDeck.js'
 import { PAGE_SECTIONS } from './content/pageSections.js'
 import { ThemeProvider } from './hooks/useTheme.jsx'
-import { useSelection, selectionAnnouncement } from './hooks/useSelection.js'
+import { useStory } from './hooks/useStory.js'
+import { selectionAnnouncement } from './hooks/useSelection.js'
 import { useMetricData } from './hooks/useMetricData.js'
 import { METRICS } from './utils/metrics.js'
-import { STORMS, stormById } from './content/storms.js'
+import { NATIONS } from './components/MapView.jsx'
+import { motionDuration } from './utils/motion.js'
+import { STORMS } from './content/storms.js'
 
 const DATA_SOURCES = [
   {
@@ -70,30 +75,42 @@ const DATA_SOURCES = [
 // somebody has to keep in step.
 const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label]))
 
-function pageSections(data, selection, storm, onSelectStorm) {
-  const { selected, toggle, clear } = selection
+// The comparison's pickers offer every in-scope nation, not only the two
+// currently chosen, so the pair can be changed from the section that asks the
+// question rather than from the map four slides back.
+const NATION_NAMES = NATIONS.map((n) => n.name)
+
+function pageSections(data, story, onSelectStorm, goToId) {
+  const { storm, selected, mode } = story
+  // Explore lifts the holds; Story keeps them. Same sections, same state, same
+  // data -- the difference between the two modes is entirely this flag and
+  // whether choosing a storm carries the reader onward by itself (below).
+  const gated = mode === 'story'
 
   return [
-    { id: 'top', element: <Hero /> },
+    { id: 'top', element: <Hero onBegin={() => goToId('timeline')} /> },
     {
       id: 'timeline',
       // The same hold the map uses further down, for the same reason: every
       // section after this one is about one storm, so paging past without one
       // chosen would walk the reader through nine slides with nothing in them.
       //
-      // This replaces a dedicated gate slide that used to sit here -- a card
-      // reading "Pick a storm to carry on" that the reader reached by pressing
-      // Next. That was a slide spent asking for a click the reader was already
-      // looking at, and holding the deck here says the same thing without
-      // spending a slide on it. The refusal lands on the control the reader
-      // actually pressed, which is also where the answer is.
+      // This one is kept in both modes, unlike the map's. It is not a
+      // narrative gate but a structural fact: with no storm chosen the later
+      // sections do not exist to navigate to, so lifting it in Explore would
+      // buy the reader nothing but a dead Next button.
       requires: storm ? null : 'Select a cyclone',
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
     ...(!storm
       ? []
       : [
-    { id: 'storm-journey', element: <StormJourney storm={storm} /> },
+    {
+      id: 'storm-journey',
+      element: (
+        <StormJourney storm={storm} index={story.journeyIndex} onIndex={story.setStop} />
+      ),
+    },
     { id: 'storm-profile', element: <StormProfile storm={storm} /> },
     { id: 'big-picture', element: <BigPicture data={data} storm={storm} /> },
     {
@@ -102,18 +119,64 @@ function pageSections(data, selection, storm, onSelectStorm) {
       // chain, the comparison and the divergence panels all read it. Paging
       // past without a country picked would show three empty states in a row
       // and read as a broken site rather than an unanswered question.
-      requires: selected.length === 0 ? 'Pick a country on the map' : null,
-      element: <MapView storm={storm} selected={selected} onToggle={toggle} onClear={clear} />,
+      //
+      // Lifted in Explore mode, where seeing the empty state and going to get
+      // a country is the reader's business rather than the story's. The empty
+      // states themselves are unchanged and still say what to do.
+      requires: gated && selected.length === 0 ? 'Pick a country on the map' : null,
+      element: (
+        <MapView
+          storm={storm}
+          selected={selected}
+          onToggle={story.toggleNation}
+          onClear={story.clearNations}
+        />
+      ),
     },
     {
       id: 'ripple-chain',
-      element: <RippleChain data={data} storm={storm} selectedNations={selected} />,
+      element: (
+        <RippleChain
+          data={data}
+          storm={storm}
+          selectedNations={selected}
+          activeMetric={story.activeMetric}
+          onActiveMetric={story.setActiveMetric}
+        />
+      ),
     },
     { id: 'divergence', element: <DivergenceView data={data} storm={storm} /> },
     { id: 'context', element: <ContextPanel data={data} /> },
     {
       id: 'compare',
-      element: <ComparisonView data={data} storm={storm} selectedNations={selected} />,
+      element: (
+        <ComparisonView
+          data={data}
+          storm={storm}
+          selectedNations={selected}
+          nations={NATION_NAMES}
+          onSetNationAt={story.setNationAt}
+          onSwapNations={story.swapNations}
+        />
+      ),
+    },
+    // The question, then the answer. Both sit after the comparison and before
+    // the method: the reader has now seen everything the site can show, which
+    // is the only honest moment to ask them what they make of it.
+    {
+      id: 'detective',
+      element: <DataDetective storm={storm} onNavigate={goToId} />,
+    },
+    {
+      id: 'conclusion',
+      element: (
+        <StoryConclusion
+          storm={storm}
+          selectedNations={selected}
+          onNavigate={goToId}
+          onReset={story.reset}
+        />
+      ),
     },
     // Method sits second to last, immediately before the sources it explains.
     // It began as an exclusions-only slide in third place, where it broke off
@@ -126,12 +189,11 @@ function pageSections(data, selection, storm, onSelectStorm) {
 
 function AppShell() {
   const data = useMetricData(METRICS)
-  const selection = useSelection()
-  // Nothing is selected on load, deliberately: the timeline is the argument and
-  // a storm is the evidence for it, so the reader chooses which piece to open
-  // rather than landing mid-way through one.
-  const [stormId, setStormId] = useState(null)
-  const storm = stormById(stormId)
+  // One hook, one source of truth: the storm, the country pair, the reading
+  // mode, the position along the storm's path and the open ripple link. Every
+  // section below is a view of these; none of them keeps a second copy.
+  const story = useStory()
+  const { storm } = story
   const [headerHeight, setHeaderHeight] = useState(0)
 
   // Progress through the whole piece: which slide, plus how far down that
@@ -153,19 +215,55 @@ function AppShell() {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
   }, [headerHeight])
 
-  // Choosing a storm appends the storm sections after the timeline and lifts
-  // the hold on it, so the reader carries on from the slide they were already
-  // on rather than being moved for having made a choice. Declared above
-  // `sections` because it is read while building it.
-  const selectStorm = useCallback((id) => {
-    setStormId(id)
-    setPanelFraction(0)
-  }, [])
+  // goToId is rebuilt on every render, because it closes over the sections
+  // array and that array is new each time. Anything that wants to navigate
+  // later -- the storm activation below -- has to reach it through a ref, or
+  // its effect would re-run every render and its timer would never fire.
+  const goToIdRef = useRef(() => {})
+  const goToId = useCallback((id) => goToIdRef.current(id), [])
 
-  const sections = pageSections(data, selection, storm, selectStorm)
-  const { active, direction, go, goToId } = useDeck(sections)
+  // STORM ACTIVATION.
+  //
+  // Choosing a storm appends the storm sections after the timeline, lifts the
+  // hold on it, and -- in Story mode -- carries the reader to the journey that
+  // storm just unlocked. Not instantly: the press has its own confirmation
+  // animation on the card, and moving the deck out from under it would mean
+  // the reader never sees the thing they pressed acknowledge the press. The
+  // wait is one slide transition long and collapses to nothing under reduced
+  // motion, where there is no animation to wait for.
+  //
+  // Explore mode does not move. That is the point of it: the reader keeps the
+  // slide they were on and navigates when they decide to.
+  const pendingRef = useRef(false)
+  const selectStorm = useCallback(
+    (id) => {
+      story.selectStorm(id)
+      pendingRef.current = Boolean(id) && story.mode === 'story'
+    },
+    [story]
+  )
+
+  useEffect(() => {
+    if (!pendingRef.current) return
+    pendingRef.current = false
+    if (!storm) return
+    const timer = setTimeout(() => goToIdRef.current('storm-journey'), motionDuration(420))
+    return () => clearTimeout(timer)
+  }, [storm])
+
+  const sections = pageSections(data, story, selectStorm, goToId)
+  const deck = useDeck(sections)
+  const { active, direction, go } = deck
+  goToIdRef.current = deck.goToId
 
   const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
+
+  // Reset the panel's own scroll fraction whenever the deck moves, so the
+  // progress readout does not carry the previous slide's position into the
+  // next one before its first scroll event arrives.
+  useEffect(() => {
+    setPanelFraction(0)
+  }, [active])
 
   return (
     <>
@@ -184,15 +282,22 @@ function AppShell() {
         progress={deckProgress}
         onNavigate={goToId}
         storm={storm}
-        selectedNations={selection.selected}
-        onClearNations={selection.clear}
+        selectedNations={story.selected}
+        onClearNations={story.clearNations}
+        onReset={story.reset}
+        mode={story.mode}
+        onModeChange={story.setMode}
       />
 
-      {/* The charts and comparison view below update silently otherwise. */}
+      {/* The charts and comparison view below update silently otherwise.
+          Deliberately only the two choices the rest of the page is built on:
+          the scrubber announces its own position through the slider's
+          valuetext, and routing that through here as well would say the same
+          country twice on every arrow press. */}
       <div aria-live="polite" className="sr-only">
         {storm
           ? `${storm.name} selected. The rest of the story is now available below. ${selectionAnnouncement(
-              selection.selected,
+              story.selected,
               'Showing its ripple chain.'
             )}`
           : 'Pick a storm from the timeline to continue.'}

@@ -27,6 +27,15 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 //     as though it were struck. Applied as a class after the draw, the same way
 //     the cross-chart highlight works, so the renderers need no knowledge of it.
 //   caveat -- what this series cannot be read as, printed under the chart
+//   emphasis -- 'active' | 'dim' | undefined. The ripple chain sets it while a
+//     link is being held: the held card is ringed and the others recede, so
+//     following one thread through five charts is a matter of looking rather
+//     than of remembering which card was which. Purely presentational, and
+//     applied as a class so nothing is redrawn.
+//   cardHandlers -- spread onto the card, so the section that owns the
+//     emphasis state can also receive pointer and focus events from the card
+//     itself. Passing handlers rather than lifting the card into a wrapper
+//     keeps the grid's column spans on the element that has them.
 //   className -- layout hook (e.g. sm:col-span-2 for an odd one out)
 //
 // The chart holds its draw until the card is on screen. These sit several
@@ -49,6 +58,8 @@ export default function TrendChart({
   ripple = false,
   dimNations,
   caveat,
+  emphasis,
+  cardHandlers,
   className = '',
 }) {
   const nationsMissing = nations.filter((n) => !allRows.some((d) => d.nation === n))
@@ -91,9 +102,10 @@ export default function TrendChart({
   return (
     <div
       ref={cardRef}
-      className={`relative overflow-hidden rounded-xl border border-ink/10 bg-surface/60 p-4 ${
+      {...cardHandlers}
+      className={`chain-card relative overflow-hidden rounded-xl border border-ink/10 bg-surface/60 p-4 ${
         inView ? 'animate-pop-in' : 'opacity-0'
-      } ${className}`}
+      } ${emphasis === 'active' ? 'is-held' : ''} ${emphasis === 'dim' ? 'is-receded' : ''} ${className}`}
       style={{ animationDelay: `${index * 60}ms` }}
     >
       {ripple && inView && (

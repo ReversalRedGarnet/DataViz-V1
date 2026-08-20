@@ -13,11 +13,30 @@ import Tooltip from './Tooltip.jsx'
 // The selected nations side by side across each stage of the ripple chain,
 // event year against the latest year on record.
 //
+// The pair is chosen on the map, four slides back. That was the only way to
+// change it, which made this section a readout rather than a comparison: a
+// reader looking at Fiji beside Tonga and wondering about Vanuatu had to page
+// back, unpick, repick and page forward again. The two pickers at the top are
+// the same selection state the map writes to -- one source of truth, so a swap
+// here moves the numbered pins on the map -- reachable from the section where
+// the question actually occurs to you.
+//
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
-//   selectedNations -- ordered; order drives colour
+//   selectedNations -- ordered; order drives colour and which side each is on
+//   nations -- every in-scope nation, for the pickers
+//   onSetNationAt -- (side, name) => void; swaps rather than duplicating
+//   onSwapNations -- () => void
 //   style -- forwarded to Section (entrance stagger)
-export default function ComparisonView({ data, storm, selectedNations, style }) {
+export default function ComparisonView({
+  data,
+  storm,
+  selectedNations,
+  nations,
+  onSetNationAt,
+  onSwapNations,
+  style,
+}) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
@@ -43,10 +62,47 @@ export default function ComparisonView({ data, storm, selectedNations, style }) 
     <Section tone="panel" style={style}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">Compare recovery</h2>
-        <p className="prose-column prose-wide prose-short mb-8 text-sm opacity-70">
-          {storm.name}&rsquo;s year ({storm.year}) versus the latest year on record.
+        <p className="prose-column prose-wide prose-short mb-5 text-sm opacity-70">
+          {storm.name}&rsquo;s year ({storm.year}) versus the latest year on record, the same five
+          records on both sides and the same scale under each figure.
         </p>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+
+        {/* The pair, stated as a pair. Native selects rather than a custom
+            control: they are keyboard- and screen-reader-complete on every
+            platform for free, and the deck already knows to keep its paging
+            keys off a focused SELECT. Picking a country that is already on the
+            other side swaps the two rather than refusing the press or drawing
+            a country against itself -- see setAt in useSelection. */}
+        <div className="compare-pickers mb-6">
+          {[0, 1].map((side) => (
+            <label key={side} className="flex min-w-0 flex-col gap-1 text-xs">
+              <span className="type-eyebrow opacity-60">
+                {side === 0 ? 'Left' : 'Right'}
+              </span>
+              <select
+                value={selectedNations[side] ?? ''}
+                onChange={(event) => onSetNationAt(side, event.target.value)}
+                className="min-h-[44px] rounded-lg border border-ink/20 bg-surface/70 px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {nations.map((nation) => (
+                  <option key={nation} value={nation}>
+                    {nation}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <button
+            type="button"
+            onClick={onSwapNations}
+            className="press-target compare-swap min-h-[44px] self-end rounded-full border border-ink/20 px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label={`Swap ${selectedNations[0]} and ${selectedNations[1]}`}
+          >
+            <span aria-hidden="true">&#8646;</span> Swap
+          </button>
+        </div>
+
+        <div className="compare-split grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Keyed by position, not by name. Keying by name would tear the
               card down and build a new one whenever the second pick changed,
               and the figures inside are meant to travel from the old nation's
@@ -65,6 +121,17 @@ export default function ComparisonView({ data, storm, selectedNations, style }) 
             />
           ))}
         </div>
+        {/* Kept on the slide rather than behind a control. Every figure above
+            is an annual national total that no cyclone has to itself, and a
+            side-by-side layout is the most persuasive way there is to imply
+            otherwise -- so the qualification travels with it. */}
+        <p className="prose-wide mt-6 text-xs italic leading-snug opacity-70">
+          Both columns read the same annual national series the ripple chain draws, so each figure
+          carries everything else that happened in that year as well as the storm &mdash; the
+          2020&ndash;21 stretch carries the pandemic in particular. A larger movement is not
+          evidence of a worse recovery, and neither column is a score.
+        </p>
+
         <Tooltip tooltip={tooltip} />
       </div>
     </Section>

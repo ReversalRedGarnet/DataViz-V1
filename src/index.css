@@ -16,6 +16,7 @@
 @import './styles/typography.css';
 @import './styles/animations.css';
 @import './styles/slideshow.css';
+@import './styles/story.css';
 
 @tailwind base;
 @tailwind components;

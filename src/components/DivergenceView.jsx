@@ -50,7 +50,7 @@ export default function DivergenceView({ data, storm, style }) {
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
   const [sectionRef, inView] = useInView({ threshold: 0.25 })
-  const { setHighlight } = useNationHighlight()
+  const { setHighlight, pinned, setPinned } = useNationHighlight()
   const [progress, setProgress] = useState(0)
   const frameRef = useRef(null)
 
@@ -128,11 +128,24 @@ export default function DivergenceView({ data, storm, style }) {
           </p>
 
           <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+            {/* Buttons, not decorative swatches. Pointing at one already lifted
+                that nation's line out of the other three on every chart in the
+                deck -- but pointing is a gesture a touch screen does not have,
+                so the same chip now presses to hold the thread and presses
+                again to release it. The brief's "no interaction requires hover
+                only", applied to the one interaction on this slide. */}
             {nations.map((nation, i) => (
-              <span
+              <button
                 key={nation}
-                tabIndex={0}
-                className="flex cursor-help items-center gap-2 rounded text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                type="button"
+                onClick={() => setPinned(pinned === nation ? null : nation)}
+                aria-pressed={pinned === nation}
+                aria-label={`Emphasise ${nation}'s trajectory on every chart in this section`}
+                className={`press-target flex min-h-[44px] items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                  pinned === nation
+                    ? 'border-accent bg-accent/10'
+                    : 'border-transparent hover:border-ink/15'
+                }`}
                 {...highlightHandlers(nation, setHighlight)}
               >
                 <svg width="26" height="8" aria-hidden="true" className="shrink-0">
@@ -148,7 +161,7 @@ export default function DivergenceView({ data, storm, style }) {
                   />
                 </svg>
                 {nation}
-              </span>
+              </button>
             ))}
           </div>
 

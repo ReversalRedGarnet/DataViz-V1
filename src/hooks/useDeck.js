@@ -56,6 +56,17 @@ export function useDeck(sections) {
     [sections, go]
   )
 
+  // goToId is rebuilt whenever the sections array changes shape, and the hash
+  // listener below is bound once. Without this ref that listener would hold the
+  // very first goToId for the life of the page -- the one closed over the
+  // two-section deck that exists before a storm is chosen -- so every id from
+  // 'storm-journey' onwards would be looked up in an array that does not
+  // contain it and quietly do nothing. That is what made a pasted #compare
+  // link, and the browser's Back button after paging around, both land on
+  // whatever slide happened to be on stage.
+  const goToIdRef = useRef(goToId)
+  goToIdRef.current = goToId
+
   // The deck grows from two sections to twelve when a storm is chosen, and
   // collapses again when it is cleared. Clearing while deep in the deck would
   // leave `active` pointing past the end of the array at a section that no
@@ -68,16 +79,17 @@ export function useDeck(sections) {
   // the single-document layout use, so a URL means the same thing in either.
   useEffect(() => {
     const fromHash = window.location.hash.replace('#', '')
-    if (fromHash) goToId(fromHash)
+    if (fromHash) goToIdRef.current(fromHash)
     function onHashChange() {
       const id = window.location.hash.replace('#', '')
-      if (id) goToId(id)
+      if (id) goToIdRef.current(id)
     }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
-    // Runs once: re-running on every sections change would drag the reader back
-    // to the hash's section every time they picked a storm.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Still runs once -- re-running on every sections change would drag the
+    // reader back to the hash's section every time they picked a storm -- but
+    // it now calls through the ref above, so "bound once" no longer means
+    // "answering with a stale deck".
   }, [])
 
   useEffect(() => {

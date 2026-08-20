@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { CHAIN_METRICS, FOOTNOTE_METRICS } from '../utils/metrics.js'
 import { buildComparativeInsights } from '../utils/insights.js'
 import { rowsByMetricForNations } from '../utils/rows.js'
@@ -8,6 +8,7 @@ import SelectionLegend from './SelectionLegend.jsx'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import TrendChart from './TrendChart.jsx'
+import MetricDetail from './MetricDetail.jsx'
 import InsightsPanel from './InsightsPanel.jsx'
 import Tooltip from './Tooltip.jsx'
 
@@ -22,9 +23,27 @@ import Tooltip from './Tooltip.jsx'
 //     dimmed: a country the storm missed is the nearest thing this data has to
 //     a control, so it stays on the chart rather than being removed.
 //   selectedNations -- ordered; order drives colour, matching the map's badges
+//   activeMetric -- which link the reader has opened, from the story state.
+//     Held there rather than here because the emphasis is meant to reach past
+//     this section: a link held open here is the same link the ending points
+//     back at.
+//   onActiveMetric -- (key | null) => void
 //   style -- forwarded to Section (entrance stagger)
-export default function RippleChain({ data, storm, selectedNations, style }) {
+export default function RippleChain({
+  data,
+  storm,
+  selectedNations,
+  activeMetric,
+  onActiveMetric,
+  style,
+}) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
+  // Pointing at a link is not the same as opening one, so the two are kept
+  // apart: `hovered` evaporates when the pointer leaves, `activeMetric`
+  // survives until the reader closes it. Emphasis follows whichever is live,
+  // which is what lets a reader with a card open still glance at another.
+  const [hovered, setHovered] = useState(null)
+  const held = hovered ?? activeMetric
 
   // Memoised deliberately: the tooltip state lives here, so an unmemoised
   // filter would redraw every chart on every hover. See rows.js.
@@ -76,6 +95,53 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
             removed: the closest thing these records have to a comparison.
           </p>
         )}
+        {/* THE CHAIN, AS A CHAIN.
+            Five cards in a grid are five cards; the order between them is the
+            argument, and until now it was carried only by a numbered badge and
+            the reading direction. This rail states it: five links in sequence,
+            each one an arrow from the last, in the order the damage travels.
+
+            It is also the section's control surface. Pointing at a link rings
+            its chart below and lets the other four recede; pressing one opens
+            what that record is and how much of it was actually reported. The
+            charts carry the same handlers, so the rail and the grid are two
+            views of one state rather than two things to keep in step. */}
+        <ol className="chain-rail mt-5">
+          {CHAIN_METRICS.map((m, i) => {
+            const isHeld = held === m.key
+            return (
+              <li key={m.key} className="chain-rail-item">
+                <button
+                  type="button"
+                  onClick={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
+                  onPointerEnter={() => setHovered(m.key)}
+                  onPointerLeave={() => setHovered(null)}
+                  onFocus={() => setHovered(m.key)}
+                  onBlur={() => setHovered(null)}
+                  aria-pressed={activeMetric === m.key}
+                  aria-label={`Link ${i + 1} of ${CHAIN_METRICS.length}: ${m.label}. Open what this record can and cannot show.`}
+                  className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
+                  style={{ animationDelay: `${i * 90}ms` }}
+                >
+                  <span aria-hidden="true" className="chain-link-stage">
+                    {i + 1}
+                  </span>
+                  <span className="chain-link-label">{m.label}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+
+        {activeMetric && (
+          <MetricDetail
+            metric={CHAIN_METRICS.find((m) => m.key === activeMetric)}
+            rows={filteredByMetric[activeMetric] ?? []}
+            nations={selectedNations}
+            onClose={() => onActiveMetric(null)}
+          />
+        )}
+
         <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {CHAIN_METRICS.map((m, i) => (
             <TrendChart
@@ -93,6 +159,13 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
               ripple
               dimNations={unstruck}
               caveat={m.caveat}
+              emphasis={held ? (held === m.key ? 'active' : 'dim') : undefined}
+              cardHandlers={{
+                onPointerEnter: () => setHovered(m.key),
+                onPointerLeave: () => setHovered(null),
+                onFocusCapture: () => setHovered(m.key),
+                onBlurCapture: () => setHovered(null),
+              }}
               className={i === CHAIN_METRICS.length - 1 && CHAIN_METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
             />
           ))}
