@@ -51,10 +51,10 @@ export default function ContextPanel({ data, style }) {
   return (
     <Section style={style}>
       <div ref={containerRef} className="relative">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+        <p className="type-eyebrow mb-1 text-accent">
           Underneath the chain
         </p>
-        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+        <h2 className="type-h2 mb-2">
           Who can measure, and what is changing
         </h2>
         <p className="prose-column prose-wide mb-8 text-sm opacity-75">
@@ -66,7 +66,7 @@ export default function ContextPanel({ data, style }) {
 
         {capacity && (
           <div className="mb-10">
-            <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+            <h3 className="type-subhead mb-1 text-accent">
               Who can observe their own weather
             </h3>
             <p className="prose-column prose-wide mb-4 text-sm opacity-80">
@@ -99,7 +99,7 @@ export default function ContextPanel({ data, style }) {
 
         {context && (
           <div>
-            <h3 className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-accent">
+            <h3 className="type-subhead mb-1 text-accent">
               What is changing underneath
             </h3>
             <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">

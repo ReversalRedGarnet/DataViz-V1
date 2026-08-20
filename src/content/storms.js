@@ -43,7 +43,7 @@ export const STORMS = [
         deathsNote:
           'IFRC, OCHA and government response documents record affected populations and damage for Solomon Islands but publish no separate fatality figure. Not zero \u2014 never reported.',
         dodge: 0,
-        fact: "Storm surge, swells and heavy rain struck Temotu and Malaita provinces while Pam was still intensifying offshore. 83 of 260 houses were damaged across Temotu's outer islands; more than half of garden crops were lost, and NDMO assessments found 2,344 families \u2014 11,780 people \u2014 needing support across 19 wards of Malaita.",
+        fact: "Storm surge, swells and heavy rain struck Temotu and Malaita provinces while Pam was still intensifying offshore. 83 of 260 houses were damaged across Temotu's outer islands; more than half of garden crops were lost, and NDMO assessments found 2,344 families \u2014 11,780 people needing support across 19 wards of Malaita Province.",
         lead: 'Two days before it reached Vanuatu, Pam was already flooding coastlines it never made landfall on.',
       },
       {
@@ -54,7 +54,7 @@ export const STORMS = [
         deaths: 11,
         dodge: 0,
         fact: "Sustained winds of 250 km/h with gusts to 320 km/h. The government's Post-Disaster Needs Assessment confirmed 11 fatalities in Tafea and Shefa, roughly 17,000 buildings damaged or destroyed, 65,000 people displaced, and total effects of US$449 million \u2014 equal to 64% of Vanuatu's GDP.",
-        lead: 'Then it reached full strength over the country it is still remembered for.',
+        lead: 'Then it reached full strength.',
       },
     ],
     sources: [

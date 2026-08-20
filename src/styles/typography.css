@@ -1,8 +1,72 @@
 /*
-  Reading-column treatments, opted into per block.
+  The type scale, and reading-column treatments opted into per block.
 */
 
 @layer components {
+  /*
+    THE TYPE SCALE
+    ==============
+
+    Six classes, and every piece of text on the site is one of them. They exist
+    because the scale had drifted: the same eyebrow was written at three
+    different letter-spacings and four different sizes across the components
+    that use it, and the section heading pattern was copy-pasted into ten files
+    where any one of them could be edited without the others noticing.
+
+    Written here rather than as a Tailwind theme extension because these are
+    roles, not values. A component asking for `.type-eyebrow` is saying what the
+    text IS; one asking for `text-xs tracking-[0.14em]` is guessing at what it
+    should look like, and the guesses are what drifted.
+
+    Spacing and colour stay at the call site. Margins belong to the layout
+    around a piece of text, not to the kind of text it is, and the same eyebrow
+    is accent-coloured above a heading and dimmed in the citation panel.
+
+    ONE TYPEFACE RULE: the serif (Newsreader) is for headings and display
+    figures only. Everything else -- body, UI, labels, chart text -- is the
+    system sans. Two exceptions, both deliberate: the wordmark and the tagline
+    beside it in Header.jsx are one brand lockup and set together, and .type-
+    figure below is a large statistic set as display type. Nothing else takes
+    the serif without a reason written next to it.
+  */
+  .type-h2 {
+    @apply font-serif text-2xl font-semibold tracking-tight md:text-3xl;
+  }
+
+  .type-h3 {
+    @apply font-serif text-xl font-semibold tracking-tight;
+  }
+
+  /* Short uppercase framing line, usually directly above a heading. */
+  .type-eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em];
+  }
+
+  /*
+    The same treatment one step up, for an uppercase <h3> that titles a block
+    rather than framing one. A step in size only -- same case, weight and
+    tracking -- so the two read as one family rather than two decisions.
+  */
+  .type-subhead {
+    @apply text-sm font-semibold uppercase tracking-[0.14em];
+  }
+
+  /* Quiet uppercase metadata: category, death toll, units under a figure. */
+  .type-meta {
+    @apply text-xs uppercase tracking-[0.14em];
+  }
+
+  /*
+    A statistic set as display type. This is the one place the serif is used on
+    something that is not a heading, and the reason is that Newsreader's figures
+    are most of what separates this page from a dashboard. Size is left to the
+    call site: the number's size is a function of how much of the slide it is
+    meant to hold, not of what kind of thing it is.
+  */
+  .type-figure {
+    @apply font-serif font-semibold tabular-nums;
+  }
+
   /*
     Justified text only earns its keep in a real reading column, and only with
     hyphenation -- unhyphenated justification opens rivers of white space, and

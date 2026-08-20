@@ -267,7 +267,7 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
               &larr;
             </span>
             <span className="min-w-0">
-              <span className="block text-[0.65rem] uppercase tracking-[0.14em] opacity-55">
+              <span className="type-meta block opacity-55">
                 Back
               </span>
               <span className="block truncate font-medium">{prevLabel}</span>
@@ -281,11 +281,18 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
           {index + 1} / {total}
         </span>
 
-        {nextLabel ? (
+        {nextLabel || requires ? (
           // `requires` holds up the deck until the reader has done the thing
           // the next slides depend on. Shown as the button's own label rather
           // than as a message elsewhere on the page: a disabled control that
           // does not say why is just a broken one.
+          //
+          // Rendered on `requires` alone, not only on `nextLabel`, because a
+          // held slide can legitimately be the last one in the deck -- the
+          // timeline is, until a storm is picked, since the sections it gates
+          // do not exist yet. Keyed on nextLabel only, that slide would show no
+          // forward control at all and read as the end of the piece rather than
+          // as a question waiting on an answer.
           <button
             type="button"
             onClick={() => (requires ? refuse() : onNavigate(index + 1))}
@@ -297,7 +304,7 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
             }`}
           >
             <span className="min-w-0">
-              <span className="block text-[0.65rem] uppercase tracking-[0.14em] opacity-55">
+              <span className="type-meta block opacity-55">
                 {requires ? 'To continue' : 'Next'}
               </span>
               <span className="block truncate">{requires || nextLabel}</span>

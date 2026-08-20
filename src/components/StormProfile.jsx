@@ -67,7 +67,7 @@ export default function StormProfile({ storm, style }) {
   return (
     <Section lock style={style}>
       <div ref={containerRef} className="relative mx-auto max-w-3xl">
-        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+        <h2 className="type-h2 mb-2">
           {storm.name} at a glance
         </h2>
 

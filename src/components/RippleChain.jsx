@@ -55,7 +55,7 @@ export default function RippleChain({ data, storm, selectedNations, style }) {
   return (
     <Section style={style}>
       <div ref={containerRef} className="relative mx-auto max-w-3xl">
-        <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+        <h2 className="type-h2 mb-2">
           After {storm.name}, {storm.year}
         </h2>
         {/* "2020 in particular carries the pandemic alongside the storm" read

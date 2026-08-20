@@ -115,10 +115,10 @@ export default function DivergenceView({ data, storm, style }) {
     <Section tone="panel" style={style}>
       <div ref={sectionRef}>
         <div ref={containerRef} className="relative">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+          <p className="type-eyebrow mb-1 text-accent">
             One storm, one starting point
           </p>
-          <h2 className="mb-2 font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+          <h2 className="type-h2 mb-2">
             Where the four nations part ways after {storm.name}
           </h2>
           <p className="prose-column prose-wide mb-6 text-sm opacity-75">
@@ -160,7 +160,7 @@ export default function DivergenceView({ data, storm, style }) {
             >
               {progress >= 1 ? 'Play again' : 'Playing\u2026'}
             </button>
-            <span className="font-serif text-3xl font-semibold tabular-nums" aria-hidden="true">
+            <span className="type-figure text-3xl" aria-hidden="true">
               {sweepYear}
             </span>
           </div>

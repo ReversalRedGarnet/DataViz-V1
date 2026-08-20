@@ -24,7 +24,7 @@ export default function PageHero({
   return (
     <Section tone={tone} className="text-center" style={style}>
       <p
-        className={`mx-auto max-w-2xl text-xs font-semibold uppercase tracking-[0.16em] md:text-sm ${
+        className={`type-eyebrow mx-auto max-w-2xl ${
           tone === 'ink' ? 'opacity-70' : 'text-accent'
         }`}
       >
