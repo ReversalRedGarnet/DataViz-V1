@@ -105,4 +105,52 @@
   .prose-wide {
     max-width: none;
   }
+
+  /*
+    The escape hatch for .prose-column, and the copy pass is what made it
+    necessary.
+
+    The mechanism, stated precisely, because the obvious explanation is wrong.
+    It is NOT that short paragraphs justify badly -- every line in a justified
+    block is stretched to the measure whether the block is two lines or twenty.
+
+    What actually happens: a line breaks when the next word will not fit, so
+    the line carries a leftover of up to one word's width, spread across its
+    word gaps. Most lines take up a few pixels each and nobody notices. Every
+    so often a line breaks early and has to absorb most of a word -- around
+    90px over sixteen gaps at this size, which more than doubles the space
+    between every word on that line. That line is conspicuous.
+
+    Paragraph length decides whether it MATTERS. In an eight-line block the bad
+    line is one of eight, bracketed by well-set neighbours, and reads as
+    texture. In a two-line block it is half of everything the reader sees --
+    and since CSS never justifies a block's last line, it is the ONLY justified
+    line in that block. There is nothing for it to hide behind, so it stops
+    reading as typography and starts reading as a rendering fault.
+
+    That is why this arrived with the wording pass rather than before it.
+    Cutting a paragraph does not make any single line worse; it removes the
+    lines that were covering for the worst one.
+
+    THE RULE: if a .prose-wide block sets to two or three lines on a desktop
+    window, add .prose-short. If a later edit takes it back to four or more,
+    drop it again. A block already inside a narrow container -- a half-width
+    card, a grid cell -- is usually long enough in lines to keep justification
+    even when its character count looks small; count lines, not characters.
+
+    Written as an override rather than as "remove .prose-column", so the intent
+    is legible in the markup: the block is still prose in a column, it is just
+    too short to justify. It has to stay below .prose-column in this file --
+    the two selectors have identical specificity, so source order is what
+    decides.
+
+    hyphens goes back to manual with it. Hyphenation is the other half of
+    paying down a justified line; on ragged-right text at this measure it only
+    breaks words that had no need to break.
+  */
+  .prose-short,
+  .prose-short p {
+    text-align: left;
+    hyphens: manual;
+  }
 }

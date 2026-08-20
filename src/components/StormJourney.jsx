@@ -333,9 +333,13 @@ export default function StormJourney({ storm, style }) {
       <h2 className="type-h2 mb-2">
         Follow {storm.name}
       </h2>
-      <p className="prose-column prose-wide text-sm opacity-75">
-        {storm.name} reached {STEPS.length} of these 4 countries. Scroll the column on the right to
-        witness its journey.
+      <p className="prose-column prose-wide prose-short text-sm opacity-75">
+        {/* NATIONS.length, not a typed 4. Same drift the timeline's eyebrow
+            had: the scope of this project is four countries today and the
+            number is written down in one place, so this sentence should read
+            it rather than repeat it. */}
+        {storm.name} reached {STEPS.length} of these {NATIONS.length} countries. Scroll the column
+        on the right to witness its journey.
       </p>
 
       <div className="journey-split mt-8 md:grid md:grid-cols-2 md:items-start md:gap-10">

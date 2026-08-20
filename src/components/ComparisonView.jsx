@@ -43,7 +43,7 @@ export default function ComparisonView({ data, storm, selectedNations, style }) 
     <Section tone="panel" style={style}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">Compare recovery</h2>
-        <p className="prose-column prose-wide mb-8 text-sm opacity-70">
+        <p className="prose-column prose-wide prose-short mb-8 text-sm opacity-70">
           {storm.name}&rsquo;s year ({storm.year}) versus the latest year on record.
         </p>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

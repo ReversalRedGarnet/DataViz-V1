@@ -355,6 +355,39 @@
       display: none;
     }
 
+    /*
+      THESE TWO PERCENTAGES ARE THE SCROLL MECHANISM. NOT SPACING.
+
+      They look like generous padding around short cards, and during a copy
+      pass that is exactly how they will read -- trim a step's text to two
+      sentences and a step still stands most of a column tall with white space
+      under it. Do not close that gap.
+
+      What they actually do is manufacture the scroll travel the active-step
+      observer needs. useActiveStep collapses its root to a band across the
+      middle of this column, 45% down to 55%. The steps have to be tall enough
+      that scrolling to the bottom carries the last one INTO that band.
+
+      Work it through on a two-stop storm, which is five of the six:
+
+        content height  = 78% + 60% = 138% of the column
+        scroll travel   = 138% - 100% = 38%
+        band at rest    = 45%-55%          -> step 1
+        band at bottom  = 83%-93%          -> step 2, which begins at 78%
+
+      38% of travel against a band starting at 45% is the whole margin there
+      is. Drop the first figure to 60% and the travel falls to 20%, the band
+      never reaches past 75%, and the second step can never become active: the
+      map sits on the first country with the track half drawn and no way to
+      advance it. Nothing throws, nothing logs, and the section looks merely
+      unresponsive.
+
+      Sizing off content instead is the same trap by another route -- it hands
+      the scroll distance to whatever the copy happens to be that week, which
+      is the coupling these percentages exist to break. Length of prose and
+      length of scroll are deliberately unrelated here. Cut the copy freely;
+      leave the heights alone.
+    */
     .slide-viewport .journey-steps > li {
       display: flex;
       min-height: 78%;
@@ -362,6 +395,8 @@
       justify-content: center;
     }
 
+    /* Shorter than the rest, and it has to be: the last step is what the band
+       has to reach, so every percent here is a percent of travel bought. */
     .slide-viewport .journey-steps > li:last-child {
       min-height: 60%;
     }
@@ -411,10 +446,19 @@
     browser starts it again. That is the one animation trick that survives the
     no-unmount rule this file is built on.
   */
+  /*
+    `> *`, not `> section` -- the same correction the .slide-scroll > * rule
+    above already carries, for the same reason. Most sections render a
+    <section>, but the sources panel renders a <footer>, so it was the one
+    slide in the deck that arrived without the entrance motion: the track slid,
+    and its contents were simply already there. Nothing about that reads as
+    deliberate, and every panel holds exactly one child, so the element name
+    was never doing any selecting.
+  */
   .slide-viewport[data-dir="forward"]
     .slide-panel[data-active="true"]
     .slide-scroll
-    > section {
+    > * {
     animation: slide-enter-forward 560ms 90ms cubic-bezier(0.16, 0.84, 0.28, 1)
       both;
   }
@@ -422,7 +466,7 @@
   .slide-viewport[data-dir="back"]
     .slide-panel[data-active="true"]
     .slide-scroll
-    > section {
+    > * {
     animation: slide-enter-back 560ms 90ms cubic-bezier(0.16, 0.84, 0.28, 1)
       both;
   }

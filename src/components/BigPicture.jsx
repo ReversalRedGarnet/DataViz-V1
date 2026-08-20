@@ -55,7 +55,7 @@ export default function BigPicture({ data, storm, style }) {
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">The Bigger Picture</h2>
 
-        <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
+        <div className="prose-column prose-wide prose-short space-y-3 text-sm opacity-80">
           <p>
             A shared disaster, and a recovery shaped by far more than the weather. All four nations
             at the same moment, before the rest of the story takes them one at a time.
@@ -104,7 +104,7 @@ export default function BigPicture({ data, storm, style }) {
             <h3 className="type-subhead mb-1 text-accent">
               Regional Snapshot — {storm.year}
             </h3>
-            <p className="prose-column prose-wide mb-3 text-sm opacity-80">
+            <p className="prose-column prose-wide prose-short mb-3 text-sm opacity-80">
               All four nations at one moment rather than over time. Countries {storm.name} did not
               reach are shown too &mdash; the point of a same-moment comparison is that it includes
               them.

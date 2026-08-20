@@ -1,10 +1,16 @@
 import PageHero from './PageHero.jsx'
-import { ROSTER_START, ROSTER_END } from '../content/storms.js'
+import { STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
+import { NATIONS } from './MapView.jsx'
+import { numberWordCapitalized } from '../utils/numberWords.js'
 
 // The opening claim is a count, not a trend. Every figure in the headline is
 // plain event-counting against the roster rule in content/storms.js, so a
 // reader who doubts it can check it against the exclusions section rather than
 // having to trust a confidence level.
+//
+// The kicker below is the same line the timeline slide opens with, and both
+// now compute it. They were typed out separately, which is how a single roster
+// came to assert its own size in four places -- see utils/numberWords.js.
 //
 // `body` is passed as an expression, not a quoted attribute. A JSX attribute
 // written as "..." is a literal string, not a JS string, so \u escapes inside
@@ -20,12 +26,15 @@ import { ROSTER_START, ROSTER_END } from '../content/storms.js'
 export default function Hero({ style }) {
   return (
     <PageHero
-      kicker={`${ROSTER_START}\u2013${ROSTER_END} \u00b7 Six severe cyclones \u00b7 Four Pacific nations`}
+      kicker={`${ROSTER_START}\u2013${ROSTER_END} \u00b7 ${numberWordCapitalized(
+        STORMS.length
+      )} severe cyclones \u00b7 ${numberWordCapitalized(NATIONS.length)} Pacific nations`}
       headline={`Between ${ROSTER_START} and ${ROSTER_END}, each of these nations was struck multiple times. No two recovered the same way.`}
       body={
         'Solomon Islands, Vanuatu, Fiji and Tonga share an ocean as well as a ' +
         'cyclone season. The same storm may sweep through different territories, ' +
-        'yet the aftermath is seldom ever the same. Six severe storms, followed ' +
+        `yet the aftermath is seldom ever the same. ${numberWordCapitalized(STORMS.length)} ` +
+        'severe storms, followed ' +
         'through official records from trusted sources and examined across key ' +
         'factors, reveal why the same weather can produce such different outcomes.'
       }

@@ -60,11 +60,11 @@ html.theme-sweep::view-transition-new(root) {
   .slide-viewport[data-dir="forward"]
     .slide-panel[data-active="true"]
     .slide-scroll
-    > section,
+    > *,
   .slide-viewport[data-dir="back"]
     .slide-panel[data-active="true"]
     .slide-scroll
-    > section,
+    > *,
   .press-target[aria-pressed="true"] {
     animation: none;
   }

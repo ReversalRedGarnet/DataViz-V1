@@ -1,5 +1,7 @@
 import Section from './Section.jsx'
-import { EXCLUDED, ROSTER_START, ROSTER_END } from '../content/storms.js'
+import { EXCLUDED, STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
+import { NATIONS } from './MapView.jsx'
+import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 
 // How the site was made, and what it cannot say.
 //
@@ -105,10 +107,15 @@ export default function MethodPanel({ style }) {
         </h3>
         <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">
           <p>
-            The roster is every severe tropical cyclone that struck two or more of these four
-            nations between {ROSTER_START} and {ROSTER_END}. Six met it. The rule was fixed before
-            the list was drawn. Four storms did not meet it and are named below, including the one
-            whose exclusion makes the case weaker.
+            {/* Both counts computed. This paragraph is the one place on the
+                site that states the rule and its yield in the same breath, so
+                a typed figure here is a paragraph that can contradict the list
+                printed directly beneath it. See utils/numberWords.js. */}
+            The roster is every severe tropical cyclone that struck two or more of these{' '}
+            {numberWord(NATIONS.length)} nations between {ROSTER_START} and {ROSTER_END}.{' '}
+            {numberWordCapitalized(STORMS.length)} met it. The rule was fixed before the list was
+            drawn. {numberWordCapitalized(EXCLUDED.length)} storms did not meet it and are named
+            below, including the one whose exclusion makes the case weaker.
           </p>
         </div>
 
@@ -169,6 +176,10 @@ export default function MethodPanel({ style }) {
           {LIMITS.map((limit) => (
             <li key={limit.title} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
               <p className="text-sm font-semibold">{limit.title}</p>
+              {/* Deliberately NOT .prose-short. These bodies run 300-450
+                  characters inside a half-width card, so they set to six or
+                  eight lines and any one badly-stretched line is lost among
+                  the well-set ones. This is the case justification is for. */}
               <p className="prose-column prose-wide mt-1 text-sm opacity-80">{limit.body}</p>
             </li>
           ))}
@@ -202,7 +213,7 @@ export default function MethodPanel({ style }) {
         <h3 className="type-subhead mb-1 text-accent">
           What is not here yet
         </h3>
-        <ul className="prose-column prose-wide space-y-2 text-sm opacity-80">
+        <ul className="prose-column prose-wide prose-short space-y-2 text-sm opacity-80">
           {PLANNED.map((item) => (
             <li key={item} className="border-l-2 border-ink/15 pl-3">
               {item}

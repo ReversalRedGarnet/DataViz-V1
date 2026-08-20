@@ -2,9 +2,16 @@ import Section from './Section.jsx'
 import { NATIONS } from './MapView.jsx'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { STORMS, ROSTER_START, ROSTER_END, strikeCounts } from '../content/storms.js'
+import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 
 const NATION_NAMES = NATIONS.map((n) => n.name)
 const YEARS = Array.from({ length: ROSTER_END - ROSTER_START + 1 }, (_, i) => ROSTER_START + i)
+
+// Counts set in words, because the eyebrow and the button labels are prose and
+// a digit reads as data there. The helper is shared -- see utils/numberWords.js
+// for the drift it closes and why the roster figures are computed rather than
+// typed.
+const NATION_COUNT_WORD = numberWord(NATION_NAMES.length)
 
 // The opening. Six storms on a ten-year axis, and the strike count per nation
 // above it.
@@ -65,7 +72,7 @@ function StormCard({ storm, active, awaiting, onSelect, delay = 0, row = false }
       type="button"
       onClick={() => onSelect(active ? null : storm.id)}
       aria-pressed={active}
-      aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of four nations.`}
+      aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of ${NATION_COUNT_WORD} nations.`}
       style={awaiting ? { animationDelay: `${delay}ms` } : undefined}
       className={`press-target relative cursor-pointer rounded-lg border px-2.5 py-2 text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
         active
@@ -79,7 +86,7 @@ function StormCard({ storm, active, awaiting, onSelect, delay = 0, row = false }
       <span className={`flex items-center gap-1.5 ${row ? 'shrink-0' : 'mt-1.5'}`}>
         <CoverageDots struck={storm.nations} />
         <span className="text-[10px] leading-none tabular-nums opacity-60">
-          {storm.nations.length} of 4
+          {storm.nations.length} of {NATION_NAMES.length}
         </span>
       </span>
     </button>
@@ -106,7 +113,8 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
         and a timeline is the one chart that actually wants the full measure.
       */}
       <p className="type-eyebrow mb-1 text-accent">
-        {ROSTER_START}&ndash;{ROSTER_END} &middot; Six severe cyclones &middot; Four Pacific nations
+        {ROSTER_START}&ndash;{ROSTER_END} &middot; {numberWordCapitalized(STORMS.length)} severe
+        cyclones &middot; {numberWordCapitalized(NATION_NAMES.length)} Pacific nations
       </p>
       <h2 className="type-h2 mb-2">
         How often, and to whom

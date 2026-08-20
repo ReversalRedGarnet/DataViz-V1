@@ -25,6 +25,26 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 //   direction -- 1 forward, -1 back; the enter animation reads it
 //   onNavigate -- (index) => void
 //   onProgress -- (fraction 0..1) => void, the active panel's own scroll
+// How much overflow a panel is allowed before it stops counting as fitting.
+//
+// ONE NUMBER, read by both measurements below, because they are two halves of
+// the same question and they used to disagree. Centring called a panel fitted
+// at 1px of overflow; the "more in this section" hint appeared only past 24px.
+// Between the two a slide was top-aligned -- visibly off-centre, with dead
+// space under it -- AND silently scrollable with nothing on screen saying so.
+//
+// That band is exactly where the wording pass sends every slide. Cutting copy
+// walks a section down through its own height, and on the way past it lands in
+// the gap: no longer tall enough to read as a scrolling slide, not yet short
+// enough to be centred as a short one.
+//
+// 24, not 1, because the hint's threshold is the one with a reason behind it:
+// under about 24px there is nothing below the fold worth pointing at. Centring
+// a panel that overflows by less than that costs at most half of one section's
+// top padding, and `justify-content: safe center` in slideshow.css gives even
+// that back by falling to start alignment the moment content would be clipped.
+const OVERFLOW_SLACK = 24
+
 export default function PageSections({ sections, active, direction, onNavigate, onProgress }) {
   // Whether the panel on stage has more below the fold. The document scrollbar
   // is hidden site-wide and the panels hide theirs, so without this nothing on
@@ -131,10 +151,11 @@ function SlidePanel({
     let frame = null
     const measure = () => {
       frame = null
-      // A pixel of slack. Sub-pixel rounding routinely leaves scrollHeight a
-      // fraction above clientHeight on a panel that is plainly not scrolling,
-      // and without the tolerance those slides never centre.
-      setFits(node.scrollHeight - node.clientHeight <= 1)
+      // The same slack the overflow hint uses -- see OVERFLOW_SLACK. It was a
+      // single pixel, which covered the sub-pixel rounding that leaves
+      // scrollHeight a fraction above clientHeight on a panel that is plainly
+      // not scrolling, but nothing above it.
+      setFits(node.scrollHeight - node.clientHeight <= OVERFLOW_SLACK)
     }
     const schedule = () => {
       if (frame == null) frame = requestAnimationFrame(measure)
@@ -172,7 +193,9 @@ function SlidePanel({
       if (onProgress) onProgress(fraction)
       // Hidden once the reader is near the end: an arrow still pointing down at
       // the bottom of a panel is an instruction that does nothing.
-      if (onOverflow) onOverflow(scrollable > 24 && node.scrollTop < scrollable - 24)
+      if (onOverflow) {
+        onOverflow(scrollable > OVERFLOW_SLACK && node.scrollTop < scrollable - OVERFLOW_SLACK)
+      }
     }
     const onScroll = () => {
       if (frame == null) frame = requestAnimationFrame(report)
