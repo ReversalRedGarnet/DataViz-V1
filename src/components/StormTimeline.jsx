@@ -127,7 +127,14 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
 // pushes the axis the reader is aiming at out from under them.
 function StormPreview({ storm, selected }) {
   return (
-    <div className="storm-preview mt-4 min-h-[7.5rem] rounded-xl border border-ink/10 bg-surface/60 p-4">
+    // A locked box, not a minimum. min-height only guarantees the floor: the
+    // longest storm note runs to four lines where the shortest runs to two, so
+    // moving the pointer along the axis pumped the whole slide up and down
+    // under the reader's hand. The box is now a fixed size that the text lives
+    // inside -- what changes is the words, and nothing else on the slide moves
+    // when they do. Anything taller than the box scrolls within it.
+    <div className="storm-preview locked-box mt-4 h-[11rem] rounded-xl border border-ink/10 bg-surface/60 sm:h-[9.5rem]">
+      <div className="locked-scroll p-4">
       {storm ? (
         <>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -152,6 +159,7 @@ function StormPreview({ storm, selected }) {
           Point at a cyclone, or tab to one, to see where it went. Press it to follow it.
         </p>
       )}
+      </div>
     </div>
   )
 }

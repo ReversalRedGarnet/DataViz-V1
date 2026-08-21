@@ -62,7 +62,13 @@ export default function PageSections({ sections, active, direction, onNavigate, 
               index={i}
               total={sections.length}
               isActive={i === active}
-              nextLabel={sections[i + 1]?.label}
+              // `cue` over `label` when a section has one. The menu needs a
+              // name for a place ("How Often, and to Whom"); the button that
+              // walks you into it needs the instruction ("Choose a storm"),
+              // and those are not always the same sentence. Only the forward
+              // control takes the cue -- going back to a slide is not being
+              // asked to do the thing on it.
+              nextLabel={sections[i + 1]?.cue ?? sections[i + 1]?.label}
               prevLabel={sections[i - 1]?.label}
               onNavigate={onNavigate}
               onProgress={onProgress}

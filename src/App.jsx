@@ -88,7 +88,7 @@ function pageSections(data, story, onSelectStorm, goToId) {
   const gated = mode === 'story'
 
   return [
-    { id: 'top', element: <Hero onBegin={() => goToId('timeline')} /> },
+    { id: 'top', element: <Hero /> },
     {
       id: 'timeline',
       // The same hold the map uses further down, for the same reason: every
@@ -100,6 +100,11 @@ function pageSections(data, story, onSelectStorm, goToId) {
       // sections do not exist to navigate to, so lifting it in Explore would
       // buy the reader nothing but a dead Next button.
       requires: storm ? null : 'Select a cyclone',
+      // What the opening slide's Next button says. The section is still called
+      // "How Often, and to Whom" everywhere it is a destination -- in the menu,
+      // in the progress readout -- but the control that walks a reader into it
+      // asks them for the one thing it wants.
+      cue: 'Choose a storm',
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
     ...(!storm

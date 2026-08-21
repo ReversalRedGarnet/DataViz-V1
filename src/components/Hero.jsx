@@ -34,7 +34,14 @@ import { numberWordCapitalized } from '../utils/numberWords.js'
 // many of the six storms reached it, and which years. That is the site's whole
 // argument in miniature, made by the reader in about a second, and it is made
 // out of the same event-counting the headline is making.
-export default function Hero({ onBegin, style }) {
+//
+// There is no call-to-action button here any more. There were two forward
+// controls on this slide saying the same thing -- a button in the body and the
+// deck's own Next in the footer -- and two ways onward is one more than a
+// reader needs to be told about. The deck's control now carries the wording
+// (see `cue` in App.jsx), which puts the instruction in the place every other
+// slide has trained the reader to look for it.
+export default function Hero({ style }) {
   const { setHighlight } = useNationHighlight()
   // Which nation the reader is pointing at, and whether they pinned it. Pinning
   // exists because hover does not: on a touch screen there is no pointer to
@@ -147,20 +154,6 @@ export default function Hero({ onBegin, style }) {
         </p>
       </div>
 
-      {/* The call to action moves the deck to the timeline and stops there.
-          It does not choose a storm on the reader's behalf: the choice is the
-          first thing the site asks for, and making it for them to save a press
-          would be answering the question the whole piece is built around. */}
-      <div className="relative mt-6">
-        <button
-          type="button"
-          onClick={onBegin}
-          className="press-target inline-flex min-h-[44px] items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-base font-medium text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
-        >
-          Choose a storm
-          <span aria-hidden="true">&rarr;</span>
-        </button>
-      </div>
     </PageHero>
   )
 }

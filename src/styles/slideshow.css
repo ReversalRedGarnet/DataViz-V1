@@ -356,14 +356,22 @@
       min-height: 0;
       height: 100%;
       flex-direction: column;
-      justify-content: center;
-      overflow-y: auto;
-      scrollbar-width: none;
+      /* Anchored to the top, not centred. Centring meant the scrubber's
+         position depended on the length of the stop text below it, so it
+         drifted up and down the column as the reader dragged it -- the one
+         control on the slide that must not move while it is in use. */
+      justify-content: flex-start;
+      overflow: hidden;
       padding-right: 0.75rem;
     }
 
-    .slide-viewport .journey-detail::-webkit-scrollbar {
-      display: none;
+    /* The stop box takes whatever the column has left after the scrubber, and
+       scrolls inside that. The column itself no longer scrolls, so the
+       scrubber cannot be scrolled off the top of it. */
+    .slide-viewport .journey-detail .journey-stop {
+      flex: 1 1 auto;
+      height: auto;
+      min-height: 0;
     }
   }
 

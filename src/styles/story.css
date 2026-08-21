@@ -107,6 +107,52 @@
   }
 
   /*
+    LOCKED BOXES
+    ============
+
+    A box whose text changes but whose size does not.
+
+    Two places on this site swap one piece of prose for another under the
+    reader's pointer: the storm preview on the timeline and the current stop in
+    Follow the Storm. The source text is not a uniform length -- storm notes run
+    from two lines to four, stop facts from three to twelve -- so a box sized to
+    its content resized on every hover and every drag, and took the rest of the
+    slide with it. The reader was aiming at a control that moved because they
+    had aimed at it.
+
+    So the height is fixed and the text lives inside it. Overflow scrolls rather
+    than clips: nothing is ever cut off silently, which matters here because the
+    thing that would be cut off is a casualty figure or a caveat. The soft edge
+    at the bottom is the only hint that there is more, and it costs nothing when
+    there is not -- a short fact simply does not reach it.
+  */
+  .locked-box {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .locked-scroll {
+    height: 100%;
+    overflow-y: auto;
+    /* Keeps a flick inside the box from chaining out to the panel and paging
+       the deck once the box hits its end. */
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.25rem), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.25rem), transparent);
+  }
+
+  .locked-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Stacked layout: a fixed height, since there is no column to divide up.
+     Tall enough for the median stop, scrollable for the long ones. */
+  .journey-stop {
+    height: 15rem;
+  }
+
+  /*
     THE STORM SCRUBBER
     ==================
 
@@ -121,6 +167,13 @@
   */
   .scrub-track {
     position: relative;
+    /* Inset by half the handle's width. Everything on the rail is positioned
+       from the track's own edges, and the handle and the end ticks are centred
+       on those edges -- so at the first stop the left half of the handle sat
+       outside the track and was clipped by the column's overflow. Insetting the
+       track moves the whole rail in together, which keeps the fill, the ticks
+       and the handle in agreement while giving the ends room to be drawn. */
+    margin-inline: 12px;
     height: 2.75rem;
     display: flex;
     align-items: center;

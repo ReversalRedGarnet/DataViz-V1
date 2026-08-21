@@ -361,12 +361,25 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
             label={`${storm.name}: move between documented impact points`}
           />
 
-          {/* The stop itself. No aria-live on it, deliberately: the slider
+          {/* The stop itself, in a box of a fixed size.
+
+              The stops are not the same length -- one storm's fact runs to
+              three lines and another's to twelve -- so a box that grew to fit
+              each one moved the scrubber above it every time the reader
+              dragged. The control has to hold still while it is being used, or
+              the reader is chasing it. So the box is locked and the text
+              scrolls inside it: on a phone to a fixed height, and on the split
+              layout to whatever the column has left after the scrubber, which
+              is why the scrubber is anchored to the top of the column rather
+              than centred with it.
+
+              No aria-live on it, deliberately: the slider
               above already announces the stop it lands on through its
               valuetext, and a live region here would say the same country
               twice on every press -- which is how an accessible control
               becomes an unusable one. */}
-          <article className="journey-stop mt-5 border-l-2 border-accent pl-5">
+          <article className="journey-stop locked-box mt-5 border-l-2 border-accent">
+            <div className="locked-scroll pl-5 pr-1">
             <p className="type-eyebrow text-accent">{step.date}</p>
             <h3 className="type-h3 mt-1">{step.name}</h3>
             <p className="mt-2 text-sm font-medium">{step.lead}</p>
@@ -388,6 +401,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
                 {step.deathsNote}
               </p>
             )}
+            </div>
           </article>
         </div>
 
