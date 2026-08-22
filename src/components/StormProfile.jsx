@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Section from './Section.jsx'
 import Tooltip from './Tooltip.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
@@ -38,11 +38,35 @@ export default function StormProfile({ storm, style }) {
   // The dots and their labels arrive one at a time, and this chart sits below
   // three paragraphs of framing -- far enough down that at mount it is off
   // screen on most windows.
+  // The chart's height is the one thing on this slide that can be given back.
+  //
+  // At a fixed 260px it fits comfortably on a laptop and awkwardly on anything
+  // shorter: three paragraphs of framing, a chart that will not yield, and then
+  // the unreported-toll caveat -- the most important sentence here -- pushed
+  // half under the footer. Technically all of it was reachable. It read as a
+  // slide that had been cut off.
+  //
+  // So the chart takes a share of the window instead, floored at 170px, which
+  // is the point below which the category axis and the two label rows start
+  // colliding. The scatter carries four points and two labels; it loses nothing
+  // by being shorter, and the caveat gains a place on the screen.
+  const [viewportHeight, setViewportHeight] = useState(
+    () => (typeof window === 'undefined' ? 800 : window.innerHeight)
+  )
+  useEffect(() => {
+    const onResize = () => setViewportHeight(window.innerHeight)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const chartHeight = Math.round(
+    Math.max(170, Math.min(STORM_CHART_HEIGHT, viewportHeight * 0.26))
+  )
+
   useEffect(() => {
     if (!inView || !node || !width || !rows) return
-    const svg = resetSvg(node, width, STORM_CHART_HEIGHT)
-    renderStormProfileChart(svg, { width, rows, showTooltip, hideTooltip, theme })
-  }, [inView, node, width, rows, showTooltip, hideTooltip, theme])
+    const svg = resetSvg(node, width, chartHeight)
+    renderStormProfileChart(svg, { width, height: chartHeight, rows, showTooltip, hideTooltip, theme })
+  }, [inView, node, width, rows, showTooltip, hideTooltip, theme, chartHeight])
 
   const blocked = sectionGuard({
     data: true,
@@ -96,8 +120,8 @@ export default function StormProfile({ storm, style }) {
             ref={ref}
             role="img"
             aria-label={`Scatter chart comparing ${storm.name}'s category at closest approach against deaths, for each nation it struck`}
-            className="mt-6 block w-full"
-            style={{ height: STORM_CHART_HEIGHT }}
+            className="mt-5 block w-full"
+            style={{ height: chartHeight }}
           />
         </div>
 

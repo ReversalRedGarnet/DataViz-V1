@@ -3,7 +3,6 @@ import ScrollProgress from './ScrollProgress.jsx'
 import SectionNav from './SectionNav.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
 import StoryStateBar from './StoryStateBar.jsx'
-import StoryModeToggle from './StoryModeToggle.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'
 
@@ -36,8 +35,6 @@ export default function Header({
   selectedNations,
   onClearNations,
   onReset,
-  mode,
-  onModeChange,
 }) {
   const headerRef = useRef(null)
 
@@ -83,13 +80,7 @@ export default function Header({
               Climate doesn't create inequality. It reveals it.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            {/* The mode switch lives here rather than on a slide of its own,
-                because it has to be reachable from the section the reader
-                wants to jump out of -- a switch that can only be reached by
-                paging back to the beginning is a switch for people who already
-                knew about it. */}
-            <StoryModeToggle mode={mode} onChange={onModeChange} />
+          <div className="flex shrink-0 items-center gap-1">
             <SectionNav availableIds={availableIds} onNavigate={onNavigate} />
             <ThemeToggle />
           </div>
@@ -97,13 +88,12 @@ export default function Header({
         {/* The map is on one slide and the charts it drives are on the next
             three, so the reader can no longer see a pick and its consequence at
             the same time. This carries the current selection across every
-            slide, lets it be changed without hunting for the section that owns
-            it, and says which choice the story is waiting on when there isn't
-            one yet. */}
+            slide, says which choice the story is waiting on when there isn't
+            one yet, and can clear a choice from anywhere -- but never moves the
+            reader between slides. That is the footer's job alone. */}
         <StoryStateBar
           storm={storm}
           selectedNations={selectedNations}
-          onNavigate={onNavigate}
           onClearNations={onClearNations}
           onReset={onReset}
         />

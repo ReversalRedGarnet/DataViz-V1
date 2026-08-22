@@ -122,9 +122,16 @@
 
     So the height is fixed and the text lives inside it. Overflow scrolls rather
     than clips: nothing is ever cut off silently, which matters here because the
-    thing that would be cut off is a casualty figure or a caveat. The soft edge
-    at the bottom is the only hint that there is more, and it costs nothing when
-    there is not -- a short fact simply does not reach it.
+    thing that would be cut off is a casualty figure or a caveat.
+
+    These boxes are the one place on the site that shows a scrollbar. Everything
+    else hides its own, because the canoe across the top carries progress and a
+    bar appearing on some slides and not others is noise. Here there is nothing
+    else to say the text continues -- and the alternative, a soft fade over the
+    last line, was tried and removed for the reason given at .slide-more: a haze
+    over a caveat obscures the sentence it is advertising. A thin, quiet bar is
+    the smaller intrusion, and it only appears when there is something to
+    scroll.
   */
   .locked-box {
     position: relative;
@@ -137,13 +144,21 @@
     /* Keeps a flick inside the box from chaining out to the panel and paging
        the deck once the box hits its end. */
     overscroll-behavior: contain;
-    scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.25rem), transparent);
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.25rem), transparent);
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-ink) / 0.25) transparent;
   }
 
   .locked-scroll::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+  }
+
+  .locked-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--color-ink) / 0.25);
+    border-radius: 9999px;
+  }
+
+  .locked-scroll::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   /* Stacked layout: a fixed height, since there is no column to divide up.

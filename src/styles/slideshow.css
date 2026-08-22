@@ -130,13 +130,14 @@
     align-items: center;
     gap: 0.1rem;
     padding-bottom: 0.6rem;
-    padding-top: 2.5rem;
+    /* Was 2.5rem, to give a gradient room to fade over. The gradient is gone:
+       a band of page-coloured haze washing over the last two lines of a
+       paragraph is a heavier thing than the hint it was carrying, and on a
+       slide whose bottom line is a caveat it was fogging the sentence the
+       reader most needs to read. The arrow and its label say "more below" on
+       their own; a cue does not need to obscure the thing it is pointing at. */
+    padding-top: 0.4rem;
     color: rgb(var(--color-ink));
-    background: linear-gradient(
-      to top,
-      rgb(var(--color-sand)) 12%,
-      transparent
-    );
     opacity: 0;
     pointer-events: none;
     transition: opacity 260ms ease-out;
@@ -247,10 +248,16 @@
   }
 
   /* A panel is one screen. The document's generous section padding wastes a
-     third of it, so it is tightened in slideshow layout only. */
+     third of it, so it is tightened in slideshow layout only.
+
+     The bottom is deliberately looser than the top. A scrolling panel ends
+     exactly where its last line ends, which put a caveat's final sentence hard
+     against the footer with the scroll cue sitting on top of it -- readable,
+     but reading as though the slide had been cut off rather than finished.
+     There is now a line's worth of air under the end of every section. */
   .slide-viewport .slide-scroll > * {
     padding-top: 1.75rem;
-    padding-bottom: 1.5rem;
+    padding-bottom: 3rem;
   }
 
   /*

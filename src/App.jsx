@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Header from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
 import StormJourney from './components/StormJourney.jsx'
@@ -23,7 +23,6 @@ import { selectionAnnouncement } from './hooks/useSelection.js'
 import { useMetricData } from './hooks/useMetricData.js'
 import { METRICS } from './utils/metrics.js'
 import { NATIONS } from './components/MapView.jsx'
-import { motionDuration } from './utils/motion.js'
 import { STORMS } from './content/storms.js'
 
 const DATA_SOURCES = [
@@ -80,12 +79,8 @@ const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.labe
 // question rather than from the map four slides back.
 const NATION_NAMES = NATIONS.map((n) => n.name)
 
-function pageSections(data, story, onSelectStorm, goToId) {
-  const { storm, selected, mode } = story
-  // Explore lifts the holds; Story keeps them. Same sections, same state, same
-  // data -- the difference between the two modes is entirely this flag and
-  // whether choosing a storm carries the reader onward by itself (below).
-  const gated = mode === 'story'
+function pageSections(data, story, onSelectStorm) {
+  const { storm, selected } = story
 
   return [
     { id: 'top', element: <Hero /> },
@@ -95,10 +90,9 @@ function pageSections(data, story, onSelectStorm, goToId) {
       // section after this one is about one storm, so paging past without one
       // chosen would walk the reader through nine slides with nothing in them.
       //
-      // This one is kept in both modes, unlike the map's. It is not a
-      // narrative gate but a structural fact: with no storm chosen the later
-      // sections do not exist to navigate to, so lifting it in Explore would
-      // buy the reader nothing but a dead Next button.
+      // It is also a structural fact rather than only a narrative one: with no
+      // storm chosen the later sections do not exist, so there is nothing to
+      // walk forward into until this question is answered.
       requires: storm ? null : 'Select a cyclone',
       // What the opening slide's Next button says. The section is still called
       // "How Often, and to Whom" everywhere it is a destination -- in the menu,
@@ -125,10 +119,7 @@ function pageSections(data, story, onSelectStorm, goToId) {
       // past without a country picked would show three empty states in a row
       // and read as a broken site rather than an unanswered question.
       //
-      // Lifted in Explore mode, where seeing the empty state and going to get
-      // a country is the reader's business rather than the story's. The empty
-      // states themselves are unchanged and still say what to do.
-      requires: gated && selected.length === 0 ? 'Pick a country on the map' : null,
+      requires: selected.length === 0 ? 'Pick a country on the map' : null,
       element: (
         <MapView
           storm={storm}
@@ -170,17 +161,12 @@ function pageSections(data, story, onSelectStorm, goToId) {
     // is the only honest moment to ask them what they make of it.
     {
       id: 'detective',
-      element: <DataDetective storm={storm} onNavigate={goToId} />,
+      element: <DataDetective storm={storm} />,
     },
     {
       id: 'conclusion',
       element: (
-        <StoryConclusion
-          storm={storm}
-          selectedNations={selected}
-          onNavigate={goToId}
-          onReset={story.reset}
-        />
+        <StoryConclusion storm={storm} selectedNations={selected} onReset={story.reset} />
       ),
     },
     // Method sits second to last, immediately before the sources it explains.
@@ -220,46 +206,28 @@ function AppShell() {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
   }, [headerHeight])
 
-  // goToId is rebuilt on every render, because it closes over the sections
-  // array and that array is new each time. Anything that wants to navigate
-  // later -- the storm activation below -- has to reach it through a ref, or
-  // its effect would re-run every render and its timer would never fire.
-  const goToIdRef = useRef(() => {})
-  const goToId = useCallback((id) => goToIdRef.current(id), [])
-
-  // STORM ACTIVATION.
+  // ONE WAY FORWARD.
   //
-  // Choosing a storm appends the storm sections after the timeline, lifts the
-  // hold on it, and -- in Story mode -- carries the reader to the journey that
-  // storm just unlocked. Not instantly: the press has its own confirmation
-  // animation on the card, and moving the deck out from under it would mean
-  // the reader never sees the thing they pressed acknowledge the press. The
-  // wait is one slide transition long and collapses to nothing under reduced
-  // motion, where there is no animation to wait for.
+  // Choosing a storm used to carry the reader to the journey it unlocked, after
+  // a beat for the card's own confirmation animation. It does not any more, and
+  // the rule it broke is worth stating once, here, because it governs the whole
+  // deck: the only thing that moves the reader between slides is the footer's
+  // Back and Next.
   //
-  // Explore mode does not move. That is the point of it: the reader keeps the
-  // slide they were on and navigates when they decide to.
-  const pendingRef = useRef(false)
-  const selectStorm = useCallback(
-    (id) => {
-      story.selectStorm(id)
-      pendingRef.current = Boolean(id) && story.mode === 'story'
-    },
-    [story]
-  )
-
-  useEffect(() => {
-    if (!pendingRef.current) return
-    pendingRef.current = false
-    if (!storm) return
-    const timer = setTimeout(() => goToIdRef.current('storm-journey'), motionDuration(420))
-    return () => clearTimeout(timer)
-  }, [storm])
-
-  const sections = pageSections(data, story, selectStorm, goToId)
+  // Nothing a reader does to the content navigates. Pressing a storm selects a
+  // storm; that is the entire effect, and the sections it unlocks appear behind
+  // the Next button for the reader to walk into when they are ready. The
+  // alternative -- a press that both chooses and travels -- means the reader
+  // cannot look at a second storm without being taken somewhere, and a reader
+  // who has been moved without asking stops pressing things to find out what
+  // they do.
+  //
+  // The header's section menu is the one other way to jump, and it stays: it is
+  // a list of destinations that does nothing but go to them. What it is not is
+  // a side effect of reading.
+  const sections = pageSections(data, story, story.selectStorm)
   const deck = useDeck(sections)
-  const { active, direction, go } = deck
-  goToIdRef.current = deck.goToId
+  const { active, direction, go, goToId } = deck
 
   const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
 
@@ -290,8 +258,6 @@ function AppShell() {
         selectedNations={story.selected}
         onClearNations={story.clearNations}
         onReset={story.reset}
-        mode={story.mode}
-        onModeChange={story.setMode}
       />
 
       {/* The charts and comparison view below update silently otherwise.

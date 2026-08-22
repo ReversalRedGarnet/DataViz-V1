@@ -25,9 +25,19 @@ import { formatNationList } from '../utils/formatNationList.js'
 // with their caveats attached. It is aria-hidden and the sentence beside it
 // says the same thing in words.
 //
+// The loop back is one button, and it is not a navigation control: it clears
+// the storm and the pair. The deck follows because it has to -- with no storm
+// the ten sections after the timeline do not exist, so the reader lands back on
+// the question the piece opens with. That is a consequence of the state
+// changing, not a slide jump, which is the distinction the whole deck runs on:
+// the footer's Back and Next are the only things that move a reader.
+//
+// The two other offers that used to sit here -- compare another pair, watch the
+// divergence again -- were slide jumps and are gone. What they pointed at is
+// named in the line below instead.
+//
 // Props:
 //   storm / selectedNations -- what the reader chose, named back to them
-//   onNavigate -- (sectionId) => void
 //   onReset -- clears the storm and the pair, for "start again"
 const PATHS = [
   'M8,60 C90,58 150,46 292,18',
@@ -65,7 +75,7 @@ function ConvergeDiverge({ inView }) {
   )
 }
 
-export default function StoryConclusion({ storm, selectedNations, onNavigate, onReset, style }) {
+export default function StoryConclusion({ storm, selectedNations, onReset, style }) {
   const [sectionRef, inView] = useInView({ threshold: 0.3 })
 
   const blocked = sectionGuard({
@@ -111,41 +121,19 @@ export default function StoryConclusion({ storm, selectedNations, onNavigate, on
           </div>
         </div>
 
-        {/* The loop, stated as three offers rather than one. Which one a reader
-            wants depends on what they have just been convinced of, and the
-            cheapest of the three -- another pair, same storm -- is the one a
-            single Next button would have hidden. */}
         <div className="mt-8">
           <p className="type-eyebrow mb-3 text-accent">Look again</p>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                onReset()
-                onNavigate('timeline')
-              }}
-              className="press-target min-h-[44px] rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              Follow another storm
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate('map')}
-              className="press-target min-h-[44px] rounded-full border border-ink/20 px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              Compare another pair
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate('divergence')}
-              className="press-target min-h-[44px] rounded-full border border-ink/20 px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              Watch the divergence again
-            </button>
-          </div>
-          <p className="mt-4 text-xs italic opacity-70">
-            How the roster was built, what it excludes and where every figure came from are in the
-            two sections after this one.
+          <button
+            type="button"
+            onClick={onReset}
+            className="press-target min-h-[44px] rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            Start again with another storm
+          </button>
+          <p className="mt-4 max-w-prose text-xs italic leading-snug opacity-70">
+            Or page back with the footer: the map takes another pair of countries against this same
+            storm, and Where They Part Ways replays the divergence. How the roster was built, what
+            it excludes and where every figure came from are in the two sections after this one.
           </p>
         </div>
       </div>

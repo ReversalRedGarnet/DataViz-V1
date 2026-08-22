@@ -12,19 +12,17 @@ import { stormById } from '../content/storms.js'
 //
 //   stormId       -- roster id, or null before anything is chosen
 //   selected      -- ordered nation pair, from useSelection
-//   mode          -- 'story' (guided) or 'explore' (direct navigation)
 //   journeyIndex  -- which documented stop of the storm's path is on the map
 //   activeMetric  -- which link of the ripple chain the reader is holding
 //
-// Mode is deliberately in here rather than in the component that switches it.
-// Both modes are the same sections reading the same state; what changes is
-// whether the deck holds the reader at a section until they have answered it
-// (see the gates in App.jsx) and whether choosing a storm carries them onward
-// by itself. One set of components, one set of data, two routes through it.
+// There was briefly a fifth: a reading mode that lifted the deck's gates. It is
+// gone. Two routes through the same sections meant every question about the
+// piece -- does this hold here, does that carry you onward -- had two answers
+// depending on a switch in the header, and the second answer was never the one
+// the piece was written for. One route, gated, is the piece.
 export function useStory() {
   const selection = useSelection()
   const [stormId, setStormId] = useState(null)
-  const [mode, setMode] = useState('story')
   const [journeyIndex, setJourneyIndex] = useState(0)
   const [activeMetric, setActiveMetric] = useState(null)
 
@@ -84,8 +82,6 @@ export function useStory() {
       clearNations: selection.clear,
       setNationAt: selection.setAt,
       swapNations: selection.swap,
-      mode,
-      setMode,
       journeyIndex: Math.min(journeyIndex, Math.max(0, stopCount - 1)),
       setStop,
       activeMetric,
@@ -101,7 +97,6 @@ export function useStory() {
       selection.clear,
       selection.setAt,
       selection.swap,
-      mode,
       journeyIndex,
       stopCount,
       setStop,

@@ -25,9 +25,14 @@ import { sectionGuard } from './sectionGuard.jsx'
 //
 // Skippable by construction: the deck's Next button never waits on it.
 //
+// Each factor names the section its evidence lives in rather than offering to
+// take the reader there. Nothing on this site moves the reader between slides
+// except the footer's Back and Next -- a rule this section would otherwise be
+// the loudest violation of, since it would be sending someone backwards out of
+// a question they are still in the middle of answering.
+//
 // Props:
 //   storm -- the selected storm, for the question's wording
-//   onNavigate -- (sectionId) => void, so "show me" is a real offer
 const FACTORS = [
   {
     id: 'capacity',
@@ -71,7 +76,7 @@ const FACTORS = [
   },
 ]
 
-export default function DataDetective({ storm, onNavigate, style }) {
+export default function DataDetective({ storm, style }) {
   const [picked, setPicked] = useState(null)
 
   const blocked = sectionGuard({
@@ -125,14 +130,9 @@ export default function DataDetective({ storm, onNavigate, style }) {
             <div className="animate-pop-in rounded-xl border border-accent/30 bg-surface/70 p-4">
               <p className="type-eyebrow text-accent">What this site actually shows</p>
               <p className="mt-2 text-sm leading-snug opacity-85">{factor.evidence}</p>
-              <button
-                type="button"
-                onClick={() => onNavigate(factor.section)}
-                className="press-target mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-ink/20 px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              >
-                Go to {factor.sectionLabel}
-                <span aria-hidden="true">&rarr;</span>
-              </button>
+              <p className="mt-3 text-xs opacity-65">
+                Where to look: <span className="font-semibold">{factor.sectionLabel}</span>.
+              </p>
             </div>
           ) : (
             <p className="text-sm opacity-55">
