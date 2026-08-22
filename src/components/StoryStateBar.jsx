@@ -2,45 +2,14 @@ import { formatNationList } from '../utils/formatNationList.js'
 
 // WHAT THE READER HAS CHOSEN, VISIBLE FROM EVERY SLIDE.
 //
-// This is the successor to DeckStatus, and it exists for the same reason that
-// component did: the map is on one slide and the four charts it drives are on
-// the ones after it, so a reader can no longer see a pick and its consequence
-// at the same time. It also speaks before there is anything to report -- an
-// empty header on the opening slides said nothing about what the site wanted,
-// while a bar reading "Choose a storm" says it in the one place that is on
-// screen no matter which slide the reader is on.
+// The map is on one slide and the charts it drives are on the next three, so
+// the reader can no longer see a pick and its consequence at the same time.
+// This strip carries the current selection across every slide, says which
+// choice the story is waiting on when there isn't one yet, and can clear a
+// choice from anywhere.
 //
-// IT DOES NOT NAVIGATE, AND THAT IS DELIBERATE.
-//
-// It used to: the storm and country each carried a "Change" link that jumped
-// the deck back to the slide that owned them. They are gone, along with every
-// other route between slides that was not the footer's Back and Next. The bar
-// reports and it clears; it never moves the reader. Where a choice is made is
-// named in words instead ("on the map"), which tells a reader who wants to
-// change it exactly which slide to walk back to without deciding for them that
-// they want to go there now.
-//
-// Clear and Reset stay, because neither is navigation. They change what is
-// selected, which is the same kind of act as selecting it in the first place,
-// and they are the only way to unpick a choice from a slide that is not the one
-// that made it.
-//
-// It holds no state. Every value here is read from the single source of truth
-// in useStory, and every action is a callback into it -- so the bar cannot
-// disagree with the sections below it, which is the failure mode a second copy
-// of "which storm is selected" would eventually produce.
-//
-// Props:
-//   storm -- the selected storm, or null
-//   selectedNations -- ordered pair, possibly empty
-//   onClearNations / onReset -- from useStory
-//
-// The action buttons are 36px rather than the 44px used for touch targets in
-// the body. That figure is for the controls a reader aims at inside a section --
-// storm cards, map pins, the scrubber, the country picker, all of which are
-// sized for it. This bar is persistent chrome sharing a row with the section
-// menu and the theme toggle, both already 36px, and growing it would take a
-// centimetre off the height of all fourteen slides on a phone.
+// What it never does is navigate. Moving between slides is the footer's job
+// alone -- see the note in App.jsx.
 function Action({ children, onClick, title }) {
   return (
     <button

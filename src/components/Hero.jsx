@@ -6,41 +6,13 @@ import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlig
 import { numberWordCapitalized } from '../utils/numberWords.js'
 
 // The opening claim is a count, not a trend. Every figure in the headline is
-// plain event-counting against the roster rule in content/storms.js, so a
-// reader who doubts it can check it against the exclusions section rather than
-// having to trust a confidence level.
+// computed from the roster, so a change to content/storms.js reaches the first
+// screen without anybody editing prose.
 //
-// The kicker below is the same line the timeline slide opens with, and both
-// now compute it. They were typed out separately, which is how a single roster
-// came to assert its own size in four places -- see utils/numberWords.js.
-//
-// `body` is passed as an expression, not a quoted attribute. A JSX attribute
-// written as "..." is a literal string, not a JS string, so \u escapes inside
-// one are never processed -- they rendered on the live site as the raw text
-// \u2014 in the middle of a sentence.
-//
-// WHAT CHANGED HERE, AND WHAT DID NOT.
-//
-// The words are the words. The claim, the scope and the roster figures are
-// untouched, and nothing below reads a dataset the page did not already load:
-// every fact in the interactive layer is counted out of STORMS, the same list
-// the headline counts. What changed is that the opening now answers something.
-// It used to end on the sentence "Pick a storm from the timeline to begin",
-// which asks the reader to act on a control that is on the next slide -- so the
-// only thing to do on the opening slide was leave it.
-//
-// Now the four nations are here as nodes: point at one, or press it on a touch
-// screen, and the roster answers with that country's own share of it -- how
-// many of the six storms reached it, and which years. That is the site's whole
-// argument in miniature, made by the reader in about a second, and it is made
-// out of the same event-counting the headline is making.
-//
-// There is no call-to-action button here any more. There were two forward
-// controls on this slide saying the same thing -- a button in the body and the
-// deck's own Next in the footer -- and two ways onward is one more than a
-// reader needs to be told about. The deck's control now carries the wording
-// (see `cue` in App.jsx), which puts the instruction in the place every other
-// slide has trained the reader to look for it.
+// The four nations are pressable, and pressing one lights its storms on the
+// decade strip below. That is the whole interaction: the point is that the
+// reader touches something before the first argument arrives, and finds out
+// that the marks under the headline mean something.
 export default function Hero({ style }) {
   const { setHighlight } = useNationHighlight()
   // Which nation the reader is pointing at, and whether they pinned it. Pinning
@@ -166,20 +138,9 @@ export default function Hero({ style }) {
   )
 }
 
-// The weather behind the words.
-//
-// Three rings spreading from a point in the ocean, and a slow cyclone glyph off
-// to one side. Both are drawn in accent at very low opacity and both animate
-// transform and opacity only -- the two properties a browser can hand to the
-// compositor -- for the reason given at length in styles/animations.css: a
-// third of this site's likely audience is on mid-range Android over Pacific
-// mobile data, and a hero that stutters is worse than a hero that is plain.
-//
-// It is decoration, so it carries no information, is hidden from assistive
-// technology, settles once the reader has touched anything, and is removed
-// entirely under prefers-reduced-motion. Nothing here is on the critical path:
-// the nodes above are pressable on the first frame, whatever the rings are
-// doing behind them.
+// The weather behind the words: rings spreading from a point in the ocean.
+// Decoration, and treated as such -- hidden from assistive technology, removed
+// under reduced motion, and stopped once the reader has touched anything.
 function HeroAtmosphere() {
   return (
     <div aria-hidden="true" className="hero-atmos-layer">

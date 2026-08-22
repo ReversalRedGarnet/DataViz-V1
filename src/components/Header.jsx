@@ -9,23 +9,16 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 // Persistent site header: wordmark, thesis, controls, scroll progress. Fixed
 // from the top, since the progress bar has to be visible there.
 //
-// A plain <header> here (not nested inside <main>) gets the implicit "banner"
-// landmark automatically, which is the correct role for persistent site-level
-// chrome -- no explicit role attribute needed. The title is deliberately not a
-// heading element: Hero already carries the page's one real <h1>, and a second
-// would break the single-h1 document outline screen reader users rely on.
-//
-// Ripple is a single page, so there is no site-level nav row here -- the
-// section menu on the right is the only navigation, and it moves within this
-// one page. That's the one structural difference from the multi-hazard build
-// this header was ported from.
+// A plain <header> (not nested inside <main>) gets the implicit "banner"
+// landmark automatically. The title is deliberately not a heading element:
+// Hero carries the page's one real <h1>, and a second would break the single-h1
+// outline screen reader users rely on.
 //
 // Props:
-//   onHeightChange -- (px: number) => void, called with the header's actual
-//     rendered height whenever it changes, so App.jsx can give <main> matching
-//     padding-top and keep the in-page anchor offset current. Measured rather
-//     than hardcoded so it can't drift out of sync with a future copy or
-//     font-size change.
+//   onHeightChange -- (px) => void, called with the header's actual rendered
+//     height whenever it changes, so App.jsx can give <main> matching padding
+//     and keep --header-height current. Measured rather than hardcoded so it
+//     cannot drift out of sync with a copy or font-size change.
 export default function Header({
   onHeightChange,
   availableIds,
@@ -68,15 +61,10 @@ export default function Header({
 
       {/* Tighter on a phone, and tighter again on a short laptop. This bar is
           on screen for all fourteen sections, so every millimetre it takes is
-          taken from the content fourteen times -- and on a 768px-tall window
-          it was taking about 135 of them, which is a fifth of the panel
-          underneath it.
-
-          Nothing is removed to buy that back: the wordmark, the thesis and the
-          whole selection strip are all still here, only set smaller. The
-          measured height feeds --header-height through the ResizeObserver
-          below, so the panel resizes itself to match without anything else in
-          the codebase being told. */}
+          taken from the content fourteen times -- and on a 768px-tall window it
+          was taking about 135 of them. Nothing is removed to buy that back,
+          only set smaller; the measured height feeds --header-height through
+          the ResizeObserver above. */}
       <div className="relative mx-auto max-w-5xl px-4 py-2 sm:px-6 sm:py-3 md:py-3.5 short:py-2">
         {/* Grouped right so they read as controls, not part of the wordmark. */}
         <div className="flex items-start justify-between gap-3 md:items-baseline">
@@ -88,10 +76,8 @@ export default function Header({
               Ripple
             </a>
             {/* Hidden on phones, where it was a second line of italic serif
-                repeating on every section for no gain. It has not been cut --
-                Hero carries it on mobile, at the top of the piece, which is
-                where a thesis statement belongs and where there is room to
-                read it. */}
+                repeating on every section for no gain. Hero carries it there
+                instead, at the top of the piece. */}
             <p className="hidden font-serif text-sm italic leading-snug text-ink/70 sm:block md:border-l md:border-ink/15 md:pl-3 md:text-lg short:text-base">
               Climate doesn't create inequality. It reveals it.
             </p>
@@ -101,12 +87,8 @@ export default function Header({
             <ThemeToggle />
           </div>
         </div>
-        {/* The map is on one slide and the charts it drives are on the next
-            three, so the reader can no longer see a pick and its consequence at
-            the same time. This carries the current selection across every
-            slide, says which choice the story is waiting on when there isn't
-            one yet, and can clear a choice from anywhere -- but never moves the
-            reader between slides. That is the footer's job alone. */}
+        {/* The reader's current selection, carried across every slide. See
+            StoryStateBar.jsx -- it never navigates. */}
         <StoryStateBar
           storm={storm}
           selectedNations={selectedNations}

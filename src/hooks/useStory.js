@@ -4,22 +4,10 @@ import { stormById } from '../content/storms.js'
 
 // EVERYTHING THE READER HAS CHOSEN, IN ONE PLACE.
 //
-// The site is a loop -- pick a storm, follow it, pick a country, compare, look
-// again -- and every section on the page is a view of the same five answers.
-// They are held here, once, and handed down as props. No section keeps its own
-// copy of which storm is selected, which is the rule that keeps a stale chart
-// impossible rather than merely unlikely: there is nothing to go stale.
-//
-//   stormId       -- roster id, or null before anything is chosen
-//   selected      -- ordered nation pair, from useSelection
-//   journeyIndex  -- which documented stop of the storm's path is on the map
-//   activeMetric  -- which link of the ripple chain the reader is holding
-//
-// There was briefly a fifth: a reading mode that lifted the deck's gates. It is
-// gone. Two routes through the same sections meant every question about the
-// piece -- does this hold here, does that carry you onward -- had two answers
-// depending on a switch in the header, and the second answer was never the one
-// the piece was written for. One route, gated, is the piece.
+// The storm, the country pair, the position along the storm's path and the open
+// ripple link. Every section is a view of these; none of them keeps a second
+// copy, which is what makes the header's strip and the charts agree without
+// anything syncing them.
 export function useStory() {
   const selection = useSelection()
   const [stormId, setStormId] = useState(null)

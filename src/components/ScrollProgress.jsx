@@ -42,9 +42,9 @@ const PADDLE_BLADE_PATH =
   'M -3.6,10 C -4.2,13 -4.2,16.5 -2.6,19.5 C -1.4,21.7 1.4,21.7 2.6,19.5 C 4.2,16.5 4.2,13 3.6,10 C 2.4,7.5 -2.4,7.5 -3.6,10 Z'
 
 // Props:
-//   progress -- 0..1, supplied by the deck in slideshow layout, where there is
-//     no document scroll left for this to read. Omitted in document layout, and
-//     it falls back to watching window.scrollY as before.
+//   progress -- 0..1, supplied by the deck. The document itself never scrolls,
+//     so there is nothing left for this to read on its own. Omitted, it falls
+//     back to watching window.scrollY.
 export default function ScrollProgress({ progress: externalProgress }) {
   const wrapperRef = useRef(null)
   const [width, setWidth] = useState(0)

@@ -5,28 +5,10 @@
 
 @layer utilities {
   /*
-    Primary entrance animation used throughout the site.
-
-    Rebalanced from the original: the scale was doing most of the work at 0.94
-    and the travel almost none at 8px, which reads as a card inflating in place
-    rather than arriving. Reversed -- a barely-there scale change and a much
-    longer rise -- so the motion has a direction.
-
-    The overshoot curve is kept but softened. A back-out with a 1.56 overshoot
-    on a large card is a bounce, and a bounce on a page about disasters is the
-    wrong register; this one settles rather than springs.
-
-    Only `opacity` and `transform` are animated, deliberately. Those two are the
-    properties a browser can hand to the compositor and run off the main thread;
-    anything else -- a blur that clears, an animated box-shadow, a colour fade
-    on a large surface -- forces a repaint every frame. A third of this site's
-    likely audience is on mid-range Android over Pacific mobile data, and an
-    entrance animation that stutters is worse than one that is plain.
-
-    No `will-change` either. It is genuinely useful for an element about to
-    animate and genuinely costly on a dozen sections that finished animating
-    minutes ago, and CSS gives no way to clear it afterwards. Browsers already
-    promote compositor-friendly animations like this one without being asked.
+    Primary entrance animation used throughout the site. Transform and opacity
+    only -- the two properties a browser can hand to the compositor -- so it
+    runs off the main thread on the mid-range phones a third of this audience
+    is reading on.
   */
   @keyframes pop-in {
     from {
@@ -147,19 +129,10 @@
 
   /*
     The invitation to press. The storm chips on the opening timeline are the
-    only control on that slide, and until one is pressed nothing else on the
-    page exists -- so a resting card with a border is not a strong enough
-    signal that the reader is meant to act. This puts a faint accent ring
-    through each chip, staggered along the axis so the six read as a sequence
-    rather than a blinking row. Applied only while no storm is selected; the
-    moment one is, the invitation has been taken and every ring stops.
-
-    Drawn on a pseudo-element and animated with transform and opacity alone,
-    for the reason given under .animate-pop-in above: an animated box-shadow on
-    six cards would repaint every frame, indefinitely, on exactly the hardware
-    this site is most likely to be read on. The ring scales past its card, so
-    the chip itself must not clip -- it carries no overflow rule, and the grid
-    cell it sits in is padded rather than tight.
+    only control on their slide and nothing moves until one is pressed, so
+    they carry more affordance than a resting card normally would: a faint
+    accent ring, staggered left to right along the axis, that stops for good
+    once any chip has been pressed.
   */
   @keyframes await-press {
     0% {

@@ -14,19 +14,12 @@ import { loadLandTopology } from '../utils/loadLand.js'
 import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 
 // Illustrative Pacific map: real coastlines, fixed markers, pan and zoom, click
-// to select up to two nations. No tile server or API key -- public/land-50m.json
-// is a static export from the 'world-atlas' package, fetched at runtime so it
-// stays out of the main bundle.
+// to select. Two selections at most, because everything downstream of this
+// slide is a pairwise comparison.
 //
-// Default nation set: the four countries this project compares. Coordinates are
-// approximate (capital city), which is fine for an illustrative map and not for
-// navigation. Other hazard pages pass their own set via the `nations` prop.
-// No blurbs here any more. Each of these carried a sentence written for Cyclone
-// Harold -- "Hit hardest by Cyclone Harold, April 2020", a ferry capsize that
-// belongs to one week in 2020 -- and they were printed under every marker
-// whichever storm was selected. Static text about a specific event has no place
-// in a component that six different events flow through, so what a marker says
-// is now read from the selected storm's own record.
+// The land is real TopoJSON; the markers are hand-placed at nation centroids
+// rather than derived, because the four nations are archipelagos and a computed
+// centroid lands in open water often enough to be wrong.
 export const NATIONS = [
   { name: 'Fiji', lat: -18.14, lon: 178.44 },
   { name: 'Solomon Islands', lat: -9.43, lon: 159.95 },
@@ -103,15 +96,9 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
 
-  // Which country the reader is pointing at, for the summary under the map.
-  // The tooltip already says this, and the tooltip is not enough on its own:
-  // it follows the pointer, so it cannot be read on a touch screen without
-  // covering the thing it describes, and it vanishes the moment focus moves.
-  // The summary is the same sentence in a place that holds still.
-  //
-  // Behind a ref for the same reason `selected` is: the D3 handlers are built
-  // once, in an effect that must not re-run, or the reader's pan and zoom are
-  // thrown away every time they point at something.
+// Which country the reader is pointing at, for the summary under the map.
+// Kept apart from the committed selection so hovering a second country does not
+// disturb the one being followed -- the same split the timeline's preview uses.
   const [preview, setPreview] = useState(null)
   const setPreviewRef = useRef(setPreview)
   setPreviewRef.current = setPreview

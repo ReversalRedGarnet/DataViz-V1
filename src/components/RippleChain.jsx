@@ -14,22 +14,11 @@ import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import Tooltip from './Tooltip.jsx'
 
 // One small chart per stage of the chain, filtered to the selected nations.
-// Which chart type each metric gets is decided in metrics.js, based on how
-// complete that metric's data actually is.
 //
-// Props:
-//   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
-//   storm -- the selected storm, or null. Its year is the before/after anchor,
-//     and the nations it struck are drawn at full strength while the rest are
-//     dimmed: a country the storm missed is the nearest thing this data has to
-//     a control, so it stays on the chart rather than being removed.
-//   selectedNations -- ordered; order drives colour, matching the map's badges
-//   activeMetric -- which link the reader has opened, from the story state.
-//     Held there rather than here because the emphasis is meant to reach past
-//     this section: a link held open here is the same link the ending points
-//     back at.
-//   onActiveMetric -- (key | null) => void
-//   style -- forwarded to Section (entrance stagger)
+// The order is the claim: who was hit, then the harvest, the herds, the power
+// supply and the visitors. It is a plausible sequence, not a measured causal
+// path, and the section says so in prose -- every series is an annual national
+// total that no cyclone has to itself.
 export default function RippleChain({
   data,
   storm,
@@ -107,30 +96,16 @@ export default function RippleChain({
             removed: the closest thing these records have to a comparison.
           </p>
         )}
-        {/* THE CHAIN, AS A CHAIN.
-            Five cards in a grid are five cards; the order between them is the
-            argument, and until now it was carried only by a numbered badge and
-            the reading direction. This rail states it: five links in sequence,
-            each one an arrow from the last, in the order the damage travels.
+        {/*
+          THE CHAIN, AS A CHAIN. Five links joined by a line, in the order the
+          damage travels. Holding one rings its chart and lets the other four
+          recede, so the rail is a filter as well as a legend.
 
-            It is also the section's control surface. Pointing at a link rings
-            its chart below and lets the other four recede; pressing one opens
-            what that record is and how much of it was actually reported. The
-            charts carry the same handlers, so the rail and the grid are two
-            views of one state rather than two things to keep in step. */}
+          On a phone the same links become an accordion, one open at a time:
+          five horizontal links on a 360px screen are five illegible ones, and
+          a stacked rail above a stacked grid is two scrolls of the same list.
+        */}
         {isPhone ? (
-          /* PHONE: the chain as an accordion, one link open at a time.
-
-             Five charts stacked on a phone is five screens of scrolling in a
-             section whose argument is the relationship between them -- by the
-             time the reader reaches tourism they cannot see people affected,
-             which is the comparison the whole section exists to make. So the
-             chain itself is the page: five rows in the order the damage
-             travels, and the open one carries its chart and its caveats.
-
-             Same state as the desktop rail. Pressing a row here is the same
-             press as pressing a link there, and the reader's choice survives a
-             rotation from one layout to the other. */
           <ol className="chain-rail chain-accordion mt-5">
             {CHAIN_METRICS.map((m, i) => {
               const isOpen = openKey === m.key

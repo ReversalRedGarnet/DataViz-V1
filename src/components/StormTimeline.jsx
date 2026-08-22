@@ -18,23 +18,16 @@ const NATION_COUNT_WORD = numberWord(NATION_NAMES.length)
 // The opening. Six storms on a ten-year axis, and the strike count per nation
 // above it.
 //
-// The count is the claim, not the calendar. An earlier draft of this project
-// planned to open on year-clustering -- "they keep getting hit in bursts" --
-// and the roster does not support it: one year of the ten holds more than one
-// storm. Counting per nation instead says something the data does show, and
-// says it without any trend or attribution claim attached. Every one of these
-// four countries was in the path of three or four severe cyclones in ten years.
-//
-// That reasoning used to be spelled out on the slide in three paragraphs. It
-// isn't any more -- the argument is the picture, and a reader who wants the
-// roster rule in prose finds it in the method section. One sentence states the
-// scope and the timeline does the rest.
+// The count is the claim, not the calendar. An earlier draft planned to open on
+// year-clustering -- "they keep getting hit in bursts" -- and the roster does
+// not support it: one year of the ten holds more than one storm. Counting per
+// nation says something the data does show, without any trend or attribution
+// claim attached.
 //
 // Nothing is selected on load. The timeline is the argument; the storm chosen
-// from it is the evidence, and the reader picks which piece to look at. That
-// makes the chips the only control on the slide and nothing on the page moves
-// until one is pressed, so they carry more selection affordance than a resting
-// card normally would -- see .awaiting-press in styles/animations.css.
+// from it is the evidence. That makes the chips the only control on the slide,
+// so they carry more selection affordance than a resting card normally would --
+// see .awaiting-press in styles/animations.css.
 //
 // Props:
 //   selectedId -- id of the chosen storm, or null
@@ -42,11 +35,9 @@ const NATION_COUNT_WORD = numberWord(NATION_NAMES.length)
 //   style -- forwarded to Section (entrance stagger)
 
 // How much of the region a storm covered, as four pips rather than a fraction.
-// Scanning the timeline, this is the one comparison worth having pre-attentive:
-// Harold reached all four, everything else reached two. Order is fixed (the
-// NATIONS order) so the glyph means the same thing on every card, and the whole
-// thing is aria-hidden because the button's own label already says "struck N of
-// four nations" in words.
+// The one comparison worth having pre-attentive when scanning the timeline.
+// Order is fixed (NATIONS order) so the glyph means the same thing on every
+// card, and it is aria-hidden because the button's label already says it.
 function CoverageDots({ struck }) {
   return (
     <span aria-hidden="true" className="flex shrink-0 items-center gap-[3px]">
@@ -65,14 +56,9 @@ function CoverageDots({ struck }) {
 // One storm, pressable. Shared by both layouts below so the two can't drift --
 // only the scaffolding around them differs between wide and narrow screens.
 //
-// `awaiting` is true only while no storm at all is chosen. It drives the faint
-// accent ring that marks these as the thing to press; once the reader has
-// pressed one, the invitation has been accepted and every ring stops.
-// `strip` is the phone-sized variant: the same button, the same handlers, the
-// same state -- just sized to be swiped past and thumbed, with the year given
-// its own line instead of being crushed onto the label's. One component, two
-// scaffolds; a mobile-only copy of this card would be a second place for the
-// roster to disagree with itself.
+// `awaiting` is true only while no storm is chosen; it drives the faint accent
+// ring that marks these as the thing to press. `strip` is the phone-sized
+// variant: same button, same handlers, same state, sized to be thumbed.
 function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, row = false, strip = false }) {
   return (
     <button
@@ -132,25 +118,16 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
 
 // The storm under the reader's attention, in four facts and one sentence.
 //
-// Every word of it is already in the roster -- name, year, which of the four
-// nations it reached, and the storm's own opening line from its first stop.
-// Nothing is written here that a reader could not check against
-// content/storms.js, and no storm gets a sentence invented to make it sound
-// more interesting than the record makes it.
-//
-// It shows the hovered or focused storm if there is one, and otherwise the
-// selected storm, so the panel is never empty once a choice has been made and
-// the reader can always see what they picked. The box holds its height whether
-// or not it has anything in it: a timeline that grows a panel under the cursor
-// pushes the axis the reader is aiming at out from under them.
+// Every word is already in the roster, so nothing here is a claim a reader
+// could not check against content/storms.js. It shows the hovered or focused
+// storm if there is one and otherwise the selected storm, so the panel is never
+// empty once a choice has been made.
 function StormPreview({ storm, selected }) {
   return (
-    // A locked box, not a minimum. min-height only guarantees the floor: the
-    // longest storm note runs to four lines where the shortest runs to two, so
-    // moving the pointer along the axis pumped the whole slide up and down
-    // under the reader's hand. The box is now a fixed size that the text lives
-    // inside -- what changes is the words, and nothing else on the slide moves
-    // when they do. Anything taller than the box scrolls within it.
+    // A locked box, not a minimum. min-height only guarantees the floor, and
+    // storm notes run from two lines to four -- so moving the pointer along the
+    // axis pumped the whole slide up and down under the reader's hand. The box
+    // is a fixed size that the text lives inside; anything taller scrolls.
     <div className="storm-preview locked-box mt-4 h-[11rem] rounded-xl border border-ink/10 bg-surface/60 sm:h-[9.5rem] short:mt-3 short:h-[8rem]">
       <div className="locked-scroll p-4">
       {storm ? (
@@ -203,9 +180,8 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       {/*
         One column, full width. This slide used to be split -- prose left,
         evidence right -- because the prose ran long enough that stacking cost
-        the reader a scroll to reach the roster it justified. With the argument
-        down to a single sentence there is nothing left to put in a side column,
-        and a timeline is the one chart that actually wants the full measure.
+        the reader a scroll. With the argument down to a single sentence there
+        is nothing left for a side column, and a timeline wants the full measure.
       */}
       <p className="type-eyebrow mb-1 text-accent">
         {ROSTER_START}&ndash;{ROSTER_END} &middot; {numberWordCapitalized(STORMS.length)} severe
@@ -220,11 +196,9 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       </p>
 
       {/* The cards take focus so a keyboard user can reach the cross-chart
-          highlight, which is otherwise pointer-only. A focusable element with
-          no accessible name is worse than one that cannot be focused at all --
-          it becomes a stop on the tab order that announces nothing -- so each
-          carries its own full sentence and the decorative split between the
-          number and its label is hidden from assistive tech. */}
+          highlight, which is otherwise pointer-only. Each carries its own full
+          sentence, because a focusable element with no accessible name is worse
+          than one that cannot be focused at all. */}
       <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 short:mt-4 short:gap-2.5">
         {counts.map(({ nation, count }) => (
           <li
@@ -255,10 +229,9 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
         WIDE: a conventional horizontal timeline. One grid column per year, so
         the ten-year axis is drawn to scale and the empty stretches are as wide
         as the busy ones -- the gaps are part of what the axis is showing. The
-        axis rule is the columns' own top border with no column gap between
-        them, which is what makes it read as one continuous line rather than
-        ten segments. Cards sit on the axis and stack upward, so 2023's two
-        storms grow into the space above rather than squeezing sideways.
+        axis rule is the columns' own top border with no column gap, which is
+        what makes it read as one continuous line. Cards sit on the axis and
+        stack upward, so 2023's two storms grow into the space above.
       */}
       <ol
         aria-label={axisLabel}
@@ -310,25 +283,17 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       {/*
         NARROW: a swipeable strip, not a squeezed axis.
 
-        What was here was the same year axis turned on its side -- a spine with
-        a tick per year and cards hanging off it. It was honest about the empty
-        years, and on a phone it was also eleven rows tall, which meant the
-        reader scrolled a section to reach a control and lost the preview panel
-        off the bottom of the screen while doing it.
+        The same year axis turned on its side was honest about the empty years
+        and, on a phone, eleven rows tall -- so the reader scrolled a section to
+        reach a control and lost the preview off the bottom while doing it.
 
         The strip drops the empty years and keeps the storms, in the same order,
-        with the year printed on each card. Six cards at a bit under a
-        screen-width each: one is always fully in view, the next always peeking
-        past the edge, which is what says "there is more this way" without a
-        gradient or an instruction. Scroll snapping makes it settle on a card
-        rather than between two.
+        with the year on each card. Six cards at a bit under a screen-width
+        each: one always fully in view, the next always peeking past the edge.
 
-        Same StormCard, same handlers, same roster. Nothing here is a
-        mobile-only data structure -- it is the same six objects, laid out for a
-        thumb. The years the region was spared are still stated in the sentence
-        above the strip and drawn on the wide axis; what is lost on a phone is
-        an eleven-row spine, and what is gained is a control the reader can
-        reach without scrolling.
+        Same StormCard, same handlers, same roster -- nothing here is a
+        mobile-only data structure. The spared years are still stated in the
+        sentence above and drawn on the wide axis.
       */}
       <ul
         aria-label={axisLabel}
@@ -350,9 +315,9 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       </ul>
 
       {/* One panel under both axes, deliberately not one per card. A preview
-          that opens inside the timeline would move every other card on the
-          slide whenever the pointer crossed one; a fixed place to look means
-          the reader's eye learns where the answer appears and stays there. */}
+          opening inside the timeline would move every other card whenever the
+          pointer crossed one; a fixed place to look means the reader's eye
+          learns where the answer appears and stays there. */}
       <StormPreview storm={shown} selected={shown != null && shown.id === selectedId} />
     </Section>
   )

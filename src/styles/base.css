@@ -6,23 +6,16 @@
 @layer base {
   /*
     Hide the browser scrollbar. The canoe in the header is the scroll readout,
-    and two position indicators competing at the edges of the same page is one
-    too many.
+    and two position indicators at the edges of the same page is one too many.
 
-    Deliberate trade-off, recorded because it is a real cost and not a free win.
-    A scrollbar is an affordance as well as a readout: it can be grabbed and
-    dragged, and some people navigate long pages that way. Hiding it takes that
-    away, and nothing here gives it back.
+    A real trade-off: a scrollbar is an affordance as well as a readout, and
+    hiding it takes the drag gesture away. Everything else still works --
+    wheel, trackpad, touch, keyboard, find-in-page -- because
+    `scrollbar-width: none` hides the control without changing the container.
 
-    What is NOT given up: the page still scrolls by wheel, trackpad, touch,
-    keyboard (arrows, Page Up/Down, Home/End, Space) and by find-in-page,
-    because `scrollbar-width: none` hides the control without changing the
-    scroll container. Only the drag gesture is lost.
-
-    Applied to the document, not to `*`. A blanket rule would also strip the
-    scrollbars from any internal scrolling region -- a long tooltip, an
-    overflowing table on a narrow screen -- where there is no canoe to replace
-    them and the content would simply look truncated.
+    Applied to the document, not to `*`: a blanket rule would also strip
+    scrollbars from internal scrolling regions where there is no canoe to
+    replace them and content would simply look truncated.
   */
   html {
     scrollbar-width: none; /* Firefox */
@@ -102,17 +95,12 @@
   }
 
   /*
-  View Transitions. Ripple is a single page, so the only transition here is the
-  theme toggle's -- but the default root cross-fade is left defined rather than
-  disabled outright, so it's still correct if a second view is ever added.
-
-  The theme toggle wants the opposite: the outgoing page must sit still and
-  fully opaque underneath while the new theme is wiped over it by the expanding
-  circle in ThemeToggle.jsx. Cross-fading both layers at once would wash the
-  whole page out to grey halfway through. Scoped to the sweep class so it can't
-  affect navigation, and the z-index puts the new theme on top -- without it
-  the circle would be clipping a layer that's already behind.
-*/
+    View Transitions. The theme toggle wants the outgoing page to sit still
+    and fully opaque underneath while the new theme is wiped over it by the
+    expanding circle in ThemeToggle.jsx -- cross-fading both layers would wash
+    the page out to grey halfway through. Scoped to the sweep class so it
+    cannot affect navigation; the z-index puts the new theme on top.
+  */
   html.theme-sweep::view-transition-old(root) {
     animation: none;
     z-index: 1;
@@ -139,16 +127,14 @@
   }
 
   /*
-    The site's only custom cursor: a standard arrow silhouette in the site's
-    own ink, outlined in the opposite tone so it reads over a light page and a
-    dark footer alike. Two files rather than one because a cursor image can't
-    respond to a CSS variable -- .dark on <html> picks between them.
+    The site's only custom cursor: a standard arrow in the site's own ink,
+    outlined in the opposite tone so it reads over a light page and a dark
+    footer alike. Two files because a cursor image cannot respond to a CSS
+    variable.
 
-    Declared here and inherited, not with !important on a universal selector:
-    an inherited value loses to any element that declares its own, which is
-    what lets the interactive rule below take over. Those states are the
-    system's own pointer and help cursors, deliberately -- the arrow is the
-    only shape this site replaces.
+    Declared here and inherited, not forced with !important on a universal
+    selector: an inherited value loses to any element that declares its own,
+    which is what lets the interactive rule below take over.
   */
   html {
     cursor:

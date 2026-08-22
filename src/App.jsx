@@ -58,20 +58,14 @@ const DATA_SOURCES = [
 ]
 
 // The page, top to bottom. PageSections owns the shape: it gives each entry its
-// anchor id and its place in the entrance stagger, so the two can't drift apart
-// the way they could when App kept parallel arrays and destructured them
-// positionally.
+// anchor id and its place in the entrance stagger, so the two can't drift the
+// way they could when App kept parallel arrays and destructured positionally.
 //
-// There is no per-section `tone` here any more. It existed to colour the wave
-// divider between two sections, and once that divider was removed the field was
-// read by nothing while still looking like the colour knob -- so a section's
-// background is now set where it is painted, in the component's own <Section>.
 // Every id here must also appear in content/pageSections.js, which is what the
-// header's jump-to menu links to.
-// The first two sections are always present; the rest appear once a storm is
-// chosen. Split into two lists rather than filtered from one, so where the
-// story opens out is a structural fact of this file rather than an index
-// somebody has to keep in step.
+// header's jump-to menu links to. The first two sections are always present;
+// the rest appear once a storm is chosen -- split into two lists rather than
+// filtered from one, so where the story opens out is a structural fact of this
+// file rather than an index somebody has to keep in step.
 const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label]))
 
 // The comparison's pickers offer every in-scope nation, not only the two
@@ -208,23 +202,18 @@ function AppShell() {
 
   // ONE WAY FORWARD.
   //
-  // Choosing a storm used to carry the reader to the journey it unlocked, after
-  // a beat for the card's own confirmation animation. It does not any more, and
-  // the rule it broke is worth stating once, here, because it governs the whole
-  // deck: the only thing that moves the reader between slides is the footer's
-  // Back and Next.
+  // The only thing that moves the reader between slides is the footer's Back
+  // and Next. Nothing a reader does to the content navigates: pressing a storm
+  // selects a storm, and the sections it unlocks appear behind the Next button
+  // for the reader to walk into when they are ready.
   //
-  // Nothing a reader does to the content navigates. Pressing a storm selects a
-  // storm; that is the entire effect, and the sections it unlocks appear behind
-  // the Next button for the reader to walk into when they are ready. The
-  // alternative -- a press that both chooses and travels -- means the reader
-  // cannot look at a second storm without being taken somewhere, and a reader
-  // who has been moved without asking stops pressing things to find out what
-  // they do.
+  // The alternative -- a press that both chooses and travels -- means the
+  // reader cannot look at a second storm without being taken somewhere, and a
+  // reader who has been moved without asking stops pressing things to find out
+  // what they do.
   //
   // The header's section menu is the one other way to jump, and it stays: it is
-  // a list of destinations that does nothing but go to them. What it is not is
-  // a side effect of reading.
+  // a list of destinations that does nothing but go to them.
   const sections = pageSections(data, story, story.selectStorm)
   const deck = useDeck(sections)
   const { active, direction, go, goToId } = deck

@@ -75,8 +75,8 @@ export function useDeck(sections) {
     setActive((current) => Math.max(0, Math.min(count - 1, current)))
   }, [count])
 
-  // Deep links, both directions. The id is the same one the section menu and
-  // the single-document layout use, so a URL means the same thing in either.
+  // Deep links, both directions. The id is the same one the section menu uses,
+  // so a URL and a menu entry mean the same thing.
   useEffect(() => {
     const fromHash = window.location.hash.replace('#', '')
     if (fromHash) goToIdRef.current(fromHash)

@@ -13,29 +13,17 @@ import { motionDuration } from '../utils/motion.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 
 // The selected storm's route across the nations it struck, driven by the reader.
-// Stops come from the storm registry in the order the storm reached them, and
-// the scrubber beside the map is what moves through them: dragging it, pressing
-// a stop, or arrowing along it advances the track, the storm glyph and the
-// marker states together.
 //
-// It used to advance on scroll. An IntersectionObserver watched a tall column
-// of steps and reported whichever one had crossed a band across the middle of
-// the panel, and the map followed. That mechanism is gone, along with the two
-// percentages in slideshow.css that manufactured the scroll travel it needed
-// and the note explaining why they could not be treated as spacing. Three
-// things are better for its going: the control is visible, so a reader knows
-// there is one; the position lives in the story state with everything else the
-// reader has chosen, so it can be reset when the storm changes rather than
-// left pointing at a stop the new storm does not have; and the section is no
-// longer one CSS edit away from silently refusing to advance.
+// A map that draws itself from the roster: one marker per documented stop, a
+// track joining them in strike order, and a cyclone glyph on the current one.
+// The scrubber beside it moves through the stops -- dragging it, pressing the
+// steppers, or pressing a stop by name all write the same index.
 //
-// The map carries nothing the steps don't already say in text, so it's hidden
-// from assistive technology entirely rather than given a description that would
-// duplicate the list beside it.
-// Shown under the map on desktop and after the step list on mobile, where the
-// map is a pinned band with no room beneath it for four lines of citation. One
-// string, rendered in two places and only ever displayed in one -- `hidden`
-// removes the other from the accessibility tree, so this does not read twice.
+// The map is painted imperatively with d3 rather than rendered as JSX, because
+// every element on it is positioned from a projection that depends on the
+// container's measured width. See build() below: it is a plain function so the
+// same pass can run on mount, on resize, on theme change and on index change
+// without four effects disagreeing about what the scene should look like.
 const TRACK_NOTE =
   'The line joins documented impact points; it is not the official track. Dates, categories and ' +
   'tolls come from national meteorological services and UN OCHA, cited in full in the sources.'
@@ -361,23 +349,12 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
             label={`${storm.name}: move between documented impact points`}
           />
 
-          {/* The stop itself, in a box of a fixed size.
-
-              The stops are not the same length -- one storm's fact runs to
-              three lines and another's to twelve -- so a box that grew to fit
-              each one moved the scrubber above it every time the reader
-              dragged. The control has to hold still while it is being used, or
-              the reader is chasing it. So the box is locked and the text
-              scrolls inside it: on a phone to a fixed height, and on the split
-              layout to whatever the column has left after the scrubber, which
-              is why the scrubber is anchored to the top of the column rather
-              than centred with it.
-
-              No aria-live on it, deliberately: the slider
-              above already announces the stop it lands on through its
-              valuetext, and a live region here would say the same country
-              twice on every press -- which is how an accessible control
-              becomes an unusable one. */}
+        {/*
+          The stop itself, in a box of a fixed size. The facts run from three
+          lines to twelve, so a box sized to its content resized on every move
+          of the scrubber and took the control with it -- see .locked-box in
+          styles/story.css. What changes is the words; nothing else moves.
+        */}
           <article className="journey-stop locked-box mt-5 border-l-2 border-accent">
             <div className="locked-scroll pl-5 pr-1">
             <p className="type-eyebrow text-accent">{step.date}</p>

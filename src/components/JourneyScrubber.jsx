@@ -2,24 +2,18 @@ import { useRef, useState } from 'react'
 
 // THE STORM, UNDER THE READER'S THUMB.
 //
-// This replaces a scroll-driven sequence. The old Follow the Storm advanced its
-// map by watching which step of a tall column had crossed a band in the middle
-// of the viewport -- which worked, and which nobody could see was a control.
-// The reader scrolled, something moved, and whether they had caused it was a
-// matter of inference. A track with a handle on it says what it is before it is
-// touched, works the same way on a phone as on a desktop, and can be driven
-// from the keyboard without a scroll container to argue with.
+// This replaced a scroll-driven sequence that advanced the map by watching
+// which step of a tall column had crossed a band in the viewport. It worked,
+// and nobody could see it was a control: the reader scrolled, something moved,
+// and whether they had caused it was a matter of inference.
 //
 // A slider, not a set of buttons, because the thing being chosen is a position
-// along a path. It reports itself as one: role="slider" with min, max, now and
-// -- the part that matters for a screen reader -- valuetext, so it announces
-// "Vanuatu, 6 April 2020" rather than "3".
+// along a path -- and it reports itself as one, with valuetext so a screen
+// reader announces "Vanuatu, 6 April 2020" rather than "3".
 //
 // The stops are discrete on purpose. The roster records documented impact
-// points, not a continuous track, so there is nothing between Solomon Islands
-// on 3 April and Vanuatu on 6 April to interpolate. Dragging snaps to the
-// nearest stop rather than inventing a position the sources do not support --
-// section 4.4 of the brief, and the same rule the whole project runs on.
+// points, not a continuous track, so dragging snaps to the nearest stop rather
+// than inventing a position the sources do not support.
 //
 // Props:
 //   stops -- the selected storm's profile rows, in strike order
@@ -103,11 +97,9 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
       </p>
 
       <div className="flex items-center gap-2">
-      {/* Steppers, because dragging a rail is a fine gesture and not everyone
-          has one available -- a large thumb, a moving bus, a tremor. Same
-          state, same clamp, no drag required. Hidden from screen readers: the
-          slider beside them already exposes exactly this, and announcing three
-          controls for one position is noise. */}
+      {/* Steppers, because dragging a rail is a gesture not everyone has
+          available. Same state, same clamp, no drag required. Hidden from
+          screen readers: the slider beside them already exposes this. */}
       <button
         type="button"
         aria-hidden="true"

@@ -2,21 +2,18 @@
   The interaction layer: the hero's weather, the storm scrubber, the ripple
   chain rail and the ending's four lines.
 
-  One rule governs everything in this file, and it is the same rule
-  animations.css states at length: animate transform and opacity, and nothing
-  else. Those are the two properties a browser can hand to the compositor and
-  run off the main thread. A third of this site's likely audience is on a
-  mid-range Android phone over Pacific mobile data, and an interface that
-  stutters while it explains a disaster is worse than one that is plain.
+  ONE RULE GOVERNS EVERYTHING HERE: animate transform and opacity, and nothing
+  else. Those are the two properties a browser can hand to the compositor. A
+  third of this site's likely audience is on a mid-range Android phone over
+  Pacific mobile data, and an interface that stutters while it explains a
+  disaster is worse than one that is plain.
 
-  The one deliberate exception is the ending's stroke-dashoffset, which cannot
-  be expressed as a transform. It runs once, on four short paths, on a slide the
-  reader reaches at the end -- see the note there.
+  The one exception is the ending's stroke-dashoffset, which cannot be
+  expressed as a transform; it runs once, on four short paths, on the last
+  slide.
 
-  Every animation below has a prefers-reduced-motion form at the bottom of this
-  file, and none of them carries information that is lost when it is switched
-  off: every state these motions decorate is also a colour, a mark, a number or
-  a word.
+  Every animation below has a prefers-reduced-motion form at the bottom of
+  this file, and none carries information that is lost when switched off.
 */
 
 @layer components {
@@ -108,30 +105,19 @@
 
   /*
     LOCKED BOXES
-    ============
 
     A box whose text changes but whose size does not.
 
-    Two places on this site swap one piece of prose for another under the
-    reader's pointer: the storm preview on the timeline and the current stop in
-    Follow the Storm. The source text is not a uniform length -- storm notes run
-    from two lines to four, stop facts from three to twelve -- so a box sized to
-    its content resized on every hover and every drag, and took the rest of the
-    slide with it. The reader was aiming at a control that moved because they
-    had aimed at it.
+    Two places swap one piece of prose for another under the pointer: the
+    storm preview on the timeline and the current stop in Follow the Storm.
+    The source text is not a uniform length, so a box sized to its content
+    resized on every hover and took the rest of the slide with it -- the
+    reader was aiming at a control that moved because they aimed at it.
 
-    So the height is fixed and the text lives inside it. Overflow scrolls rather
-    than clips: nothing is ever cut off silently, which matters here because the
-    thing that would be cut off is a casualty figure or a caveat.
-
-    These boxes are the one place on the site that shows a scrollbar. Everything
-    else hides its own, because the canoe across the top carries progress and a
-    bar appearing on some slides and not others is noise. Here there is nothing
-    else to say the text continues -- and the alternative, a soft fade over the
-    last line, was tried and removed for the reason given at .slide-more: a haze
-    over a caveat obscures the sentence it is advertising. A thin, quiet bar is
-    the smaller intrusion, and it only appears when there is something to
-    scroll.
+    So the height is fixed and the text lives inside it. Overflow scrolls
+    rather than clips: what would be cut off is a casualty figure or a caveat.
+    These are the one place on the site that shows a scrollbar, because there
+    is nothing else here to say the text continues.
   */
   .locked-box {
     position: relative;
@@ -169,25 +155,25 @@
 
   /*
     THE STORM SCRUBBER
-    ==================
 
     A rail, a fill, one tick per documented stop, and a handle. The handle is
     positioned by translating a full-width layer rather than by setting `left`,
-    so the movement is a transform and the browser can composite it: a
-    percentage translateX on a layer as wide as the track resolves against the
-    track's width, which is exactly the arithmetic wanted here.
+    so the movement is a transform the browser can composite.
 
-    touch-action: none is load-bearing. Without it a drag on a phone is claimed
-    by the panel's vertical scroll and the storm never moves.
+    touch-action: none is load-bearing. Without it a drag on a phone is
+    claimed by the panel's vertical scroll and the storm never moves.
   */
   .scrub-track {
     position: relative;
-    /* Inset by half the handle's width. Everything on the rail is positioned
-       from the track's own edges, and the handle and the end ticks are centred
-       on those edges -- so at the first stop the left half of the handle sat
-       outside the track and was clipped by the column's overflow. Insetting the
-       track moves the whole rail in together, which keeps the fill, the ticks
-       and the handle in agreement while giving the ends room to be drawn. */
+    /* flex, and load-bearing. Every child of the track is absolutely
+       positioned, so its intrinsic width is zero -- as a plain flex item
+       between the two steppers it collapsed to nothing and took the rail, the
+       fill and the ticks with it. Only the knob stayed visible, parked at a
+       track edge that was also the track centre. */
+    flex: 1 1 auto;
+    min-width: 0;
+    /* Inset by half the handle's width, so the end ticks and the handle have
+       room to be drawn instead of being clipped by the column's overflow. */
     margin-inline: 12px;
     height: 2.75rem;
     display: flex;
@@ -266,16 +252,10 @@
 
   /*
     THE MOBILE STORM STRIP
-    ======================
 
-    Horizontal, snapping, and sized so the next card always shows past the
-    right edge. That peek is the scroll cue: no gradient, no arrow, no "swipe"
-    instruction -- a card cut off by the edge of the screen is the most
-    literal statement there is that the row continues.
-
-    scroll-padding keeps a snapped card clear of the container's left edge, and
-    the scrollbar is hidden because the strip is six items long and a bar under
-    it would be a second, worse cue than the peek.
+    Horizontal, snapping, sized so the next card always shows past the right
+    edge. That peek is the scroll cue: a card cut off by the edge of the
+    screen is the most literal statement there is that the row continues.
   */
   .storm-strip {
     scroll-padding-left: 0.25rem;
@@ -289,14 +269,12 @@
 
   /*
     THE SCRUBBER, ON A PHONE
-    ========================
 
-    Three changes, all of them about thumbs. The rail's hit area is 56px tall
-    against a 4px visual line -- the target is the band, not the line, which is
-    the difference between a control that works while walking and one that
-    needs a mouse. The handle is 28px. And there are two steppers beside it,
-    because a drag is a gesture some readers cannot make reliably and every
-    gesture on this site has to have a button that does the same thing.
+    Three changes, all about thumbs. The rail's hit area is 56px tall against
+    a 4px visual line -- the target is the band, not the line. The handle is
+    28px. And two steppers sit beside it, because a drag is a gesture some
+    readers cannot make reliably and every gesture here has a button that does
+    the same thing.
   */
   .scrub-readout {
     margin-bottom: 0.5rem;
@@ -437,13 +415,11 @@
 
   /*
     THE PHONE ACCORDION
-    ===================
 
     The same links, with the open one carrying its chart. Rows are taller than
-    the desktop chips (they are the primary control here, not a rail above a
-    grid), the caret says which way the row will go, and the connector between
-    rows runs down the left so the sequence still reads as a chain rather than
-    as five unrelated drawers.
+    the desktop chips because they are the primary control here, the caret
+    says which way the row will go, and the connector runs down the left so
+    the sequence still reads as a chain rather than five unrelated drawers.
   */
   .chain-accordion .chain-link {
     min-height: 52px;
