@@ -17,9 +17,9 @@ import { useScrollRoot } from './useScrollRoot.jsx'
 // every entrance. Anything without IntersectionObserver -- or without a DOM at
 // all, which is how the server-rendered check runs -- reports visible
 // immediately rather than rendering a page of permanently hidden cards.
-// `root` defaults to whatever ScrollRootProvider is above this component --
-// the viewport in document layout, the panel's own scroll box in slideshow
-// layout. Pass it explicitly to override.
+// `root` defaults to whatever ScrollRootProvider is above this component: the
+// panel's own scroll box inside the deck, the viewport outside it. Pass it
+// explicitly to override.
 export function useInView({
   rootMargin = '0px 0px -10% 0px',
   threshold = 0.12,

@@ -2,30 +2,23 @@ import { useLayoutEffect, useRef } from 'react'
 import ScrollProgress from './ScrollProgress.jsx'
 import SectionNav from './SectionNav.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
-import DeckStatus from './DeckStatus.jsx'
+import StoryStateBar from './StoryStateBar.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'
 
 // Persistent site header: wordmark, thesis, controls, scroll progress. Fixed
 // from the top, since the progress bar has to be visible there.
 //
-// A plain <header> here (not nested inside <main>) gets the implicit "banner"
-// landmark automatically, which is the correct role for persistent site-level
-// chrome -- no explicit role attribute needed. The title is deliberately not a
-// heading element: Hero already carries the page's one real <h1>, and a second
-// would break the single-h1 document outline screen reader users rely on.
-//
-// Ripple is a single page, so there is no site-level nav row here -- the
-// section menu on the right is the only navigation, and it moves within this
-// one page. That's the one structural difference from the multi-hazard build
-// this header was ported from.
+// A plain <header> (not nested inside <main>) gets the implicit "banner"
+// landmark automatically. The title is deliberately not a heading element:
+// Hero carries the page's one real <h1>, and a second would break the single-h1
+// outline screen reader users rely on.
 //
 // Props:
-//   onHeightChange -- (px: number) => void, called with the header's actual
-//     rendered height whenever it changes, so App.jsx can give <main> matching
-//     padding-top and keep the in-page anchor offset current. Measured rather
-//     than hardcoded so it can't drift out of sync with a future copy or
-//     font-size change.
+//   onHeightChange -- (px) => void, called with the header's actual rendered
+//     height whenever it changes, so App.jsx can give <main> matching padding
+//     and keep --header-height current. Measured rather than hardcoded so it
+//     cannot drift out of sync with a copy or font-size change.
 export default function Header({
   onHeightChange,
   availableIds,
@@ -34,6 +27,7 @@ export default function Header({
   storm,
   selectedNations,
   onClearNations,
+  onReset,
 }) {
   const headerRef = useRef(null)
 
@@ -65,17 +59,26 @@ export default function Header({
           every scroll. */}
       <BackgroundPattern backdrop={HEADER_BACKDROP} />
 
-      <div className="relative mx-auto max-w-5xl px-6 py-3 md:py-3.5">
+      {/* Tighter on a phone, and tighter again on a short laptop. This bar is
+          on screen for all fourteen sections, so every millimetre it takes is
+          taken from the content fourteen times -- and on a 768px-tall window it
+          was taking about 135 of them. Nothing is removed to buy that back,
+          only set smaller; the measured height feeds --header-height through
+          the ResizeObserver above. */}
+      <div className="relative mx-auto max-w-5xl px-4 py-2 sm:px-6 sm:py-3 md:py-3.5 short:py-2">
         {/* Grouped right so they read as controls, not part of the wordmark. */}
         <div className="flex items-start justify-between gap-3 md:items-baseline">
           <div className="flex flex-col gap-0.5 md:flex-row md:items-baseline md:gap-3">
             <a
               href="#top"
-              className="rounded font-serif text-2xl font-semibold leading-tight tracking-tight text-ink hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink md:text-4xl"
+              className="rounded font-serif text-xl font-semibold leading-tight tracking-tight text-ink hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:text-2xl md:text-4xl short:text-3xl"
             >
               Ripple
             </a>
-            <p className="font-serif text-sm italic leading-snug text-ink/70 md:border-l md:border-ink/15 md:pl-3 md:text-lg">
+            {/* Hidden on phones, where it was a second line of italic serif
+                repeating on every section for no gain. Hero carries it there
+                instead, at the top of the piece. */}
+            <p className="hidden font-serif text-sm italic leading-snug text-ink/70 sm:block md:border-l md:border-ink/15 md:pl-3 md:text-lg short:text-base">
               Climate doesn't create inequality. It reveals it.
             </p>
           </div>
@@ -84,11 +87,14 @@ export default function Header({
             <ThemeToggle />
           </div>
         </div>
-        {/* The map is on one slide and the charts it drives are on the next
-            three, so the reader can no longer see a pick and its consequence at
-            the same time. This carries the current selection across every
-            slide, and lets it be cleared without paging back to the map. */}
-        <DeckStatus storm={storm} selectedNations={selectedNations} onClearNations={onClearNations} />
+        {/* The reader's current selection, carried across every slide. See
+            StoryStateBar.jsx -- it never navigates. */}
+        <StoryStateBar
+          storm={storm}
+          selectedNations={selectedNations}
+          onClearNations={onClearNations}
+          onReset={onReset}
+        />
       </div>
       {/* -mt pulls the bar up so the waterline lands on the header's edge
           rather than below it; overflow-visible on the svg lets the canoe and

@@ -209,14 +209,44 @@ unreported stop on this roster is the secondary nation in its storm.
 ## Current Status
 
 Built, deployed, and through several rounds of hardening: light/dark theming,
-real-pixel chart rendering, scroll-linked motion that respects
-`prefers-reduced-motion`, per-metric attribution caveats printed under the charts
-rather than buried in a methodology note, cross-chart nation highlighting, and
-screen-reader data tables under every visualization.
+real-pixel chart rendering, motion that respects `prefers-reduced-motion`,
+per-metric attribution caveats printed under the charts rather than buried in a
+methodology note, cross-chart nation highlighting, and screen-reader data tables
+under every visualization.
 
 The multi-storm restructure is complete — timeline, per-storm ripple chain,
 storm-aware map, exclusions section, and full profile and journey records for
 all six storms.
+
+The experience layer is a second pass over the same data and the same argument,
+turning a deck that was read into one that is driven:
+
+- **One state, held once** (`hooks/useStory.js`) — storm, country pair, reading
+  mode, position along the storm's path, open ripple link. Sections receive it
+  as props and keep no copies, so a stale chart is impossible rather than
+  unlikely.
+- **Story and Explore modes** — the same sections and the same data. Story holds
+  the reader at a section until they have answered it and carries them onward
+  when they choose a storm; Explore lifts the country hold and lets them
+  navigate freely.
+- **A persistent story-state bar** in the header — what is selected, how to
+  change it, and, before anything is, which choice the story is waiting on.
+- **An interactive opening** — the four nations are nodes that answer with their
+  own share of the roster, counted from the same list the headline counts.
+- **Follow the Storm is scrubbed, not scrolled** — a real slider with pointer
+  drag, arrow/Home/End keys and per-stop buttons, snapping to documented impact
+  points rather than interpolating between them. This replaced an
+  IntersectionObserver reading a tall column, and with it the two CSS
+  percentages that manufactured the scroll travel that mechanism needed.
+- **The ripple chain is a chain** — five links in the order the damage travels;
+  holding one rings its chart and lets the others recede, opening one shows what
+  that record covers, how many years were actually reported, and how many of
+  those are reported zeros rather than gaps.
+- **A question before the conclusion, and a conclusion** — an optional
+  interpretive interaction that points at existing evidence without scoring the
+  answer, then a synthesis with replay controls back into the loop.
+
+No dataset, storm inclusion rule, caveat or citation was changed in this pass.
 
 Remaining before submission: replace the deployment-domain placeholders in
 `index.html` with the production URL, and file the competition submission form

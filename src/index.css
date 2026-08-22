@@ -3,19 +3,23 @@
   which is load-bearing.
 
   The @import statements come first because postcss-import requires it, and it
-  costs nothing: everything in those four files sits inside an @layer, and
-  Tailwind hoists layered rules into the directives below regardless of where
-  they were written.
+  costs nothing: everything in those files sits inside an @layer, and Tailwind
+  hoists layered rules into the directives below wherever they were written.
 
-  What cannot move is unlayered CSS. It keeps its source position, so the two
-  blocks at the bottom of this file have to stay after the directives -- above
-  them, preflight would win.
+  What cannot move is unlayered CSS. It keeps its source position, so the
+  blocks at the bottom of this file have to stay after the directives --
+  above them, preflight would win.
 */
 
 @import './styles/base.css';
 @import './styles/typography.css';
 @import './styles/animations.css';
 @import './styles/slideshow.css';
+@import './styles/story.css';
+/* Last, deliberately. Several rules in here restate a selector that already
+   appears in slideshow.css at the same specificity, so source order is what
+   decides -- and the laptop layer has to be the one that wins. */
+@import './styles/compact.css';
 
 @tailwind base;
 @tailwind components;
@@ -23,14 +27,8 @@
 
 /*
   View Transitions. The default root cross-fade is what a page-to-page
-  navigation should look like, so it's left alone.
-
-  The theme toggle wants the opposite: the outgoing page must sit still and
-  fully opaque underneath while the new theme is wiped over it by the expanding
-  circle in ThemeToggle.jsx. Cross-fading both layers at once would wash the
-  whole page out to grey halfway through. Scoped to the sweep class so it can't
-  affect navigation, and the z-index puts the new theme on top -- without it
-  the circle would be clipping a layer that's already behind.
+  navigation should look like, so it is left alone. The theme toggle wants the
+  opposite -- see the matching note in base.css.
 */
 html.theme-sweep::view-transition-old(root) {
   animation: none;
@@ -93,7 +91,7 @@ html.theme-sweep::view-transition-new(root) {
   }
 
   /*
-    The press invitation on the timeline chips can't simply be switched off:
+    The press invitation on the timeline chips cannot simply be switched off:
     the ring is the affordance, and at rest it is fully transparent, so
     `animation: none` alone would delete the signal rather than calm it. Held
     still at the opacity it would otherwise pass through instead.

@@ -15,6 +15,8 @@ export const PAGE_SECTIONS = [
   { id: 'divergence', label: 'Where They Part Ways' },
   { id: 'context', label: 'Capacity & Context' },
   { id: 'compare', label: 'Compare Recovery' },
+  { id: 'detective', label: 'What Shaped the Difference' },
+  { id: 'conclusion', label: 'What It Adds Up To' },
   { id: 'method', label: 'How This Was Made' },
   { id: 'sources', label: 'Sources' },
 ]

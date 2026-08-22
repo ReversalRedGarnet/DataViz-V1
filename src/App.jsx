@@ -11,15 +11,19 @@ import ContextPanel from './components/ContextPanel.jsx'
 import StormTimeline from './components/StormTimeline.jsx'
 import MethodPanel from './components/MethodPanel.jsx'
 import ComparisonView from './components/ComparisonView.jsx'
+import DataDetective from './components/DataDetective.jsx'
+import StoryConclusion from './components/StoryConclusion.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
 import { useDeck } from './hooks/useDeck.js'
 import { PAGE_SECTIONS } from './content/pageSections.js'
 import { ThemeProvider } from './hooks/useTheme.jsx'
-import { useSelection, selectionAnnouncement } from './hooks/useSelection.js'
+import { useStory } from './hooks/useStory.js'
+import { selectionAnnouncement } from './hooks/useSelection.js'
 import { useMetricData } from './hooks/useMetricData.js'
 import { METRICS } from './utils/metrics.js'
-import { STORMS, stormById } from './content/storms.js'
+import { NATIONS } from './components/MapView.jsx'
+import { STORMS } from './content/storms.js'
 
 const DATA_SOURCES = [
   {
@@ -54,24 +58,23 @@ const DATA_SOURCES = [
 ]
 
 // The page, top to bottom. PageSections owns the shape: it gives each entry its
-// anchor id and its place in the entrance stagger, so the two can't drift apart
-// the way they could when App kept parallel arrays and destructured them
-// positionally.
+// anchor id and its place in the entrance stagger, so the two can't drift the
+// way they could when App kept parallel arrays and destructured positionally.
 //
-// There is no per-section `tone` here any more. It existed to colour the wave
-// divider between two sections, and once that divider was removed the field was
-// read by nothing while still looking like the colour knob -- so a section's
-// background is now set where it is painted, in the component's own <Section>.
 // Every id here must also appear in content/pageSections.js, which is what the
-// header's jump-to menu links to.
-// The first two sections are always present; the rest appear once a storm is
-// chosen. Split into two lists rather than filtered from one, so where the
-// story opens out is a structural fact of this file rather than an index
-// somebody has to keep in step.
+// header's jump-to menu links to. The first two sections are always present;
+// the rest appear once a storm is chosen -- split into two lists rather than
+// filtered from one, so where the story opens out is a structural fact of this
+// file rather than an index somebody has to keep in step.
 const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label]))
 
-function pageSections(data, selection, storm, onSelectStorm) {
-  const { selected, toggle, clear } = selection
+// The comparison's pickers offer every in-scope nation, not only the two
+// currently chosen, so the pair can be changed from the section that asks the
+// question rather than from the map four slides back.
+const NATION_NAMES = NATIONS.map((n) => n.name)
+
+function pageSections(data, story, onSelectStorm) {
+  const { storm, selected } = story
 
   return [
     { id: 'top', element: <Hero /> },
@@ -81,19 +84,26 @@ function pageSections(data, selection, storm, onSelectStorm) {
       // section after this one is about one storm, so paging past without one
       // chosen would walk the reader through nine slides with nothing in them.
       //
-      // This replaces a dedicated gate slide that used to sit here -- a card
-      // reading "Pick a storm to carry on" that the reader reached by pressing
-      // Next. That was a slide spent asking for a click the reader was already
-      // looking at, and holding the deck here says the same thing without
-      // spending a slide on it. The refusal lands on the control the reader
-      // actually pressed, which is also where the answer is.
+      // It is also a structural fact rather than only a narrative one: with no
+      // storm chosen the later sections do not exist, so there is nothing to
+      // walk forward into until this question is answered.
       requires: storm ? null : 'Select a cyclone',
+      // What the opening slide's Next button says. The section is still called
+      // "How Often, and to Whom" everywhere it is a destination -- in the menu,
+      // in the progress readout -- but the control that walks a reader into it
+      // asks them for the one thing it wants.
+      cue: 'Choose a storm',
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
     ...(!storm
       ? []
       : [
-    { id: 'storm-journey', element: <StormJourney storm={storm} /> },
+    {
+      id: 'storm-journey',
+      element: (
+        <StormJourney storm={storm} index={story.journeyIndex} onIndex={story.setStop} />
+      ),
+    },
     { id: 'storm-profile', element: <StormProfile storm={storm} /> },
     { id: 'big-picture', element: <BigPicture data={data} storm={storm} /> },
     {
@@ -102,18 +112,56 @@ function pageSections(data, selection, storm, onSelectStorm) {
       // chain, the comparison and the divergence panels all read it. Paging
       // past without a country picked would show three empty states in a row
       // and read as a broken site rather than an unanswered question.
+      //
       requires: selected.length === 0 ? 'Pick a country on the map' : null,
-      element: <MapView storm={storm} selected={selected} onToggle={toggle} onClear={clear} />,
+      element: (
+        <MapView
+          storm={storm}
+          selected={selected}
+          onToggle={story.toggleNation}
+          onClear={story.clearNations}
+        />
+      ),
     },
     {
       id: 'ripple-chain',
-      element: <RippleChain data={data} storm={storm} selectedNations={selected} />,
+      element: (
+        <RippleChain
+          data={data}
+          storm={storm}
+          selectedNations={selected}
+          activeMetric={story.activeMetric}
+          onActiveMetric={story.setActiveMetric}
+        />
+      ),
     },
     { id: 'divergence', element: <DivergenceView data={data} storm={storm} /> },
     { id: 'context', element: <ContextPanel data={data} /> },
     {
       id: 'compare',
-      element: <ComparisonView data={data} storm={storm} selectedNations={selected} />,
+      element: (
+        <ComparisonView
+          data={data}
+          storm={storm}
+          selectedNations={selected}
+          nations={NATION_NAMES}
+          onSetNationAt={story.setNationAt}
+          onSwapNations={story.swapNations}
+        />
+      ),
+    },
+    // The question, then the answer. Both sit after the comparison and before
+    // the method: the reader has now seen everything the site can show, which
+    // is the only honest moment to ask them what they make of it.
+    {
+      id: 'detective',
+      element: <DataDetective storm={storm} />,
+    },
+    {
+      id: 'conclusion',
+      element: (
+        <StoryConclusion storm={storm} selectedNations={selected} onReset={story.reset} />
+      ),
     },
     // Method sits second to last, immediately before the sources it explains.
     // It began as an exclusions-only slide in third place, where it broke off
@@ -126,12 +174,11 @@ function pageSections(data, selection, storm, onSelectStorm) {
 
 function AppShell() {
   const data = useMetricData(METRICS)
-  const selection = useSelection()
-  // Nothing is selected on load, deliberately: the timeline is the argument and
-  // a storm is the evidence for it, so the reader chooses which piece to open
-  // rather than landing mid-way through one.
-  const [stormId, setStormId] = useState(null)
-  const storm = stormById(stormId)
+  // One hook, one source of truth: the storm, the country pair, the reading
+  // mode, the position along the storm's path and the open ripple link. Every
+  // section below is a view of these; none of them keeps a second copy.
+  const story = useStory()
+  const { storm } = story
   const [headerHeight, setHeaderHeight] = useState(0)
 
   // Progress through the whole piece: which slide, plus how far down that
@@ -153,19 +200,32 @@ function AppShell() {
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
   }, [headerHeight])
 
-  // Choosing a storm appends the storm sections after the timeline and lifts
-  // the hold on it, so the reader carries on from the slide they were already
-  // on rather than being moved for having made a choice. Declared above
-  // `sections` because it is read while building it.
-  const selectStorm = useCallback((id) => {
-    setStormId(id)
-    setPanelFraction(0)
-  }, [])
-
-  const sections = pageSections(data, selection, storm, selectStorm)
-  const { active, direction, go, goToId } = useDeck(sections)
+  // ONE WAY FORWARD.
+  //
+  // The only thing that moves the reader between slides is the footer's Back
+  // and Next. Nothing a reader does to the content navigates: pressing a storm
+  // selects a storm, and the sections it unlocks appear behind the Next button
+  // for the reader to walk into when they are ready.
+  //
+  // The alternative -- a press that both chooses and travels -- means the
+  // reader cannot look at a second storm without being taken somewhere, and a
+  // reader who has been moved without asking stops pressing things to find out
+  // what they do.
+  //
+  // The header's section menu is the one other way to jump, and it stays: it is
+  // a list of destinations that does nothing but go to them.
+  const sections = pageSections(data, story, story.selectStorm)
+  const deck = useDeck(sections)
+  const { active, direction, go, goToId } = deck
 
   const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
+
+  // Reset the panel's own scroll fraction whenever the deck moves, so the
+  // progress readout does not carry the previous slide's position into the
+  // next one before its first scroll event arrives.
+  useEffect(() => {
+    setPanelFraction(0)
+  }, [active])
 
   return (
     <>
@@ -184,15 +244,20 @@ function AppShell() {
         progress={deckProgress}
         onNavigate={goToId}
         storm={storm}
-        selectedNations={selection.selected}
-        onClearNations={selection.clear}
+        selectedNations={story.selected}
+        onClearNations={story.clearNations}
+        onReset={story.reset}
       />
 
-      {/* The charts and comparison view below update silently otherwise. */}
+      {/* The charts and comparison view below update silently otherwise.
+          Deliberately only the two choices the rest of the page is built on:
+          the scrubber announces its own position through the slider's
+          valuetext, and routing that through here as well would say the same
+          country twice on every arrow press. */}
       <div aria-live="polite" className="sr-only">
         {storm
           ? `${storm.name} selected. The rest of the story is now available below. ${selectionAnnouncement(
-              selection.selected,
+              story.selected,
               'Showing its ripple chain.'
             )}`
           : 'Pick a storm from the timeline to continue.'}
@@ -205,6 +270,7 @@ function AppShell() {
           direction={direction}
           onNavigate={go}
           onProgress={onProgress}
+          storyLength={PAGE_SECTIONS.length}
         />
       </main>
     </>
