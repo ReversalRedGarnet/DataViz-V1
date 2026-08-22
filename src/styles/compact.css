@@ -1,0 +1,157 @@
+/*
+  THE COMPACT-LAPTOP LAYER
+  ========================
+
+  One deliberate responsive layer for laptop-sized windows -- a Surface Pro, a
+  1366x768 or 1280x800 panel -- rather than a scattering of per-component
+  pixel fixes. Read this file before adding a rule anywhere else for a laptop
+  bug: it is meant to be the only place these live.
+
+  WHAT THIS LAYER IS *NOT* DOING, AND WHY.
+
+  Two things a compact-laptop pass would normally have to fix are already
+  correct in this build, and adding rules for them would have been fixing
+  something that is not broken:
+
+  1. The header does not cover section headings. The height is measured by
+     ResizeObserver in Header.jsx, published as --header-height, and consumed
+     in exactly two places -- <main>'s padding-top in App.jsx and
+     .slide-viewport's `height: calc(100dvh - var(--header-height))`. The
+     panel therefore starts below the header by construction, at every
+     breakpoint, and shrinking the header (as this pass does) is picked up
+     with no further arithmetic anywhere.
+
+  2. The page does not scroll horizontally. The document itself never scrolls
+     at all -- html.is-slides locks it -- the panels page sideways under
+     overflow:hidden, and .slide-scroll carries an explicit overflow-x:hidden.
+     Measured across all fourteen sections at 1280x800, 1366x768, 1440x900,
+     1368x912 and 1920x1080: page overflow is zero everywhere.
+
+  WHAT IS ACTUALLY WRONG AT THIS SIZE IS HEIGHT, AND IT IS HEIGHT RATHER THAN
+  WIDTH.
+
+  The same measurement pass, on vertical overflow per panel: 1440x900 fits
+  almost everything, and 1366x768 -- 74px narrower and 132px shorter -- puts
+  the timeline, the map and the storm journey over their panel. The variable
+  that moved is not the one the width band names.
+
+  So the density rules below are keyed on `max-height`, which is the thing
+  they are actually responding to, and the width band from the specification
+  is kept for the rules that genuinely are about width. A rule keyed only on
+  width would tighten a 1280x1024 window that has room to spare, and leave a
+  1600x768 one exactly as broken as it started.
+
+  960px is the ceiling because the Surface Pro this pass was written against
+  reports a 1368x912 CSS viewport, and a threshold that excluded the target
+  device would have been a very quiet way to ship nothing. 1920x1080 stays
+  above it and is untouched.
+
+  The min-width guard on the height query is what keeps all of this away from
+  a phone in landscape, which is short by definition and has its own layout.
+*/
+
+@layer components {
+  /*
+    SHORT LAPTOP WINDOWS
+    ====================
+
+    Everything here buys back vertical space, and the ranking is deliberate:
+    padding first, then the one object with no natural ceiling (the map), and
+    nothing at all from the type scale. Shrinking body text to fit more of it
+    on screen is the trade this layer refuses to make -- a laptop reader is
+    not further from the screen than a desktop one.
+  */
+  @media (min-width: 1024px) and (max-height: 960px) {
+    /*
+      The panel's own frame. 1.75rem/3rem is right on a tall monitor; on a
+      768px panel it is a tenth of the reading area spent on air at the two
+      edges the reader is least looking at.
+
+      The bottom stays looser than the top, for the reason the base rule in
+      slideshow.css gives: a scrolling panel ends where its last line ends,
+      and a caveat pressed against the footer reads as a slide that was cut
+      off rather than one that finished.
+    */
+    .slide-viewport .slide-scroll > * {
+      padding-top: 1.125rem;
+      padding-bottom: 2.5rem;
+    }
+
+    /*
+      The map is the only object on the site with no natural height -- it is
+      sized from its own width, and 52vh of a 900px window is a comfortable
+      picture where 52vh of a 768px one is 70% of the panel. What got pushed
+      off the bottom was the summary box and the country legend: the picture
+      kept the screen and the controls that operate it went below the fold.
+
+      38vh is the largest value at which the map, its summary and its legend
+      all sit above the footer at 1366x768. It is a clamp on the picture, not
+      a switch to the phone layout -- the map stays full-width, stays
+      interactive, and every marker stays where it was.
+    */
+    .slide-viewport .map-frame svg {
+      max-height: 38vh;
+    }
+
+    /*
+      Follow the Storm is height-locked to one panel and hands its overflow to
+      the step column, so anything spent above the split is taken directly out
+      of the map and the stop text. Both of those are the section.
+    */
+    .slide-viewport .journey-split {
+      margin-top: 0.875rem;
+    }
+  }
+
+  /*
+    THE COMPACT-LAPTOP WIDTH BAND
+    =============================
+
+    1100-1399px. Wide enough that every two-column composition on the site
+    still works -- the journey's map and detail, the divergence pair, the
+    comparison's two countries -- and narrow enough that the gaps between
+    those columns are worth more as column than as gap.
+
+    So: tighten the gutter, keep both columns. Collapsing to one column here
+    would be applying the phone redesign to a window that is 1300px wide.
+  */
+  @media (min-width: 1100px) and (max-width: 1399px) {
+    /*
+      md:gap-10 is 40px of gutter between a map and a text column that both
+      want the width. Halved, which goes almost entirely to the map: it is
+      the object whose readability falls off fastest as it narrows, because
+      four island nations spread across 30 degrees of longitude do not get
+      any closer together.
+    */
+    .slide-viewport .journey-split {
+      column-gap: 1.25rem;
+    }
+  }
+}
+
+/*
+  GLOBAL CONTAINMENT
+  ==================
+
+  Not a compact-laptop rule -- the standing guarantee that makes the
+  page-level containment described at the top of this file true at any size,
+  and the place to look when a new component starts widening the page.
+
+  In @layer base rather than written bare, so Tailwind puts it after preflight
+  instead of leaving it to source position at the top of the import list,
+  where preflight would land on top of it. (See the note in index.css about
+  what unlayered CSS does and does not survive.)
+
+  Preflight already gives `img, video { max-width: 100% }` and a global
+  border-box. What it does not cover is <svg> and <canvas>, and this site is
+  mostly those: eleven d3 charts, a Pacific basemap and a storm track. Each
+  one measures its container and draws to fit, so none of them needs this
+  today -- which is exactly the point. It costs nothing now and it is what
+  stops the twelfth chart from being a layout bug.
+*/
+@layer base {
+  svg,
+  canvas {
+    max-width: 100%;
+  }
+}

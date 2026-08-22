@@ -151,7 +151,7 @@ function StormPreview({ storm, selected }) {
     // under the reader's hand. The box is now a fixed size that the text lives
     // inside -- what changes is the words, and nothing else on the slide moves
     // when they do. Anything taller than the box scrolls within it.
-    <div className="storm-preview locked-box mt-4 h-[11rem] rounded-xl border border-ink/10 bg-surface/60 sm:h-[9.5rem]">
+    <div className="storm-preview locked-box mt-4 h-[11rem] rounded-xl border border-ink/10 bg-surface/60 sm:h-[9.5rem] short:mt-3 short:h-[8rem]">
       <div className="locked-scroll p-4">
       {storm ? (
         <>
@@ -225,13 +225,13 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
           it becomes a stop on the tab order that announces nothing -- so each
           carries its own full sentence and the decorative split between the
           number and its label is hidden from assistive tech. */}
-      <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 short:mt-4 short:gap-2.5">
         {counts.map(({ nation, count }) => (
           <li
             key={nation}
             tabIndex={0}
             aria-label={`${count} severe cyclones struck ${nation} between ${ROSTER_START} and ${ROSTER_END}.`}
-            className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
+            className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 short:p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
             {...highlightHandlers(nation, setHighlight)}
           >
             <p aria-hidden="true" className="type-figure text-2xl leading-none">
@@ -246,7 +246,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
 
       {/* A UI label, not a sentence: the chips are the only control on the
           slide and the ring alone can't say what pressing one is for. */}
-      <p className="type-eyebrow mt-7 flex items-center gap-2 text-accent">
+      <p className="type-eyebrow mt-7 flex items-center gap-2 text-accent short:mt-5">
         <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
         Select a cyclone
       </p>
@@ -262,7 +262,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       */}
       <ol
         aria-label={axisLabel}
-        className="mt-3 hidden lg:grid"
+        className="mt-3 hidden lg:grid short:mt-2"
         style={{ gridTemplateColumns: `repeat(${YEARS.length}, minmax(0, 1fr))` }}
       >
         {YEARS.map((year) => {

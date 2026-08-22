@@ -17,6 +17,10 @@
 @import './styles/animations.css';
 @import './styles/slideshow.css';
 @import './styles/story.css';
+/* Last, deliberately. Several rules in here restate a selector that already
+   appears in slideshow.css at the same specificity, so source order is what
+   decides -- and the laptop layer has to be the one that wins. */
+@import './styles/compact.css';
 
 @tailwind base;
 @tailwind components;

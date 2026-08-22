@@ -88,7 +88,7 @@ export default function Hero({ style }) {
       {/* The four nations, as the thing to touch first. Buttons, not labels:
           they are pressable, they say so, and they are in the tab order in the
           same order the map draws them. */}
-      <ul className="relative mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mt-8">
+      <ul className="relative mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mt-8 short:mt-5">
         {NATIONS.map((nation) => {
           const isActive = active === nation.name
           return (
@@ -124,7 +124,7 @@ export default function Hero({ style }) {
           Space is reserved for the sentence below, so lighting a nation moves
           nothing else on the slide. A hero that reflows under the pointer is a
           hero the reader stops pointing at. */}
-      <div className="relative mx-auto mt-5 max-w-md sm:mt-6">
+      <div className="relative mx-auto mt-5 max-w-md sm:mt-6 short:mt-4">
         <ul className="flex items-end justify-center gap-3" aria-hidden="true">
           {STORMS.map((storm) => {
             const lit = active ? storm.nations.includes(active) : null
@@ -147,7 +147,7 @@ export default function Hero({ style }) {
           })}
         </ul>
 
-        <p className="mt-4 min-h-[3.25rem] text-sm leading-snug opacity-80">
+        <p className="mt-4 min-h-[3.25rem] text-sm leading-snug opacity-80 short:mt-3 short:min-h-[2.5rem]">
           {active ? (
             <>
               <span className="font-semibold">{active}</span> was in the path of{' '}

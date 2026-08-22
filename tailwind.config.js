@@ -12,6 +12,29 @@ export default {
 
   theme: {
     extend: {
+      // TWO NEW BREAKPOINTS, AND THEY ARE NOT THE SAME QUESTION.
+      //
+      // `compact` is the width band the compact-laptop pass is written
+      // against: wide enough for every two-column layout the desktop uses,
+      // narrow enough that those columns need their gaps tightened rather
+      // than collapsed. Appended after the defaults, so it wins over `lg`
+      // and `xl` in the generated output the way a later breakpoint should.
+      //
+      // `short` is the one that actually carries this pass. Measured across
+      // the whole deck, the thing that separates a comfortable laptop from a
+      // cramped one is height, not width: at 1440x900 every slide fits, and
+      // at 1366x768 -- barely narrower -- the timeline, the map and the
+      // journey all overflow. A width-only rule would tighten a 1280x1024
+      // window that has room to spare and leave a 1600x768 one broken.
+      //
+      // min-width guard on `short` so none of it can reach a phone in
+      // landscape, which is short by definition and already has its own
+      // layout.
+      screens: {
+        compact: { min: '1100px', max: '1399px' },
+        short: { raw: '(min-width: 1024px) and (max-height: 960px)' },
+      },
+
       // Headings and the wordmark only; body, UI and data stay on the system
       // sans Tailwind's preflight already sets. An editorial serif is what
       // separates a data story from a dashboard, and one face used with

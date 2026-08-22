@@ -66,16 +66,24 @@ export default function Header({
           every scroll. */}
       <BackgroundPattern backdrop={HEADER_BACKDROP} />
 
-      {/* Tighter on a phone. This bar is on screen for all fourteen sections,
-          so every millimetre it takes is taken from the content fourteen
-          times. */}
-      <div className="relative mx-auto max-w-5xl px-4 py-2 sm:px-6 sm:py-3 md:py-3.5">
+      {/* Tighter on a phone, and tighter again on a short laptop. This bar is
+          on screen for all fourteen sections, so every millimetre it takes is
+          taken from the content fourteen times -- and on a 768px-tall window
+          it was taking about 135 of them, which is a fifth of the panel
+          underneath it.
+
+          Nothing is removed to buy that back: the wordmark, the thesis and the
+          whole selection strip are all still here, only set smaller. The
+          measured height feeds --header-height through the ResizeObserver
+          below, so the panel resizes itself to match without anything else in
+          the codebase being told. */}
+      <div className="relative mx-auto max-w-5xl px-4 py-2 sm:px-6 sm:py-3 md:py-3.5 short:py-2">
         {/* Grouped right so they read as controls, not part of the wordmark. */}
         <div className="flex items-start justify-between gap-3 md:items-baseline">
           <div className="flex flex-col gap-0.5 md:flex-row md:items-baseline md:gap-3">
             <a
               href="#top"
-              className="rounded font-serif text-xl font-semibold leading-tight tracking-tight text-ink hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:text-2xl md:text-4xl"
+              className="rounded font-serif text-xl font-semibold leading-tight tracking-tight text-ink hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:text-2xl md:text-4xl short:text-3xl"
             >
               Ripple
             </a>
@@ -84,7 +92,7 @@ export default function Header({
                 Hero carries it on mobile, at the top of the piece, which is
                 where a thesis statement belongs and where there is room to
                 read it. */}
-            <p className="hidden font-serif text-sm italic leading-snug text-ink/70 sm:block md:border-l md:border-ink/15 md:pl-3 md:text-lg">
+            <p className="hidden font-serif text-sm italic leading-snug text-ink/70 sm:block md:border-l md:border-ink/15 md:pl-3 md:text-lg short:text-base">
               Climate doesn't create inequality. It reveals it.
             </p>
           </div>
