@@ -281,6 +281,7 @@ function AppShell() {
           direction={direction}
           onNavigate={go}
           onProgress={onProgress}
+          storyLength={PAGE_SECTIONS.length}
         />
       </main>
     </>

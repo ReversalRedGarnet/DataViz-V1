@@ -45,7 +45,14 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 // that back by falling to start alignment the moment content would be clipped.
 const OVERFLOW_SLACK = 24
 
-export default function PageSections({ sections, active, direction, onNavigate, onProgress }) {
+export default function PageSections({
+  sections,
+  active,
+  direction,
+  onNavigate,
+  onProgress,
+  storyLength,
+}) {
   // Whether the panel on stage has more below the fold. The document scrollbar
   // is hidden site-wide and the panels hide theirs, so without this nothing on
   // screen says a slide continues past its bottom edge -- and most do.
@@ -60,7 +67,14 @@ export default function PageSections({ sections, active, direction, onNavigate, 
               key={section.id}
               section={section}
               index={i}
-              total={sections.length}
+              // The whole story's length, not the number of slides currently
+              // mounted. Before a storm is picked only two sections exist, so
+              // the footer read "1 / 2" on the opening screen -- which told a
+              // reader arriving at a fourteen-section piece that it was two
+              // pages long, and then appeared to grow under them. The position
+              // is the same number either way, because the sections that come
+              // and go all come after the ones that do not.
+              total={storyLength ?? sections.length}
               isActive={i === active}
               // `cue` over `label` when a section has one. The menu needs a
               // name for a place ("How Often, and to Whom"); the button that
@@ -80,8 +94,13 @@ export default function PageSections({ sections, active, direction, onNavigate, 
         {/* Outside the track, so it holds still while a panel scrolls beneath
             it. aria-hidden because a screen reader is already walking the
             panel's content directly. */}
+        {/* Reduced to a mark. It used to say "More in this section", which read
+            as a second way forward competing with the footer's Next -- two
+            progression mechanisms on a screen small enough that the reader can
+            only see one of them at a time. The footer is the way through the
+            piece; this only says the current section has not finished yet, and
+            it says it without words that sound like navigation. */}
         <div className={more ? 'slide-more is-visible' : 'slide-more'} aria-hidden="true">
-          <span className="slide-more-label">More in this section</span>
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
             <path
               d="M6 9l6 6 6-6"
@@ -285,7 +304,28 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
   return (
     <div className="slide-footer relative bg-sand shadow-[0_-1px_2px_0_rgb(0_0_0/0.05)]">
       <BackgroundPattern backdrop={HEADER_BACKDROP} />
-      <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2.5 sm:px-8">
+      {/* On a phone the destination goes above the buttons, not inside them.
+          A section called "What Shaped the Difference" cannot be put inside a
+          button on a 360px screen without either truncating it or crushing the
+          button, and a truncated destination is worse than none -- the reader
+          has to guess. So the buttons say Back and Next, at a size a thumb can
+          hit, and the name of the place sits on its own line above them where
+          it has the full width to be read. Desktop keeps the labels in the
+          buttons, where there is room for them. */}
+      {(nextLabel || requires) && (
+        <p className="deck-destination sm:hidden">
+          {requires ? (
+            <>
+              <span className="opacity-55">To continue</span> {requires}
+            </>
+          ) : (
+            <>
+              <span className="opacity-55">Next</span> {nextLabel}
+            </>
+          )}
+        </p>
+      )}
+      <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2 sm:gap-4 sm:px-8 sm:py-2.5">
         {prevLabel ? (
           <button
             type="button"
@@ -295,7 +335,8 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
             <span aria-hidden="true" className="deck-btn-arrow">
               &larr;
             </span>
-            <span className="min-w-0">
+            <span className="min-w-0 font-medium sm:hidden">Back</span>
+            <span className="hidden min-w-0 sm:block">
               <span className="type-meta block opacity-55">
                 Back
               </span>
@@ -332,7 +373,8 @@ function SlideFooter({ index, total, nextLabel, prevLabel, onNavigate, requires 
               nudging ? ' is-refusing' : ''
             }`}
           >
-            <span className="min-w-0">
+            <span className="min-w-0 font-medium sm:hidden">Next</span>
+            <span className="hidden min-w-0 sm:block">
               <span className="type-meta block opacity-55">
                 {requires ? 'To continue' : 'Next'}
               </span>

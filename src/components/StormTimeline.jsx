@@ -68,7 +68,12 @@ function CoverageDots({ struck }) {
 // `awaiting` is true only while no storm at all is chosen. It drives the faint
 // accent ring that marks these as the thing to press; once the reader has
 // pressed one, the invitation has been accepted and every ring stops.
-function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, row = false }) {
+// `strip` is the phone-sized variant: the same button, the same handlers, the
+// same state -- just sized to be swiped past and thumbed, with the year given
+// its own line instead of being crushed onto the label's. One component, two
+// scaffolds; a mobile-only copy of this card would be a second place for the
+// roster to disagree with itself.
+function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, row = false, strip = false }) {
   return (
     <button
       type="button"
@@ -85,7 +90,9 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
       aria-pressed={active}
       aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of ${NATION_COUNT_WORD} nations.`}
       style={awaiting ? { animationDelay: `${delay}ms` } : undefined}
-      className={`press-target storm-card relative min-h-[44px] cursor-pointer rounded-lg border px-2.5 py-2 text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
+      className={`press-target storm-card relative cursor-pointer rounded-lg border text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
+        strip ? 'h-full w-full rounded-xl px-4 py-3.5' : 'min-h-[44px] px-2.5 py-2'
+      } ${
         active
           ? 'is-active border-accent bg-accent/10 font-semibold'
           : 'border-ink/20 bg-surface/70 hover:border-accent/60 hover:bg-surface'
@@ -93,7 +100,14 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
         row ? 'flex w-full items-center justify-between gap-3' : ''
       }`}
     >
-      <span className="flex items-center gap-1.5 text-xs leading-tight">
+      {strip && (
+        <span className="type-eyebrow block text-accent">{storm.year}</span>
+      )}
+      <span
+        className={`flex items-center gap-1.5 leading-tight ${
+          strip ? 'mt-1 text-base font-semibold' : 'text-xs'
+        }`}
+      >
         {/* The selected card is the story's current state, so it says so with
             a mark as well as a colour -- the brief's "do not rely on colour
             alone", applied to the one control the whole page hangs off. */}
@@ -102,7 +116,11 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
         )}
         <span className="truncate">{storm.label}</span>
       </span>
-      <span className={`flex items-center gap-1.5 ${row ? 'shrink-0' : 'mt-1.5'}`}>
+      <span
+        className={`flex items-center gap-1.5 ${row ? 'shrink-0' : 'mt-1.5'} ${
+          strip ? 'mt-2.5' : ''
+        }`}
+      >
         <CoverageDots struck={storm.nations} />
         <span className="text-[10px] leading-none tabular-nums opacity-60">
           {storm.nations.length} of {NATION_NAMES.length}
@@ -290,55 +308,46 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       </ol>
 
       {/*
-        NARROW: the same axis turned on its side. A spine with a dot per year
-        and full-width cards hanging off it -- deliberately full-width, because
-        the previous version sized each chip to its own label and a row of
-        variable-length blocks off a left-hand year axis read as a bar chart
-        whose bars meant nothing. Years without a storm keep their tick and
-        their label but collapse to a fraction of the height, so ten years fit
-        on a phone without pretending the empty ones aren't there.
+        NARROW: a swipeable strip, not a squeezed axis.
+
+        What was here was the same year axis turned on its side -- a spine with
+        a tick per year and cards hanging off it. It was honest about the empty
+        years, and on a phone it was also eleven rows tall, which meant the
+        reader scrolled a section to reach a control and lost the preview panel
+        off the bottom of the screen while doing it.
+
+        The strip drops the empty years and keeps the storms, in the same order,
+        with the year printed on each card. Six cards at a bit under a
+        screen-width each: one is always fully in view, the next always peeking
+        past the edge, which is what says "there is more this way" without a
+        gradient or an instruction. Scroll snapping makes it settle on a card
+        rather than between two.
+
+        Same StormCard, same handlers, same roster. Nothing here is a
+        mobile-only data structure -- it is the same six objects, laid out for a
+        thumb. The years the region was spared are still stated in the sentence
+        above the strip and drawn on the wide axis; what is lost on a phone is
+        an eleven-row spine, and what is gained is a control the reader can
+        reach without scrolling.
       */}
-      <ol aria-label={axisLabel} className="mt-3 ml-11 border-l border-ink/15 lg:hidden">
-        {YEARS.map((year) => {
-          const storms = STORMS.filter((s) => s.year === year)
-          const hit = storms.length > 0
-          return (
-            <li key={year} className={`relative ${hit ? 'py-2' : 'py-1.5'}`}>
-              <span
-                className={`absolute -left-11 top-2 w-8 text-right text-xs tabular-nums ${
-                  hit ? 'font-semibold opacity-80' : 'opacity-40'
-                }`}
-              >
-                {year}
-              </span>
-              <span
-                aria-hidden="true"
-                className={`absolute left-0 top-2.5 -translate-x-1/2 rounded-full ${
-                  hit ? 'h-2 w-2 bg-accent' : 'h-1 w-1 bg-ink/25'
-                }`}
-              />
-              {hit ? (
-                <div className="ml-4 space-y-2">
-                  {storms.map((storm) => (
-                    <StormCard
-                      key={storm.id}
-                      storm={storm}
-                      active={storm.id === selectedId}
-                      awaiting={awaiting}
-                      delay={delayOf(storm.id)}
-                      onSelect={onSelect}
-                      onPreview={setPreviewId}
-                      row
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div aria-hidden="true" className="h-1" />
-              )}
-            </li>
-          )
-        })}
-      </ol>
+      <ul
+        aria-label={axisLabel}
+        className="storm-strip mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 lg:hidden"
+      >
+        {STORMS.map((storm) => (
+          <li key={storm.id} className="w-[74%] max-w-[17rem] shrink-0 snap-start">
+            <StormCard
+              storm={storm}
+              active={storm.id === selectedId}
+              awaiting={awaiting}
+              delay={delayOf(storm.id)}
+              onSelect={onSelect}
+              onPreview={setPreviewId}
+              strip
+            />
+          </li>
+        ))}
+      </ul>
 
       {/* One panel under both axes, deliberately not one per card. A preview
           that opens inside the timeline would move every other card on the

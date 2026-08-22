@@ -10,6 +10,7 @@ import { sectionGuard } from './sectionGuard.jsx'
 import TrendChart from './TrendChart.jsx'
 import MetricDetail from './MetricDetail.jsx'
 import InsightsPanel from './InsightsPanel.jsx'
+import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import Tooltip from './Tooltip.jsx'
 
 // One small chart per stage of the chain, filtered to the selected nations.
@@ -44,6 +45,17 @@ export default function RippleChain({
   // which is what lets a reader with a card open still glance at another.
   const [hovered, setHovered] = useState(null)
   const held = hovered ?? activeMetric
+
+  // The one structural difference between the two layouts. See the accordion
+  // below for why five charts at once is the wrong thing to put on a phone,
+  // and hooks/useMediaQuery.js for why this is decided in JavaScript rather
+  // than by hiding one of them in CSS.
+  const isPhone = useMediaQuery('(max-width: 639px)')
+  // On a phone one link is always open: an accordion with everything shut is a
+  // section that opens on no chart at all, and the first link is where the
+  // chain starts. It is a display fallback, not a write -- nothing is put into
+  // the shared state on the reader's behalf.
+  const openKey = isPhone ? activeMetric ?? CHAIN_METRICS[0].key : activeMetric
 
   // Memoised deliberately: the tooltip state lives here, so an unmemoised
   // filter would redraw every chart on every hover. See rows.js.
@@ -106,70 +118,137 @@ export default function RippleChain({
             what that record is and how much of it was actually reported. The
             charts carry the same handlers, so the rail and the grid are two
             views of one state rather than two things to keep in step. */}
-        <ol className="chain-rail mt-5">
-          {CHAIN_METRICS.map((m, i) => {
-            const isHeld = held === m.key
-            return (
-              <li key={m.key} className="chain-rail-item">
-                <button
-                  type="button"
-                  onClick={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
-                  onPointerEnter={() => setHovered(m.key)}
-                  onPointerLeave={() => setHovered(null)}
-                  onFocus={() => setHovered(m.key)}
-                  onBlur={() => setHovered(null)}
-                  aria-pressed={activeMetric === m.key}
-                  aria-label={`Link ${i + 1} of ${CHAIN_METRICS.length}: ${m.label}. Open what this record can and cannot show.`}
-                  className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
-                  style={{ animationDelay: `${i * 90}ms` }}
-                >
-                  <span aria-hidden="true" className="chain-link-stage">
-                    {i + 1}
-                  </span>
-                  <span className="chain-link-label">{m.label}</span>
-                </button>
-              </li>
-            )
-          })}
-        </ol>
+        {isPhone ? (
+          /* PHONE: the chain as an accordion, one link open at a time.
 
-        {activeMetric && (
-          <MetricDetail
-            metric={CHAIN_METRICS.find((m) => m.key === activeMetric)}
-            rows={filteredByMetric[activeMetric] ?? []}
-            nations={selectedNations}
-            onClose={() => onActiveMetric(null)}
-          />
+             Five charts stacked on a phone is five screens of scrolling in a
+             section whose argument is the relationship between them -- by the
+             time the reader reaches tourism they cannot see people affected,
+             which is the comparison the whole section exists to make. So the
+             chain itself is the page: five rows in the order the damage
+             travels, and the open one carries its chart and its caveats.
+
+             Same state as the desktop rail. Pressing a row here is the same
+             press as pressing a link there, and the reader's choice survives a
+             rotation from one layout to the other. */
+          <ol className="chain-rail chain-accordion mt-5">
+            {CHAIN_METRICS.map((m, i) => {
+              const isOpen = openKey === m.key
+              return (
+                <li key={m.key} className="chain-rail-item">
+                  <button
+                    type="button"
+                    onClick={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
+                    aria-expanded={isOpen}
+                    aria-label={`Link ${i + 1} of ${CHAIN_METRICS.length}: ${m.label}. Show this record and what it can and cannot show.`}
+                    className={`press-target chain-link ${isOpen ? 'is-held' : ''}`}
+                  >
+                    <span aria-hidden="true" className="chain-link-stage">
+                      {i + 1}
+                    </span>
+                    <span className="chain-link-label">{m.label}</span>
+                    <span aria-hidden="true" className="chain-link-caret">
+                      {isOpen ? '\u2212' : '+'}
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="chain-panel">
+                      <TrendChart
+                        label={m.label}
+                        allRows={filteredByMetric[m.key]}
+                        nations={selectedNations}
+                        valueField={m.field}
+                        chartType={m.chartType}
+                        format={m.format}
+                        showTooltip={showTooltip}
+                        hideTooltip={hideTooltip}
+                        index={0}
+                        stage={i + 1}
+                        ripple
+                        dimNations={unstruck}
+                        caveat={m.caveat}
+                      />
+                      <MetricDetail
+                        metric={m}
+                        rows={filteredByMetric[m.key] ?? []}
+                        nations={selectedNations}
+                        onClose={() => onActiveMetric(null)}
+                      />
+                    </div>
+                  )}
+                </li>
+              )
+            })}
+          </ol>
+        ) : (
+          <>
+            <ol className="chain-rail mt-5">
+              {CHAIN_METRICS.map((m, i) => {
+                const isHeld = held === m.key
+                return (
+                  <li key={m.key} className="chain-rail-item">
+                    <button
+                      type="button"
+                      onClick={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
+                      onPointerEnter={() => setHovered(m.key)}
+                      onPointerLeave={() => setHovered(null)}
+                      onFocus={() => setHovered(m.key)}
+                      onBlur={() => setHovered(null)}
+                      aria-pressed={activeMetric === m.key}
+                      aria-label={`Link ${i + 1} of ${CHAIN_METRICS.length}: ${m.label}. Open what this record can and cannot show.`}
+                      className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
+                      style={{ animationDelay: `${i * 90}ms` }}
+                    >
+                      <span aria-hidden="true" className="chain-link-stage">
+                        {i + 1}
+                      </span>
+                      <span className="chain-link-label">{m.label}</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ol>
+
+            {activeMetric && (
+              <MetricDetail
+                metric={CHAIN_METRICS.find((m) => m.key === activeMetric)}
+                rows={filteredByMetric[activeMetric] ?? []}
+                nations={selectedNations}
+                onClose={() => onActiveMetric(null)}
+              />
+            )}
+
+            <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {CHAIN_METRICS.map((m, i) => (
+                <TrendChart
+                  key={m.key}
+                  label={m.label}
+                  allRows={filteredByMetric[m.key]}
+                  nations={selectedNations}
+                  valueField={m.field}
+                  chartType={m.chartType}
+                  format={m.format}
+                  showTooltip={showTooltip}
+                  hideTooltip={hideTooltip}
+                  index={i}
+                  stage={i + 1}
+                  ripple
+                  dimNations={unstruck}
+                  caveat={m.caveat}
+                  emphasis={held ? (held === m.key ? 'active' : 'dim') : undefined}
+                  cardHandlers={{
+                    onPointerEnter: () => setHovered(m.key),
+                    onPointerLeave: () => setHovered(null),
+                    onFocusCapture: () => setHovered(m.key),
+                    onBlurCapture: () => setHovered(null),
+                  }}
+                  className={i === CHAIN_METRICS.length - 1 && CHAIN_METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
+                />
+              ))}
+            </div>
+          </>
         )}
-
-        <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {CHAIN_METRICS.map((m, i) => (
-            <TrendChart
-              key={m.key}
-              label={m.label}
-              allRows={filteredByMetric[m.key]}
-              nations={selectedNations}
-              valueField={m.field}
-              chartType={m.chartType}
-              format={m.format}
-              showTooltip={showTooltip}
-              hideTooltip={hideTooltip}
-              index={i}
-              stage={i + 1}
-              ripple
-              dimNations={unstruck}
-              caveat={m.caveat}
-              emphasis={held ? (held === m.key ? 'active' : 'dim') : undefined}
-              cardHandlers={{
-                onPointerEnter: () => setHovered(m.key),
-                onPointerLeave: () => setHovered(null),
-                onFocusCapture: () => setHovered(m.key),
-                onBlurCapture: () => setHovered(null),
-              }}
-              className={i === CHAIN_METRICS.length - 1 && CHAIN_METRICS.length % 2 !== 0 ? 'sm:col-span-2' : ''}
-            />
-          ))}
-        </div>
 
         <p className="prose-wide mt-6 text-xs italic opacity-70">
           Direct economic loss is deliberately not a link here. {FOOTNOTE_METRICS[0].caveat} A chart

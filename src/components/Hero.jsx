@@ -77,10 +77,18 @@ export default function Hero({ style }) {
     >
       <HeroAtmosphere />
 
+      {/* The thesis, on mobile only. It is in the header at every width from
+          sm up; on a phone the header cannot afford it, so it lands here
+          instead -- once, at the top of the piece, rather than on all fourteen
+          sections. */}
+      <p className="relative mt-3 font-serif text-base italic leading-snug text-ink/70 sm:hidden">
+        Climate doesn't create inequality. It reveals it.
+      </p>
+
       {/* The four nations, as the thing to touch first. Buttons, not labels:
           they are pressable, they say so, and they are in the tab order in the
           same order the map draws them. */}
-      <ul className="relative mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-2">
+      <ul className="relative mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mt-8">
         {NATIONS.map((nation) => {
           const isActive = active === nation.name
           return (
@@ -116,7 +124,7 @@ export default function Hero({ style }) {
           Space is reserved for the sentence below, so lighting a nation moves
           nothing else on the slide. A hero that reflows under the pointer is a
           hero the reader stops pointing at. */}
-      <div className="relative mx-auto mt-6 max-w-md">
+      <div className="relative mx-auto mt-5 max-w-md sm:mt-6">
         <ul className="flex items-end justify-center gap-3" aria-hidden="true">
           {STORMS.map((storm) => {
             const lit = active ? storm.nations.includes(active) : null

@@ -26,8 +26,16 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
 
   return (
     <div>
-      <p className="type-eyebrow mb-2 opacity-60">Or choose from the list</p>
-      <ul className="flex flex-wrap gap-2">
+      {/* "Choose a country", not "or choose from the list". On a phone this is
+          the primary control and the map is the picture beside it: four
+          full-width rows a thumb cannot miss, against four 7px pins inside a
+          pannable SVG. The wording follows the fact rather than describing the
+          desktop arrangement. */}
+      <p className="type-eyebrow mb-2 opacity-60">
+        <span className="sm:hidden">Choose a country</span>
+        <span className="hidden sm:inline">Or choose from the list</span>
+      </p>
+      <ul className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
         {nations.map((nation) => {
           const index = selected.indexOf(nation.name)
           const picked = index !== -1
@@ -48,7 +56,7 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
                     ? `${nation.name}. Not struck by ${storm.name}; shown for comparison.`
                     : nation.name
                 }
-                className={`press-target flex min-h-[44px] items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
+                className={`press-target flex w-full min-h-[48px] items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel sm:w-auto sm:min-h-[44px] sm:rounded-full sm:py-2 ${
                   picked
                     ? 'border-accent bg-accent/10 font-semibold'
                     : 'border-ink/20 bg-surface/60 hover:border-accent/60'
@@ -68,6 +76,15 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
                 {/* Not colour alone: a country the storm missed says so in a
                     word as well as by being drawn faint. */}
                 {missed && <span className="text-[10px] uppercase tracking-wide opacity-60">missed</span>}
+                {/* A tick as well as the badge and the fill: three cues for
+                    one state, none of them colour on its own. It sits at the
+                    end of a full-width row, which is where a thumb has just
+                    been. */}
+                {picked && (
+                  <span aria-hidden="true" className="ml-auto text-accent">
+                    &#10003;
+                  </span>
+                )}
               </button>
             </li>
           )

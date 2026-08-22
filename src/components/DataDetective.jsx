@@ -104,14 +104,18 @@ export default function DataDetective({ storm, style }) {
           decides what you look at next.
         </p>
 
-        <ul className="flex flex-wrap gap-2">
+        {/* Full-width stacked on a phone, wrapped pills from sm up. Five
+            options of very different lengths wrapped into a pill cloud gave a
+            ragged block of small targets; one per line is one clear thing to
+            press per line. */}
+        <ul className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
           {FACTORS.map((f) => (
             <li key={f.id}>
               <button
                 type="button"
                 onClick={() => setPicked(picked === f.id ? null : f.id)}
                 aria-pressed={picked === f.id}
-                className={`press-target min-h-[44px] rounded-full border px-4 py-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
+                className={`press-target w-full min-h-[44px] rounded-xl border px-4 py-3 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel sm:w-auto sm:rounded-full sm:py-2 sm:text-center ${
                   picked === f.id
                     ? 'border-accent bg-accent/10 font-semibold'
                     : 'border-ink/20 bg-surface/60 hover:border-accent/60'

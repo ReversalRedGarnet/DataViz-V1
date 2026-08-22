@@ -265,6 +265,80 @@
   }
 
   /*
+    THE MOBILE STORM STRIP
+    ======================
+
+    Horizontal, snapping, and sized so the next card always shows past the
+    right edge. That peek is the scroll cue: no gradient, no arrow, no "swipe"
+    instruction -- a card cut off by the edge of the screen is the most
+    literal statement there is that the row continues.
+
+    scroll-padding keeps a snapped card clear of the container's left edge, and
+    the scrollbar is hidden because the strip is six items long and a bar under
+    it would be a second, worse cue than the peek.
+  */
+  .storm-strip {
+    scroll-padding-left: 0.25rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .storm-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
+    THE SCRUBBER, ON A PHONE
+    ========================
+
+    Three changes, all of them about thumbs. The rail's hit area is 56px tall
+    against a 4px visual line -- the target is the band, not the line, which is
+    the difference between a control that works while walking and one that
+    needs a mouse. The handle is 28px. And there are two steppers beside it,
+    because a drag is a gesture some readers cannot make reliably and every
+    gesture on this site has to have a button that does the same thing.
+  */
+  .scrub-readout {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .scrub-step {
+    display: flex;
+    height: 44px;
+    width: 44px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--color-ink) / 0.2);
+    background-color: rgb(var(--color-surface) / 0.6);
+    font-size: 1.125rem;
+    line-height: 1;
+  }
+
+  .scrub-step:disabled {
+    opacity: 0.35;
+  }
+
+  @media (max-width: 639px) {
+    .scrub-track {
+      height: 3.5rem;
+    }
+
+    .scrub-knob {
+      width: 28px;
+      height: 28px;
+      margin-left: -14px;
+    }
+
+    .scrub-track {
+      margin-inline: 16px;
+    }
+  }
+
+  /*
     THE RIPPLE CHAIN RAIL
     =====================
 
@@ -359,6 +433,48 @@
 
   .chain-link-label {
     min-width: 0;
+  }
+
+  /*
+    THE PHONE ACCORDION
+    ===================
+
+    The same links, with the open one carrying its chart. Rows are taller than
+    the desktop chips (they are the primary control here, not a rail above a
+    grid), the caret says which way the row will go, and the connector between
+    rows runs down the left so the sequence still reads as a chain rather than
+    as five unrelated drawers.
+  */
+  .chain-accordion .chain-link {
+    min-height: 52px;
+    font-size: 0.875rem;
+  }
+
+  .chain-link-caret {
+    margin-left: auto;
+    padding-left: 0.5rem;
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.5;
+  }
+
+  .chain-panel {
+    padding: 0.75rem 0 0.25rem;
+  }
+
+  /* The open row's chart slides down rather than appearing. Transform and
+     opacity only, and short -- 180ms, because on a phone the reader's thumb is
+     still on the row they pressed and anything slower reads as lag rather than
+     as motion. */
+  .chain-panel {
+    animation: chain-panel-open 180ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
+  }
+
+  @keyframes chain-panel-open {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
   }
 
   /*
@@ -488,6 +604,11 @@
     }
 
     .converge-diverge[data-play="true"] path {
+      animation: none;
+    }
+
+    /* The panel still opens; it just arrives. */
+    .chain-panel {
       animation: none;
     }
   }

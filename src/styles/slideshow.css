@@ -277,6 +277,16 @@
     max-height: 52vh;
   }
 
+  /* On a phone the map has to leave room for the thing that actually selects a
+     country. 52vh of map plus a heading plus four full-width rows plus the
+     summary does not fit, and what got pushed off was the list -- so the
+     picture kept the screen and the control went below the fold. */
+  @media (max-width: 639px) {
+    .slide-viewport .map-frame svg {
+      max-height: 30vh;
+    }
+  }
+
   /*
     The footer is the header's twin at the other edge of the frame: pinned
     rather than scrolling, so paging controls never have to be hunted for.
@@ -505,9 +515,29 @@
     and the whole control gives slightly under a press -- borrowed from the map
     controls, which already did this, rather than inventing a second idiom.
   */
+  /* The destination, above the buttons, on phones only. Centred, one line,
+     truncated rather than wrapped -- a wrapping destination would change the
+     footer's height from section to section, and the footer holding exactly
+     still is the point of it. */
+  .deck-destination {
+    position: relative;
+    margin: 0 auto;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 0.4rem 1rem 0;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+  }
+
   .deck-btn {
     display: flex;
     min-width: 0;
+    /* 44px, the same floor every control in the body uses. These two are the
+       most-pressed buttons on the site. */
+    min-height: 44px;
     align-items: center;
     gap: 0.5rem;
     border-radius: 0.5rem;

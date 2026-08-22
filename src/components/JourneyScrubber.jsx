@@ -81,6 +81,8 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
     onIndex(Math.min(last, Math.max(0, next)))
   }
 
+  const step = (delta) => onIndex(Math.min(last, Math.max(0, index + delta)))
+
   return (
     <div className="journey-scrubber">
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -89,6 +91,33 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
           Stop {index + 1} of {stops.length}
         </span>
       </div>
+
+      {/* Where the storm is now, directly above the control that moves it. The
+          full stop record is below, but on a phone that can be under the fold
+          while the reader's thumb is on the rail -- and a control whose effect
+          you cannot see while using it is a control you stop trusting. This
+          line is never more than a line, so it always fits. */}
+      <p className="scrub-readout">
+        <span className="font-semibold">{current?.name}</span>
+        <span className="opacity-60"> &middot; {current?.date}</span>
+      </p>
+
+      <div className="flex items-center gap-2">
+      {/* Steppers, because dragging a rail is a fine gesture and not everyone
+          has one available -- a large thumb, a moving bus, a tremor. Same
+          state, same clamp, no drag required. Hidden from screen readers: the
+          slider beside them already exposes exactly this, and announcing three
+          controls for one position is noise. */}
+      <button
+        type="button"
+        aria-hidden="true"
+        tabIndex={-1}
+        onClick={() => step(-1)}
+        disabled={index === 0}
+        className="scrub-step"
+      >
+        &minus;
+      </button>
 
       <div
         ref={trackRef}
@@ -131,6 +160,18 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
         >
           <span className="scrub-knob" />
         </span>
+      </div>
+
+      <button
+        type="button"
+        aria-hidden="true"
+        tabIndex={-1}
+        onClick={() => step(1)}
+        disabled={index === last}
+        className="scrub-step"
+      >
+        +
+      </button>
       </div>
 
       {/* The same positions as buttons, outside the slider rather than inside
