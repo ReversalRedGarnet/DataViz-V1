@@ -17,12 +17,12 @@ import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
 import { useDeck } from './hooks/useDeck.js'
 import { PAGE_SECTIONS } from './content/pageSections.js'
+import { NATION_NAMES } from './content/nations.js'
 import { ThemeProvider } from './hooks/useTheme.jsx'
 import { useStory } from './hooks/useStory.js'
 import { selectionAnnouncement } from './hooks/useSelection.js'
 import { useMetricData } from './hooks/useMetricData.js'
 import { METRICS } from './utils/metrics.js'
-import { NATIONS } from './components/MapView.jsx'
 import { STORMS } from './content/storms.js'
 
 const DATA_SOURCES = [
@@ -70,8 +70,9 @@ const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.labe
 
 // The comparison's pickers offer every in-scope nation, not only the two
 // currently chosen, so the pair can be changed from the section that asks the
-// question rather than from the map four slides back.
-const NATION_NAMES = NATIONS.map((n) => n.name)
+// question rather than from the map four slides back. NATION_NAMES comes from
+// content/nations.js; this file used to derive it here, and so did BigPicture,
+// ContextPanel and DivergenceView, each independently.
 
 function pageSections(data, story, onSelectStorm) {
   const { storm, selected } = story

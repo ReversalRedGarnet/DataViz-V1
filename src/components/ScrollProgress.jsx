@@ -22,7 +22,6 @@ const BAR_HEIGHT = 26
 // are drawn along it.
 const WATER_Y = 21
 const CANOE_SCALE = 0.55
-const OCEAN = '#5B8FA3'
 
 // How quickly the drawn position chases the true scroll position, per frame.
 // Low enough to smooth a flick, high enough that it never feels laggy or
@@ -42,19 +41,32 @@ const PADDLE_BLADE_PATH =
   'M -3.6,10 C -4.2,13 -4.2,16.5 -2.6,19.5 C -1.4,21.7 1.4,21.7 2.6,19.5 C 4.2,16.5 4.2,13 3.6,10 C 2.4,7.5 -2.4,7.5 -3.6,10 Z'
 
 // Props:
-//   progress -- 0..1, supplied by the deck. The document itself never scrolls,
-//     so there is nothing left for this to read on its own. Omitted, it falls
-//     back to watching window.scrollY.
-export default function ScrollProgress({ progress: externalProgress }) {
+//   progress -- 0..1, supplied by the deck. Required: the document itself never
+//     scrolls (App puts html.is-slides on permanently), so there is nothing
+//     left for this to read on its own.
+//
+//     There used to be a fallback here that watched window.scrollY, with its
+//     own rAF throttle and a ResizeObserver on document.body -- around thirty
+//     lines that could not run. This component has one call site, Header, which
+//     has one call site, App, which always passes a number. It was dead the
+//     moment the deck became the only layout.
+export default function ScrollProgress({ progress = 0 }) {
   const wrapperRef = useRef(null)
+  const canoeRef = useRef(null)
+  const wakeRef = useRef(null)
+  const leadRef = useRef(null)
   const [width, setWidth] = useState(0)
-  const [progress, setProgress] = useState(0) // 0..1, the true scroll fraction
-  const [drawn, setDrawn] = useState(0) // 0..1, the eased position actually drawn
-  const rafRef = useRef(null)
-  const chaseRef = useRef(null)
   const drawnRef = useRef(0)
+  const chaseRef = useRef(null)
   const { theme } = useTheme()
-  const { ink } = chartTheme(theme)
+  // The wake used to be a hardcoded '#5B8FA3' that stayed identical in dark
+  // mode while every other colour on the page flipped. palette.idle is that
+  // exact value in light mode and its dark-mode counterpart otherwise, so this
+  // is the same picture in one theme and a correct one in the other.
+  const { ink, palette } = chartTheme(theme)
+  const ocean = palette.idle
+
+  const target = Math.min(1, Math.max(0, progress))
 
   // The wrapper's own width, not window.innerWidth: innerWidth includes the
   // scrollbar, and this sits in a header laid out against the narrower
@@ -71,62 +83,61 @@ export default function ScrollProgress({ progress: externalProgress }) {
     return () => observer.disconnect()
   }, [])
 
-  // In slideshow layout the deck owns the number: the document does not scroll,
-  // so scrollY is pinned at 0 and the canoe would never leave the shore.
+  // Chase the true position rather than jumping to it, and do it WITHOUT React.
+  //
+  // This used to call setDrawn() on every frame, which re-rendered the whole
+  // Header subtree -- SectionNav, StoryStateBar and ThemeToggle included --
+  // sixty times a second for the length of every deck movement, to move one
+  // canoe a few pixels. The eased position is not application state; it is an
+  // attribute on three SVG nodes. Writing it straight to them through refs is
+  // the same picture at none of the cost, and it is the pattern the divergence
+  // chart already uses for its own sweep.
+  //
+  // Runs only while there is a gap to close and stops itself inside SETTLE_PX,
+  // so an idle page does no work at all.
   useEffect(() => {
-    if (externalProgress == null) return
-    setProgress(Math.min(1, Math.max(0, externalProgress)))
-  }, [externalProgress])
+    if (width <= 0) return
 
-  useEffect(() => {
-    if (externalProgress != null) return
-    function computeProgress() {
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight
-      const pct = scrollable > 0 ? window.scrollY / scrollable : 0
-      setProgress(Math.min(1, Math.max(0, pct)))
-      rafRef.current = null
-    }
-    function handleScroll() {
-      // One update per frame; scroll fires far more often than the page paints.
-      if (rafRef.current == null) {
-        rafRef.current = requestAnimationFrame(computeProgress)
+    const paint = (value) => {
+      const x = value * width
+      if (canoeRef.current) {
+        // A gentle bob and pitch, driven by distance travelled rather than by
+        // time: the canoe rides the water while it moves and sits still when
+        // the reader does. Time-driven idle motion would be movement with
+        // nothing behind it.
+        const bob = Math.sin(value * Math.PI * 9) * 1.1
+        const pitch = Math.cos(value * Math.PI * 9) * 2.5
+        // Aligns the hull's keel (local y ~= +5) to the waterline rather than
+        // the canoe's own (0,0) origin.
+        const canoeY = WATER_Y - 5 * CANOE_SCALE
+        canoeRef.current.setAttribute(
+          'transform',
+          `translate(${x},${canoeY + bob}) rotate(${pitch}) scale(${CANOE_SCALE})`
+        )
+      }
+      if (wakeRef.current) wakeRef.current.setAttribute('x2', String(x))
+      if (leadRef.current) {
+        leadRef.current.setAttribute('x1', String(Math.max(0, x - 26)))
+        leadRef.current.setAttribute('x2', String(x))
       }
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    computeProgress()
 
-    // Content-height changes (selecting a second country, say) change what
-    // progress means without firing a scroll event.
-    const bodyObserver = new ResizeObserver(handleScroll)
-    bodyObserver.observe(document.body)
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      bodyObserver.disconnect()
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [externalProgress])
-
-  // Chase the true position rather than jumping to it. Runs only while there is
-  // a gap to close, and stops itself once inside SETTLE_PX, so an idle page does
-  // no work.
-  useEffect(() => {
     if (prefersReducedMotion()) {
-      drawnRef.current = progress
-      setDrawn(progress)
+      drawnRef.current = target
+      paint(target)
       return
     }
 
-    function step() {
-      const gap = progress - drawnRef.current
+    const step = () => {
+      const gap = target - drawnRef.current
       if (Math.abs(gap * width) < SETTLE_PX) {
-        drawnRef.current = progress
-        setDrawn(progress)
+        drawnRef.current = target
+        paint(target)
         chaseRef.current = null
         return
       }
       drawnRef.current += gap * EASE
-      setDrawn(drawnRef.current)
+      paint(drawnRef.current)
       chaseRef.current = requestAnimationFrame(step)
     }
 
@@ -137,19 +148,12 @@ export default function ScrollProgress({ progress: externalProgress }) {
         chaseRef.current = null
       }
     }
-  }, [progress, width])
+  }, [target, width])
 
   // The wrapper always renders (ResizeObserver needs its ref); the SVG waits
-  // for a real measurement to avoid a flash at zero width.
-  const progressX = drawn * width
-  // Aligns the hull's keel (local y ~= +5) to the waterline rather than the
-  // canoe's own (0,0) origin.
-  const canoeY = WATER_Y - 5 * CANOE_SCALE
-  // A gentle bob and pitch, driven by distance travelled rather than by time:
-  // the canoe rides the water while it moves and sits still when the reader
-  // does. Time-driven idle motion would be movement with nothing behind it.
-  const bob = Math.sin(drawn * Math.PI * 9) * 1.1
-  const pitch = Math.cos(drawn * Math.PI * 9) * 2.5
+  // for a real measurement to avoid a flash at zero width. Every position below
+  // is a starting value only -- the effect above owns them from the first frame.
+  const initialX = drawnRef.current * width
 
   return (
     <div ref={wrapperRef} className="w-full">
@@ -176,11 +180,12 @@ export default function ScrollProgress({ progress: externalProgress }) {
           {/* The wake. Thicker and ocean-blue, so distance covered reads at a
               glance without needing a second motif to carry it. */}
           <line
+            ref={wakeRef}
             x1="0"
-            x2={progressX}
+            x2={initialX}
             y1={WATER_Y}
             y2={WATER_Y}
-            stroke={OCEAN}
+            stroke={ocean}
             strokeWidth="2.5"
             strokeLinecap="round"
           />
@@ -188,19 +193,18 @@ export default function ScrollProgress({ progress: externalProgress }) {
           {/* A short bright lead into the hull, so the canoe looks like it is
               pulling the wake rather than sitting on top of a line. */}
           <line
-            x1={Math.max(0, progressX - 26)}
-            x2={progressX}
+            ref={leadRef}
+            x1={Math.max(0, initialX - 26)}
+            x2={initialX}
             y1={WATER_Y}
             y2={WATER_Y}
-            stroke={OCEAN}
+            stroke={ocean}
             strokeOpacity="0.45"
             strokeWidth="5"
             strokeLinecap="round"
           />
 
-          <g
-            transform={`translate(${progressX},${canoeY + bob}) rotate(${pitch}) scale(${CANOE_SCALE})`}
-          >
+          <g ref={canoeRef} transform={`translate(${initialX},${WATER_Y - 5 * CANOE_SCALE}) scale(${CANOE_SCALE})`}>
             <path d={HULL_PATH} fill={ink} />
             <g transform="translate(-1,-4) rotate(-32)">
               <ellipse cx="0" cy="-21" rx="1.9" ry="3" fill={ink} />

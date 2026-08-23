@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import Section from './Section.jsx'
-import { NATIONS } from './MapView.jsx'
+import { NATION_NAMES } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { STORMS, ROSTER_START, ROSTER_END, strikeCounts } from '../content/storms.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 import { formatNationList } from '../utils/formatNationList.js'
 
-const NATION_NAMES = NATIONS.map((n) => n.name)
 const YEARS = Array.from({ length: ROSTER_END - ROSTER_START + 1 }, (_, i) => ROSTER_START + i)
 
 // Counts set in words, because the eyebrow and the button labels are prose and
@@ -204,6 +203,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
           <li
             key={nation}
             tabIndex={0}
+            role="note"
             aria-label={`${count} severe cyclones struck ${nation} between ${ROSTER_START} and ${ROSTER_END}.`}
             className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 short:p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
             {...highlightHandlers(nation, setHighlight)}

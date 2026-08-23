@@ -11,10 +11,15 @@ their populations they are not close at all: Vanuatu's figure is a large share
 of the whole country, Fiji's a much smaller one. A chart that shows those two
 bars at the same height is telling the reader the opposite of what happened.
 
-Fixing that needs a denominator, and the denominator has to be real. This
-script is the pipeline half, ready to run. Nothing in the site consumes
-population.json yet, deliberately: the numbers have to come from the portal
-before anything is built on top of them, and no figures are hardcoded here.
+Fixing that needs a denominator, and the denominator has to be real, so no
+figures are hardcoded here -- they come from the portal or they do not exist.
+
+The site now consumes population.json: metrics.js carries it as the one
+`optional` dataset, utils/rows.js divides by it in shareOfPopulationRows, and
+the regional snapshot in BigPicture offers a Count/Share toggle built on it. It
+is optional on purpose. Losing this file costs the share-of-population view and
+nothing else, so it must not be able to blank the site the way a missing chain
+metric legitimately does.
 
 Usage
 -----
@@ -34,8 +39,6 @@ empty -- portal indicator codes change, and this script prints what it found
 rather than guessing.
 """
 
-import json
-
 import pandas as pd
 
 from common import (
@@ -47,8 +50,9 @@ from common import (
     VALUE_COL_CANDIDATES,
     YEAR_MAX,
     YEAR_MIN,
+    extract_rows,
     find_col,
-    matches_nation,
+    write_json,
 )
 
 RAW_FILE = "population.csv"
@@ -95,17 +99,10 @@ def clean_population() -> None:
     time_col = find_col(df, TIME_COL_CANDIDATES, "year")
     value_col = find_col(df, VALUE_COL_CANDIDATES, "value")
 
-    records = []
-    for nation in NATIONS:
-        rows = df[df[country_col].apply(lambda v: matches_nation(v, nation))]
-        for _, row in rows.iterrows():
-            year = int(row[time_col])
-            if not (YEAR_MIN <= year <= YEAR_MAX):
-                continue
-            value = pd.to_numeric(row[value_col], errors="coerce")
-            if pd.isna(value):
-                continue
-            records.append({"nation": nation, "year": year, FIELD_NAME: float(value)})
+    records, report = extract_rows(df, country_col, time_col, value_col, FIELD_NAME)
+
+    if report["unreadable"]:
+        print(f"  skipped {report['unreadable']} row(s) with no readable figure")
 
     # A duplicate nation-year here means a dimension wasn't filtered out above.
     seen = {}
@@ -119,8 +116,7 @@ def clean_population() -> None:
         seen[key] = record[FIELD_NAME]
 
     records.sort(key=lambda r: (r["nation"], r["year"]))
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / OUT_FILE).write_text(json.dumps(records, indent=2) + "\n")
+    write_json(OUT_DIR / OUT_FILE, records)
 
     print(f"\nWrote {len(records)} rows to {OUT_DIR / OUT_FILE}")
     print("\nCoverage:")

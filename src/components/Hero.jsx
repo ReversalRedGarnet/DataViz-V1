@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import PageHero from './PageHero.jsx'
 import { STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
-import { NATIONS } from './MapView.jsx'
+import { NATIONS, NATION_COUNT } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { numberWordCapitalized } from '../utils/numberWords.js'
 
@@ -34,7 +34,7 @@ export default function Hero({ style }) {
     <PageHero
       kicker={`${ROSTER_START}\u2013${ROSTER_END} \u00b7 ${numberWordCapitalized(
         STORMS.length
-      )} severe cyclones \u00b7 ${numberWordCapitalized(NATIONS.length)} Pacific nations`}
+      )} severe cyclones \u00b7 ${numberWordCapitalized(NATION_COUNT)} Pacific nations`}
       headline={`Between ${ROSTER_START} and ${ROSTER_END}, each of these nations was struck multiple times. No two recovered the same way.`}
       body={
         'Solomon Islands, Vanuatu, Fiji and Tonga share an ocean as well as a ' +
@@ -54,7 +54,7 @@ export default function Hero({ style }) {
           instead -- once, at the top of the piece, rather than on all fourteen
           sections. */}
       <p className="relative mt-3 font-serif text-base italic leading-snug text-ink/70 sm:hidden">
-        Climate doesn't create inequality. It reveals it.
+        Climate doesn&rsquo;t create inequality. It reveals it.
       </p>
 
       {/* The four nations, as the thing to touch first. Buttons, not labels:

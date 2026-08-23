@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useElementWidth } from './useElementWidth.js'
 import { useInView } from './useInView.js'
 import { useTheme } from './useTheme.jsx'
+import { useLatest } from './useLatest.js'
 import { resetSvg } from '../utils/d3helpers.js'
 
 // The scaffolding every D3 chart card on this page needs: measure the card in
@@ -34,8 +35,7 @@ export function useChartCanvas({ height, ready = true, waitForInView = true, dra
   const [cardRef, inView] = useInView()
   const { theme } = useTheme()
 
-  const drawRef = useRef(draw)
-  drawRef.current = draw
+  const drawRef = useLatest(draw)
 
   const visible = waitForInView ? inView : true
 

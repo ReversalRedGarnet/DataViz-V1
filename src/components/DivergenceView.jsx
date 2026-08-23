@@ -4,7 +4,7 @@ import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
 import DivergenceChart from './DivergenceChart.jsx'
-import { NATIONS } from './MapView.jsx'
+import { NATION_NAMES } from '../content/nations.js'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useInView } from '../hooks/useInView.js'
@@ -54,11 +54,10 @@ export default function DivergenceView({ data, storm, style }) {
   const [progress, setProgress] = useState(0)
   const frameRef = useRef(null)
 
-  const nations = useMemo(() => NATIONS.map((n) => n.name), [])
   const eventYear = storm?.year ?? null
   const panels = useMemo(
-    () => (eventYear ? buildDivergencePanels(data, CHAIN_METRICS, nations, eventYear) : []),
-    [data, nations, eventYear]
+    () => (eventYear ? buildDivergencePanels(data, CHAIN_METRICS, NATION_NAMES, eventYear) : []),
+    [data, eventYear]
   )
   const years = useMemo(
     () => (eventYear ? divergenceYearRange(panels, eventYear) : [0, 0]),
@@ -89,7 +88,6 @@ export default function DivergenceView({ data, storm, style }) {
     if (!inView || panels.length === 0) return
     play()
     return () => cancelAnimationFrame(frameRef.current)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, panels.length])
 
   const blocked = sectionGuard({
@@ -134,7 +132,7 @@ export default function DivergenceView({ data, storm, style }) {
                 so the same chip now presses to hold the thread and presses
                 again to release it. The brief's "no interaction requires hover
                 only", applied to the one interaction on this slide. */}
-            {nations.map((nation, i) => (
+            {NATION_NAMES.map((nation, i) => (
               <button
                 key={nation}
                 type="button"

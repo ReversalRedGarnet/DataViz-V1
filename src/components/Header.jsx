@@ -79,7 +79,7 @@ export default function Header({
                 repeating on every section for no gain. Hero carries it there
                 instead, at the top of the piece. */}
             <p className="hidden font-serif text-sm italic leading-snug text-ink/70 sm:block md:border-l md:border-ink/15 md:pl-3 md:text-lg short:text-base">
-              Climate doesn't create inequality. It reveals it.
+              Climate doesn&rsquo;t create inequality. It reveals it.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1">

@@ -13,6 +13,53 @@ import InsightsPanel from './InsightsPanel.jsx'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import Tooltip from './Tooltip.jsx'
 
+// One of the five links on the rail.
+//
+// The phone accordion and the desktop rail rendered a near-identical button
+// with the same six classes and the same stage/label/caret structure, differing
+// only in whether they carried hover handlers and whether the state they
+// announced was aria-expanded or aria-pressed. Two copies of a control is two
+// places to change it and one place to forget.
+//
+// Props:
+//   metric, stage, total -- what this link is and where it sits in the chain
+//   isHeld -- whether it should be drawn emphasised
+//   expanded -- accordion mode; when defined, the button reports aria-expanded
+//     and shows a caret. Undefined means the desktop rail, which reports
+//     aria-pressed instead.
+//   onToggle -- () => void
+//   hoverHandlers -- pointer/focus emphasis, desktop only
+//   style -- entrance stagger
+function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHandlers, style }) {
+  const isAccordion = expanded !== undefined
+  const action = isAccordion
+    ? 'Show this record and what it can and cannot show.'
+    : 'Open what this record can and cannot show.'
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={isAccordion ? expanded : undefined}
+      aria-pressed={isAccordion ? undefined : isHeld}
+      aria-label={`Link ${stage} of ${total}: ${metric.label}. ${action}`}
+      className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
+      style={style}
+      {...hoverHandlers}
+    >
+      <span aria-hidden="true" className="chain-link-stage">
+        {stage}
+      </span>
+      <span className="chain-link-label">{metric.label}</span>
+      {isAccordion && (
+        <span aria-hidden="true" className="chain-link-caret">
+          {expanded ? '\u2212' : '+'}
+        </span>
+      )}
+    </button>
+  )
+}
+
 // One small chart per stage of the chain, filtered to the selected nations.
 //
 // The order is the claim: who was hit, then the harvest, the herds, the power
@@ -72,6 +119,25 @@ export default function RippleChain({
 
   const unstruck = selectedNations.filter((n) => !storm.nations.includes(n))
 
+  // The thirteen props every chain chart takes, in one place. Both layouts drew
+  // the same chart from the same data and each wrote the list out in full, so a
+  // prop added for one was a prop silently missing from the other.
+  const chainChartProps = (metric, index) => ({
+    label: metric.label,
+    allRows: filteredByMetric[metric.key],
+    nations: selectedNations,
+    valueField: metric.field,
+    chartType: metric.chartType,
+    format: metric.format,
+    showTooltip,
+    hideTooltip,
+    index,
+    stage: CHAIN_METRICS.indexOf(metric) + 1,
+    ripple: true,
+    dimNations: unstruck,
+    caveat: metric.caveat,
+  })
+
   return (
     <Section style={style}>
       <div ref={containerRef} className="relative mx-auto max-w-3xl">
@@ -111,39 +177,18 @@ export default function RippleChain({
               const isOpen = openKey === m.key
               return (
                 <li key={m.key} className="chain-rail-item">
-                  <button
-                    type="button"
-                    onClick={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
-                    aria-expanded={isOpen}
-                    aria-label={`Link ${i + 1} of ${CHAIN_METRICS.length}: ${m.label}. Show this record and what it can and cannot show.`}
-                    className={`press-target chain-link ${isOpen ? 'is-held' : ''}`}
-                  >
-                    <span aria-hidden="true" className="chain-link-stage">
-                      {i + 1}
-                    </span>
-                    <span className="chain-link-label">{m.label}</span>
-                    <span aria-hidden="true" className="chain-link-caret">
-                      {isOpen ? '\u2212' : '+'}
-                    </span>
-                  </button>
+                  <ChainLink
+                    metric={m}
+                    stage={i + 1}
+                    total={CHAIN_METRICS.length}
+                    isHeld={isOpen}
+                    expanded={isOpen}
+                    onToggle={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
+                  />
 
                   {isOpen && (
                     <div className="chain-panel">
-                      <TrendChart
-                        label={m.label}
-                        allRows={filteredByMetric[m.key]}
-                        nations={selectedNations}
-                        valueField={m.field}
-                        chartType={m.chartType}
-                        format={m.format}
-                        showTooltip={showTooltip}
-                        hideTooltip={hideTooltip}
-                        index={0}
-                        stage={i + 1}
-                        ripple
-                        dimNations={unstruck}
-                        caveat={m.caveat}
-                      />
+                      <TrendChart {...chainChartProps(m, 0)} />
                       <MetricDetail
                         metric={m}
                         rows={filteredByMetric[m.key] ?? []}
@@ -159,30 +204,24 @@ export default function RippleChain({
         ) : (
           <>
             <ol className="chain-rail mt-5">
-              {CHAIN_METRICS.map((m, i) => {
-                const isHeld = held === m.key
-                return (
-                  <li key={m.key} className="chain-rail-item">
-                    <button
-                      type="button"
-                      onClick={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
-                      onPointerEnter={() => setHovered(m.key)}
-                      onPointerLeave={() => setHovered(null)}
-                      onFocus={() => setHovered(m.key)}
-                      onBlur={() => setHovered(null)}
-                      aria-pressed={activeMetric === m.key}
-                      aria-label={`Link ${i + 1} of ${CHAIN_METRICS.length}: ${m.label}. Open what this record can and cannot show.`}
-                      className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
-                      style={{ animationDelay: `${i * 90}ms` }}
-                    >
-                      <span aria-hidden="true" className="chain-link-stage">
-                        {i + 1}
-                      </span>
-                      <span className="chain-link-label">{m.label}</span>
-                    </button>
-                  </li>
-                )
-              })}
+              {CHAIN_METRICS.map((m, i) => (
+                <li key={m.key} className="chain-rail-item">
+                  <ChainLink
+                    metric={m}
+                    stage={i + 1}
+                    total={CHAIN_METRICS.length}
+                    isHeld={held === m.key}
+                    onToggle={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
+                    hoverHandlers={{
+                      onPointerEnter: () => setHovered(m.key),
+                      onPointerLeave: () => setHovered(null),
+                      onFocus: () => setHovered(m.key),
+                      onBlur: () => setHovered(null),
+                    }}
+                    style={{ animationDelay: `${i * 90}ms` }}
+                  />
+                </li>
+              ))}
             </ol>
 
             {activeMetric && (
@@ -198,19 +237,7 @@ export default function RippleChain({
               {CHAIN_METRICS.map((m, i) => (
                 <TrendChart
                   key={m.key}
-                  label={m.label}
-                  allRows={filteredByMetric[m.key]}
-                  nations={selectedNations}
-                  valueField={m.field}
-                  chartType={m.chartType}
-                  format={m.format}
-                  showTooltip={showTooltip}
-                  hideTooltip={hideTooltip}
-                  index={i}
-                  stage={i + 1}
-                  ripple
-                  dimNations={unstruck}
-                  caveat={m.caveat}
+                  {...chainChartProps(m, i)}
                   emphasis={held ? (held === m.key ? 'active' : 'dim') : undefined}
                   cardHandlers={{
                     onPointerEnter: () => setHovered(m.key),

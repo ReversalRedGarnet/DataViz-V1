@@ -1,22 +1,10 @@
 import { AXIS_FONT, VALUE_FONT } from './constants.js'
+import { shortName } from '../../content/nations.js'
 
-// Axis labels have to fit a band that can be under 50px wide on a phone.
-// Truncating to the first word turned "Federated States of Micronesia" into
-// "Federated", so long names get a real short form and anything not listed is
-// left alone.
-const SHORT_NAMES = {
-  'Federated States of Micronesia': 'Micronesia',
-  'Papua New Guinea': 'PNG',
-  'Marshall Islands': 'Marshall Is.',
-  'Solomon Islands': 'Solomon Is.',
-  'Cook Islands': 'Cook Is.',
-  'New Caledonia': 'N. Caledonia',
-  'French Polynesia': 'Fr. Polynesia',
-}
-
-export function shortName(nation) {
-  return SHORT_NAMES[nation] ?? nation
-}
+// shortName lives with the nation data rather than here: it is a fact about
+// a country, not about a chart axis, and this module was a fifth place the
+// project's country names were written down.
+export { shortName }
 
 // Measuring text properly would mean a hidden canvas; a per-character estimate
 // at these font sizes is accurate enough to decide whether a label fits.

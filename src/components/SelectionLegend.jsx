@@ -17,12 +17,17 @@ export default function SelectionLegend({ selected }) {
 
   if (!selected || selected.length === 0) return null
 
+  // role="note" plus an explicit name on each chip below: a focusable <li> with
+  // neither announces as an unlabelled list item, and the digit that tells the
+  // two picks apart is drawn in an aria-hidden swatch.
   return (
     <ul className="mb-4 flex flex-wrap gap-4 text-sm">
       {selected.map((name, i) => (
         <li
           key={name}
           tabIndex={0}
+          role="note"
+          aria-label={`Selection ${i + 1}: ${name}. Focus to emphasise it on every chart in this section.`}
           className="flex cursor-help items-center gap-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           {...highlightHandlers(name, setHighlight)}
         >

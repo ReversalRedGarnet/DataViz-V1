@@ -3,8 +3,22 @@
 // page; these mirror them for the canvas and SVG renderers, which cannot read a
 // utility class.
 //
-// Resolved from the computed style rather than hardcoded where possible, so a
-// theme change reaches the charts on the same frame it reaches the page.
+// THESE ARE HARDCODED, AND THAT IS A KNOWN DUPLICATION. This comment used to
+// claim the values were "resolved from the computed style rather than hardcoded
+// where possible" -- they never were, and saying so made the duplication
+// invisible. Six colours are written twice: once here as hex, once in
+// styles/base.css as space-separated RGB triples for Tailwind's <alpha-value>
+// syntax. Because the two formats differ, no search will ever catch a drift
+// between them.
+//
+// Kept in step by hand for now. If you change a value here, change its --color-
+// counterpart in base.css, and vice versa:
+//   CHART_INK.light      #24333A  =  --color-ink      36 51 58
+//   CHART_INK.dark       #F0ECE3  =  --color-ink     240 236 227
+//   CHART_SURFACE.light  #FFFFFF  =  --color-surface 255 255 255
+//   CHART_SURFACE.dark   #293236  =  --color-surface  41 50 54
+//   selection[0].light   #3D6B7D  =  --color-accent   61 107 125
+//   selection[0].dark    #8FBACD  =  --color-accent  143 186 205
 const CHART_COLORS_BY_THEME = {
   light: {
     selection: ['#3D6B7D', '#8A6300'],

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLatest } from './useLatest.js'
 
 // Which slide is on stage, plus the three ways a reader can change that:
 // the Next/Previous controls, the section menu, and the keyboard.
@@ -18,16 +19,14 @@ export function useDeck(sections) {
   // rather than as more of the same forward motion.
   const [direction, setDirection] = useState(1)
   const count = sections.length
-  const countRef = useRef(count)
-  countRef.current = count
+  const countRef = useLatest(count)
 
   // A section carrying `requires` holds the deck at itself until the reader has
   // done what it asks. Enforced here rather than only on the Next button, so
   // the keyboard and the section menu cannot walk around it -- and enforced as
   // a clamp rather than a refusal, so jumping from slide 2 to slide 9 still
   // moves the reader as far as the gate instead of doing nothing.
-  const gateRef = useRef([])
-  gateRef.current = sections.map((s) => Boolean(s.requires))
+  const gateRef = useLatest(sections.map((s) => Boolean(s.requires)))
 
   const go = useCallback((next) => {
     setActive((current) => {
@@ -46,7 +45,7 @@ export function useDeck(sections) {
       setDirection(1)
       return target
     })
-  }, [])
+  }, [countRef, gateRef])
 
   const goToId = useCallback(
     (id) => {
@@ -61,11 +60,16 @@ export function useDeck(sections) {
   // very first goToId for the life of the page -- the one closed over the
   // two-section deck that exists before a storm is chosen -- so every id from
   // 'storm-journey' onwards would be looked up in an array that does not
-  // contain it and quietly do nothing. That is what made a pasted #compare
-  // link, and the browser's Back button after paging around, both land on
-  // whatever slide happened to be on stage.
-  const goToIdRef = useRef(goToId)
-  goToIdRef.current = goToId
+  // contain it and quietly do nothing.
+  //
+  // WHAT THIS DOES AND DOES NOT FIX. It fixes hashchange: the Back button after
+  // paging around, and any later navigation to a hash, now resolve against the
+  // deck as it currently stands. It does NOT make a pasted #compare link work
+  // on a cold load, and this comment used to claim it did. On first load no
+  // storm is selected, so the sections from 'storm-journey' onwards genuinely
+  // do not exist yet and there is nothing to jump to -- the reader lands on the
+  // timeline, which is the slide that asks for the one missing choice.
+  const goToIdRef = useLatest(goToId)
 
   // The deck grows from two sections to twelve when a storm is chosen, and
   // collapses again when it is cleared. Clearing while deep in the deck would
@@ -90,7 +94,7 @@ export function useDeck(sections) {
     // reader back to the hash's section every time they picked a storm -- but
     // it now calls through the ref above, so "bound once" no longer means
     // "answering with a stale deck".
-  }, [])
+  }, [goToIdRef])
 
   useEffect(() => {
     const id = sections[active]?.id
@@ -126,7 +130,7 @@ export function useDeck(sections) {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [go])
+  }, [go, countRef])
 
   return { active, direction, go, goToId, count }
 }

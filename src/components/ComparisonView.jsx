@@ -188,9 +188,12 @@ function NationSummary({ nation, data, eventYear, color, index, showTooltip, hid
 // printed number is what separates them.
 function Delta({ metric, eventRow, latestRow }) {
   const target = pctChange(eventRow[metric.field], latestRow[metric.field])
-  const from = useCountUp(eventRow[metric.field])
-  const to = useCountUp(latestRow[metric.field])
-  const pct = useCountUp(target ?? 0)
+  // All three move together on the same clock -- see hooks/useCountUp.js.
+  const [from, to, pct] = useCountUp([
+    eventRow[metric.field],
+    latestRow[metric.field],
+    target ?? 0,
+  ])
   const magnitude = Math.min(1, Math.abs(pct) / 100)
 
   return (
