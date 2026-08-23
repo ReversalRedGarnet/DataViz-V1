@@ -7,6 +7,7 @@ import { sectionGuard } from './sectionGuard.jsx'
 import JourneyScrubber from './JourneyScrubber.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useLatest } from '../hooks/useLatest.js'
+import { useOverflowFade } from '../hooks/useOverflowFade.js'
 import { chartTheme, MAP_COLORS } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
@@ -200,6 +201,13 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   const activeRef = useLatest(active)
   const themeRef = useLatest(theme)
 
+  // The stop box swaps text as the reader moves along the track, so whether it
+  // overflows is a per-stop question, not a per-storm one.
+  const { ref: stopScrollRef, overflowing: stopOverflowing } = useOverflowFade([
+    storm?.id,
+    active,
+  ])
+
   // Built once. The coastline fetch is the same static file the interactive
   // map uses, so this costs nothing extra after that section has loaded.
   useEffect(() => {
@@ -379,7 +387,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
           styles/story.css. What changes is the words; nothing else moves.
         */}
           <article className="journey-stop locked-box mt-5 border-l-2 border-accent">
-            <div className="locked-scroll pl-5 pr-1">
+            <div ref={stopScrollRef} data-overflowing={stopOverflowing} className="locked-scroll pl-5 pr-1">
             <p className="type-eyebrow text-accent">{step.date}</p>
             <h3 className="type-h3 mt-1">{step.name}</h3>
             <p className="mt-2 text-sm font-medium">{step.lead}</p>

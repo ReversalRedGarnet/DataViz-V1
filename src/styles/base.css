@@ -13,9 +13,20 @@
     wheel, trackpad, touch, keyboard, find-in-page -- because
     `scrollbar-width: none` hides the control without changing the container.
 
-    Applied to the document, not to `*`: a blanket rule would also strip
-    scrollbars from internal scrolling regions where there is no canoe to
-    replace them and content would simply look truncated.
+    APPLIED EVERYWHERE, NOT ONLY TO THE DOCUMENT. It used to be scoped to
+    <html> on the grounds that an internal scrolling region without a scrollbar
+    would look truncated -- and that reasoning was sound, so the regions that
+    relied on it now carry their own affordance instead: .locked-scroll fades
+    its bottom edge while it overflows, and .slide-more announces a slide with
+    more below it. With those in place, the scrollbars themselves were the last
+    inconsistency, appearing on some panels and not others depending on how much
+    text a storm happened to have.
+
+    Nothing about scrolling changes. `scrollbar-width: none` and a zero-size
+    ::-webkit-scrollbar hide the control without altering the container or the
+    scroll box, so wheel, trackpad, touch, keyboard, find-in-page and
+    scroll-into-view all behave exactly as before. The only thing lost is the
+    drag gesture on the bar itself.
   */
   html {
     scrollbar-width: none; /* Firefox */
@@ -23,6 +34,17 @@
   }
 
   html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* legacy Edge */
+  }
+
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
     display: none; /* Chrome, Safari, Edge */
   }
 

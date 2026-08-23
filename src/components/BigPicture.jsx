@@ -20,7 +20,7 @@ const PER_CAPITA_KEY = 'affected_persons'
 const SHARE_FORMAT = (v) => `${v.toFixed(1)}%`
 const SHARE_TICK_FORMAT = (v) => `${v}%`
 
-export default function BigPicture({ data, storm, style }) {
+export default function BigPicture({ data, dataError, storm, style }) {
   const eventYear = storm?.year ?? null
   const [perCapita, setPerCapita] = useState(false)
   const hasPopulation = (data?.population?.length ?? 0) > 0
@@ -40,6 +40,7 @@ export default function BigPicture({ data, storm, style }) {
 
   const blocked = sectionGuard({
     data,
+    error: dataError,
     storm,
     style,
     tone: 'panel',
@@ -60,41 +61,56 @@ export default function BigPicture({ data, storm, style }) {
           </p>
         </div>
 
-        {stats ? (
-          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatTile
-              index={0}
-              label="What happened"
-              value={`${storm.nations.length} of ${NATION_COUNT} nations`}
-              detail={`${storm.name}, ${storm.year}`}
-            />
-            <StatTile
-              index={1}
-              label={`People affected, ${storm.year}`}
-              value={stats.totalAffected.toLocaleString()}
-              detail="Across all four nations combined"
-            />
-            <StatTile
-              index={2}
-              label="Hardest- vs. least-hit"
-              value={stats.ratio ? `${stats.ratio.toLocaleString()}×` : 'n/a'}
-              detail={
-                stats.maxNation
-                  ? `${stats.maxNation} vs. ${stats.minNation}, ${
-                      showShareStats ? 'as a share of population' : 'by reported count'
-                    } for ${storm.year}`
-                  : `No comparable figures for ${storm.year}`
-              }
-            />
-            <StatTile
-              index={3}
-              label="Economic loss reported"
-              value={`${stats.economicLossReported} of ${NATION_COUNT} nations`}
-              detail={`For ${storm.year} itself, in the official dataset`}
-            />
-          </div>
-        ) : (
-          <p className="mt-6 text-sm opacity-70">Loading overview...</p>
+        {/* No loading branch here. sectionGuard above has already returned for
+            both data === null and a failed load, so by this point the fetch has
+            finished and every tile can say what it actually has. */}
+        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile
+            index={0}
+            label="What happened"
+            value={`${storm.nations.length} of ${NATION_COUNT} nations`}
+            detail={`${storm.name}, ${storm.year}`}
+          />
+          <StatTile
+            index={1}
+            label={`People affected, ${storm.year}`}
+            value={stats.totalAffected == null ? 'Not reported' : stats.totalAffected.toLocaleString()}
+            detail={
+              stats.totalAffected == null
+                ? `No national figure was filed for ${storm.year}`
+                : 'Across all four nations combined'
+            }
+          />
+          <StatTile
+            index={2}
+            label="Hardest- vs. least-hit"
+            value={stats.ratio ? `${stats.ratio.toLocaleString()}×` : 'n/a'}
+            detail={
+              stats.maxNation
+                ? `${stats.maxNation} vs. ${stats.minNation}, ${
+                    showShareStats ? 'as a share of population' : 'by reported count'
+                  } for ${storm.year}`
+                : `No comparable figures for ${storm.year}`
+            }
+          />
+          <StatTile
+            index={3}
+            label="Economic loss reported"
+            value={`${stats.economicLossReported} of ${NATION_COUNT} nations`}
+            detail={`For ${storm.year} itself, in the official dataset`}
+          />
+        </div>
+
+        {/* Said once, plainly, rather than left for the reader to infer from
+            four tiles and five charts that all happen to be empty. This is a
+            reporting gap, which is one of the things this site is about -- so
+            it is stated as a finding, not shown as a failure. */}
+        {stats.totalAffected == null && (
+          <p className="mt-3 text-sm opacity-70">
+            The disaster-impact series does not extend to {storm.year}. The regional snapshot below
+            is drawn from what was reported; the empty panels are gaps in the record, not a problem
+            with the page.
+          </p>
         )}
 
         {snapshots && (
@@ -257,13 +273,26 @@ function roundRatio(value) {
 // The total affected does not follow the toggle, and must not. It is a sum of
 // people across four nations; shares of four different denominators do not add
 // up to anything, and a "112%" here would be meaningless.
+// ALWAYS RETURNS AN OBJECT once there is data and a storm. It used to return
+// null when `affected_persons` held no rows for the storm's year, and the
+// caller rendered "Loading overview..." on null -- so the two 2023 storms, for
+// which that series simply stops in 2022, sat on a loading message forever.
+// Nothing was loading. The fetch had completed, and the answer was "this year
+// was never reported".
+//
+// The fix is not a better message on null: it is that one empty series should
+// never have blanked the block. Two of the four tiles below -- what happened,
+// and how many nations filed an economic-loss figure -- do not read
+// `affected_persons` at all and were being withheld because a different series
+// was empty. Each field is now independently nullable, and each tile says what
+// it does and does not have.
 function computeStats(data, eventYear, perCapita) {
   if (!data || !eventYear) return null
   const rows = data.affected_persons ?? []
   const eventRows = rows.filter((d) => d.year === eventYear)
-  if (eventRows.length === 0) return null
 
-  const totalAffected = eventRows.reduce((sum, d) => sum + d.affected_persons, 0)
+  const totalAffected =
+    eventRows.length > 0 ? eventRows.reduce((sum, d) => sum + d.affected_persons, 0) : null
 
   // Compared in whichever unit the reader has chosen. A nation with no
   // population figure drops out of the per-capita comparison rather than being

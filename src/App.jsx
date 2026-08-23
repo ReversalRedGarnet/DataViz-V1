@@ -74,7 +74,7 @@ const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.labe
 // content/nations.js; this file used to derive it here, and so did BigPicture,
 // ContextPanel and DivergenceView, each independently.
 
-function pageSections(data, story, onSelectStorm) {
+function pageSections(data, dataError, story, onSelectStorm) {
   const { storm, selected } = story
 
   return [
@@ -106,7 +106,7 @@ function pageSections(data, story, onSelectStorm) {
       ),
     },
     { id: 'storm-profile', element: <StormProfile storm={storm} /> },
-    { id: 'big-picture', element: <BigPicture data={data} storm={storm} /> },
+    { id: 'big-picture', element: <BigPicture data={data} dataError={dataError} storm={storm} /> },
     {
       id: 'map',
       // Everything from here on is driven by the map's selection: the ripple
@@ -129,6 +129,7 @@ function pageSections(data, story, onSelectStorm) {
       element: (
         <RippleChain
           data={data}
+          dataError={dataError}
           storm={storm}
           selectedNations={selected}
           activeMetric={story.activeMetric}
@@ -136,13 +137,14 @@ function pageSections(data, story, onSelectStorm) {
         />
       ),
     },
-    { id: 'divergence', element: <DivergenceView data={data} storm={storm} /> },
-    { id: 'context', element: <ContextPanel data={data} /> },
+    { id: 'divergence', element: <DivergenceView data={data} dataError={dataError} storm={storm} /> },
+    { id: 'context', element: <ContextPanel data={data} dataError={dataError} /> },
     {
       id: 'compare',
       element: (
         <ComparisonView
           data={data}
+          dataError={dataError}
           storm={storm}
           selectedNations={selected}
           nations={NATION_NAMES}
@@ -174,7 +176,7 @@ function pageSections(data, story, onSelectStorm) {
 }
 
 function AppShell() {
-  const data = useMetricData(METRICS)
+  const { data, error: dataError } = useMetricData(METRICS)
   // One hook, one source of truth: the storm, the country pair, the reading
   // mode, the position along the storm's path and the open ripple link. Every
   // section below is a view of these; none of them keeps a second copy.
@@ -215,7 +217,7 @@ function AppShell() {
   //
   // The header's section menu is the one other way to jump, and it stays: it is
   // a list of destinations that does nothing but go to them.
-  const sections = pageSections(data, story, story.selectStorm)
+  const sections = pageSections(data, dataError, story, story.selectStorm)
   const deck = useDeck(sections)
   const { active, direction, go, goToId } = deck
 

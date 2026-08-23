@@ -29,7 +29,7 @@ import Tooltip from './Tooltip.jsx'
 //   onSwapNations -- () => void
 //   style -- forwarded to Section (entrance stagger)
 export default function ComparisonView({
-  data,
+  data, dataError,
   storm,
   selectedNations,
   nations,
@@ -43,6 +43,7 @@ export default function ComparisonView({
 
   const blocked = sectionGuard({
     data,
+    error: dataError,
     storm,
     style,
     tone: 'panel',

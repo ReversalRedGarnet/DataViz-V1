@@ -6,6 +6,8 @@
 // reads as frame and the content reads as content. 'ink' is the inversion the
 // closing citations use -- its dark: pair is bg-panel/text-ink rather than a
 // straight flip, because the flip reads too bright in dark mode.
+import Atmosphere from './Atmosphere.jsx'
+
 const TONES = {
   panel: 'bg-panel',
   ink: 'bg-ink text-sand dark:bg-panel dark:text-ink',
@@ -43,10 +45,26 @@ const WIDTHS = {
 // property it inherits, so a chart nested three levels down can align itself to
 // the section's column without being handed a prop -- see .section-content in
 // styles/layout.css.
+//
+// `atmosphere` is the site's decorative weather: 'ambient' (the default),
+// 'hero' for the louder title-card variant, or false to switch it off. It lives
+// here because this is the one component every section on every page already
+// passes through, which is what makes "the animation appears consistently" a
+// property of the layout rather than something each page has to remember.
+//
+// It is rendered as a SIBLING of .section-content, not inside it, so the two
+// can be ordered explicitly: the layer at z-index 0, the content at 1. See the
+// note on .atmos-layer in styles/story.css for what that replaces.
+//
+// This is also why the section is `relative`: the layer positions against it.
+// Note what is deliberately NOT added alongside -- overflow: hidden. The layer
+// clips its own rings, and a section that clipped its overflow would clip the
+// tooltips that sit near its edges.
 export default function Section({
   tone = 'panel',
   lock = false,
   width = 'wide',
+  atmosphere = 'ambient',
   className = '',
   style,
   children,
@@ -54,12 +72,13 @@ export default function Section({
 }) {
   return (
     <section
-      className={`animate-pop-in px-6 py-14 sm:px-8 md:py-20 ${TONES[tone] ?? TONES.panel} ${
+      className={`animate-pop-in relative px-6 py-14 sm:px-8 md:py-20 ${TONES[tone] ?? TONES.panel} ${
         lock ? 'section-lock' : ''
       } ${className}`}
       style={{ '--content-max': WIDTHS[width] ?? WIDTHS.wide, ...style }}
       {...rest}
     >
+      {atmosphere && <Atmosphere variant={atmosphere === true ? 'ambient' : atmosphere} />}
       <div className="section-content">{children}</div>
     </section>
   )

@@ -5,6 +5,7 @@ import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlig
 import { STORMS, ROSTER_START, ROSTER_END, strikeCounts } from '../content/storms.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 import { formatNationList } from '../utils/formatNationList.js'
+import { useOverflowFade } from '../hooks/useOverflowFade.js'
 
 const YEARS = Array.from({ length: ROSTER_END - ROSTER_START + 1 }, (_, i) => ROSTER_START + i)
 
@@ -122,13 +123,17 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
 // storm if there is one and otherwise the selected storm, so the panel is never
 // empty once a choice has been made.
 function StormPreview({ storm, selected }) {
+  // Re-measured whenever the storm changes: the same box overflows for one
+  // storm's note and has room to spare for the next.
+  const { ref: scrollRef, overflowing } = useOverflowFade([storm?.id])
+
   return (
     // A locked box, not a minimum. min-height only guarantees the floor, and
     // storm notes run from two lines to four -- so moving the pointer along the
     // axis pumped the whole slide up and down under the reader's hand. The box
     // is a fixed size that the text lives inside; anything taller scrolls.
     <div className="storm-preview locked-box mt-4 h-[11rem] rounded-xl border border-ink/10 bg-surface/60 sm:h-[9.5rem] short:mt-3 short:h-[8rem]">
-      <div className="locked-scroll p-4">
+      <div ref={scrollRef} data-overflowing={overflowing} className="locked-scroll p-4">
       {storm ? (
         <>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

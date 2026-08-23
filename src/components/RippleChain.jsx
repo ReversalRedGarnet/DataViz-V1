@@ -67,7 +67,7 @@ function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHand
 // path, and the section says so in prose -- every series is an annual national
 // total that no cyclone has to itself.
 export default function RippleChain({
-  data,
+  data, dataError,
   storm,
   selectedNations,
   activeMetric,
@@ -107,6 +107,7 @@ export default function RippleChain({
 
   const blocked = sectionGuard({
     data,
+    error: dataError,
     storm,
     style,
     subject: 'Ripple chain',

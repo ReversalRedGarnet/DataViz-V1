@@ -15,7 +15,20 @@ import EmptyState from './EmptyState.jsx'
 // `prompt` completes the sentence "Pick a storm from the timeline to ..." so
 // each section can say what it specifically offers, which is the part worth
 // varying. `subject` names the section in the loading message.
-export function sectionGuard({ data, storm, style, tone, subject, prompt }) {
+//
+// `error` is checked before `data`, because a failed load and a load still in
+// flight both arrive here as data === null. Without the distinction a 404 read
+// as "waiting on data" and never stopped saying so, which is the one thing a
+// loading message must never do.
+export function sectionGuard({ data, error, storm, style, tone, subject, prompt }) {
+  if (error) {
+    return (
+      <EmptyState tone={tone} style={style}>
+        {subject} &mdash; the data could not be loaded. Reload the page to try again.
+      </EmptyState>
+    )
+  }
+
   if (!data) {
     return (
       <EmptyState tone={tone} style={style}>

@@ -33,6 +33,10 @@
     width: 100%;
     max-width: var(--content-max, 64rem);
     margin-inline: auto;
+    /* Above the decorative weather Section paints behind it. See .atmos-layer
+       in styles/story.css for why the order is stated rather than inferred. */
+    position: relative;
+    z-index: 1;
   }
 
   /*
