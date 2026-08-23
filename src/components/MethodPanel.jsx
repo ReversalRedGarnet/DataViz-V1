@@ -2,6 +2,7 @@ import Section from './Section.jsx'
 import { EXCLUDED, STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
 import { NATION_COUNT } from '../content/nations.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
+import { METHOD_BACKDROP } from '../content/patterns.js'
 
 // How the site was made, and what it cannot say.
 //
@@ -26,6 +27,14 @@ import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 // build. Replace it with your own roadmap before submitting -- it is written
 // from what the code currently does not do, not from anything you have told me
 // you intend.
+
+// One card style, named once. It was written out identically four times, so a
+// density change meant four edits and any one of them could be missed -- which
+// is most of why this slide drifted heavier than the ones around it.
+//
+// p-3.5 rather than p-4, and that is the whole of the "shrink things" part of
+// this pass. The rest of the height came out of layout, not type.
+const CARD = 'rounded-xl border border-ink/10 bg-surface/60 p-3.5'
 
 const BUILD = [
   { label: 'Interface', value: 'React 18, built with Vite' },
@@ -81,14 +90,23 @@ const PLANNED = [
 
 export default function MethodPanel({ style }) {
   return (
-    <Section tone="panel" style={style}>
+    // backdrop: the weave motif, because this slide and the sources slide are
+    // apparatus rather than argument. See content/patterns.js.
+    <Section tone="panel" backdrop={METHOD_BACKDROP} style={style}>
       <p className="type-eyebrow mb-1 text-accent">
         Method, data and limitations
       </p>
-      <h2 className="type-h2 mb-2">
+      <h2 className="type-h2 mb-1.5">
         How this was made
       </h2>
-      <div className="prose-column prose-wide mb-8 space-y-3 text-sm opacity-80">
+
+      {/* ONE RHYTHM, SET ONCE. Every block below used to carry its own mb-8,
+          which is 32px of air repeated six times whether the block above it was
+          a paragraph or a grid of cards -- 192px of the scroll, before any
+          content. space-y-5 on the wrapper states the gap in one place and lets
+          the last block end without a trailing margin. */}
+      <div className="method-stack space-y-5">
+      <div className="prose-column prose-wide text-sm opacity-80">
         <p>
           Everything on the preceding slides rests on two choices: which storms count, and which
           figures are trusted to describe them. Both are stated here so they can be checked rather
@@ -101,7 +119,7 @@ export default function MethodPanel({ style }) {
           it is the exclusion that costs the argument something, and a list
           containing only convenient omissions would be doing the same selective
           work it claims to prevent. */}
-      <div className="mb-8">
+      <div>
         <h3 className="type-subhead mb-1 text-accent">
           The roster rule, and what it left out
         </h3>
@@ -123,9 +141,7 @@ export default function MethodPanel({ style }) {
           {EXCLUDED.map((storm, i) => (
             <li
               key={storm.name}
-              className={`rounded-xl border border-ink/10 bg-surface/60 p-4 ${
-                i === 0 ? 'sm:col-span-2' : ''
-              }`}
+              className={`${CARD} ${i === 0 ? 'sm:col-span-2' : ''}`}
             >
               <p className="text-base font-semibold">
                 {storm.name} <span className="text-sm font-normal opacity-60">{storm.year}</span>
@@ -147,34 +163,72 @@ export default function MethodPanel({ style }) {
         </p>
       </div>
 
-      <div className="mb-8">
-        <h3 className="type-subhead mb-1 text-accent">
-          Where the figures come from
-        </h3>
-        <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
-          <p>
-            All indicator data is drawn from the Pacific Data Hub, the Pacific Community&rsquo;s
-            statistical portal, for Solomon Islands, Vanuatu, Fiji and Tonga across 2013 to 2024.
-            The portal exports whole dataflows; the filtering to these four nations and these
-            twelve years happens in a Python cleaning step, not by hand, so the same rule is
-            applied to every series. Storm dates, categories and death tolls are not portal data
-            &mdash; they come from national meteorological services and UN OCHA, cited per storm.
-            Every source is linked in full on the next slide.
-          </p>
-          <p>
-            The window opens in 2013 rather than at the first storm on the roster because a chart
-            of an event year means nothing without baseline years before it.
+      {/* Provenance and build, side by side on a wide screen. They were two
+          full-width blocks stacked, and neither fills the measure: one is two
+          short paragraphs, the other is four one-line cards. They are also the
+          same kind of statement -- where this came from, what it was made with
+          -- so pairing them reads as one answer rather than two sections. */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div>
+          <h3 className="type-subhead mb-1 text-accent">
+            Where the figures come from
+          </h3>
+          <div className="prose-column prose-wide space-y-2 text-sm opacity-80">
+            <p>
+              All indicator data is drawn from the Pacific Data Hub, the Pacific Community&rsquo;s
+              statistical portal, for Solomon Islands, Vanuatu, Fiji and Tonga across 2013 to 2024.
+              The portal exports whole dataflows; the filtering to these four nations and these
+              twelve years happens in a Python cleaning step, not by hand, so the same rule is
+              applied to every series. Storm dates, categories and death tolls are not portal data
+              &mdash; they come from national meteorological services and UN OCHA, cited per storm.
+              Every source is linked in full on the next slide.
+            </p>
+            <p>
+              The window opens in 2013 rather than at the first storm on the roster because a chart
+              of an event year means nothing without baseline years before it.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="type-subhead mb-1 text-accent">
+            How it is built
+          </h3>
+          <dl className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            {BUILD.map((row) => (
+              <div key={row.label} className={CARD}>
+                <dt className="type-eyebrow opacity-60">{row.label}</dt>
+                <dd className="mt-1 text-sm opacity-85">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="prose-column prose-wide mt-2.5 text-sm opacity-80">
+            Charts are drawn directly in D3 rather than through a charting library, so every axis,
+            label and empty state is a decision made here rather than a default inherited from
+            somewhere else. The cleaning scripts are committed alongside the site, and the JSON they
+            produce is what ships &mdash; there is no live API call, and the figures cannot change
+            under the argument after it has been read.
           </p>
         </div>
       </div>
 
-      <div className="mb-8">
+      <div>
         <h3 className="type-subhead mb-1 text-accent">
           What the data cannot say
         </h3>
-        <ul className="space-y-3">
+        {/* TWO COLUMNS, and this is the single biggest saving on the slide.
+            Five cards of 300-450 characters stacked at the full 1024px measure
+            ran about 700px; the same content in two columns runs about 540px,
+            and the cards were already written for a half-width measure -- the
+            note below has said so all along. Reading order still goes down the
+            page, since a grid fills row by row and each card is self-contained.
+
+            items-start so a short card does not stretch to match a tall
+            neighbour, which is where a two-column grid usually gives back the
+            height it saved. */}
+        <ul className="grid items-start gap-2.5 sm:grid-cols-2">
           {LIMITS.map((limit) => (
-            <li key={limit.title} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
+            <li key={limit.title} className={CARD}>
               <p className="text-sm font-semibold">{limit.title}</p>
               {/* Deliberately NOT .prose-short. These bodies run 300-450
                   characters inside a half-width card, so they set to six or
@@ -186,36 +240,16 @@ export default function MethodPanel({ style }) {
         </ul>
       </div>
 
-      <div className="mb-8">
-        <h3 className="type-subhead mb-1 text-accent">
-          How it is built
-        </h3>
-        <dl className="grid gap-3 sm:grid-cols-2">
-          {BUILD.map((row) => (
-            <div key={row.label} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
-              <dt className="type-eyebrow opacity-60">
-                {row.label}
-              </dt>
-              <dd className="mt-1 text-sm opacity-85">{row.value}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="prose-column prose-wide mt-3 text-sm opacity-80">
-          Charts are drawn directly in D3 rather than through a charting library, so every axis,
-          label and empty state is a decision made here rather than a default inherited from
-          somewhere else. The cleaning scripts are committed alongside the site, and the JSON they
-          produce is what ships &mdash; there is no live API call, and the figures cannot change
-          under the argument after it has been read.
-        </p>
-      </div>
-
-      <div className="mb-8">
+      <div>
         <h3 className="type-subhead mb-1 text-accent">
           What is not here yet
         </h3>
-        <ul className="prose-column prose-wide prose-short space-y-2 text-sm opacity-80">
+        {/* Four one-sentence items at the full measure each set to a single
+            long line with a wrapped tail. Two columns halves the block and
+            fits each item to its own text. */}
+        <ul className="grid gap-x-6 gap-y-2 text-sm opacity-80 sm:grid-cols-2">
           {PLANNED.map((item) => (
-            <li key={item} className="border-l-2 border-ink/15 pl-3">
+            <li key={item} className="prose-short border-l-2 border-ink/15 pl-3">
               {item}
             </li>
           ))}
@@ -233,7 +267,7 @@ export default function MethodPanel({ style }) {
         <h3 className="type-subhead mb-1 text-accent">
           Whose language the record is kept in
         </h3>
-        <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
+        <div className="prose-column prose-wide text-sm opacity-80">
           <p>
             This site is written in English. So is every figure it draws on: the portal exports,
             the national statistics releases, the disaster assessments filed after each cyclone.
@@ -242,16 +276,23 @@ export default function MethodPanel({ style }) {
           </p>
         </div>
 
-        <ul aria-label="First languages of the four nations" className="mt-4 grid gap-3 sm:grid-cols-2">
+        {/* Was four cards, each with 14px of padding on every side around a
+            country name and one short line. Card chrome is for something a
+            reader compares or acts on; this is a list, so it is set as one.
+            Same four facts, roughly a third of the height. */}
+        <ul
+          aria-label="First languages of the four nations"
+          className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2"
+        >
           {LANGUAGES.map((row) => (
-            <li key={row.nation} className="rounded-xl border border-ink/10 bg-surface/60 p-4">
-              <p className="text-sm font-semibold">{row.nation}</p>
-              <p className="mt-1 text-sm opacity-80">{row.tongues}</p>
+            <li key={row.nation} className="border-l-2 border-accent/40 pl-3">
+              <span className="font-semibold">{row.nation}</span>
+              <span className="opacity-80"> &mdash; {row.tongues}</span>
             </li>
           ))}
         </ul>
 
-        <div className="prose-column prose-wide mt-4 space-y-3 text-sm opacity-80">
+        <div className="prose-column prose-wide mt-3 space-y-2 text-sm opacity-80">
           <p>
             That is the same asymmetry the rest of this page documents, one step further along.
             Solomon Islands has the fewest weather stations and the largest gaps in the disaster
@@ -268,10 +309,11 @@ export default function MethodPanel({ style }) {
           </p>
         </div>
 
-        <p className="prose-wide mt-6 text-xs italic opacity-70">
-          This site is illustrative. It is not intended to inform policy, funding or financial
-          decisions.
-        </p>
+        {/* The "this site is illustrative" line that sat here is gone. It was
+            printed verbatim on the sources slide immediately after this one,
+            which is where a disclaimer belongs, and saying it twice in
+            consecutive slides made neither instance carry weight. */}
+      </div>
       </div>
     </Section>
   )

@@ -1,10 +1,21 @@
 // Site footer: sources, copyright, and a plain-language data disclaimer.
 //
-// bg-ink/text-sand rather than a light panel with low-opacity small print,
-// which is a common way footnotes quietly drop below WCAG contrast. In dark
-// mode ink becomes the LIGHT tone, so an un-overridden bg-ink would flip the
-// footer to a near-white panel -- correct by contrast logic, too bright in
-// practice. dark:bg-panel keeps panel's existing relationship to the page.
+// THIS SLIDE USED TO INVERT ITSELF, AND ONLY IN LIGHT MODE. It was
+// bg-ink/text-sand with a dark:bg-panel/dark:text-ink override, on the
+// reasoning that dark small print on a light panel is a common way footnotes
+// drop below WCAG contrast. The effect was that in dark mode it matched every
+// other slide, and in light mode it alone was a black panel -- so the last
+// thing a reader saw was the one thing that did not belong to the design
+// system, and the inconsistency was invisible to anyone reviewing in dark mode.
+//
+// Now bg-panel/text-ink in both, which is Section's default tone. The contrast
+// concern was real but it was answered in the wrong place: the fix is that the
+// small print here is text-ink/75 rather than a low opacity on a dark ground,
+// which clears AA against panel in both themes.
+//
+// What it loses is its distinctiveness as the closing slide. That is carried
+// by the fish backdrop instead -- see content/patterns.js. A texture can mark
+// a slide as different without taking it out of the palette.
 //
 // Props:
 //   sources -- array of { label, url }
@@ -21,7 +32,7 @@ const YEAR = new Date().getFullYear()
 export default function CitationPanel({ sources = [], aboutTitle = 'About this data', children, style }) {
   return (
     <footer
-      className="animate-pop-in relative overflow-hidden px-6 py-10 md:py-14 bg-ink text-sand dark:bg-panel dark:text-ink"
+      className="animate-pop-in relative overflow-hidden bg-panel px-6 py-10 text-ink md:py-14"
       style={style}
     >
       <BackgroundPattern backdrop={FOOTER_BACKDROP} />
@@ -40,7 +51,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
         <div>
           <h2 className="type-eyebrow mb-3 opacity-80">Data sources</h2>
           {sources.length === 0 ? (
-            <p className="text-sand/60 dark:text-ink/60">No data sources listed yet.</p>
+            <p className="text-ink/75">No data sources listed yet.</p>
           ) : (
             <ul className="space-y-1.5">
               {sources.map((s) => (
@@ -48,7 +59,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
                   <a
                     href={s.url}
                     rel="noreferrer"
-                    className="underline decoration-sand/40 hover:decoration-sand dark:decoration-ink/40 dark:hover:decoration-ink"
+                    className="underline decoration-ink/40 hover:decoration-ink"
                   >
                     {s.label}
                   </a>
@@ -67,7 +78,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
                   sitting under a list of links; they are the subject of the
                   method slide before this one, and stating them twice made
                   neither slide readable. */}
-              <p className="prose-column prose-wide text-sand/85 dark:text-ink/85">
+              <p className="prose-column prose-wide text-ink/85">
                 Figures are drawn from official Pacific Data Hub statistics for Solomon Islands,
                 Vanuatu, Fiji and Tonga, covering 2013 to 2024. Coverage varies by country and by
                 metric, and missing figures are labelled unavailable rather than left blank. How
@@ -75,7 +86,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
                 previous slide.
               </p>
 
-              <p className="prose-column prose-wide prose-short text-sand/85 dark:text-ink/85 mt-3">
+              <p className="prose-column prose-wide prose-short mt-3 text-ink/85">
                 This site is illustrative and isn&rsquo;t intended to inform policy, funding, or financial
                 decisions.
               </p>
@@ -83,7 +94,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
           )}
         </div>
 
-        <div className="text-sand/60 dark:text-ink/60 text-xs">
+        <div className="text-xs text-ink/75">
           <p>
             © {YEAR} Aziel Douglas Orihao. Code licensed under MIT (see LICENSE in the repository).
             Underlying datasets belong to their original sources, listed here, under their own

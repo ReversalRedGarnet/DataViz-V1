@@ -7,10 +7,19 @@
 // closing citations use -- its dark: pair is bg-panel/text-ink rather than a
 // straight flip, because the flip reads too bright in dark mode.
 import Atmosphere from './Atmosphere.jsx'
+import BackgroundPattern from './BackgroundPattern.jsx'
 
+// THERE USED TO BE AN 'ink' TONE HERE -- bg-ink/text-sand with a
+// dark:bg-panel/dark:text-ink override -- and no section ever passed it. The
+// citations panel hardcoded the same three classes instead, which is how the
+// closing slide came to be a black panel in light mode and an ordinary one in
+// dark, so the inconsistency was invisible to anyone reviewing in dark mode.
+//
+// Removed rather than left unused: an inverted tone sitting in the palette is
+// an invitation to reintroduce exactly that, and a slide that needs to feel
+// different now has `backdrop` for it.
 const TONES = {
   panel: 'bg-panel',
-  ink: 'bg-ink text-sand dark:bg-panel dark:text-ink',
 }
 
 // THE SITE'S TWO CONTENT WIDTHS, NAMED.
@@ -56,6 +65,15 @@ const WIDTHS = {
 // can be ordered explicitly: the layer at z-index 0, the content at 1. See the
 // note on .atmos-layer in styles/story.css for what that replaces.
 //
+// `backdrop` is a tiling motif from content/patterns.js, off by default. It
+// paints in the same band as the atmosphere -- behind .section-content, in
+// front of the section's background -- and like the atmosphere it takes no
+// pointer events and is hidden from assistive technology.
+//
+// Off by default on purpose. These textures belong on the slides that are
+// apparatus rather than argument; behind a chart the tiling competes with the
+// marks. See the note on METHOD_BACKDROP for where the line falls.
+//
 // This is also why the section is `relative`: the layer positions against it.
 // Note what is deliberately NOT added alongside -- overflow: hidden. The layer
 // clips its own rings, and a section that clipped its overflow would clip the
@@ -65,6 +83,7 @@ export default function Section({
   lock = false,
   width = 'wide',
   atmosphere = 'ambient',
+  backdrop = null,
   className = '',
   style,
   children,
@@ -78,6 +97,10 @@ export default function Section({
       style={{ '--content-max': WIDTHS[width] ?? WIDTHS.wide, ...style }}
       {...rest}
     >
+      {/* Backdrop first: both layers sit below .section-content's z-index 1,
+          so between themselves source order decides, and the tiling should be
+          the further back of the two. */}
+      {backdrop && <BackgroundPattern backdrop={backdrop} />}
       {atmosphere && <Atmosphere variant={atmosphere === true ? 'ambient' : atmosphere} />}
       <div className="section-content">{children}</div>
     </section>
