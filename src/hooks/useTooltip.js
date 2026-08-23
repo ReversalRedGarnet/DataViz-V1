@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { TOOLTIP_MAX_WIDTH } from '../components/Tooltip.jsx'
 
 // Tooltip state for anything drawn with D3 (map markers, chart marks) or plain
 // React (the "no data" notes).
@@ -28,9 +29,12 @@ export function useTooltip() {
       clientY = targetRect.top
     }
 
-    // Clamp so the ~200px box doesn't run off either edge on a phone.
+    // Clamp so the box doesn't run off either edge on a phone. Half the box's
+    // real width, imported rather than guessed -- these were two independent
+    // numbers before, and the clamp was the smaller of them.
+    const half = TOOLTIP_MAX_WIDTH / 2
     const rawX = clientX - containerRect.left
-    const x = Math.min(Math.max(rawX, 90), Math.max(containerRect.width - 90, 90))
+    const x = Math.min(Math.max(rawX, half), Math.max(containerRect.width - half, half))
     const y = clientY - containerRect.top
 
     setTooltip({ x, y, content })

@@ -20,10 +20,39 @@ export const HEADER_BACKDROP = {
 
 // Stronger than the header's -- the footer is a solid block with less
 // competing for attention inside it.
+//
+// It also does more work than it used to. The sources slide was the one panel
+// on the site that inverted its own colours, which is what made it read as the
+// end; now that it uses the same palette as everything else, this texture is
+// what marks it. Nudged up accordingly -- 0.07 was calibrated against a black
+// ground, and the same value reads fainter on panel.
 export const FOOTER_BACKDROP = {
   pattern: 'fish',
-  opacity: 0.07,
+  opacity: 0.09,
   scale: 1,
+}
+
+// THE BACK MATTER, and the editorial reason there is a third of these.
+//
+// The patterns were only ever on the chrome: the header, the slide footer and
+// the sources panel. Putting them on an argument slide would compete with the
+// charts, which is the one thing decoration is not allowed to do. But the last
+// two slides are not argument -- they are apparatus: how the site was made, and
+// where its figures came from. Giving those two a texture the analysis slides
+// do not have marks the shift from "here is what the data says" to "here is how
+// we know", which is a real boundary in the piece and was previously carried by
+// nothing at all.
+//
+// Weave for the method slide: plaited strands, over and under, is the motif
+// about construction. It is also the quietest of the three, which matters on a
+// slide that is mostly text.
+//
+// To try it elsewhere, pass backdrop={...} to any Section. To take it back out,
+// delete the prop -- nothing else moves.
+export const METHOD_BACKDROP = {
+  pattern: 'weave',
+  opacity: 0.05,
+  scale: 1.4,
 }
 
 // With your own artwork:

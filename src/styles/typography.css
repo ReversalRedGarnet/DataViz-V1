@@ -77,8 +77,20 @@
     section that carries full-width charts beneath it.
 
     Long lines are the cost, and .prose-column pays it down. Pair the two.
-    Opt in per block: sections whose prose sits beside something have no empty
-    width to reclaim.
+
+    NOTE ON WHAT THIS DOES NOW. Nothing else sets a max-width on these blocks,
+    so this declaration is a no-op that documents intent rather than a rule that
+    changes anything -- full width is what a <div> does by default. It is kept
+    because the intent is worth stating at the call site, and because a block
+    marked .prose-wide is a block someone has already decided should run the
+    full measure.
+
+    The case that DOES need a rule is prose whose neighbour is a chart, which
+    used to carry Tailwind's max-w-prose and so stopped short of the figure it
+    was describing. That is .figure-prose in styles/layout.css -- a real 65ch
+    cap below the desktop breakpoint, released above it. Reach for .figure-prose
+    when the text belongs to a visualisation, .prose-wide when it is simply
+    body copy that should fill the column.
   */
   .prose-wide {
     max-width: none;

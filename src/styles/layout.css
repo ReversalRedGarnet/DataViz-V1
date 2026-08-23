@@ -1,0 +1,72 @@
+/*
+  THE SHARED CONTENT COLUMN.
+
+  One horizontal measurement per section, and everything in that section --
+  heading, intro prose, the chart or map itself, the caption underneath -- is
+  laid out against it. The stack a reader sees is:
+
+      Section (background, page padding)
+        └─ .section-content        <- the shared boundaries
+             ├─ heading
+             ├─ intro prose
+             ├─ visualisation
+             └─ caption / notes
+
+  WHAT THIS REPLACES. There were two content widths and they were set in
+  different places. Section put a max-w-5xl wrapper around everything, and then
+  four sections -- the storm profile, the ripple chain, the detective and the
+  conclusion -- opened a *second*, narrower mx-auto max-w-3xl wrapper inside it.
+  Neither width was named anywhere, so "how wide is a section" had no answer you
+  could look up, and a new section had to guess.
+
+  Now Section owns it. `--content-max` is set once, by the width prop, and
+  .section-content is the only element that reads it.
+
+  WHY --content-max IS A CUSTOM PROPERTY rather than a Tailwind class: it
+  inherits. Anything nested at any depth can align itself to the section's
+  column without being passed a prop or being a direct child, which is what
+  makes this a shared rule rather than a convention people have to remember.
+*/
+
+@layer components {
+  .section-content {
+    width: 100%;
+    max-width: var(--content-max, 64rem);
+    margin-inline: auto;
+    /* Above the decorative weather Section paints behind it. See .atmos-layer
+       in styles/story.css for why the order is stated rather than inferred. */
+    position: relative;
+    z-index: 1;
+  }
+
+  /*
+    PROSE THAT BELONGS TO A FIGURE.
+
+    Text introducing or annotating a chart is part of that chart's block, and
+    on a wide screen it should have the chart's left and right edges. It used
+    to carry Tailwind's max-w-prose, a 65ch reading measure, which on the storm
+    profile set the intro to roughly 455px above a 768px chart -- text ending
+    two-fifths of the way across a figure it is describing, with the gap
+    reading as a layout fault rather than as a margin.
+
+    The measure is kept below the desktop breakpoint. On a phone or a tablet
+    the column is already narrower than 65ch, or close to it, so removing the
+    cap there would change nothing on the small end and risk a genuinely long
+    line on the large end of the tablet range. Widening is a desktop behaviour
+    because the empty space it reclaims is a desktop problem.
+
+    Pair with .prose-column. Long lines are the cost of full width, and the
+    justification and hyphenation in typography.css are what pay it down --
+    that file's own note on .prose-wide says the same thing about the same
+    trade-off.
+  */
+  .figure-prose {
+    max-width: 65ch;
+  }
+
+  @media (min-width: 1024px) {
+    .figure-prose {
+      max-width: none;
+    }
+  }
+}

@@ -36,7 +36,7 @@ const CAPACITY_YEAR = DATA_YEAR_MAX
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
 //   style -- forwarded to Section (entrance stagger)
-export default function ContextPanel({ data, style }) {
+export default function ContextPanel({ data, dataError, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
 
   const capacity = useMemo(
@@ -48,7 +48,16 @@ export default function ContextPanel({ data, style }) {
     [data]
   )
 
-  if (!data) return <EmptyState style={style}>Context -- waiting on data.</EmptyState>
+  // A failed load and a load in flight both arrive as data === null; only the
+  // second one is worth a message that implies waiting.
+  if (dataError) {
+    return (
+      <EmptyState style={style}>
+        Context &mdash; the data could not be loaded. Reload the page to try again.
+      </EmptyState>
+    )
+  }
+  if (!data) return <EmptyState style={style}>Context &mdash; waiting on data.</EmptyState>
 
   return (
     <Section style={style}>

@@ -44,10 +44,10 @@ export default function Hero({ style }) {
         'through official records from trusted sources and examined across key ' +
         'factors, reveal why the same weather can produce such different outcomes.'
       }
+      atmosphere="hero"
       className={`hero-atmos relative overflow-hidden ${stirred ? 'is-stirred' : ''}`}
       style={style}
     >
-      <HeroAtmosphere />
 
       {/* The thesis, on mobile only. It is in the header at every width from
           sm up; on a phone the header cannot afford it, so it lands here
@@ -135,25 +135,5 @@ export default function Hero({ style }) {
       </div>
 
     </PageHero>
-  )
-}
-
-// The weather behind the words: rings spreading from a point in the ocean.
-// Decoration, and treated as such -- hidden from assistive technology, removed
-// under reduced motion, and stopped once the reader has touched anything.
-function HeroAtmosphere() {
-  return (
-    <div aria-hidden="true" className="hero-atmos-layer">
-      <span className="hero-ring" style={{ animationDelay: '0ms' }} />
-      <span className="hero-ring" style={{ animationDelay: '2600ms' }} />
-      <span className="hero-ring" style={{ animationDelay: '5200ms' }} />
-      <svg className="hero-cyclone" viewBox="-20 -20 40 40" fill="none">
-        <g className="cyclone-spin">
-          <path d="M0,-3 C10,-13 22,-9 20,1 C16,-6 7,-7 0,-3 Z" fill="currentColor" />
-          <path d="M0,3 C-10,13 -22,9 -20,-1 C-16,6 -7,7 0,3 Z" fill="currentColor" />
-          <circle r="3.4" fill="currentColor" />
-        </g>
-      </svg>
-    </div>
   )
 }

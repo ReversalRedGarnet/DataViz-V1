@@ -27,11 +27,17 @@ export default function PageHero({
   tone = 'panel',
   headlineClassName,
   className = '',
+  atmosphere,
   children,
   style,
 }) {
   return (
-    <Section tone={tone} className={`text-center ${className}`} style={style}>
+    <Section
+      tone={tone}
+      atmosphere={atmosphere}
+      className={`text-center ${className}`}
+      style={style}
+    >
       <p
         className={`type-eyebrow mx-auto max-w-2xl ${
           tone === 'ink' ? 'opacity-70' : 'text-accent'

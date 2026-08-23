@@ -97,8 +97,8 @@ export default function DataDetective({ storm, style }) {
   const factor = FACTORS.find((f) => f.id === picked) ?? null
 
   return (
-    <Section style={style}>
-      <div className="mx-auto max-w-3xl">
+    <Section width="narrow" style={style}>
+      <div>
         <p className="type-eyebrow mb-1 text-accent">Before the conclusion</p>
         <h2 className="type-h2 mb-2">
           Why might two countries hit by {storm.name} recover differently?

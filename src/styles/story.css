@@ -29,16 +29,34 @@
     The layer sits at a negative z-index inside the section's own stacking
     context, so it paints above the panel's background and below every word.
   */
-  .hero-atmos-layer {
+  /*
+    z-index: 0 AND NOT -1, WHICH IS A DELIBERATE CHANGE.
+
+    The hero's original layer used -1, and that only ever worked by accident:
+    a negative-z child paints behind its parent's background unless the parent
+    establishes a stacking context, and the section's happens to be established
+    by `animation: pop-in ... both` in animations.css -- the `both` fill mode
+    leaves a transform in effect forever, which keeps the context alive after
+    the entrance has finished. That is a load-bearing dependency on an
+    animation's fill mode, and it was fine while one section used it.
+
+    Made explicit instead: this layer sits at z-index 0 and .section-content at
+    z-index 1 (styles/layout.css), so the order is background, weather, content
+    regardless of what any ancestor does.
+
+    The layer clips its own rings, so a section using this does NOT need
+    overflow: hidden -- which would also clip the tooltips near its edges.
+  */
+  .atmos-layer {
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     overflow: hidden;
     color: rgb(var(--color-accent));
     pointer-events: none;
   }
 
-  .hero-ring {
+  .atmos-ring {
     position: absolute;
     left: 22%;
     top: 38%;
@@ -49,17 +67,17 @@
     border: 1px solid rgb(var(--color-accent) / 0.5);
     border-radius: 9999px;
     opacity: 0;
-    animation: hero-ring-out 7800ms cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+    animation: atmos-ring-out 7800ms cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
   }
 
-  @keyframes hero-ring-out {
+  @keyframes atmos-ring-out {
     0% {
       opacity: 0;
       transform: scale(0.05);
     }
 
     18% {
-      opacity: 0.22;
+      opacity: var(--atmos-ring-peak, 0.22);
     }
 
     100% {
@@ -68,7 +86,7 @@
     }
   }
 
-  .hero-cyclone {
+  .atmos-cyclone {
     position: absolute;
     right: 4%;
     top: 12%;
@@ -78,15 +96,43 @@
   }
 
   /*
+    THE AMBIENT VARIANT, for every section that is not the title card.
+
+    The hero's weather is the first thing a reader sees and is meant to be
+    noticed. Behind a chart it must not be: the same motion at the same strength
+    would compete with the marks a reader is trying to compare, which is the one
+    thing decoration is not allowed to do. So it is the same animation, run
+    quieter -- a third of the peak opacity, a cycle slow enough to read as
+    drift rather than as an event, and the cyclone pushed smaller and further
+    into the corner.
+  */
+  .atmos-ambient {
+    --atmos-ring-peak: 0.07;
+  }
+
+  .atmos-ambient .atmos-ring {
+    animation-duration: 15600ms;
+    border-color: rgb(var(--color-accent) / 0.28);
+  }
+
+  .atmos-ambient .atmos-cyclone {
+    width: 5.5rem;
+    height: 5.5rem;
+    right: 2%;
+    top: 6%;
+    color: rgb(var(--color-accent) / 0.07);
+  }
+
+  /*
     Settled, not stopped dead. Pausing mid-sweep would freeze a half-drawn ring
     on the page as a permanent artefact; this lets each ring finish the pass it
     is on and then holds still.
   */
-  .hero-atmos.is-stirred .hero-ring {
+  .hero-atmos.is-stirred .atmos-ring {
     animation-iteration-count: 1;
   }
 
-  .hero-atmos.is-stirred .hero-cyclone {
+  .hero-atmos.is-stirred .atmos-cyclone {
     opacity: 0.45;
     transition: opacity 400ms ease-out;
   }
@@ -116,8 +162,26 @@
 
     So the height is fixed and the text lives inside it. Overflow scrolls
     rather than clips: what would be cut off is a casualty figure or a caveat.
-    These are the one place on the site that shows a scrollbar, because there
-    is nothing else here to say the text continues.
+
+    THIS USED TO BE THE ONE PLACE ON THE SITE THAT SHOWED A SCROLLBAR, because
+    there is nothing else here to say the text continues. Now that scrollbars
+    are hidden everywhere (see base.css), the affordance is carried by a fade
+    at the bottom edge instead: the text dissolving rather than stopping is
+    what says there is more of it. It is masked, not painted, so it works over
+    either theme's background without a dark: variant.
+
+    THE FADE TRACKS SCROLL POSITION, NOT JUST OVERFLOW. data-overflowing means
+    "something is hidden below the bottom edge right now", not "this content is
+    taller than its box" -- see hooks/useOverflowFade.js. Those are the same
+    thing until the reader reaches the end, at which point the second is still
+    true and the first is not, and a fade that stays on there dissolves the
+    final line with nothing beneath it. That reads as a rendering fault, and it
+    is the one state in which this affordance actively misleads: it promises
+    more text at the exact moment there is none.
+
+    It is also off entirely for a box that fits -- dimming the last line of
+    something unscrollable looks broken, and every one of these boxes is short
+    for at least one storm.
   */
   .locked-box {
     position: relative;
@@ -130,21 +194,11 @@
     /* Keeps a flick inside the box from chaining out to the panel and paging
        the deck once the box hits its end. */
     overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: rgb(var(--color-ink) / 0.25) transparent;
   }
 
-  .locked-scroll::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .locked-scroll::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--color-ink) / 0.25);
-    border-radius: 9999px;
-  }
-
-  .locked-scroll::-webkit-scrollbar-track {
-    background: transparent;
+  .locked-scroll[data-overflowing="true"] {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent 100%);
   }
 
   /* Stacked layout: a fixed height, since there is no column to divide up.
@@ -545,8 +599,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    /* Decoration, and the only thing it does is move. */
-    .hero-atmos-layer {
+    /* Decoration, and the only thing it does is move. Covers every section's
+       ambient layer as well as the hero's, since they are now the same
+       component. */
+    .atmos-layer {
       display: none;
     }
 

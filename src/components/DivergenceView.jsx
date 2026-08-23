@@ -45,7 +45,7 @@ const LEGEND_DASH = ['none', '7 4', '2 3', '9 3 2 3']
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
 //   style -- forwarded to Section (entrance stagger)
-export default function DivergenceView({ data, storm, style }) {
+export default function DivergenceView({ data, dataError, storm, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
@@ -92,6 +92,7 @@ export default function DivergenceView({ data, storm, style }) {
 
   const blocked = sectionGuard({
     data,
+    error: dataError,
     storm,
     style,
     tone: 'panel',
