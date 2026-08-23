@@ -10,9 +10,38 @@ const ThemeContext = createContext(null)
 // before first paint. Renaming it here means renaming it there.
 const STORAGE_KEY = 'ripple-theme'
 
+// STORAGE CAN THROW, AND THIS RUNS BEFORE ANYTHING IS ON SCREEN.
+//
+// In a browser with storage disabled -- Safari in certain private-mode states,
+// a hardened profile, an enterprise policy -- touching localStorage raises a
+// SecurityError rather than returning null. getInitialTheme() is a useState
+// initialiser inside ThemeProvider, which wraps the whole application, so an
+// unguarded read there does not degrade the theme: it throws during the first
+// render and the site is a blank page.
+//
+// The inline script in index.html has always wrapped the identical read in a
+// try/catch, with a comment saying to keep the two in step. This is the half
+// that was not kept in step.
+function readStoredTheme() {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function writeStoredTheme(theme) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, theme)
+  } catch {
+    // Storage unavailable. The class on <html> below is what actually themes
+    // the page, so the only thing lost is the choice surviving a reload.
+  }
+}
+
 function getInitialTheme() {
   if (typeof window === 'undefined') return 'light'
-  const stored = window.localStorage.getItem(STORAGE_KEY)
+  const stored = readStoredTheme()
   if (stored === 'light' || stored === 'dark') return stored
   // No explicit choice in this browser yet, so follow the OS. Read once: a
   // later manual toggle is written to localStorage and wins from then on.
@@ -24,7 +53,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
-    window.localStorage.setItem(STORAGE_KEY, theme)
+    writeStoredTheme(theme)
   }, [theme])
 
   function toggleTheme() {

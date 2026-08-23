@@ -1,31 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
-import { feature } from 'topojson-client'
 import Section from './Section.jsx'
 import Tooltip from './Tooltip.jsx'
 import CountryPicker from './CountryPicker.jsx'
-import MapControlIcon from './MapControlIcon.jsx'
+import MapControlButton from './MapControlButton.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
-import { chartColorsFor, MAP_COLORS } from '../utils/theme.js'
+import { useLatest } from '../hooks/useLatest.js'
+import { chartColorsFor } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
 import { loadLandTopology } from '../utils/loadLand.js'
+import { drawBasemap, fitToPoints, pacificProjection, recolourBasemap } from '../utils/map.js'
+import { NATIONS } from '../content/nations.js'
 import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 
 // Illustrative Pacific map: real coastlines, fixed markers, pan and zoom, click
 // to select. Two selections at most, because everything downstream of this
 // slide is a pairwise comparison.
 //
-// The land is real TopoJSON; the markers are hand-placed at nation centroids
-// rather than derived, because the four nations are archipelagos and a computed
-// centroid lands in open water often enough to be wrong.
-export const NATIONS = [
-  { name: 'Fiji', lat: -18.14, lon: 178.44 },
-  { name: 'Solomon Islands', lat: -9.43, lon: 159.95 },
-  { name: 'Vanuatu', lat: -17.73, lon: 168.32 },
-  { name: 'Tonga', lat: -21.14, lon: -175.2 },
-]
+// The land is real TopoJSON. The markers come from content/nations.js, which
+// this file used to own and export -- so App, BigPicture, ContextPanel,
+// DivergenceView and StormJourney all imported the project's scope from a UI
+// component. It is scope data, not map data, and it now lives with the rest of
+// the content.
 
 const WIDTH = 700
 const HEIGHT = 460
@@ -35,10 +33,10 @@ const HEIGHT = 460
 // reported/unreported distinction the profile chart makes. A nation the storm
 // never reached says so, because a marker with nothing under it reads as
 // missing data rather than as a country that was spared.
-function stormBlurb(nation, storm) {
-  if (!storm) return nation.blurb ?? null
-  const entry = storm.profile?.find((p) => p.name === nation.name)
-  if (!entry) return `${storm.name} did not reach ${nation.name}.`
+function stormBlurb(nationName, storm) {
+  if (!storm) return null
+  const entry = storm.profile?.find((p) => p.name === nationName)
+  if (!entry) return `${storm.name} did not reach ${nationName}.`
 
   const toll =
     entry.deaths == null
@@ -57,7 +55,7 @@ function markerTooltipContent(nation, selected, storm) {
   else if (selected.length === 1) status = 'Tap to compare with your first pick.'
   else status = 'Tap to select.'
 
-  const blurb = stormBlurb(nation, storm)
+  const blurb = stormBlurb(nation.name, storm)
 
   return (
     <>
@@ -90,8 +88,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   // must not re-run when the highlight changes -- rebuilding it would throw
   // away the reader's pan and zoom.
   const { setHighlight } = useNationHighlight()
-  const setHighlightRef = useRef(setHighlight)
-  setHighlightRef.current = setHighlight
+  const setHighlightRef = useLatest(setHighlight)
 
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
@@ -100,32 +97,22 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 // Kept apart from the committed selection so hovering a second country does not
 // disturb the one being followed -- the same split the timeline's preview uses.
   const [preview, setPreview] = useState(null)
-  const setPreviewRef = useRef(setPreview)
-  setPreviewRef.current = setPreview
+  const setPreviewRef = useLatest(setPreview)
 
   // The setup effect runs once, so its D3 closures would capture `selected` at
   // mount and never see a later pick. A ref keeps the hint current without
   // rebuilding the map, which would reset pan and zoom.
   const [built, setBuilt] = useState(false)
-  const selectedRef = useRef(selected)
-  useEffect(() => {
-    selectedRef.current = selected
-  }, [selected])
+  const selectedRef = useLatest(selected)
 
   // Same reasoning again, for the storm. The setup effect deliberately does not
   // re-run when the storm changes -- rebuilding would throw away the reader's
   // pan and zoom -- so without a ref the D3 handlers would keep describing
   // whichever storm happened to be selected when the map was first built.
-  const stormRef = useRef(storm)
-  useEffect(() => {
-    stormRef.current = storm
-  }, [storm])
+  const stormRef = useLatest(storm)
 
   // Same reasoning, for the map's initial ocean/land paint.
-  const themeRef = useRef(theme)
-  useEffect(() => {
-    themeRef.current = theme
-  }, [theme])
+  const themeRef = useLatest(theme)
 
   // Build the map once. Selection and theme recolouring happen in the effects
   // below so pan/zoom survives a marker click. `cancelled` guards against the
@@ -139,26 +126,13 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 
       const svg = resetSvg(svgRef, WIDTH, HEIGHT)
 
-      // Antimeridian at the centre, or nations either side of 180deg (Fiji
-      // +178, Samoa -172) land on opposite edges of the map.
-      const projection = d3.geoMercator().rotate([-180, 0])
-
-      const points = {
-        type: 'FeatureCollection',
-        features: nations.map((n) => ({
-          type: 'Feature',
-          properties: { name: n.name },
-          geometry: { type: 'Point', coordinates: [n.lon, n.lat] },
-        })),
-      }
       // Fitted to the current nation set, not the world. The 65px padding keeps
-      // labels and the zoom buttons off a marker near an edge.
-      projection.fitExtent(
-        [
-          [65, 65],
-          [WIDTH - 65, HEIGHT - 65],
-        ],
-        points
+      // labels and the zoom buttons off a marker near an edge. The antimeridian
+      // rotation lives in pacificProjection() -- see utils/map.js.
+      const projection = fitToPoints(
+        pacificProjection(),
+        nations.map((n) => [n.lon, n.lat]),
+        { width: WIDTH, height: HEIGHT, padding: 65 }
       )
 
       const g = svg.append('g')
@@ -171,25 +145,17 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       // until after a storm was already chosen -- the fade simply never applied.
       setBuilt(true)
 
-      // Classed so the theme effect below can recolour these in place.
-      const initialColors = MAP_COLORS[themeRef.current] ?? MAP_COLORS.light
-      g.append('rect')
-        .attr('class', 'ocean-bg')
-        .attr('x', -2000)
-        .attr('y', -2000)
-        .attr('width', WIDTH + 4000)
-        .attr('height', HEIGHT + 4000)
-        .attr('fill', initialColors.ocean)
-
-      const geoPath = d3.geoPath(projection)
-      const landFeature = feature(land50m, land50m.objects.land)
-      g.append('path')
-        .attr('class', 'land')
-        .datum(landFeature)
-        .attr('d', geoPath)
-        .attr('fill', initialColors.land)
-        .attr('stroke', initialColors.coastline)
-        .attr('stroke-width', 0.5)
+      // Classed by drawBasemap so the theme effect below can recolour in place.
+      // The 2000px bleed is why the <svg> carries overflow-hidden: the ocean is
+      // drawn far past the viewBox so panning never reveals empty space.
+      drawBasemap(g, {
+        land: land50m,
+        projection,
+        width: WIDTH,
+        height: HEIGHT,
+        theme: themeRef.current,
+        bleed: 2000,
+      })
 
       // Wheel is excluded so scrolling past the map doesn't zoom it. Drag and
       // pinch stay on.
@@ -214,6 +180,11 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         })
         .attr('role', 'button')
         .attr('tabindex', 0)
+        // aria-pressed is set by the selection effect below, alongside the
+        // colour and the 1/2 badge. It is what tells a screen-reader user that
+        // this marker is already in the comparison -- information that was
+        // otherwise carried only by a fill colour and a digit drawn in SVG.
+        .attr('aria-pressed', 'false')
         .attr('aria-label', (d) => `Select ${d.name}`)
         .on('click', (event, d) => {
           onToggle(d.name)
@@ -341,6 +312,12 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         const i = selected.indexOf(d.name)
         return i === -1 ? '' : String(i + 1)
       })
+
+    // The visual state, said out loud. Without this a marker announced itself
+    // as "Select Fiji" whether or not Fiji was already selected, so the one
+    // piece of state the whole rest of the deck depends on was invisible to
+    // anyone not looking at the colours.
+    markers.attr('aria-pressed', (d) => (selected.includes(d.name) ? 'true' : 'false'))
     // `theme` is a dependency because the pin colours live in the same
     // palette the charts use, and that palette flips with the theme.
   }, [selected, theme, built])
@@ -357,6 +334,8 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       .style('opacity', (d) => (!storm || storm.nations.includes(d.name) ? 1 : 0.42))
 
     // The visual fade is invisible to a screen reader, so the label carries it.
+    // Selection is carried by aria-pressed rather than folded in here, so the
+    // two effects cannot fight over the same attribute.
     gRef.current
       .selectAll('g.marker')
       .attr('aria-label', (d) =>
@@ -369,15 +348,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   // No-ops if setup() hasn't finished; that race is covered by themeRef.
   useEffect(() => {
     if (!gRef.current) return
-    const colors = MAP_COLORS[theme] ?? MAP_COLORS.light
-    const duration = motionDuration(200)
-    gRef.current.select('rect.ocean-bg').transition().duration(duration).attr('fill', colors.ocean)
-    gRef.current
-      .select('path.land')
-      .transition()
-      .duration(duration)
-      .attr('fill', colors.land)
-      .attr('stroke', colors.coastline)
+    recolourBasemap(gRef.current, theme, motionDuration(200))
   }, [theme])
 
   function zoomBy(factor) {
@@ -426,32 +397,9 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         />
         {/* Top-right: a bottom-right column covered Tonga's label. */}
         <div className="absolute top-3 right-3 flex flex-col gap-1.5">
-          {/* 44px: minimum comfortable touch target, and this is the section
-              where a mis-tap is most disruptive. */}
-          <button
-            type="button"
-            onClick={() => zoomBy(1.5)}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-surface/50 shadow-sm backdrop-blur-sm transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-surface/70 active:scale-90"
-            aria-label="Zoom in"
-          >
-            <MapControlIcon kind="zoomIn" />
-          </button>
-          <button
-            type="button"
-            onClick={() => zoomBy(1 / 1.5)}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-surface/50 shadow-sm backdrop-blur-sm transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-surface/70 active:scale-90"
-            aria-label="Zoom out"
-          >
-            <MapControlIcon kind="zoomOut" />
-          </button>
-          <button
-            type="button"
-            onClick={resetView}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-surface/50 shadow-sm backdrop-blur-sm transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-surface/70 active:scale-90"
-            aria-label="Reset view"
-          >
-            <MapControlIcon kind="reset" />
-          </button>
+          <MapControlButton kind="zoomIn" onClick={() => zoomBy(1.5)} label="Zoom in" />
+          <MapControlButton kind="zoomOut" onClick={() => zoomBy(1 / 1.5)} label="Zoom out" />
+          <MapControlButton kind="reset" onClick={resetView} label="Reset view" />
         </div>
         <Tooltip tooltip={tooltip} />
       </div>
@@ -473,7 +421,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
               )}
             </p>
             <p className="mt-1 text-xs leading-snug opacity-75">
-              {stormBlurb({ name: summaryFor }, storm) ?? 'No storm selected.'}
+              {stormBlurb(summaryFor, storm) ?? 'No storm selected.'}
             </p>
           </>
         ) : (

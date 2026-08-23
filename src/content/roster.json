@@ -1,0 +1,72 @@
+{
+  "_comment": [
+    "THE PROJECT'S SCOPE, AS DATA. Read by the site (src/content/nations.js and",
+    "src/content/storms.js) and by the cleaning scripts (data-pipeline/common.py).",
+    "It is JSON rather than JS because Python cannot import a module, and a roster",
+    "that disagrees with itself across two languages is exactly what the",
+    "exclusions section exists to rule out.",
+    "",
+    "What belongs here: facts the stated rule determines -- which storms are in,",
+    "which nations each struck, and the year window the data covers. What does NOT",
+    "belong here: prose. Per-storm profiles, leads, notes and citations live in",
+    "src/content/storms.js, which merges them onto these entries by id and throws",
+    "at import time if either side is missing an entry the other has.",
+    "",
+    "THE RULE: a severe tropical cyclone that made landfall or had major impact in",
+    "two or more of the four in-scope nations, between rosterStart and rosterEnd.",
+    "",
+    "yearMin opens in 2013, not at rosterStart: a chart of an event year is",
+    "meaningless without baseline years before it, and two clear years ahead of",
+    "the earliest storm is the minimum that lets a reader see what normal was."
+  ],
+
+  "yearMin": 2013,
+  "yearMax": 2024,
+  "rosterStart": 2015,
+  "rosterEnd": 2024,
+
+  "storms": [
+    {
+      "id": "pam",
+      "name": "Cyclone Pam",
+      "year": 2015,
+      "label": "Pam",
+      "nations": ["Solomon Islands", "Vanuatu"]
+    },
+    {
+      "id": "winston",
+      "name": "Cyclone Winston",
+      "year": 2016,
+      "label": "Winston",
+      "nations": ["Tonga", "Fiji"]
+    },
+    {
+      "id": "gita",
+      "name": "Cyclone Gita",
+      "year": 2018,
+      "label": "Gita",
+      "nations": ["Tonga", "Fiji"]
+    },
+    {
+      "id": "harold",
+      "name": "Cyclone Harold",
+      "year": 2020,
+      "label": "Harold",
+      "nations": ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]
+    },
+    {
+      "id": "judy-kevin",
+      "name": "Cyclones Judy & Kevin",
+      "year": 2023,
+      "label": "Judy & Kevin",
+      "nations": ["Solomon Islands", "Vanuatu"]
+    },
+    {
+      "id": "lola",
+      "name": "Cyclone Lola",
+      "year": 2023,
+      "label": "Lola",
+      "nations": ["Solomon Islands", "Vanuatu"]
+    }
+  ]
+}

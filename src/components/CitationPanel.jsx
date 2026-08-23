@@ -43,6 +43,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
                 <li key={s.url}>
                   <a
                     href={s.url}
+                    rel="noreferrer"
                     className="underline decoration-sand/40 hover:decoration-sand dark:decoration-ink/40 dark:hover:decoration-ink"
                   >
                     {s.label}
@@ -71,7 +72,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
               </p>
 
               <p className="prose-column prose-wide prose-short text-sand/85 dark:text-ink/85 mt-3">
-                This site is illustrative and isn't intended to inform policy, funding, or financial
+                This site is illustrative and isn&rsquo;t intended to inform policy, funding, or financial
                 decisions.
               </p>
             </>

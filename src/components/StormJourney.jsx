@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as d3 from 'd3'
-import { feature } from 'topojson-client'
 import Section from './Section.jsx'
-import { NATIONS } from './MapView.jsx'
+import { NATION_COORDS, NATION_COUNT } from '../content/nations.js'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import JourneyScrubber from './JourneyScrubber.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLatest } from '../hooks/useLatest.js'
 import { chartTheme, MAP_COLORS } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
 import { loadLandTopology } from '../utils/loadLand.js'
+import { drawBasemap, fitToPoints, pacificProjection } from '../utils/map.js'
 
 // The selected storm's route across the nations it struck, driven by the reader.
 //
@@ -31,36 +32,59 @@ const TRACK_NOTE =
 const WIDTH = 800
 const HEIGHT = 540
 
-// One coordinate set for the whole site: these are the same approximate
-// capital-city positions the interactive map uses.
-const COORDS = Object.fromEntries(NATIONS.map((n) => [n.name, [n.lon, n.lat]]))
+// One coordinate set for the whole site: NATION_COORDS is the same approximate
+// capital-city positions the interactive map uses, from content/nations.js.
 
 // Built per storm rather than once at module load: each storm reached a
 // different set of nations in a different order, and the track is drawn through
 // the stops in array order.
 function buildSteps(storm) {
-  return (storm?.profile ?? []).map((row) => ({ ...row, lonLat: COORDS[row.name] }))
+  return (storm?.profile ?? []).map((row) => ({ ...row, lonLat: NATION_COORDS[row.name] }))
 }
 
 // The connecting sentence for each stop now lives with that stop in
 // src/content/storms.js as `lead`, so a storm's facts and the sentences that
 // join them cannot drift apart across six storms.
 
-// Distance along a path to the point closest to a given position. The track is
-// a smoothed curve through the four stops, so a stop's own coordinates aren't
-// exactly on it; sampling finds where the curve actually passes.
-function lengthAtPoint(pathNode, [px, py]) {
+// Where along the track each stop actually sits.
+//
+// The track is a smoothed curve through the stops, so a stop's own projected
+// coordinates are not exactly on it; the curve has to be sampled to find where
+// it passes closest.
+//
+// SAMPLED ONCE, SCANNED MANY TIMES. This used to be a function called per stop,
+// each call walking its own 500 points -- and getPointAtLength() forces layout
+// on every call, so a four-stop storm cost about 2,000 synchronous layout calls
+// in the frame the map is built. The 500 points are identical on every one of
+// those walks; only the target moves. Taking them once and scanning the
+// resulting array in plain JavaScript gives bit-for-bit the same answer for a
+// quarter of the layout work on Harold, and a half on every two-stop storm.
+//
+// Deliberately not a coarser sample with a refinement pass. That is faster
+// still, but it finds a local minimum rather than the global one whenever a
+// track doubles back on itself, and "the tracks we have today are smooth" is
+// not a property anything here enforces.
+const TRACK_SAMPLES = 500
+
+function sampleTrack(pathNode) {
   const total = pathNode.getTotalLength()
-  const samples = 500
+  const points = new Array(TRACK_SAMPLES + 1)
+  for (let i = 0; i <= TRACK_SAMPLES; i++) {
+    const length = (i / TRACK_SAMPLES) * total
+    const point = pathNode.getPointAtLength(length)
+    points[i] = { length, x: point.x, y: point.y }
+  }
+  return points
+}
+
+function lengthAtPoint(samples, [px, py]) {
   let best = 0
   let bestDistance = Infinity
-  for (let i = 0; i <= samples; i++) {
-    const length = (i / samples) * total
-    const point = pathNode.getPointAtLength(length)
-    const distance = (point.x - px) ** 2 + (point.y - py) ** 2
+  for (const sample of samples) {
+    const distance = (sample.x - px) ** 2 + (sample.y - py) ** 2
     if (distance < bestDistance) {
       bestDistance = distance
-      best = length
+      best = sample.length
     }
   }
   return best
@@ -69,14 +93,17 @@ function lengthAtPoint(pathNode, [px, py]) {
 // The colour-and-progress pass, as a plain function rather than only an effect
 // body, because whoever builds a scene has to be the one who paints it.
 //
-// It used to live only in an effect keyed on [active, theme, built]. On the
-// first storm the coastline is fetched over the network, so setBuilt(false) and
-// setBuilt(true) land in different React batches, `built` transitions and the
-// effect runs. On every storm after that the topology is cached, the await
-// resolves in a microtask, both updates collapse into one batch, `built` never
-// changes value and the effect never runs -- leaving the ocean rect and the
-// land path with no fill attribute at all. SVG's default fill is black, which
-// is why the second storm rendered a black rectangle the size of the map.
+// It used to live only in an effect keyed on a `built` state flag. On the first
+// storm the coastline is fetched over the network, so setBuilt(false) and
+// setBuilt(true) landed in different React batches, `built` transitioned and
+// the effect ran. On every storm after that the topology is cached, the await
+// resolves in a microtask, both updates collapsed into one batch, `built` never
+// changed value and the effect never ran -- leaving the ocean rect and the land
+// path with no fill attribute at all. SVG's default fill is black, which is why
+// the second storm rendered a black rectangle the size of the map.
+//
+// The flag has since been removed entirely (see the scene-reset effect below):
+// once build() paints its own scene, nothing was left for it to do.
 function paintScene(scene, { active, theme }) {
   const mapColors = MAP_COLORS[theme] ?? MAP_COLORS.light
   const { ink, palette } = chartTheme(theme)
@@ -138,16 +165,25 @@ function paintScene(scene, { active, theme }) {
 //   onIndex -- (i) => void, the only way that position changes
 //   style -- forwarded to the underlying Section (entrance stagger)
 export default function StormJourney({ storm, index = 0, onIndex, style }) {
-  const STEPS = buildSteps(storm)
+  // Memoised so it can be a real dependency of the build effect below rather
+  // than something that effect closes over and hopes stays in step. `storm`
+  // comes from stormById(), a .find() over a module constant, so the same id
+  // yields the same object and this is stable for as long as the storm is.
+  const STEPS = useMemo(() => buildSteps(storm), [storm])
   const svgRef = useRef(null)
   const sceneRef = useRef(null)
-  const [built, setBuilt] = useState(false)
 
   // Drop the previous storm's scene immediately, so the progress effect below
   // cannot animate a track that belongs to a map no longer on screen.
+  //
+  // There used to be a `built` flag alongside this, set false here and true at
+  // the end of build(), and listed in the repaint effect's dependencies. The
+  // note on paintScene explains why it could not be relied on to fire that
+  // effect -- which is why build() paints the scene itself. Once it did,
+  // `built` was carrying nothing: storm?.id already covers every case it would
+  // have, so it was state that existed only to be written.
   useEffect(() => {
     sceneRef.current = null
-    setBuilt(false)
   }, [storm?.id])
   const { theme } = useTheme()
   // Clamped rather than trusted. The index is shared state and the stop list is
@@ -160,12 +196,9 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
 
   // Read inside build(), which resolves after the render that set them. Held in
   // refs rather than taken as effect dependencies: either one changing must
-  // repaint the scene, not rebuild it. Assigned during render, matching the
-  // setHighlightRef pattern in MapView.
-  const activeRef = useRef(active)
-  activeRef.current = active
-  const themeRef = useRef(theme)
-  themeRef.current = theme
+  // repaint the scene, not rebuild it. See hooks/useLatest.js.
+  const activeRef = useLatest(active)
+  const themeRef = useLatest(theme)
 
   // Built once. The coastline fetch is the same static file the interactive
   // map uses, so this costs nothing extra after that section has loaded.
@@ -177,39 +210,23 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
       if (cancelled || !svgRef.current) return
 
       const svg = resetSvg(svgRef, WIDTH, HEIGHT)
-      const projection = d3.geoMercator().rotate([-180, 0])
-      projection.fitExtent(
-        [
-          [58, 58],
-          [WIDTH - 58, HEIGHT - 58],
-        ],
-        {
-          type: 'FeatureCollection',
-          features: STEPS.map((s) => ({
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: s.lonLat },
-          })),
-        }
+      const projection = fitToPoints(
+        pacificProjection(),
+        STEPS.map((s) => s.lonLat),
+        { width: WIDTH, height: HEIGHT, padding: 58 }
       )
 
-      // Filled at creation, not left for the paint pass to reach. An SVG shape
-      // with no fill attribute is black, so any gap between building this and
-      // colouring it is a black rectangle on screen -- for one frame at best.
-      const initial = MAP_COLORS[themeRef.current] ?? MAP_COLORS.light
-
+      // drawBasemap fills both shapes at creation rather than leaving them for
+      // the paint pass to reach. An SVG shape with no fill attribute is black,
+      // and this map is where that was learned. No bleed: this map cannot pan.
       const g = svg.append('g')
-      g.append('rect')
-        .attr('class', 'ocean-bg')
-        .attr('width', WIDTH)
-        .attr('height', HEIGHT)
-        .attr('fill', initial.ocean)
-      g.append('path')
-        .attr('class', 'land')
-        .datum(feature(land50m, land50m.objects.land))
-        .attr('d', d3.geoPath(projection))
-        .attr('fill', initial.land)
-        .attr('stroke', initial.coastline)
-        .attr('stroke-width', 0.5)
+      drawBasemap(g, {
+        land: land50m,
+        projection,
+        width: WIDTH,
+        height: HEIGHT,
+        theme: themeRef.current,
+      })
 
       const positions = STEPS.map((s) => projection(s.lonLat))
 
@@ -223,7 +240,8 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
 
       const trackNode = track.node()
       const totalLength = trackNode.getTotalLength()
-      const stopLengths = positions.map((p) => lengthAtPoint(trackNode, p))
+      const trackSamples = sampleTrack(trackNode)
+      const stopLengths = positions.map((p) => lengthAtPoint(trackSamples, p))
       track.attr('stroke-dasharray', `${totalLength} ${totalLength}`).attr('stroke-dashoffset', totalLength)
 
       const stops = g
@@ -267,10 +285,9 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
       spinner.append('circle').attr('class', 'cyclone-core').attr('r', 2.6)
 
       sceneRef.current = { g, track, trackNode, totalLength, stopLengths, eye }
-      // Painted here, by the code that built it. `built` cannot be relied on to
-      // trigger the effect below -- see the note on paintScene.
+      // Painted here, by the code that built it -- see the note on paintScene
+      // for why no effect can be trusted to do it instead.
       paintScene(sceneRef.current, { active: activeRef.current, theme: themeRef.current })
-      setBuilt(true)
     }
 
     build()
@@ -283,7 +300,13 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
     // blank for every storm. It also has to rebuild on a *change* of storm,
     // since the projection is fitted to that storm's stops and the track is
     // drawn through them in order.
-  }, [storm?.id])
+    //
+    // STEPS is listed because build() reads it. It was previously closed over
+    // while the effect depended on storm?.id alone -- which worked only because
+    // the two always change together, a coincidence nothing enforced. activeRef
+    // and themeRef are stable ref objects; naming them costs nothing and lets
+    // the dependency array be honest.
+  }, [storm?.id, STEPS, activeRef, themeRef])
 
   // Repaint on progress or theme. The scene is also painted at the end of
   // build(), so this effect is the update path rather than the first paint;
@@ -291,7 +314,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   // storm, so that a rebuild can never leave an unpainted scene on screen.
   useEffect(() => {
     if (sceneRef.current) paintScene(sceneRef.current, { active, theme })
-  }, [active, theme, built, storm?.id])
+  }, [active, theme, storm?.id])
 
   const blocked = sectionGuard({
     data: true,
@@ -319,11 +342,11 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         Follow {storm.name}
       </h2>
       <p className="prose-column prose-wide prose-short text-sm opacity-75">
-        {/* NATIONS.length, not a typed 4. Same drift the timeline's eyebrow
-            had: the scope of this project is four countries today and the
-            number is written down in one place, so this sentence should read
-            it rather than repeat it. */}
-        {storm.name} reached {STEPS.length} of these {NATIONS.length} countries. Drag the control
+        {/* NATION_COUNT, not a typed 4. Same drift the timeline's eyebrow had:
+            the scope of this project is four countries today and the number is
+            written down in one place, so this sentence should read it rather
+            than repeat it. */}
+        {storm.name} reached {STEPS.length} of these {NATION_COUNT} countries. Drag the control
         beside the map, or use the arrow keys, to travel with it.
       </p>
 

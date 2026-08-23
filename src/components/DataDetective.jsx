@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Section from './Section.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
+import { PAGE_SECTIONS } from '../content/pageSections.js'
 
 // ONE QUESTION, ASKED BEFORE THE ANSWER.
 //
@@ -33,6 +34,16 @@ import { sectionGuard } from './sectionGuard.jsx'
 //
 // Props:
 //   storm -- the selected storm, for the question's wording
+//
+// `section` is the id of the slide each factor's evidence lives on. It used to
+// sit here unused beside a hand-copied `sectionLabel` string, so the name shown
+// to the reader was a second copy of PAGE_SECTIONS' label with nothing keeping
+// the two in step. The id is looked up below instead: the dead field turned out
+// to be the fix for the duplication.
+function sectionLabel(id) {
+  return PAGE_SECTIONS.find((s) => s.id === id)?.label ?? id
+}
+
 const FACTORS = [
   {
     id: 'capacity',
@@ -40,7 +51,6 @@ const FACTORS = [
     evidence:
       'The capacity section carries the standing difference in monitoring stations between these four nations, unchanged in every year on record -- a structural difference, not a trend.',
     section: 'context',
-    sectionLabel: 'Capacity & Context',
   },
   {
     id: 'agriculture',
@@ -48,7 +58,6 @@ const FACTORS = [
     evidence:
       'Crop yield and livestock yield are the second and third links of the ripple chain. They move for weather, planting decisions and markets as well as storms, and yield per animal can hold steady through a year that killed stock.',
     section: 'ripple-chain',
-    sectionLabel: 'The Ripple Chain',
   },
   {
     id: 'tourism',
@@ -56,7 +65,6 @@ const FACTORS = [
     evidence:
       'Tourist arrivals is the last link of the chain, and the one with the largest movements -- almost all of which, across 2020 and 2021, is border closure rather than any cyclone.',
     section: 'ripple-chain',
-    sectionLabel: 'The Ripple Chain',
   },
   {
     id: 'exposure',
@@ -64,7 +72,6 @@ const FACTORS = [
     evidence:
       'The overview reads people affected against population, because the same raw count is a different event in a country of 300,000 and a country of 900,000.',
     section: 'big-picture',
-    sectionLabel: 'The Bigger Picture',
   },
   {
     id: 'reporting',
@@ -72,7 +79,6 @@ const FACTORS = [
     evidence:
       'The gaps are the finding here: consequence data depends on the capacity to assess and report after being hit, which is exactly what a disaster destroys and what the least-resourced countries have least of. Several tolls on this roster are never reported rather than zero.',
     section: 'method',
-    sectionLabel: 'How This Was Made',
   },
 ]
 
@@ -135,7 +141,7 @@ export default function DataDetective({ storm, style }) {
               <p className="type-eyebrow text-accent">What this site actually shows</p>
               <p className="mt-2 text-sm leading-snug opacity-85">{factor.evidence}</p>
               <p className="mt-3 text-xs opacity-65">
-                Where to look: <span className="font-semibold">{factor.sectionLabel}</span>.
+                Where to look: <span className="font-semibold">{sectionLabel(factor.section)}</span>.
               </p>
             </div>
           ) : (

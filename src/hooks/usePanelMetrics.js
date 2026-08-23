@@ -2,6 +2,9 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 
 // How much overflow a panel is allowed before it stops counting as fitting.
 //
+// Module-private: both readers are in this file, and exporting it was an
+// invitation to the exact drift the constant exists to prevent.
+//
 // ONE NUMBER, read by both hooks below, because they are two halves of the
 // same question and they used to disagree. Centring called a panel fitted at
 // 1px of overflow; the "more in this section" hint appeared only past 24px.
@@ -14,7 +17,7 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 //
 // 24, not 1, because the hint's threshold is the one with a reason behind it:
 // under about 24px there is nothing below the fold worth pointing at.
-export const OVERFLOW_SLACK = 24
+const OVERFLOW_SLACK = 24
 
 // Watch a node until it settles, then run `measure`. Shared because both hooks
 // need the same three triggers: a resize of the box, a resize of its content,

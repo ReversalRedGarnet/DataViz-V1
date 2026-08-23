@@ -1,7 +1,9 @@
-// The storm roster, and the rule that produced it.
+import roster from './roster.json'
+
+// THE STORM ROSTER'S PROSE HALF.
 //
 // THE RULE: a severe tropical cyclone that made landfall or had major impact in
-// two or more of the four in-scope nations, between 2015 and 2024.
+// two or more of the four in-scope nations, between ROSTER_START and ROSTER_END.
 //
 // Applied evenly, which is the whole point. A roster picked for the story it
 // tells is not evidence of anything; a roster picked by a stated rule can be
@@ -9,14 +11,20 @@
 // rendered on the page rather than kept in a comment -- the storms the rule
 // throws out are what make the ones it keeps mean something.
 //
-// Each entry:
-//   id -- stable key, also the value held in selection state
-//   name / year -- display
-//   label -- short form for the timeline
-//   nations -- the in-scope nations this storm actually struck. Drives which
-//     lines stay at full strength in the chain; the other nations are still
-//     drawn, dimmed, because a country the storm missed is the closest thing
-//     this data has to a control.
+// WHERE THE SPLIT FALLS, AND WHY THERE IS ONE. The facts the rule determines --
+// id, name, year, label, and which in-scope nations each storm struck -- live in
+// roster.json, because data-pipeline/clean_data.py needs them too and cannot
+// import a JavaScript module. It used to keep its own copy of all six storms,
+// under a comment asking whoever edited one list to remember the other. This
+// file holds everything the pipeline has no use for: the researched per-nation
+// profiles, the sentences that connect them, and the citations.
+//
+// The two halves are merged by id below, and the merge THROWS AT IMPORT TIME if
+// either side has an entry the other does not. A roster that disagrees with
+// itself is precisely what the exclusions section exists to rule out, so this
+// fails the build rather than the reader.
+//
+// Each entry in STORM_DETAIL is keyed by its id in roster.json:
 //   note -- optional, printed under the storm's name where the entry needs a
 //     qualification the reader would otherwise have to take on trust
 //   profile -- per-nation storm facts, hand-researched from BOM cyclone
@@ -24,15 +32,8 @@
 //     without a profile still gets a full ripple chain; it just doesn't get the
 //     journey and category-versus-deaths sections, which have nothing to draw.
 //   sources -- the two supplementary citations for that storm's profile
-export const STORMS = [
-  {
-    id: 'pam',
-    name: 'Cyclone Pam',
-    year: 2015,
-    label: 'Pam',
-    // Strike order: Pam formed east of the Solomon Islands and reached them two
-    // days before Vanuatu.
-    nations: ['Solomon Islands', 'Vanuatu'],
+const STORM_DETAIL = {
+  pam: {
     profile: [
       {
         name: 'Solomon Islands',
@@ -68,14 +69,7 @@ export const STORMS = [
       },
     ],
   },
-  {
-    id: 'winston',
-    name: 'Cyclone Winston',
-    year: 2016,
-    label: 'Winston',
-    // Strike order: Winston passed Tonga on 16 February, four days before its
-    // Fiji landfall.
-    nations: ['Tonga', 'Fiji'],
+  winston: {
     profile: [
       {
         name: 'Tonga',
@@ -113,12 +107,7 @@ export const STORMS = [
       },
     ],
   },
-  {
-    id: 'gita',
-    name: 'Cyclone Gita',
-    year: 2018,
-    label: 'Gita',
-    nations: ['Tonga', 'Fiji'],
+  gita: {
     profile: [
       {
         name: 'Tonga',
@@ -156,12 +145,7 @@ export const STORMS = [
       },
     ],
   },
-  {
-    id: 'harold',
-    name: 'Cyclone Harold',
-    year: 2020,
-    label: 'Harold',
-    nations: ['Solomon Islands', 'Vanuatu', 'Fiji', 'Tonga'],
+  harold: {
     // Listed in the order the storm reached them, which is the order the
     // journey section walks through.
     profile: [
@@ -218,14 +202,7 @@ export const STORMS = [
       },
     ],
   },
-  {
-    id: 'judy-kevin',
-    name: 'Cyclones Judy & Kevin',
-    year: 2023,
-    label: 'Judy & Kevin',
-    // Strike order: Judy crossed southern Temotu on 27 February, before either
-    // system reached Vanuatu. Fiji is deliberately absent -- see the note.
-    nations: ['Solomon Islands', 'Vanuatu'],
+  'judy-kevin': {
     note: 'Two named cyclones, counted here as one event: they struck Vanuatu two days apart in March 2023, and every official assessment -- the government PDNA, OCHA\u2019s situation reports, the IFRC appeal -- reports combined figures for the pair rather than separating them.',
     profile: [
       {
@@ -268,13 +245,7 @@ export const STORMS = [
       },
     ],
   },
-  {
-    id: 'lola',
-    name: 'Cyclone Lola',
-    year: 2023,
-    label: 'Lola',
-    // Strike order: Tikopia on 22 October, Vanuatu on 25 October.
-    nations: ['Solomon Islands', 'Vanuatu'],
+  lola: {
     profile: [
       {
         name: 'Solomon Islands',
@@ -315,7 +286,27 @@ export const STORMS = [
       },
     ],
   },
-]
+}
+
+// Merged by id, in roster order. The check below is not defensive politeness: a
+// storm present in one half and absent from the other means the site and the
+// cleaning scripts have parted company about what the roster is, and that is
+// worth a hard failure at import rather than a section that quietly renders
+// nothing.
+const detailIds = Object.keys(STORM_DETAIL)
+const rosterIds = roster.storms.map((s) => s.id)
+const missingDetail = rosterIds.filter((id) => !detailIds.includes(id))
+const orphanDetail = detailIds.filter((id) => !rosterIds.includes(id))
+
+if (missingDetail.length > 0 || orphanDetail.length > 0) {
+  throw new Error(
+    'roster.json and storms.js disagree about the roster. ' +
+      (missingDetail.length > 0 ? `No detail written for: ${missingDetail.join(', ')}. ` : '') +
+      (orphanDetail.length > 0 ? `Detail with no roster entry: ${orphanDetail.join(', ')}.` : '')
+  )
+}
+
+export const STORMS = roster.storms.map((entry) => ({ ...entry, ...STORM_DETAIL[entry.id] }))
 
 // Storms the rule throws out. Shown on the page, because a roster is only
 // defensible if the near-misses are visible: a reader who suspects the list was
@@ -356,8 +347,14 @@ export function strikeCounts(nations) {
   }))
 }
 
-export const ROSTER_START = 2015
-export const ROSTER_END = 2024
+export const ROSTER_START = roster.rosterStart
+export const ROSTER_END = roster.rosterEnd
+
+// The window the cleaned data covers. Wider than the roster on purpose: an
+// event-year chart is meaningless without baseline years before it. Shared with
+// the pipeline, which is what actually does the filtering.
+export const DATA_YEAR_MIN = roster.yearMin
+export const DATA_YEAR_MAX = roster.yearMax
 
 export function stormById(id) {
   return STORMS.find((s) => s.id === id) ?? null

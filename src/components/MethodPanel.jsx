@@ -1,6 +1,6 @@
 import Section from './Section.jsx'
 import { EXCLUDED, STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
-import { NATIONS } from './MapView.jsx'
+import { NATION_COUNT } from '../content/nations.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 
 // How the site was made, and what it cannot say.
@@ -112,7 +112,7 @@ export default function MethodPanel({ style }) {
                 a typed figure here is a paragraph that can contradict the list
                 printed directly beneath it. See utils/numberWords.js. */}
             The roster is every severe tropical cyclone that struck two or more of these{' '}
-            {numberWord(NATIONS.length)} nations between {ROSTER_START} and {ROSTER_END}.{' '}
+            {numberWord(NATION_COUNT)} nations between {ROSTER_START} and {ROSTER_END}.{' '}
             {numberWordCapitalized(STORMS.length)} met it. The rule was fixed before the list was
             drawn. {numberWordCapitalized(EXCLUDED.length)} storms did not meet it and are named
             below, including the one whose exclusion makes the case weaker.
@@ -153,7 +153,7 @@ export default function MethodPanel({ style }) {
         </h3>
         <div className="prose-column prose-wide space-y-3 text-sm opacity-80">
           <p>
-            All indicator data is drawn from the Pacific Data Hub, the Pacific Community's
+            All indicator data is drawn from the Pacific Data Hub, the Pacific Community&rsquo;s
             statistical portal, for Solomon Islands, Vanuatu, Fiji and Tonga across 2013 to 2024.
             The portal exports whole dataflows; the filtering to these four nations and these
             twelve years happens in a Python cleaning step, not by hand, so the same rule is

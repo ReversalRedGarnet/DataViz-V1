@@ -4,12 +4,10 @@ import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
-import { NATIONS } from './MapView.jsx'
+import { NATION_NAMES, NATION_COUNT } from '../content/nations.js'
 import { CHAIN_METRICS } from '../utils/metrics.js'
 import { formatNationList } from '../utils/formatNationList.js'
 import { missingNations, snapshotRowsByMetric, shareOfPopulationRows } from '../utils/rows.js'
-
-const NATION_NAMES = NATIONS.map((n) => n.name)
 
 // The one metric in the chain that is a count of people, and so the only one a
 // population denominator means anything for. Crop yield is already per hectare
@@ -67,7 +65,7 @@ export default function BigPicture({ data, storm, style }) {
             <StatTile
               index={0}
               label="What happened"
-              value={`${storm.nations.length} of 4 nations`}
+              value={`${storm.nations.length} of ${NATION_COUNT} nations`}
               detail={`${storm.name}, ${storm.year}`}
             />
             <StatTile
@@ -91,7 +89,7 @@ export default function BigPicture({ data, storm, style }) {
             <StatTile
               index={3}
               label="Economic loss reported"
-              value={`${stats.economicLossReported} of ${NATIONS.length} nations`}
+              value={`${stats.economicLossReported} of ${NATION_COUNT} nations`}
               detail={`For ${storm.year} itself, in the official dataset`}
             />
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/charts/index.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
@@ -65,6 +65,42 @@ export default function DivergenceChart({
     if (apiRef.current) apiRef.current.update(progress)
   }, [progress])
 
+  // MEMOISED BECAUSE OF THE SWEEP. The section above owns a clock that runs
+  // `progress` from 0 to 1 over 3.4 seconds, so this component re-renders on
+  // every frame of it -- roughly two hundred times. The chart itself is fine:
+  // it is built once and driven through apiRef, so no D3 work happens per
+  // frame. This table was not: four nations of a dozen years each was rebuilt
+  // and reconciled on every one of those renders, for content that does not
+  // depend on `progress` at all.
+  const table = useMemo(
+    () => (
+      <table>
+        <caption>{label}, indexed to each nation&rsquo;s own {years[0]} figure</caption>
+        <thead>
+          <tr>
+            <th scope="col">Country</th>
+            <th scope="col">Year</th>
+            <th scope="col">Value</th>
+            <th scope="col">Index ({years[0]} = 100)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {series.flatMap((s) =>
+            s.points.map((p) => (
+              <tr key={`${s.nation}-${p.year}`}>
+                <td>{s.nation}</td>
+                <td>{p.year}</td>
+                <td>{format(p.raw)}</td>
+                <td>{p.index.toFixed(1)}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    ),
+    [label, series, years, format]
+  )
+
   return (
     <div className={`rounded-xl border border-ink/10 bg-surface/60 p-4 ${className}`}>
       <h3 className="mb-1 text-sm font-semibold">{label}</h3>
@@ -82,31 +118,7 @@ export default function DivergenceChart({
           No usable record for {missing.join(' or ')} on this metric.
         </p>
       )}
-      <VisuallyHidden>
-        <table>
-          <caption>{label}, indexed to each nation&rsquo;s own {years[0]} figure</caption>
-          <thead>
-            <tr>
-              <th scope="col">Country</th>
-              <th scope="col">Year</th>
-              <th scope="col">Value</th>
-              <th scope="col">Index ({years[0]} = 100)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {series.flatMap((s) =>
-              s.points.map((p) => (
-                <tr key={`${s.nation}-${p.year}`}>
-                  <td>{s.nation}</td>
-                  <td>{p.year}</td>
-                  <td>{format(p.raw)}</td>
-                  <td>{p.index.toFixed(1)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </VisuallyHidden>
+      <VisuallyHidden>{table}</VisuallyHidden>
     </div>
   )
 }

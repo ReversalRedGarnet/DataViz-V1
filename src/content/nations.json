@@ -1,0 +1,48 @@
+{
+  "_comment": [
+    "THE FOUR IN-SCOPE NATIONS, AS DATA. Read by the site (src/content/nations.js)",
+    "and by the cleaning scripts (data-pipeline/common.py), for the same reason",
+    "roster.json is shared: the two halves have to agree about which countries",
+    "this project covers, and a list written twice is a list that drifts.",
+    "",
+    "lat/lon are approximate capital-city positions, hand-placed rather than",
+    "derived. All four are archipelagos and a computed centroid lands in open",
+    "water often enough to be wrong.",
+    "",
+    "codes are the ISO-2 and ISO-3 forms the Pacific Data Hub exports use. Only",
+    "the pipeline reads these; the site matches on name.",
+    "",
+    "short is the axis-label form, used where a band can be under 50px wide."
+  ],
+
+  "nations": [
+    {
+      "name": "Fiji",
+      "short": "Fiji",
+      "lat": -18.14,
+      "lon": 178.44,
+      "codes": ["FJ", "FJI"]
+    },
+    {
+      "name": "Solomon Islands",
+      "short": "Solomon Is.",
+      "lat": -9.43,
+      "lon": 159.95,
+      "codes": ["SB", "SLB"]
+    },
+    {
+      "name": "Vanuatu",
+      "short": "Vanuatu",
+      "lat": -17.73,
+      "lon": 168.32,
+      "codes": ["VU", "VUT"]
+    },
+    {
+      "name": "Tonga",
+      "short": "Tonga",
+      "lat": -21.14,
+      "lon": -175.2,
+      "codes": ["TO", "TON"]
+    }
+  ]
+}

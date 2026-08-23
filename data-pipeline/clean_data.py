@@ -13,9 +13,6 @@ configuration below selects the required indicator (and unit where needed)
 for each dataset.
 """
 
-import json
-from pathlib import Path
-
 import pandas as pd
 
 from common import (
@@ -23,49 +20,20 @@ from common import (
     NATIONS,
     OUT_DIR,
     RAW_DIR,
+    STORMS,
     TIME_COL_CANDIDATES,
     VALUE_COL_CANDIDATES,
     YEAR_MAX,
     YEAR_MIN,
+    extract_rows,
     find_col,
-    matches_nation,
+    write_json,
 )
 
-# The storm roster, for the coverage report at the end of a run. Each entry is
-# the year a chart would have to anchor on, and the in-scope nations that storm
-# actually struck. This is not used to filter anything: it exists so a run
-# prints, in plain terms, which storms the exported data can and cannot support
-# -- the question that decides what the site is able to show.
-#
-# The rule these were picked under: severe tropical cyclone, landfall or major
-# impact in two or more of the four in-scope nations, since 2015. Applied
-# evenly rather than picked for the story, which means it also throws out
-# storms that would have suited it:
-#
-#   Ana (2021), Cody (2022)  -- Fiji only
-#   Rae (2022)               -- minor, no fatalities
-#   Yasa (2020)              -- severe, and it would have strengthened the
-#                               "2020 was relentless" beat, but within these
-#                               four nations it struck Fiji alone and so fails
-#                               the same two-nation test the others passed.
-#
-# Keeping Yasa because it helped the argument is exactly the bias the rule
-# exists to prevent. The exclusions belong on the site itself: stating what was
-# left out, and why, is what makes the roster defensible rather than
-# cherry-picked. Six storms, five of them in 2020 and 2023.
-STORMS = [
-    ("Pam", 2015, ["Vanuatu", "Solomon Islands"]),
-    ("Winston", 2016, ["Fiji", "Tonga"]),
-    ("Gita", 2018, ["Tonga", "Fiji"]),
-    ("Harold", 2020, ["Solomon Islands", "Vanuatu", "Fiji", "Tonga"]),
-    # Fiji is deliberately absent: it had forecast coverage only, with no damage
-    # assessment published. Kept in step with src/content/storms.js, which is
-    # the roster of record -- a roster that disagrees with itself across two
-    # files in the repo is exactly what the exclusions section exists to rule
-    # out.
-    ("Judy & Kevin", 2023, ["Vanuatu", "Solomon Islands"]),
-    ("Lola", 2023, ["Vanuatu", "Solomon Islands"]),
-]
+# NATIONS, STORMS and the year window are imported rather than declared. The
+# roster in particular used to be written out again here, under a comment asking
+# whoever edited it to keep it in step with src/content/storms.js by hand. Both
+# now read src/content/roster.json.
 
 # Several metrics below come out of the same portal dataflow, and the portal
 # exports whole dataflows rather than single indicators. Rather than asking for
@@ -268,44 +236,37 @@ def clean_one(path, config: dict) -> list:
     time_col = find_col(df, TIME_COL_CANDIDATES, "year")
     value_col = find_col(df, VALUE_COL_CANDIDATES, "value")
 
-    rows = []
-    dropped_zeros = []
+    rows, report = extract_rows(
+        df,
+        country_col,
+        time_col,
+        value_col,
+        config["field_name"],
+        zero_is_missing=config.get("zero_is_missing", False),
+    )
 
-    for nation in NATIONS:
-        matched = df[df[country_col].apply(matches_nation, args=(nation,))]
-        in_range = matched[
-            matched[time_col].astype(int).between(YEAR_MIN, YEAR_MAX)
-        ]
-
+    for nation, matched_count, in_range_count in report["per_nation"]:
         print(
-            f"  {nation}: {len(matched)} rows matched, "
-            f"{len(in_range)} within {YEAR_MIN}-{YEAR_MAX}"
+            f"  {nation}: {matched_count} rows matched, "
+            f"{in_range_count} within {YEAR_MIN}-{YEAR_MAX}"
         )
 
-        for _, row in in_range.iterrows():
-            value = row[value_col]
-
-            # See "zero_is_missing" in this dataset's config for why.
-            if config.get("zero_is_missing") and pd.to_numeric(value, errors="coerce") == 0:
-                dropped_zeros.append((nation, int(row[time_col])))
-                continue
-
-            rows.append({
-                "nation": nation,
-                "year": int(row[time_col]),
-                config["field_name"]: value,
-            })
-
-    if dropped_zeros:
+    if report["dropped_zeros"]:
         print(
-            f"  dropped {len(dropped_zeros)} zero-valued nation-years as "
-            f"unreported: {sorted(dropped_zeros)}"
+            f"  dropped {len(report['dropped_zeros'])} zero-valued nation-years as "
+            f"unreported: {sorted(report['dropped_zeros'])}"
         )
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    # Not silent, and not fatal. A blank cell is a gap in the source, which this
+    # project treats as a finding rather than an error -- but an unannounced one
+    # would let a metric quietly lose rows between runs.
+    if report["unreadable"]:
+        print(
+            f"  skipped {report['unreadable']} row(s) whose value could not be "
+            f"read as a number"
+        )
 
-    with open(OUT_DIR / config["json_name"], "w") as f:
-        json.dump(rows, f, indent=2)
+    write_json(OUT_DIR / config["json_name"], rows)
 
     print(f"  wrote {config['json_name']} ({len(rows)} rows total)")
     return rows

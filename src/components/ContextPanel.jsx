@@ -5,15 +5,17 @@ import TrendChart from './TrendChart.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import EmptyState from './EmptyState.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
-import { NATIONS } from './MapView.jsx'
+import { NATION_NAMES } from '../content/nations.js'
 import { CAPACITY_METRICS, CONTEXT_METRICS } from '../utils/metrics.js'
+import { DATA_YEAR_MAX } from '../content/storms.js'
 import { snapshotRowsByMetric, rowsByMetricForNations } from '../utils/rows.js'
 
-const NATION_NAMES = NATIONS.map((n) => n.name)
-
-// The capacity chart is flat in every year, so any year is representative.
-// Pinned rather than computed from the data so the caption can name it.
-const CAPACITY_YEAR = 2024
+// The capacity chart is flat in every year, so any year is representative --
+// but "any year" still has to be a year the pipeline actually exported. This
+// was a bare 2024 that had to match YEAR_MAX in data-pipeline/common.py and
+// would not have been updated when the window moved, leaving this section
+// silently empty. Both now read src/content/roster.json.
+const CAPACITY_YEAR = DATA_YEAR_MAX
 
 // The two things the ripple chain cannot show about itself.
 //

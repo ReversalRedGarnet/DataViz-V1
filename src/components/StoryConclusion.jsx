@@ -3,7 +3,7 @@ import { sectionGuard } from './sectionGuard.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useInView } from '../hooks/useInView.js'
 import { chartColorsFor } from '../utils/theme.js'
-import { NATIONS } from './MapView.jsx'
+import { NATION_COUNT, NATION_NAMES } from '../content/nations.js'
 import { formatNationList } from '../utils/formatNationList.js'
 
 // THE END OF THE ARGUMENT, NOT THE END OF THE PAGE.
@@ -99,9 +99,9 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
         <div className="md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8">
           <p className="prose-column prose-wide text-sm leading-snug opacity-85">
             {storm.name} reached {formatNationList(storm.nations)} in {storm.year}
-            {storm.nations.length < NATIONS.length &&
+            {storm.nations.length < NATION_COUNT &&
               ` and missed ${formatNationList(
-                NATIONS.map((n) => n.name).filter((n) => !storm.nations.includes(n))
+                NATION_NAMES.filter((n) => !storm.nations.includes(n))
               )}`}
             . Indexed to their own figures in that year, the four national trajectories start from
             one point and do not stay together: the harvest, the herds, the power supply and the
