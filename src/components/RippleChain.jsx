@@ -139,8 +139,8 @@ export default function RippleChain({
   })
 
   return (
-    <Section style={style}>
-      <div ref={containerRef} className="relative mx-auto max-w-3xl">
+    <Section width="narrow" style={style}>
+      <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">
           After {storm.name}, {storm.year}
         </h2>

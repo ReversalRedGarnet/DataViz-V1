@@ -144,7 +144,7 @@ function StormPreview({ storm, selected }) {
             Reached {formatNationList(storm.nations)} &mdash; {storm.nations.length} of{' '}
             {NATION_COUNT_WORD} nations in scope.
           </p>
-          <p className="mt-2 max-w-prose text-sm opacity-85">
+          <p className="mt-2 figure-prose text-sm opacity-85">
             {storm.note ?? storm.profile?.[0]?.lead ?? ''}
           </p>
         </>
@@ -189,7 +189,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       <h2 className="type-h2 mb-2">
         How often, and to whom
       </h2>
-      <p className="max-w-prose text-sm opacity-80">
+      <p className="figure-prose text-sm opacity-80">
         This site records every severe cyclone that struck more than one of these four nations from{' '}
         {ROSTER_START}&ndash;{ROSTER_END}.
       </p>

@@ -91,8 +91,8 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const pair = selectedNations ?? []
 
   return (
-    <Section tone="panel" style={style}>
-      <div ref={sectionRef} className="mx-auto max-w-3xl">
+    <Section tone="panel" width="narrow" style={style}>
+      <div ref={sectionRef}>
         <p className="type-eyebrow mb-1 text-accent">What {storm.name} showed</p>
         <h2 className="type-h2 mb-3">A shared storm is not a shared recovery.</h2>
 
@@ -130,7 +130,7 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
           >
             Start again with another storm
           </button>
-          <p className="mt-4 max-w-prose text-xs italic leading-snug opacity-70">
+          <p className="mt-4 figure-prose text-xs italic leading-snug opacity-70">
             Or page back with the footer: the map takes another pair of countries against this same
             storm, and Where They Part Ways replays the divergence. How the roster was built, what
             it excludes and where every figure came from are in the two sections after this one.

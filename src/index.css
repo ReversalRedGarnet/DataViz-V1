@@ -13,6 +13,10 @@
 
 @import './styles/base.css';
 @import './styles/typography.css';
+/* After typography, because .figure-prose relaxes a width that .prose-column
+   and .prose-wide only ever talked about. Before slideshow and compact, which
+   both restate section selectors and have to keep winning. */
+@import './styles/layout.css';
 @import './styles/animations.css';
 @import './styles/slideshow.css';
 @import './styles/story.css';

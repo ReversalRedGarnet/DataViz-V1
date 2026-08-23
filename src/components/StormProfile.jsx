@@ -89,13 +89,13 @@ export default function StormProfile({ storm, style }) {
   const indirect = rows.filter((r) => r.deathsKind === 'indirect')
 
   return (
-    <Section lock style={style}>
-      <div ref={containerRef} className="relative mx-auto max-w-3xl">
+    <Section lock width="narrow" style={style}>
+      <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">
           {storm.name} at a glance
         </h2>
 
-        <div className="prose-column max-w-prose space-y-3 text-sm opacity-80">
+        <div className="prose-column figure-prose space-y-3 text-sm opacity-80">
           <p>
             {storm.name} struck {formatNationList(storm.nations)} in {storm.year}. The same weather
             system throughout, and a different storm on arrival: a direct landfall at full strength
@@ -126,7 +126,7 @@ export default function StormProfile({ storm, style }) {
         </div>
 
         {(unreported.length > 0 || indirect.length > 0) && (
-          <div className="mt-3 max-w-prose space-y-2 border-l-2 border-ink/15 pl-3 text-xs italic opacity-75">
+          <div className="mt-3 figure-prose space-y-2 border-l-2 border-ink/15 pl-3 text-xs italic opacity-75">
             {unreported.length > 0 && (
               <p>
                 {formatNationList(unreported.map((r) => r.name))} sits in the band above the chart
