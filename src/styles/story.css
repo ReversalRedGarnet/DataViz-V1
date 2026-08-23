@@ -170,9 +170,18 @@
     what says there is more of it. It is masked, not painted, so it works over
     either theme's background without a dark: variant.
 
-    The fade is only applied while the box actually overflows -- an unscrollable
-    box that dims its last line looks broken, and every one of these boxes is
-    short for at least one storm.
+    THE FADE TRACKS SCROLL POSITION, NOT JUST OVERFLOW. data-overflowing means
+    "something is hidden below the bottom edge right now", not "this content is
+    taller than its box" -- see hooks/useOverflowFade.js. Those are the same
+    thing until the reader reaches the end, at which point the second is still
+    true and the first is not, and a fade that stays on there dissolves the
+    final line with nothing beneath it. That reads as a rendering fault, and it
+    is the one state in which this affordance actively misleads: it promises
+    more text at the exact moment there is none.
+
+    It is also off entirely for a box that fits -- dimming the last line of
+    something unscrollable looks broken, and every one of these boxes is short
+    for at least one storm.
   */
   .locked-box {
     position: relative;
