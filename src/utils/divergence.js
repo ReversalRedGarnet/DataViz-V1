@@ -56,9 +56,11 @@ export function buildDivergencePanels(data, metrics, nations, eventYear) {
   return panels
 }
 
-// The year range every panel sweeps across. Shared rather than per-panel so
-// the three charts stay on one clock: a metric whose record stops in 2023
-// should visibly stop, not finish its sweep early and imply it kept going.
+// The year range used for every panel's x-axis. Shared rather than per-panel
+// so the four charts stay visually aligned even though each now sweeps on its
+// own clock to its own last real year (see DivergenceChart) -- an axis that
+// changed width per metric would make the charts impossible to compare at a
+// glance.
 export function divergenceYearRange(panels, eventYear) {
   if (panels.length === 0) return [eventYear, eventYear + 1]
   return [eventYear, Math.max(...panels.map((p) => p.lastYear))]

@@ -52,6 +52,40 @@ export function pctChange(from, to) {
   return ((to - from) / Math.abs(from)) * 100
 }
 
+// Reported country-years per nation, summed across several metrics and out of
+// a stated maximum -- how much of the chain a nation actually got to report,
+// as one number instead of five separate gap lists.
+//
+// Built for one specific claim: that the stations ranking and the reporting
+// ranking are the same ranking. That only holds up if a metric every nation
+// reports identically -- power generation is missing 2024 for all four, a
+// data-lag artefact, not a capacity difference -- doesn't get counted as a
+// "gap" for whichever nation happens to be listed first. It doesn't, because
+// nothing here treats a universally-missing year specially: it just counts
+// what each nation actually has, and a year nobody has yet counts the same
+// against everyone. Checked against the real data before this was written --
+// a coarser measure (how many of the five metrics have *any* missing year)
+// ties Fiji and Solomon Islands and breaks the ranking; this one preserves it,
+// because it is sensitive to *how much* of a metric is missing, not just
+// whether any of it is.
+export function reportingCompletenessByNation(data, metrics, nations, yearMin, yearMax) {
+  if (!data) return []
+  const possible = (yearMax - yearMin + 1) * metrics.length
+  return nations.map((nation) => {
+    const value = metrics.reduce((sum, m) => {
+      const years = new Set(
+        (data[m.key] ?? []).filter((d) => d.nation === nation).map((d) => d.year)
+      )
+      let reported = 0
+      for (let y = yearMin; y <= yearMax; y++) {
+        if (years.has(y)) reported += 1
+      }
+      return sum + reported
+    }, 0)
+    return { nation, value, possible }
+  })
+}
+
 // Snapshot rows restated as a percentage of each nation's population that
 // year. Takes the { nation, value } rows snapshotRowsByMetric returns, so it
 // converts a count of people and nothing else -- applied to crop yield or GWh

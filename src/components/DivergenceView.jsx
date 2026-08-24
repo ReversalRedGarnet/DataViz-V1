@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import EmptyState from './EmptyState.jsx'
@@ -15,9 +15,6 @@ import { chartColorsFor } from '../utils/theme.js'
 import { seriesStyles } from '../utils/charts/index.js'
 import { CHAIN_METRICS } from '../utils/metrics.js'
 import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.js'
-import { motionDuration } from '../utils/motion.js'
-
-const SWEEP_MS = 3400
 
 // Caveats that belong to a specific metric rather than to the section. Kept
 // here rather than in metrics.js because they're about what this indexed view
@@ -54,13 +51,13 @@ export default function DivergenceView({ data, dataError, storm, style }) {
   const palette = chartColorsFor(theme)
   const [sectionRef, inView] = useInView({ threshold: 0.25 })
   const { pinned, setPinned } = useNationHighlight()
-  const [progress, setProgress] = useState(0)
-  // Explicit, rather than inferred from `progress < 1`. Inferred, the button
-  // read "Playing..." from the moment the slide mounted -- before the sweep had
-  // ever run -- and there was no state in which it said what pressing it would
-  // do. It also stayed pressable mid-sweep and silently restarted from zero.
-  const [playState, setPlayState] = useState('idle') // 'idle' | 'playing' | 'done'
-  const frameRef = useRef(null)
+  // Each chart now runs its own sweep clock (see DivergenceChart) and reaches
+  // its own last real year rather than a page-wide max. This token is how the
+  // section still gets every chart moving together: bumping it fans out to
+  // every panel's own play(), same trigger, four independent clocks. It starts
+  // at 0 so mounting never auto-plays before the section is even on screen --
+  // each panel's effect only fires once the token has actually been bumped.
+  const [playToken, setPlayToken] = useState(0)
 
   const eventYear = storm?.year ?? null
   const panels = useMemo(
@@ -74,34 +71,12 @@ export default function DivergenceView({ data, dataError, storm, style }) {
   const notes = useMemo(() => metricNotes(eventYear), [eventYear])
   const legendStyles = useMemo(() => seriesStyles(NATION_NAMES, palette), [palette])
 
-  function play() {
-    cancelAnimationFrame(frameRef.current)
-    const duration = motionDuration(SWEEP_MS)
-    if (duration === 0) {
-      // Under reduced motion the sweep has no meaningful slow form, so it
-      // arrives at its end. That is a finished sweep, not an idle one.
-      setProgress(1)
-      setPlayState('done')
-      return
-    }
-    setPlayState('playing')
-    const start = performance.now()
-    const step = (now) => {
-      const t = Math.min(1, (now - start) / duration)
-      setProgress(t)
-      if (t < 1) frameRef.current = requestAnimationFrame(step)
-      else setPlayState('done')
-    }
-    frameRef.current = requestAnimationFrame(step)
-  }
-
   // Runs itself once, when the section is actually on screen. The whole point
   // is the moment the lines separate, and it can't happen four screens above
   // where the reader is.
   useEffect(() => {
     if (!inView || panels.length === 0) return
-    play()
-    return () => cancelAnimationFrame(frameRef.current)
+    setPlayToken((t) => t + 1)
   }, [inView, panels.length])
 
   const blocked = sectionGuard({
@@ -120,8 +95,6 @@ export default function DivergenceView({ data, dataError, storm, style }) {
       </EmptyState>
     )
   }
-
-  const sweepYear = Math.round(years[0] + (years[1] - years[0]) * progress)
 
   return (
     <Section style={style} backdrop={scatterBackdrop('divergence')}>
@@ -151,22 +124,18 @@ export default function DivergenceView({ data, dataError, storm, style }) {
             className="mb-6 gap-x-5 gap-y-3"
           />
 
+          {/* No year printed beside this button any more: with four
+              independent clocks below, one shared number would be true of at
+              most one of them at any given moment. Each chart's own count is
+              on its own card, next to its own mini play button. */}
           <div className="mb-5 flex items-center gap-4">
             <button
               type="button"
-              onClick={play}
-              disabled={playState === 'playing'}
-              className="rounded-full border border-ink/20 px-4 py-2 text-sm font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95 disabled:opacity-55 disabled:hover:scale-100 disabled:hover:bg-transparent"
+              onClick={() => setPlayToken((t) => t + 1)}
+              className="rounded-full border border-ink/20 px-4 py-2 text-sm font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95"
             >
-              {playState === 'playing'
-                ? 'Playing\u2026'
-                : playState === 'done'
-                  ? 'Play again'
-                  : 'Play the sweep'}
+              Replay all
             </button>
-            <span className="type-figure text-3xl" aria-hidden="true">
-              {sweepYear}
-            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -176,7 +145,8 @@ export default function DivergenceView({ data, dataError, storm, style }) {
                 label={panel.metric.label}
                 series={panel.series}
                 years={years}
-                progress={progress}
+                lastYear={panel.lastYear}
+                playToken={playToken}
                 format={panel.metric.format}
                 note={notes[panel.metric.key]}
                 missing={panel.missing}

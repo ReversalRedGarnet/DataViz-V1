@@ -5,13 +5,24 @@ import { pctChange } from './rows.js'
 // to the latest on record. Deliberately not a ranking of "most interesting"
 // findings: every bullet traces back to a specific chart above it.
 //
+// Bullets stay short on purpose: the chart above already shows each nation's
+// full trajectory, so the text only needs to carry what the chart can't --
+// the verdict and the two percentages. The full "went from X to Y" phrasing
+// used to duplicate the chart and was the wordiest part of the page for what
+// is meant to be its headline takeaway.
+//
 // Records don't all end in the same year. Fiji's tourist arrivals run to 2024
 // while Tonga's and Vanuatu's stop at 2022, so an unqualified "+452% against
 // +94% since 2020" compares a four-year recovery with a two-year one and reads
 // as a gap in outcome when part of it is a gap in the calendar. Where the two
-// end years differ, the bullet says so and names both.
+// end years differ, the bullet still says so, just in fewer words.
 //
-// Returns [{ key, text }], always exactly CHAIN_METRICS.length entries.
+// Returns { items, summary }. items is [{ key, text, comparison }], always
+// exactly CHAIN_METRICS.length entries; comparison is only set on entries
+// with a real two-nation comparison (undefined for reporting-gap and
+// no-new-data cases, which summary excludes). summary is a single sentence
+// naming how many of the comparable metrics moved in opposite directions, or
+// null when fewer than two metrics are comparable -- not enough to summarise.
 
 
 function formatPct(p) {
@@ -21,9 +32,9 @@ function formatPct(p) {
 }
 
 export function buildComparativeInsights(data, nationA, nationB, eventYear) {
-  if (!data) return []
+  if (!data) return { items: [], summary: null }
 
-  return CHAIN_METRICS.map((m) => {
+  const items = CHAIN_METRICS.map((m) => {
     const rowsA = (data[m.key] ?? []).filter((d) => d.nation === nationA).sort((a, b) => a.year - b.year)
     const rowsB = (data[m.key] ?? []).filter((d) => d.nation === nationB).sort((a, b) => a.year - b.year)
     const eventA = rowsA.find((r) => r.year === eventYear)
@@ -92,19 +103,23 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear) {
     const changeA = formatPct(pctA)
     const changeB = formatPct(pctB)
 
-    const windowNote = sameWindow
-      ? ''
-      : ` The two records end in different years, so those percentages cover spans of different lengths and are not directly comparable.`
+    const windowNote = sameWindow ? '' : ' Spans differ in length, so these percentages aren\u2019t directly comparable.'
 
     return {
       key: m.key,
-      text: `${m.label}: ${nationA} went from ${m.format(eventA[m.field])} to ${m.format(
-        latestA[m.field]
-      )} by ${latestA.year}${changeA ? ` (${changeA})` : ''}, ${nationB} from ${m.format(
-        eventB[m.field]
-      )} to ${m.format(latestB[m.field])} by ${latestB.year}${
-        changeB ? ` (${changeB})` : ''
-      } -- ${comparison} since ${eventYear}.${windowNote}`,
+      comparison,
+      text: `${m.label}: ${comparison} since ${eventYear} (${nationA} ${changeA ?? '\u2014'}, ${nationB} ${
+        changeB ?? '\u2014'
+      }).${windowNote}`,
     }
   })
+
+  const comparable = items.filter((item) => item.comparison !== undefined)
+  const opposing = comparable.filter((item) => item.comparison === 'opposite directions')
+  const summary =
+    comparable.length >= 2
+      ? `${opposing.length} of ${comparable.length} comparable metrics moved in opposite directions since ${eventYear}.`
+      : null
+
+  return { items, summary }
 }

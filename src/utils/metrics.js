@@ -57,7 +57,7 @@ export const CHAIN_METRICS = [
     chartType: 'line',
     format: (v) => `${v.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/animal`,
     caveat:
-      'Output per animal, not herd size, so a year that kills stock can leave this figure flat or even raise it. Sits beside crop yield rather than replacing it: the two move for different reasons, and a food system losing one but not the other is a different situation from losing both.',
+      'Output per animal, not herd size \u2014 a year that kills stock can still show flat or rising yield. Moves independently of crop yield, so losing one doesn\u2019t mean losing both.',
   },
   {
     key: 'power_generation',

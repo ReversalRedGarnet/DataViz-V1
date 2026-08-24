@@ -117,6 +117,8 @@ export default function RippleChain({
     if (!data || !storm || selectedNations.length !== 2) return null
     return buildComparativeInsights(data, selectedNations[0], selectedNations[1], storm.year)
   }, [data, storm, selectedNations])
+  const insightItems = insights?.items
+  const insightSummary = insights?.summary
 
   const blocked = sectionGuard({
     data,
@@ -272,7 +274,8 @@ export default function RippleChain({
         {insights && (
           <InsightsPanel
             title={`${selectedNations[0]} vs. ${selectedNations[1]}: similarities and differences`}
-            items={insights}
+            summary={insightSummary}
+            items={insightItems}
             staggerItems
           />
         )}

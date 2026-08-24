@@ -207,7 +207,7 @@ export default function BigPicture({ data, dataError, storm, style }) {
 // silently printing 68.9% beside a card that says 62% invites the reader to
 // assume one of them is a mistake.
 const SHARE_CAVEAT =
-  'Each figure divided by that nation\u2019s mid-year population estimate for the same year. Still an annual, all-hazard total, so a year holding two cyclones is one number here as well. Percentages derived from the SPC series will not always match the shares quoted on the storm cards, which come from government and PDNA assessments counting a single event on their own population base: for Cyclone Winston the two give roughly 69% and 62% of Fiji. Both are reported figures; neither is a correction of the other.'
+  'Figures are divided by each nation\u2019s mid-year population for that year, as an annual all-hazard total. SPC-derived percentages may not match the storm cards\u2019 shares, which use government/PDNA figures for a single event \u2014 e.g., for Cyclone Winston, 69% vs. 62% of Fiji. Both are reported figures.'
 
 function PerCapitaToggle({ value, onChange }) {
   const option = (active) =>
