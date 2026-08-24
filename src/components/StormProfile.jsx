@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import Tooltip from './Tooltip.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
-import { useTheme } from '../hooks/useTheme.jsx'
-import { useElementWidth } from '../hooks/useElementWidth.js'
-import { useInView } from '../hooks/useInView.js'
-import { resetSvg } from '../utils/d3helpers.js'
+import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/charts/index.js'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
@@ -30,10 +28,7 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 //     stagger each section's entrance on first load
 export default function StormProfile({ storm, style }) {
   const rows = storm?.profile ?? null
-  const [ref, node, width] = useElementWidth()
-  const [chartRef, inView] = useInView()
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
-  const { theme } = useTheme()
 
   // The dots and their labels arrive one at a time, and this chart sits below
   // three paragraphs of framing -- far enough down that at mount it is off
@@ -53,20 +48,52 @@ export default function StormProfile({ storm, style }) {
   const [viewportHeight, setViewportHeight] = useState(
     () => (typeof window === 'undefined' ? 800 : window.innerHeight)
   )
+
+  // Coalesced into a frame, and only written when the number actually moves.
+  // chartHeight is a dependency of the draw below, so an unthrottled listener
+  // meant a full resetSvg, a complete D3 redraw and a replay of the staggered
+  // entrance on every resize event -- continuously through a window drag, and
+  // on a phone every time the address bar slides in or out.
   useEffect(() => {
-    const onResize = () => setViewportHeight(window.innerHeight)
+    let frame = null
+    const onResize = () => {
+      if (frame !== null) return
+      frame = requestAnimationFrame(() => {
+        frame = null
+        setViewportHeight((current) =>
+          current === window.innerHeight ? current : window.innerHeight
+        )
+      })
+    }
     window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('resize', onResize)
+      if (frame !== null) cancelAnimationFrame(frame)
+    }
   }, [])
+
   const chartHeight = Math.round(
     Math.max(170, Math.min(STORM_CHART_HEIGHT, viewportHeight * 0.26))
   )
 
-  useEffect(() => {
-    if (!inView || !node || !width || !rows) return
-    const svg = resetSvg(node, width, chartHeight)
-    renderStormProfileChart(svg, { width, height: chartHeight, rows, showTooltip, hideTooltip, theme })
-  }, [inView, node, width, rows, showTooltip, hideTooltip, theme, chartHeight])
+  // This was the last chart on the site still assembling the measure / observe
+  // / reset scaffolding by hand, which is the exact job useChartCanvas exists
+  // to do once. The variable height is not an obstacle: the hook takes it and
+  // already lists it as a redraw dependency.
+  const { svgRef, cardRef } = useChartCanvas({
+    height: chartHeight,
+    ready: Boolean(rows),
+    deps: [rows, showTooltip, hideTooltip],
+    draw: (svg, { width, theme }) =>
+      renderStormProfileChart(svg, {
+        width,
+        height: chartHeight,
+        rows,
+        showTooltip,
+        hideTooltip,
+        theme,
+      }),
+  })
 
   const blocked = sectionGuard({
     data: true,
@@ -89,7 +116,7 @@ export default function StormProfile({ storm, style }) {
   const indirect = rows.filter((r) => r.deathsKind === 'indirect')
 
   return (
-    <Section lock width="narrow" style={style}>
+    <Section lock width="narrow" style={style} backdrop={scatterBackdrop('storm-profile')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">
           {storm.name} at a glance
@@ -115,9 +142,9 @@ export default function StormProfile({ storm, style }) {
           </p>
         </div>
 
-        <div ref={chartRef}>
+        <div ref={cardRef}>
           <svg
-            ref={ref}
+            ref={svgRef}
             role="img"
             aria-label={`Scatter chart comparing ${storm.name}'s category at closest approach against deaths, for each nation it struck`}
             className="mt-5 block w-full"

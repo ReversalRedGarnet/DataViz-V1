@@ -13,7 +13,8 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 // Props:
 //   index, total -- position readout
 //   nextLabel, prevLabel -- destination names
-//   onNavigate -- (index) => void
+//   onNavigate -- (index, origin?) => void; origin is the click point the
+//     ripple transition lands on, see rippleTransition.js
 //   requires -- if set, the deck is held here until the reader has done this
 export default function SlideFooter({
   index,
@@ -52,7 +53,7 @@ export default function SlideFooter({
         {prevLabel ? (
           <button
             type="button"
-            onClick={() => onNavigate(index - 1)}
+            onClick={(event) => onNavigate(index - 1, { x: event.clientX, y: event.clientY })}
             className="deck-btn deck-btn-back"
           >
             <span aria-hidden="true" className="deck-btn-arrow">
@@ -81,7 +82,9 @@ export default function SlideFooter({
         {nextLabel || requires ? (
           <button
             type="button"
-            onClick={() => (requires ? refuse() : onNavigate(index + 1))}
+            onClick={(event) =>
+              requires ? refuse() : onNavigate(index + 1, { x: event.clientX, y: event.clientY })
+            }
             onAnimationEnd={() => setNudging(false)}
             aria-disabled={Boolean(requires)}
             title={requires || undefined}

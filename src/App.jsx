@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Header from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
 import StormJourney from './components/StormJourney.jsx'
@@ -15,6 +15,7 @@ import DataDetective from './components/DataDetective.jsx'
 import StoryConclusion from './components/StoryConclusion.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
+import DisplayCheck from './components/DisplayCheck.jsx'
 import { useDeck } from './hooks/useDeck.js'
 import { PAGE_SECTIONS } from './content/pageSections.js'
 import { NATION_NAMES } from './content/nations.js'
@@ -50,10 +51,17 @@ const DATA_SOURCES = [
     label: 'Mid-year population estimates — Pacific Data Hub (SPC)',
     url: 'https://stats.pacificdata.org/',
   },
-  // Supplementary sources follow, drawn from the roster itself so a storm and
-  // its citations cannot drift apart. Not from the official Pacific Data Hub
-  // list, and used only for the "storm itself" facts in the profile and journey
-  // sections -- never for a ripple-chain metric above.
+  // EVERY STORM'S CITATIONS, NOT THE SELECTED STORM'S. This slide is a
+  // bibliography for the whole piece rather than a footnote to the reader's
+  // current choice: the roster is the argument, so a reader checking whether it
+  // was picked to suit the conclusion needs to see what the storms they did not
+  // choose were sourced from too. It is also why this is a module constant
+  // rather than a function of `storm`.
+  //
+  // Drawn from the roster itself so a storm and its citations cannot drift
+  // apart. Not from the official Pacific Data Hub list, and used only for the
+  // "storm itself" facts in the profile and journey sections -- never for a
+  // ripple-chain metric above.
   ...STORMS.flatMap((storm) => storm.sources),
 ]
 
@@ -217,9 +225,25 @@ function AppShell() {
   //
   // The header's section menu is the one other way to jump, and it stays: it is
   // a list of destinations that does nothing but go to them.
-  const sections = pageSections(data, dataError, story, story.selectStorm)
+  // MEMOISED, AND THAT IS A CORRECTNESS FIX RATHER THAN A TUNING ONE.
+  //
+  // This was a bare call, so every render of AppShell produced a new array of
+  // new objects holding new elements. AppShell re-renders on every frame of a
+  // panel scroll -- onProgress below writes a fraction that changes each frame
+  // -- so the whole fourteen-section tree was rebuilt and reconciled at 60fps,
+  // and useDeck's hash-sync effect, which listed `sections` in its
+  // dependencies, called history.replaceState just as often. WebKit throws
+  // after 100 history writes in 30 seconds, which is under two seconds of
+  // scrolling.
+  //
+  // `story` is itself memoised (see useStory), so this rebuilds when the
+  // reader changes something and not when they scroll.
+  const sections = useMemo(
+    () => pageSections(data, dataError, story, story.selectStorm),
+    [data, dataError, story]
+  )
   const deck = useDeck(sections)
-  const { active, direction, go, goToId } = deck
+  const { active, go, goToId } = deck
 
   const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
 
@@ -270,12 +294,16 @@ function AppShell() {
         <PageSections
           sections={sections}
           active={active}
-          direction={direction}
           onNavigate={go}
           onProgress={onProgress}
           storyLength={PAGE_SECTIONS.length}
         />
       </main>
+
+      {/* Last in the tree and outside <main>: it is chrome about the window
+          rather than part of the story, and nothing in the deck depends on it
+          rendering. */}
+      <DisplayCheck />
     </>
   )
 }

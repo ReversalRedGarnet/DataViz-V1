@@ -18,7 +18,7 @@ export default function MapControlButton({ kind, onClick, label }) {
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-11 w-11 items-center justify-center rounded-full bg-surface/50 shadow-sm backdrop-blur-sm transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-surface/70 active:scale-90"
+      className="flex h-11 w-11 items-center justify-center rounded-full bg-surface/50 text-ink shadow-sm backdrop-blur-sm transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-surface/70 active:scale-90"
     >
       <MapControlIcon kind={kind} />
     </button>

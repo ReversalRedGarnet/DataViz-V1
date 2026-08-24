@@ -5,6 +5,7 @@ import { pctChange } from '../utils/rows.js'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useCountUp } from '../hooks/useCountUp.js'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import NoDataNote from './NoDataNote.jsx'
@@ -46,21 +47,20 @@ export default function ComparisonView({
     error: dataError,
     storm,
     style,
-    tone: 'panel',
     subject: 'Comparison',
     prompt: 'compare recovery',
   })
   if (blocked) return blocked
   if (!selectedNations || selectedNations.length < 2) {
     return (
-      <EmptyState tone="panel" style={style}>
+      <EmptyState style={style}>
         Select a second country on the map to compare.
       </EmptyState>
     )
   }
 
   return (
-    <Section tone="panel" style={style}>
+    <Section style={style} backdrop={scatterBackdrop('compare')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">Compare recovery</h2>
         <p className="prose-column prose-wide prose-short mb-5 text-sm opacity-70">
@@ -96,7 +96,7 @@ export default function ComparisonView({
           <button
             type="button"
             onClick={onSwapNations}
-            className="press-target compare-swap min-h-[44px] self-end rounded-full border border-ink/20 px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="press-target min-h-[44px] self-end rounded-full border border-ink/20 px-4 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={`Swap ${selectedNations[0]} and ${selectedNations[1]}`}
           >
             <span aria-hidden="true">&#8646;</span> Swap

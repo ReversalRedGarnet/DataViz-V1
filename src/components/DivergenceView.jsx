@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
 import DivergenceChart from './DivergenceChart.jsx'
+import SeriesLegend from './SeriesLegend.jsx'
 import { NATION_NAMES } from '../content/nations.js'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useInView } from '../hooks/useInView.js'
-import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
+import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 import { chartColorsFor } from '../utils/theme.js'
+import { seriesStyles } from '../utils/charts/index.js'
 import { CHAIN_METRICS } from '../utils/metrics.js'
 import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.js'
 import { motionDuration } from '../utils/motion.js'
@@ -34,10 +37,10 @@ function metricNotes(eventYear) {
   }
 }
 
-// A small line preview, so the legend shows the dash pattern and not just the
-// colour -- the pattern is the cue that survives a greyscale print or a reader
-// who can't separate the hues.
-const LEGEND_DASH = ['none', '7 4', '2 3', '9 3 2 3']
+// The legend's colours and dashes come from seriesStyles(), the same resolver
+// the charts draw with. They used to be a LEGEND_DASH array declared here --
+// a fourth copy of DIVERGENCE_DASH, differing only in spelling solid as
+// 'none' rather than null, with nothing keeping the two in step.
 
 // Every nation indexed to its own event-year figure, so the four lines start
 // from one point and the chart can only show how far apart they finish.
@@ -50,8 +53,13 @@ export default function DivergenceView({ data, dataError, storm, style }) {
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
   const [sectionRef, inView] = useInView({ threshold: 0.25 })
-  const { setHighlight, pinned, setPinned } = useNationHighlight()
+  const { pinned, setPinned } = useNationHighlight()
   const [progress, setProgress] = useState(0)
+  // Explicit, rather than inferred from `progress < 1`. Inferred, the button
+  // read "Playing..." from the moment the slide mounted -- before the sweep had
+  // ever run -- and there was no state in which it said what pressing it would
+  // do. It also stayed pressable mid-sweep and silently restarted from zero.
+  const [playState, setPlayState] = useState('idle') // 'idle' | 'playing' | 'done'
   const frameRef = useRef(null)
 
   const eventYear = storm?.year ?? null
@@ -64,19 +72,25 @@ export default function DivergenceView({ data, dataError, storm, style }) {
     [panels, eventYear]
   )
   const notes = useMemo(() => metricNotes(eventYear), [eventYear])
+  const legendStyles = useMemo(() => seriesStyles(NATION_NAMES, palette), [palette])
 
   function play() {
     cancelAnimationFrame(frameRef.current)
     const duration = motionDuration(SWEEP_MS)
     if (duration === 0) {
+      // Under reduced motion the sweep has no meaningful slow form, so it
+      // arrives at its end. That is a finished sweep, not an idle one.
       setProgress(1)
+      setPlayState('done')
       return
     }
+    setPlayState('playing')
     const start = performance.now()
     const step = (now) => {
       const t = Math.min(1, (now - start) / duration)
       setProgress(t)
       if (t < 1) frameRef.current = requestAnimationFrame(step)
+      else setPlayState('done')
     }
     frameRef.current = requestAnimationFrame(step)
   }
@@ -95,14 +109,13 @@ export default function DivergenceView({ data, dataError, storm, style }) {
     error: dataError,
     storm,
     style,
-    tone: 'panel',
     subject: 'The divergence',
     prompt: 'see how the four nations moved apart after it',
   })
   if (blocked) return blocked
   if (panels.length === 0) {
     return (
-      <EmptyState tone="panel" style={style}>
+      <EmptyState style={style}>
         No metric in this chain has enough data after {storm.year} to index.
       </EmptyState>
     )
@@ -111,7 +124,7 @@ export default function DivergenceView({ data, dataError, storm, style }) {
   const sweepYear = Math.round(years[0] + (years[1] - years[0]) * progress)
 
   return (
-    <Section tone="panel" style={style}>
+    <Section style={style} backdrop={scatterBackdrop('divergence')}>
       <div ref={sectionRef}>
         <div ref={containerRef} className="relative">
           <p className="type-eyebrow mb-1 text-accent">
@@ -126,51 +139,30 @@ export default function DivergenceView({ data, dataError, storm, style }) {
             the chart to show is the distance that opens up afterwards.
           </p>
 
-          <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-            {/* Buttons, not decorative swatches. Pointing at one already lifted
-                that nation's line out of the other three on every chart in the
-                deck -- but pointing is a gesture a touch screen does not have,
-                so the same chip now presses to hold the thread and presses
-                again to release it. The brief's "no interaction requires hover
-                only", applied to the one interaction on this slide. */}
-            {NATION_NAMES.map((nation, i) => (
-              <button
-                key={nation}
-                type="button"
-                onClick={() => setPinned(pinned === nation ? null : nation)}
-                aria-pressed={pinned === nation}
-                aria-label={`Emphasise ${nation}'s trajectory on every chart in this section`}
-                className={`press-target flex min-h-[44px] items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                  pinned === nation
-                    ? 'border-accent bg-accent/10'
-                    : 'border-transparent hover:border-ink/15'
-                }`}
-                {...highlightHandlers(nation, setHighlight)}
-              >
-                <svg width="26" height="8" aria-hidden="true" className="shrink-0">
-                  <line
-                    x1="0"
-                    y1="4"
-                    x2="26"
-                    y2="4"
-                    stroke={palette.series[i]}
-                    strokeWidth="2"
-                    strokeDasharray={LEGEND_DASH[i]}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                {nation}
-              </button>
-            ))}
-          </div>
+          {/* Buttons, not decorative swatches -- see SeriesLegend. Pointing at
+              one already lifted that nation's line out of the other three on
+              every chart in the deck, but pointing is a gesture a touch screen
+              does not have, so the same chip presses to hold the thread and
+              presses again to release it. */}
+          <SeriesLegend
+            styles={legendStyles}
+            pinned={pinned}
+            onPin={setPinned}
+            className="mb-6 gap-x-5 gap-y-3"
+          />
 
           <div className="mb-5 flex items-center gap-4">
             <button
               type="button"
               onClick={play}
-              className="rounded-full border border-ink/20 px-4 py-2 text-sm font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95"
+              disabled={playState === 'playing'}
+              className="rounded-full border border-ink/20 px-4 py-2 text-sm font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95 disabled:opacity-55 disabled:hover:scale-100 disabled:hover:bg-transparent"
             >
-              {progress >= 1 ? 'Play again' : 'Playing\u2026'}
+              {playState === 'playing'
+                ? 'Playing\u2026'
+                : playState === 'done'
+                  ? 'Play again'
+                  : 'Play the sweep'}
             </button>
             <span className="type-figure text-3xl" aria-hidden="true">
               {sweepYear}

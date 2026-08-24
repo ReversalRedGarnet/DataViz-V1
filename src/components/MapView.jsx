@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import Tooltip from './Tooltip.jsx'
 import CountryPicker from './CountryPicker.jsx'
 import MapControlButton from './MapControlButton.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useLatest } from '../hooks/useLatest.js'
+import { useViewBoxScale } from '../hooks/useViewBoxScale.js'
 import { chartColorsFor } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
@@ -27,6 +29,20 @@ import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 
 const WIDTH = 700
 const HEIGHT = 460
+
+// Marker furniture, in CSS pixels rather than viewBox units. The counter-scale
+// effect below keeps them at these sizes whatever box the map is drawn into --
+// see hooks/useViewBoxScale.js for the 4.8px labels this replaces.
+//
+// 22 is the hit radius, so the target is 44px across: the same floor every
+// other control on this site uses, and previously the one place it was missed.
+// The markers are at least 146 viewBox units apart at every fit, so they cannot
+// collide at this size.
+const MARKER_HIT_R = 22
+// Gap between a pin and its name, and the margin the name must keep from the
+// map's edge before it flips to the other side of the pin.
+const LABEL_GAP = 12
+const LABEL_MARGIN = 6
 
 // What the selected storm did to this nation, in the storm's own words -- the
 // date and category from its profile, and the death toll with the same
@@ -114,6 +130,10 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   // Same reasoning, for the map's initial ocean/land paint.
   const themeRef = useLatest(theme)
 
+  // How small the fixed viewBox is currently being drawn. Markers counter-scale
+  // by it so their labels and tap targets stay the size they were designed at.
+  const scale = useViewBoxScale(svgRef, WIDTH, HEIGHT)
+
   // Build the map once. Selection and theme recolouring happen in the effects
   // below so pan/zoom survives a marker click. `cancelled` guards against the
   // async coastline fetch resolving after unmount.
@@ -169,15 +189,20 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       zoomRef.current = zoom
       svg.call(zoom)
 
+      // Projected once and kept, because the label-flip pass below needs each
+      // pin's x in viewBox units and the projection is not in scope there.
+      const projected = new Map(nations.map((n) => [n.name, projection([n.lon, n.lat])]))
+
       const marker = g
         .selectAll('g.marker')
         .data(nations)
         .join('g')
         .attr('class', 'marker')
         .attr('transform', (d) => {
-          const [x, y] = projection([d.lon, d.lat])
+          const [x, y] = projected.get(d.name)
           return `translate(${x},${y})`
         })
+        .attr('data-px', (d) => projected.get(d.name)[0])
         .attr('role', 'button')
         .attr('tabindex', 0)
         // aria-pressed is set by the selection effect below, alongside the
@@ -218,11 +243,19 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
           hideTooltip()
         })
 
+      // EVERYTHING VISIBLE HANGS OFF THIS GROUP, not off the marker itself.
+      // The marker carries the projected position; this carries the
+      // counter-scale that keeps the dot, badge, label and hit area at a fixed
+      // pixel size. Two groups because they are two transforms -- writing the
+      // scale onto the marker would overwrite the translate that puts it on the
+      // map, the same split the cyclone glyph uses in StormJourney.
+      const inner = marker.append('g').attr('class', 'marker-inner')
+
       // Comfortable tap target without enlarging the visible dot.
-      marker
+      inner
         .append('circle')
         .attr('class', 'marker-hit')
-        .attr('r', 18)
+        .attr('r', MARKER_HIT_R)
         .attr('fill', 'transparent')
         .attr('pointer-events', 'all')
 
@@ -230,7 +263,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       // one palette invited them to drift apart.
       const markerPalette = chartColorsFor(themeRef.current)
 
-      marker
+      inner
         .append('circle')
         .attr('class', 'marker-dot')
         .attr('r', 7)
@@ -239,7 +272,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .attr('stroke-width', 1.5)
         .style('transition', 'r 150ms ease-out')
 
-      marker
+      inner
         .append('text')
         .attr('class', 'marker-badge')
         .attr('text-anchor', 'middle')
@@ -249,11 +282,11 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .attr('fill', markerPalette.onMark)
         .style('pointer-events', 'none')
 
-      marker
+      inner
         .append('text')
         .attr('class', 'marker-label')
         .text((d) => d.name)
-        .attr('x', 12)
+        .attr('x', LABEL_GAP)
         .attr('y', 4)
         .attr('font-size', 11)
         .attr('fill', 'currentColor')
@@ -345,6 +378,41 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       )
   }, [storm, built])
 
+  // Counter-scale the marker furniture so the labels and tap targets stay the
+  // size they were designed at while the geography scales with the box. `built`
+  // is a dependency for the usual reason -- on mount the coastline is still in
+  // flight and there are no markers to find yet.
+  useEffect(() => {
+    if (!gRef.current || !scale) return
+    const inverse = 1 / scale
+    gRef.current.selectAll('g.marker-inner').attr('transform', `scale(${inverse})`)
+
+    // AND THEN FLIP THE ONES THAT NO LONGER FIT.
+    //
+    // Counter-scaling is what makes a label legible, and it is also what makes
+    // it wide: at the phone's fit a name occupies more than twice the viewBox
+    // room it used to, while the projection's padding is a fixed 65 units
+    // chosen when the labels were small. Tonga sits nearest the right edge and
+    // ran straight off it.
+    //
+    // So a name that would overflow is drawn on the other side of its pin,
+    // which is what stormProfileChart does with its own clamp for the same
+    // reason. Measured rather than assumed: getComputedTextLength reports the
+    // real advance width in the marker's own units, so this stays correct for
+    // a longer country name than any currently on the roster.
+    gRef.current.selectAll('g.marker').each(function () {
+      const label = d3.select(this).select('text.marker-label')
+      const node = label.node()
+      if (!node) return
+      const px = Number(this.getAttribute('data-px'))
+      const width = node.getComputedTextLength()
+      const overflows = px + (LABEL_GAP + width) * inverse > WIDTH - LABEL_MARGIN
+      label
+        .attr('x', overflows ? -LABEL_GAP : LABEL_GAP)
+        .attr('text-anchor', overflows ? 'end' : 'start')
+    })
+  }, [scale, built])
+
   // No-ops if setup() hasn't finished; that race is covered by themeRef.
   useEffect(() => {
     if (!gRef.current) return
@@ -373,7 +441,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   const summaryFor = preview ?? selected[selected.length - 1] ?? null
 
   return (
-    <Section style={style}>
+    <Section style={style} backdrop={scatterBackdrop('map')}>
       <h2 className="type-h2 mb-2">Explore the Pacific</h2>
       <p className="prose-column prose-wide prose-short mb-3 text-sm opacity-70">
         Every country on this map is selectable. Tap a marker to select it, tap a second one to

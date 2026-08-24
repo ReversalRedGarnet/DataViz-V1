@@ -10,9 +10,9 @@ import {
   POINT_R,
   POINT_R_HOVER,
   POP_EASE,
-  SERIES_DASH,
 } from './constants.js'
 import { bandLabelStep, yearTickCount } from './labels.js'
+import { seriesStyles } from './series.js'
 import { barTopAndHeight, zeroAnchoredDomain } from './scales.js'
 import { drawXAxis, drawYAxis, drawZeroLabels, drawZeroLine } from './axes.js'
 import { pointTooltip } from './tooltips.jsx'
@@ -37,7 +37,12 @@ export function renderMetricChart(
   const margin = MARGIN
   const { ink, surface, palette } = chartTheme(theme)
 
-  const color = d3.scaleOrdinal(nations, palette.selection)
+  // Colour and dash come from one resolver shared with the legend, and it
+  // picks a wider palette above two nations -- see utils/charts/series.js for
+  // the two countries that used to be drawn identically here.
+  const styles = seriesStyles(nations, palette)
+  const styleOf = (nation) => styles[nations.indexOf(nation)]
+  const color = (nation) => styleOf(nation).color
 
   const isBand = chartType === 'bar'
   const years = Array.from(new Set(allRows.map((d) => d.year))).sort((a, b) => a - b)
@@ -160,7 +165,7 @@ export function renderMetricChart(
         .attr('fill-opacity', 0.2)
     }
 
-    const dash = SERIES_DASH[nations.indexOf(nation)] ?? null
+    const dash = styleOf(nation).dash
     // Sixty years of a noisy index at full weight is a hairball. A lighter
     // stroke lets the two series read through each other where they cross.
     const dense = series.length > 30

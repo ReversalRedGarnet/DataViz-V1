@@ -29,7 +29,10 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 export default function MetricSnapshotChart({
   label,
   ariaLabel,
-  rows,
+  // Defaulted rather than optional-chained at one use site and dereferenced at
+  // the next, which is what it was. Every caller passes an array today; the
+  // point is that the component now answers the question the same way twice.
+  rows = [],
   nationsMissing,
   missingNote,
   emptyNote,
@@ -44,7 +47,7 @@ export default function MetricSnapshotChart({
 }) {
   const { svgRef, cardRef, inView } = useChartCanvas({
     height: CHART_HEIGHT,
-    ready: rows?.length > 0,
+    ready: rows.length > 0,
     deps: [rows, format, yTickFormat, showTooltip, hideTooltip],
     draw: (svg, { width, theme }) =>
       renderSnapshotChart(svg, { width, rows, format, showTooltip, hideTooltip, yTickFormat, theme }),

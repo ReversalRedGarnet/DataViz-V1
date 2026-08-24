@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
@@ -43,14 +44,13 @@ export default function BigPicture({ data, dataError, storm, style }) {
     error: dataError,
     storm,
     style,
-    tone: 'panel',
     subject: 'The bigger picture',
     prompt: 'see how the region looked that year',
   })
   if (blocked) return blocked
 
   return (
-    <Section tone="panel" style={style}>
+    <Section style={style} backdrop={scatterBackdrop('big-picture')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">The Bigger Picture</h2>
 

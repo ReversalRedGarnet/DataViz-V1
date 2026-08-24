@@ -24,11 +24,17 @@
     height: calc(100dvh - var(--header-height));
   }
 
+  /*
+    The track used to carry its own transform transition -- the deck sliding
+    sideways was the page-change animation. It moved to an instant jump: the
+    reader never sees the jump itself, because it happens mid-drop, hidden
+    under the ripple-droplet cover in utils/rippleTransition.js. That is now
+    the one page-change animation for the whole site, so this does not get a
+    second, competing motion of its own.
+  */
   .slide-track {
     display: flex;
     height: 100%;
-    will-change: transform;
-    transition: transform 520ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .slide-panel {
@@ -74,6 +80,44 @@
 
   .slide-panel[data-active="false"] {
     opacity: 0;
+  }
+
+  /*
+    OFF-STAGE SLIDES DO NOT GET TO ANIMATE.
+
+    All fourteen panels stay mounted, and that is deliberate and load-bearing --
+    every chart measures a real DOM node and waits on a real
+    IntersectionObserver, so an unmounted section is a chart drawn at zero
+    width. See the note at the top of PageSections.jsx.
+
+    What does not follow is that they should all keep moving. `opacity: 0`
+    hides a layer; it does not stop its animation. Every section mounts an
+    Atmosphere whose ring runs `infinite`, and every content section paints a
+    scatter backdrop -- so thirteen slides
+    nobody can see were compositing continuously, on the mid-range phones this
+    stylesheet's own opening comment names as the reason everything here is
+    restricted to transform and opacity.
+
+    Safe to switch off rather than merely pause, and that is the point: both
+    layers are `position: absolute` and `pointer-events: none`, so they are out
+    of flow and out of the hit-testing tree. Nothing here changes a measurement,
+    which is the constraint that makes the all-mounted design work.
+  */
+  .slide-panel[data-active="false"] .atmos-layer,
+  .slide-panel[data-active="false"] .backdrop-layer {
+    display: none;
+  }
+
+  /* Paused rather than removed, so arriving at a slide does not snap the glyph
+     back to zero rotation. This one is a mark on the journey map, outside the
+     atmosphere layer above. */
+  .slide-panel[data-active="false"] .cyclone-spin {
+    animation-play-state: paused;
+  }
+
+  /* An invitation to press something the reader cannot currently see. */
+  .slide-panel[data-active="false"] .awaiting-press::after {
+    animation: none;
   }
 
   /* height, not min-height. A floor with no ceiling let a tall section grow
@@ -309,58 +353,15 @@
   /*
     SLIDE TRANSITIONS
 
-    Two motions doing different jobs. The track slides -- the deck itself
-    moving, same distance and curve every time, so the reader builds a sense
-    of where they are. The contents settle in behind it, slightly later and
-    over a shorter distance, which is what makes a slide feel like it arrived
-    somewhere rather than like a filmstrip pulled past a window.
+    Used to be two motions here: the track sliding sideways, and the entering
+    panel's contents settling in a beat later along the same axis. Both are
+    gone, replaced by the ripple-droplet transition every page change and
+    theme switch now shares -- see utils/rippleTransition.js.
 
-    The enter animation restarts without anything remounting: the selector
-    matches only while data-active is true, so false -> true changes the
-    computed animation-name from none and the browser starts it again.
+    The `direction` state and its data-dir attribute went with them. They
+    outlived the animation they were computed for by some time, threaded from
+    useDeck through App to PageSections to an attribute no selector read.
   */
-  /* `> *`, not `> section`, for the reason the .slide-scroll rule gives. */
-  .slide-viewport[data-dir="forward"]
-    .slide-panel[data-active="true"]
-    .slide-scroll
-    > * {
-    animation: slide-enter-forward 560ms 90ms cubic-bezier(0.16, 0.84, 0.28, 1)
-      both;
-  }
-
-  .slide-viewport[data-dir="back"]
-    .slide-panel[data-active="true"]
-    .slide-scroll
-    > * {
-    animation: slide-enter-back 560ms 90ms cubic-bezier(0.16, 0.84, 0.28, 1)
-      both;
-  }
-
-  /* Sideways only. A vertical component inflates the scroll container's
-     scrollHeight while it runs, and the overflow hint measures exactly that. */
-  @keyframes slide-enter-forward {
-    from {
-      opacity: 0;
-      transform: translate3d(34px, 0, 0);
-    }
-
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  @keyframes slide-enter-back {
-    from {
-      opacity: 0;
-      transform: translate3d(-34px, 0, 0);
-    }
-
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0);
-    }
-  }
 
   /* The counter is the one part of the footer whose meaning changes on every
      move, so it is the one part that acknowledges the move. */

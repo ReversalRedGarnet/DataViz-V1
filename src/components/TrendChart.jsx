@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import NoDataNote from './NoDataNote.jsx'
+import SeriesLegend from './SeriesLegend.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { slug } from '../utils/d3helpers.js'
-import { renderMetricChart, CHART_HEIGHT } from '../utils/charts/index.js'
+import { renderMetricChart, CHART_HEIGHT, seriesStyles } from '../utils/charts/index.js'
+import { chartTheme } from '../utils/theme.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 
 // One "selected nations, over time" chart card: heading, chart or placeholder,
@@ -26,6 +28,11 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 //     stays on the chart rather than being filtered out, but it must not read
 //     as though it were struck. Applied as a class after the draw, the same way
 //     the cross-chart highlight works, so the renderers need no knowledge of it.
+//   legend -- draw a key above the chart. Off by default: the ripple chain
+//     already prints one SelectionLegend above its whole grid, and a key on
+//     each of five cards would be the same two names five times. Sections
+//     drawing more than two nations need it, since four lines with no key are
+//     four lines the reader has to hover to tell apart.
 //   caveat -- what this series cannot be read as, printed under the chart
 //   emphasis -- 'active' | 'dim' | undefined. The ripple chain sets it while a
 //     link is being held: the held card is ringed and the others recede, so
@@ -57,6 +64,7 @@ export default function TrendChart({
   stage,
   ripple = false,
   dimNations,
+  legend = false,
   caveat,
   emphasis,
   cardHandlers,
@@ -66,7 +74,7 @@ export default function TrendChart({
   // Only worth explaining where a reported zero is actually on screen.
   const hasReportedZero = chartType === 'bar' && allRows.some((d) => d[valueField] === 0)
 
-  const { svgRef, cardRef, node, inView } = useChartCanvas({
+  const { svgRef, cardRef, node, inView, theme, drawCount } = useChartCanvas({
     height: CHART_HEIGHT,
     ready: allRows?.length > 0,
     deps: [allRows, nations, valueField, chartType, format, yTickFormat, showTooltip, hideTooltip],
@@ -88,6 +96,17 @@ export default function TrendChart({
   // Reduced strength for nations shown only as comparison. A separate effect
   // from the draw so that changing which storm is selected re-dims without
   // redrawing the chart and replaying its entrance.
+  //
+  // `drawCount` is the third dependency and the non-obvious one. The marks
+  // these classes go on belong to D3 and are destroyed and recreated by every
+  // redraw, so a re-dim has to follow each one -- a theme flip would otherwise
+  // silently drop the dimming. It stands in for "the chart was drawn again",
+  // which is not something node identity or dimNations can express.
+  //
+  // This effect previously had no dependency array at all, so it ran a
+  // querySelectorAll and a full class-string scan of every mark after every
+  // render. Correct, and on the ripple chain that was five charts' worth of it
+  // per frame of any scroll.
   useEffect(() => {
     if (!node) return
     const dim = new Set((dimNations ?? []).map(slug))
@@ -97,7 +116,12 @@ export default function TrendChart({
       )
       mark.classList.toggle('nation-unstruck', isDim)
     }
-  })
+  }, [node, dimNations, drawCount])
+
+  const legendStyles = useMemo(
+    () => (legend ? seriesStyles(nations, chartTheme(theme).palette) : null),
+    [legend, nations, theme]
+  )
 
   return (
     <div
@@ -123,6 +147,9 @@ export default function TrendChart({
         )}
         {label}
       </h3>
+      {legendStyles && allRows.length > 0 && (
+        <SeriesLegend styles={legendStyles} className="mb-3" />
+      )}
       {allRows.length > 0 ? (
         <svg ref={svgRef} role="img" aria-label={label} className="block w-full" style={{ height: CHART_HEIGHT }} />
       ) : (

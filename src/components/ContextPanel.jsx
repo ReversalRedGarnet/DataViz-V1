@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import Tooltip from './Tooltip.jsx'
 import TrendChart from './TrendChart.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
-import EmptyState from './EmptyState.jsx'
+import { sectionGuard } from './sectionGuard.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { NATION_NAMES } from '../content/nations.js'
 import { CAPACITY_METRICS, CONTEXT_METRICS } from '../utils/metrics.js'
@@ -48,19 +49,16 @@ export default function ContextPanel({ data, dataError, style }) {
     [data]
   )
 
-  // A failed load and a load in flight both arrive as data === null; only the
-  // second one is worth a message that implies waiting.
-  if (dataError) {
-    return (
-      <EmptyState style={style}>
-        Context &mdash; the data could not be loaded. Reload the page to try again.
-      </EmptyState>
-    )
-  }
-  if (!data) return <EmptyState style={style}>Context &mdash; waiting on data.</EmptyState>
+  // No `storm` key at all, which is what tells sectionGuard this section does
+  // not depend on one -- these two records exist with or without a selection.
+  // The error and loading branches used to be written out here by hand for
+  // want of that, and had already drifted from the wording every other section
+  // uses.
+  const blocked = sectionGuard({ data, error: dataError, style, subject: 'Context' })
+  if (blocked) return blocked
 
   return (
-    <Section style={style}>
+    <Section style={style} backdrop={scatterBackdrop('context')}>
       <div ref={containerRef} className="relative">
         <p className="type-eyebrow mb-1 text-accent">
           Underneath the chain
@@ -142,6 +140,7 @@ export default function ContextPanel({ data, dataError, style }) {
                   showTooltip={showTooltip}
                   hideTooltip={hideTooltip}
                   index={i}
+                  legend
                   caveat={m.caveat}
                   className={
                     i === CONTEXT_METRICS.length - 1 && CONTEXT_METRICS.length % 2 !== 0

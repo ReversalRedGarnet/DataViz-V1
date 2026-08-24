@@ -19,6 +19,7 @@ from common import (
     COUNTRY_COL_CANDIDATES,
     NATIONS,
     OUT_DIR,
+    write_bundle,
     RAW_DIR,
     STORMS,
     TIME_COL_CANDIDATES,
@@ -353,6 +354,11 @@ def main() -> None:
 
     if cleaned:
         report_coverage(cleaned)
+
+    # Always, even on a partial run: write_bundle reads the directory rather
+    # than `cleaned`, so it re-emits the whole of public/data/ and cannot drop
+    # a dataset this run did not touch.
+    write_bundle()
 
 
 if __name__ == "__main__":

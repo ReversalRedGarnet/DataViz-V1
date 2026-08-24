@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import { sectionGuard } from './sectionGuard.jsx'
 import { PAGE_SECTIONS } from '../content/pageSections.js'
 
@@ -97,7 +98,7 @@ export default function DataDetective({ storm, style }) {
   const factor = FACTORS.find((f) => f.id === picked) ?? null
 
   return (
-    <Section width="narrow" style={style}>
+    <Section width="narrow" style={style} backdrop={scatterBackdrop('detective')}>
       <div>
         <p className="type-eyebrow mb-1 text-accent">Before the conclusion</p>
         <h2 className="type-h2 mb-2">

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import PageHero from './PageHero.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import { STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
 import { NATIONS, NATION_COUNT } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
@@ -45,6 +46,7 @@ export default function Hero({ style }) {
         'factors, reveal why the same weather can produce such different outcomes.'
       }
       atmosphere="hero"
+      backdrop={scatterBackdrop('top')}
       className={`hero-atmos relative overflow-hidden ${stirred ? 'is-stirred' : ''}`}
       style={style}
     >

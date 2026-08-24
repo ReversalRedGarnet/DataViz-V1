@@ -1,6 +1,5 @@
-import { flushSync } from 'react-dom'
 import { useTheme } from '../hooks/useTheme.jsx'
-import { prefersReducedMotion } from '../utils/motion.js'
+import { runRippleTransition } from '../utils/rippleTransition.js'
 
 // Same stroke convention as MapControlIcon.jsx. Shows the mode a click
 // switches TO -- answering "what does this do" rather than "what state am I
@@ -51,46 +50,13 @@ export default function ThemeToggle({ className = '' }) {
   const { theme, toggleTheme } = useTheme()
 
   // The whole page repaints on a theme change, so the switch is either an
-  // abrupt flash or something deliberate. This wipes the new theme in as a
-  // circle expanding from the button the reader just pressed, which makes the
-  // change feel caused rather than glitched.
-  //
-  // flushSync inside startViewTransition is required, not stylistic: the
-  // browser snapshots the page when the callback returns, and React's default
-  // batching would mean it snapshots the old theme.
-  //
-  // Everything here is progressive. No View Transition support, or a reader
-  // who has asked for less motion, and it falls through to a plain toggle.
+  // abrupt flash or something deliberate. It goes through the same
+  // ripple-droplet transition as moving between slides -- see
+  // utils/rippleTransition.js -- landing at the button the reader just
+  // pressed, which makes the change feel caused rather than glitched, and
+  // read as the same kind of event as paging the deck.
   function handleClick(event) {
-    if (typeof document === 'undefined' || !document.startViewTransition || prefersReducedMotion()) {
-      toggleTheme()
-      return
-    }
-
-    const x = event.clientX
-    const y = event.clientY
-    // Radius out to the furthest corner, so the circle finishes by covering
-    // the viewport rather than stopping short of a corner.
-    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
-
-    document.documentElement.classList.add('theme-sweep')
-    const transition = document.startViewTransition(() => flushSync(toggleTheme))
-
-    transition.ready
-      .then(() =>
-        document.documentElement.animate(
-          {
-            clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
-          },
-          {
-            duration: 480,
-            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-            pseudoElement: '::view-transition-new(root)',
-          }
-        ).finished
-      )
-      .catch(() => {})
-      .finally(() => document.documentElement.classList.remove('theme-sweep'))
+    runRippleTransition({ x: event.clientX, y: event.clientY, run: toggleTheme })
   }
 
   return (

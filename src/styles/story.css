@@ -86,15 +86,6 @@
     }
   }
 
-  .atmos-cyclone {
-    position: absolute;
-    right: 4%;
-    top: 12%;
-    width: 8rem;
-    height: 8rem;
-    color: rgb(var(--color-accent) / 0.16);
-  }
-
   /*
     THE AMBIENT VARIANT, for every section that is not the title card.
 
@@ -102,9 +93,8 @@
     noticed. Behind a chart it must not be: the same motion at the same strength
     would compete with the marks a reader is trying to compare, which is the one
     thing decoration is not allowed to do. So it is the same animation, run
-    quieter -- a third of the peak opacity, a cycle slow enough to read as
-    drift rather than as an event, and the cyclone pushed smaller and further
-    into the corner.
+    quieter -- a third of the peak opacity, and a cycle slow enough to read as
+    drift rather than as an event.
   */
   .atmos-ambient {
     --atmos-ring-peak: 0.07;
@@ -115,14 +105,6 @@
     border-color: rgb(var(--color-accent) / 0.28);
   }
 
-  .atmos-ambient .atmos-cyclone {
-    width: 5.5rem;
-    height: 5.5rem;
-    right: 2%;
-    top: 6%;
-    color: rgb(var(--color-accent) / 0.07);
-  }
-
   /*
     Settled, not stopped dead. Pausing mid-sweep would freeze a half-drawn ring
     on the page as a permanent artefact; this lets each ring finish the pass it
@@ -130,11 +112,6 @@
   */
   .hero-atmos.is-stirred .atmos-ring {
     animation-iteration-count: 1;
-  }
-
-  .hero-atmos.is-stirred .atmos-cyclone {
-    opacity: 0.45;
-    transition: opacity 400ms ease-out;
   }
 
   /* The six roster marks under the hero. Lighting one is a colour change; the
@@ -206,6 +183,7 @@
   .journey-stop {
     height: 15rem;
   }
+
 
   /*
     THE STORM SCRUBBER
@@ -319,6 +297,15 @@
 
   .storm-strip::-webkit-scrollbar {
     display: none;
+  }
+
+  /* The same fade .locked-scroll uses, turned sideways: cards dissolving at the
+     right edge is what says the row continues. It clears at the end for the
+     same reason -- a fade with nothing behind it promises a card that is not
+     there. Masked rather than painted, so it works over either theme. */
+  .storm-strip[data-overflowing="true"] {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
   }
 
   /*

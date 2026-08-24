@@ -11,6 +11,9 @@
   above them, preflight would win.
 */
 
+/* Generated from styles/tokens.js -- see scripts/build-tokens.mjs. First,
+   because everything below is painted with the variables it declares. */
+@import './styles/tokens.css';
 @import './styles/base.css';
 @import './styles/typography.css';
 /* After typography, because .figure-prose relaxes a width that .prose-column
@@ -20,6 +23,9 @@
 @import './styles/animations.css';
 @import './styles/slideshow.css';
 @import './styles/story.css';
+/* Self-contained: one component's rules, sharing no selector with any file
+   above, so its position here is convenience rather than load-bearing. */
+@import './styles/display-check.css';
 /* Last, deliberately. Several rules in here restate a selector that already
    appears in slideshow.css at the same specificity, so source order is what
    decides -- and the laptop layer has to be the one that wins. */
@@ -30,43 +36,37 @@
 @tailwind utilities;
 
 /*
-  View Transitions. The default root cross-fade is what a page-to-page
-  navigation should look like, so it is left alone. The theme toggle wants the
-  opposite -- see the matching note in base.css.
+  The theme toggle and the deck's page changes used to each animate the root
+  differently -- a View Transitions crossfade for one, left alone for the
+  other. Both now go through the same ripple-droplet transition
+  (utils/rippleTransition.js), which is plain WAAPI rather than the View
+  Transitions API, so there is nothing left here to scope to a sweep class or
+  to opt out of under reduced motion: rippleTransition.js checks that itself,
+  once, before it creates anything.
 */
-html.theme-sweep::view-transition-old(root) {
-  animation: none;
-  z-index: 1;
-}
 
-html.theme-sweep::view-transition-new(root) {
-  animation: none;
-  z-index: 999;
-  mix-blend-mode: normal;
-}
+/*
+  REDUCED MOTION IS ANSWERED IN FOUR PLACES, and this is only one of them.
+  Each block scopes to what its own file owns, which is right -- but it means
+  there is no single rule to read, so here is the map:
 
-@media (prefers-reduced-motion: reduce) {
-  /* The root cross-fade is decoration; the toggle already opts out in JS. */
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-  }
-}
+    this file           the shared entrance, the deck's controls, the timeline's
+                        press invitation, the cross-chart dimming
+    styles/story.css    the atmosphere, the scrubber, the ending's four lines,
+                        the phone accordion
+    styles/slideshow.css the track, the panels, the "more below" nudge
+    utils/motion.js     the JavaScript half -- every D3 transition and the
+                        ripple page change ask it before they animate
 
+  Adding an animation means adding its no-motion form to whichever of these
+  owns it. None of them may carry information that is lost when switched off.
+*/
 @media (prefers-reduced-motion: reduce) {
   .animate-pop-in,
   .animate-tooltip-pop-in,
   .cyclone-spin,
   .deck-status,
   .slide-panel[data-active="true"] .deck-count,
-  .slide-viewport[data-dir="forward"]
-    .slide-panel[data-active="true"]
-    .slide-scroll
-    > *,
-  .slide-viewport[data-dir="back"]
-    .slide-panel[data-active="true"]
-    .slide-scroll
-    > *,
   .press-target[aria-pressed="true"] {
     animation: none;
   }

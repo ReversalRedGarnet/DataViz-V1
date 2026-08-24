@@ -1,4 +1,5 @@
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import { sectionGuard } from './sectionGuard.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useInView } from '../hooks/useInView.js'
@@ -82,7 +83,6 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
     data: true,
     storm,
     style,
-    tone: 'panel',
     subject: 'The finding',
     prompt: 'see what it all adds up to',
   })
@@ -91,7 +91,7 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const pair = selectedNations ?? []
 
   return (
-    <Section tone="panel" width="narrow" style={style}>
+    <Section width="narrow" style={style} backdrop={scatterBackdrop('conclusion')}>
       <div ref={sectionRef}>
         <p className="type-eyebrow mb-1 text-accent">What {storm.name} showed</p>
         <h2 className="type-h2 mb-3">A shared storm is not a shared recovery.</h2>

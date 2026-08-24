@@ -5,17 +5,22 @@
 // is a ~290-degree arc (large-arc-flag 1, sweep-flag 0: the long way round, not
 // the short way through the gap) with an arrowhead tangent to the curl.
 //
+// currentColor, not a hex. These were hardcoded to #24333A -- the LIGHT
+// theme's --color-ink -- so in dark mode three near-black glyphs were drawn on
+// a translucent dark surface over the dark ocean fill, and zoom and reset
+// simply were not there. ThemeToggle.jsx solves the same problem the same way
+// one file over; this one was the last hardcoded theme colour in a component.
+//
 // Props:
 //   kind -- 'zoomIn' | 'zoomOut' | 'reset'
-const STROKE = '#24333A'
 const STROKE_WIDTH = 2.25
 
 export default function MapControlIcon({ kind }) {
   if (kind === 'zoomIn') {
     return (
       <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
-        <line x1="12" y1="4" x2="12" y2="20" stroke={STROKE} strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
-        <line x1="4" y1="12" x2="20" y2="12" stroke={STROKE} strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
+        <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
+        <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
       </svg>
     )
   }
@@ -23,7 +28,7 @@ export default function MapControlIcon({ kind }) {
   if (kind === 'zoomOut') {
     return (
       <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
-        <line x1="4" y1="12" x2="20" y2="12" stroke={STROKE} strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
+        <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
       </svg>
     )
   }
@@ -33,12 +38,12 @@ export default function MapControlIcon({ kind }) {
       <path
         d="M 7.70 5.86 A 7.5 7.5 0 1 0 16.30 5.86"
         fill="none"
-        stroke={STROKE}
+        stroke="currentColor"
         strokeWidth={STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <polygon points="14.42,4.54 18.82,5.05 16.41,8.49" fill={STROKE} />
+      <polygon points="14.42,4.54 18.82,5.05 16.41,8.49" fill="currentColor" />
     </svg>
   )
 }

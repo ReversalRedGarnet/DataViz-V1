@@ -4,6 +4,7 @@ import { buildComparativeInsights } from '../utils/insights.js'
 import { rowsByMetricForNations } from '../utils/rows.js'
 import { useTooltip } from '../hooks/useTooltip.js'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import SelectionLegend from './SelectionLegend.jsx'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
@@ -100,6 +101,18 @@ export default function RippleChain({
     [data, selectedNations]
   )
 
+  // Memoised, and it has to be: this is TrendChart's `dimNations`, which is a
+  // dependency of the effect that applies the faded treatment. Computed inline
+  // it was a fresh array on every render, which is why that effect ended up
+  // with no dependency array at all and ran after every one of them.
+  //
+  // Above the guards below rather than beside its use, because a hook cannot
+  // follow a conditional return -- hence the storm check inside it.
+  const unstruck = useMemo(
+    () => (storm ? selectedNations.filter((n) => !storm.nations.includes(n)) : []),
+    [storm, selectedNations]
+  )
+
   const insights = useMemo(() => {
     if (!data || !storm || selectedNations.length !== 2) return null
     return buildComparativeInsights(data, selectedNations[0], selectedNations[1], storm.year)
@@ -117,8 +130,6 @@ export default function RippleChain({
   if (!selectedNations || selectedNations.length === 0) {
     return <EmptyState style={style}>Choose a country in the map section to see its ripple chain.</EmptyState>
   }
-
-  const unstruck = selectedNations.filter((n) => !storm.nations.includes(n))
 
   // The thirteen props every chain chart takes, in one place. Both layouts drew
   // the same chart from the same data and each wrote the list out in full, so a
@@ -140,7 +151,7 @@ export default function RippleChain({
   })
 
   return (
-    <Section width="narrow" style={style}>
+    <Section width="narrow" style={style} backdrop={scatterBackdrop('ripple-chain')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">
           After {storm.name}, {storm.year}
