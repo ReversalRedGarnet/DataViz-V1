@@ -62,14 +62,16 @@ import { scatterBackdrop } from '../content/patterns.js'
 // p-3.5 rather than p-4, and that is the whole of the "shrink things" part of
 // this pass. The rest of the height came out of layout, not type.
 //
-// SPLIT IN TWO because the exclusions list is a card whose padding sits on its
-// rows rather than on itself, and `${CARD} p-0` would not reliably do that:
-// two Tailwind padding utilities on one element are the same specificity, so
-// the generated stylesheet's own order decides which wins, not the order they
-// are written in the class attribute. Naming the chrome separately makes it a
-// fact rather than a coin flip.
-const CARD_CHROME = 'rounded-xl border border-ink/10 bg-surface/60'
-const CARD = `${CARD_CHROME} p-3.5`
+// Used to be split into CARD_CHROME and CARD, because the roster's exclusions
+// list was a card whose padding sat on its own divided rows rather than on
+// the card itself, and `${CARD} p-0` would not have reliably won that fight --
+// two Tailwind padding utilities at identical specificity leave the
+// stylesheet's own generation order to decide, not the order written in the
+// class attribute. That card is gone (see the roster section below: it now
+// splits by whether an exclusion has real explanatory prose, same rule as
+// everything else on this page), and with it the only reason CARD_CHROME
+// needed to be nameable on its own.
+const CARD = 'rounded-xl border border-ink/10 bg-surface/60 p-3.5'
 
 const BUILD = [
   { label: 'Interface', value: 'React 18, built with Vite' },
@@ -191,39 +193,46 @@ export default function MethodPanel({ style }) {
           </p>
         </div>
 
-        {/* ONE BOX, NOT FOUR. These were four cards in a two-column grid with
-            Yasa spanning the top, which drew four hard edges around what is a
-            single four-line answer to a single question. Three of the four
-            reasons are a fragment long ("Fiji only.") and got a card the size
-            of a paragraph; the grid then left a hole beside Rae, so the block
-            ended on an empty cell.
-
-            The same card chrome as everything else on this slide, once, with
-            the storms as divided rows inside it. divide-y rather than a border
-            per row so the first row has no rule above it and the last none
-            below -- the card's own edge is doing that job.
-
-            Yasa keeps the room. It is the exclusion that costs the argument
-            something, and a list of exclusions where the expensive one is set
-            like the cheap ones is doing the same flattening the rule exists to
-            prevent. See EXCLUDED in content/storms.js: `cost` is present on
-            exactly one entry, and its presence is what earns the extra lines
+        {/* SAME RULE AS THE REST OF THE PAGE NOW: card chrome for an entry
+            with real explanatory prose, a bare left rule for a short fact.
+            This list used to be its own bespoke thing -- one card with
+            divide-y rows -- which was a reasonable fix for "Yasa needs more
+            room than Ana" on its own, but it was also a fourth container
+            style on a page now trying to have exactly two. Splitting the
+            list by whether an entry has `cost` does the same job (Yasa still
+            gets room the three one-liners don't) using the two treatments
+            already established for "What the data cannot say" and "Languages"
+            below, so this section stops looking like a different part of the
+            site. See EXCLUDED in content/storms.js: `cost` is present on
+            exactly one entry, and its presence is what decides the split
             rather than a hardcoded index here. */}
-        <ul
-          aria-label="Storms excluded by the roster rule"
-          className={`${CARD_CHROME} divide-y divide-ink/10`}
-        >
-          {EXCLUDED.map((storm) => (
-            <li key={storm.name} className="px-3.5 py-3">
+        <ul aria-label="Storms excluded with cost to the case" className="space-y-2.5">
+          {EXCLUDED.filter((storm) => storm.cost).map((storm) => (
+            <li key={storm.name} className={CARD}>
               <p className="text-base font-semibold">
                 {storm.name} <span className="text-sm font-normal opacity-60">{storm.year}</span>
               </p>
               <p className="mt-0.5 text-sm opacity-80">{storm.reason}</p>
-              {storm.cost && (
-                <p className="mt-2 border-l-2 border-accent pl-3 text-sm italic opacity-80">
-                  {storm.cost}
-                </p>
-              )}
+              {/* Accent stays reserved for this one line and for headings --
+                  it is the page's "look here, this is an argument" colour,
+                  which is exactly why it should not also be the colour of an
+                  ordinary list divider (see the languages/build note below). */}
+              <p className="mt-2 border-l-2 border-accent pl-3 text-sm italic opacity-80">
+                {storm.cost}
+              </p>
+            </li>
+          ))}
+        </ul>
+
+        <ul
+          aria-label="Storms excluded without cost to the case"
+          className="mt-2.5 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2"
+        >
+          {EXCLUDED.filter((storm) => !storm.cost).map((storm) => (
+            <li key={storm.name} className="border-l-2 border-ink/15 pl-3">
+              <span className="font-semibold">{storm.name}</span>
+              <span className="opacity-60"> {storm.year}</span>
+              <span className="opacity-80"> &mdash; {storm.reason}</span>
             </li>
           ))}
         </ul>
@@ -268,18 +277,26 @@ export default function MethodPanel({ style }) {
         <h4 className="type-subhead mb-1 text-accent">
           What the data cannot say
         </h4>
-        {/* ONE COLUMN. This was a two-up grid, which was the right call for
-            bodies of 300-450 characters and the wrong one for the two-sentence
-            bodies above: at half width they set to five or six short lines, so
-            two columns produced two ragged narrow blocks side by side and the
-            reader's eye had to find the next card rather than just continuing
-            down. Trimmed text buys the height that the second column used to.
+        {/* TWO COLUMNS NOW, having gone one-column-then-two across two
+            passes. The original two-up grid was the wrong call for the
+            300-450 character bodies it held then: at half width they set to
+            five or six ragged lines. Trimmed to two sentences, they read
+            comfortably at half width too -- and a full-width stack of five
+            identical cards was itself a problem once the rest of this page
+            started using a grid for everything else short-and-listy
+            (Planned, Languages, Build). One more full-width block made the
+            page read as an undifferentiated scroll even after the act-level
+            regrouping fixed the bigger structural issue.
 
-            Five titles in a single left-aligned stack also read as a list of
-            five limitations, which is what this block is. In two columns they
-            read as a grid of cards, which invites comparison between them --
-            and these five have nothing to do with each other. */}
-        <ul className="space-y-2.5">
+            (These bodies carry .prose-short, not .prose-column, so this
+            column change does not touch justification either way -- there is
+            no .prose-column ancestor here for .prose-short to be overriding.)
+
+            Five items in two columns leaves the last on its own row. Accepted
+            rather than engineered around: it is a minor asymmetry, and the
+            alternative (padding to six, or forcing four-and-a-caption) would
+            cost more than the empty half-row does. */}
+        <ul className="grid gap-2.5 sm:grid-cols-2">
           {LIMITS.map((limit) => (
             <li key={limit.title} className={CARD}>
               <p className="text-sm font-semibold">{limit.title}</p>
@@ -343,13 +360,21 @@ export default function MethodPanel({ style }) {
         {/* Was four cards, each with 14px of padding on every side around a
             country name and one short line. Card chrome is for something a
             reader compares or acts on; this is a list, so it is set as one.
-            Same four facts, roughly a third of the height. */}
+            Same four facts, roughly a third of the height.
+
+            border-ink/15 now, not border-accent/40. It was accent-coloured
+            with no stated reason -- accent is reserved elsewhere on this page
+            for the one line meant to read as an argument (Yasa's cost
+            callout) and for headings, so an accent-coloured divider here was
+            competing with that signal rather than reinforcing it. ink/15 is
+            what every other bare-rule list on this page uses now (Planned,
+            the roster's short exclusions, Build below). */}
         <ul
           aria-label="First languages of the four nations"
           className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2"
         >
           {LANGUAGES.map((row) => (
-            <li key={row.nation} className="border-l-2 border-accent/40 pl-3">
+            <li key={row.nation} className="border-l-2 border-ink/15 pl-3">
               <span className="font-semibold">{row.nation}</span>
               <span className="opacity-80"> &mdash; {row.tongues}</span>
             </li>
@@ -389,16 +414,24 @@ export default function MethodPanel({ style }) {
           sudden toggle as a different site bolted on at the end -- the exact
           "feels unplanned" complaint this whole slide was being fixed for,
           recurring in a new spot. Smaller type and lower opacity say "this
-          matters less" without saying "this behaves differently". */}
+          matters less" without saying "this behaves differently".
+
+          Rows are a bare left rule now, not card chrome. Each one is a label
+          and a single fact -- "Styling: Tailwind CSS, PostCSS" -- which is
+          exactly the shape every other short-fact list on this page uses
+          (Planned, Languages, the roster's one-line exclusions), and card
+          chrome on this page now means "read this prose in full" (What the
+          data cannot say). Four rows in cards were the last place that
+          signal was being sent to something that isn't an argument. */}
       <div className="border-t border-ink/10 pt-4 text-xs opacity-60">
         <p className="type-eyebrow mb-3">
           How this site is built
         </p>
-        <dl className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        <dl className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
           {BUILD.map((row) => (
-            <div key={row.label} className={CARD}>
-              <dt className="type-eyebrow opacity-60">{row.label}</dt>
-              <dd className="mt-1 text-xs opacity-85">{row.value}</dd>
+            <div key={row.label} className="border-l-2 border-ink/15 pl-3">
+              <dt className="inline font-semibold">{row.label}</dt>
+              <dd className="inline"> &mdash; {row.value}</dd>
             </div>
           ))}
         </dl>
