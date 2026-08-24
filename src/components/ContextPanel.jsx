@@ -57,6 +57,15 @@ export default function ContextPanel({ data, dataError, style }) {
   // themselves rather than recomputed here, so this can never drift from what
   // reportingCompletenessByNation actually divided by.
   const completenessMax = completeness[0]?.possible ?? 0
+  // Memoised for the same reason every other chart's format function is a
+  // stable reference declared once in metrics.js rather than written inline:
+  // useChartCanvas redraws whenever the format function it's given changes
+  // identity. An inline arrow here is a new function on every render of this
+  // component, and hovering a bar elsewhere on this same panel updates
+  // tooltip state that lives in this component -- so every hover was
+  // recreating this closure and the chart was redrawing itself, entrance
+  // animation and all, on every pointer move.
+  const completenessFormat = useMemo(() => (v) => `${v} of ${completenessMax} years`, [completenessMax])
 
   // The stations ranking, best to worst, read out of the chart's own rows
   // rather than typed as nation names in the paragraph below. Typed out by
@@ -128,16 +137,16 @@ export default function ContextPanel({ data, dataError, style }) {
                 />
               ))}
               <MetricSnapshotChart
-                label="Ripple-chain reporting completeness"
-                ariaLabel="Ripple-chain reporting completeness, country-years reported, by nation"
+                label="Years of data actually reported"
+                ariaLabel="Years of data actually reported, out of 60 possible, by nation"
                 rows={completeness}
                 nationsMissing={[]}
                 emptyNote="Data not available."
-                format={(v) => `${v} of ${completenessMax} years`}
+                format={completenessFormat}
                 showTooltip={showTooltip}
                 hideTooltip={hideTooltip}
                 index={CAPACITY_METRICS.length}
-                caveat={`Reported country-years across the same five records as the ripple chain, out of ${completenessMax} possible. A year every nation is equally missing \u2014 power generation's still-unpublished ${DATA_YEAR_MAX} \u2014 counts the same against all four and does not move this ranking; what moves it is a year one nation has and another does not.`}
+                caveat={`Out of ${completenessMax} possible country-years (5 records \u00d7 12 years), this counts how many each nation actually reported. A gap shared by all four nations \u2014 like ${DATA_YEAR_MAX} power-generation data, not yet published for anyone \u2014 doesn't count against any one country. Only gaps that fall unevenly, where one nation has data and another doesn't, move this ranking.`}
               />
             </div>
           </div>
