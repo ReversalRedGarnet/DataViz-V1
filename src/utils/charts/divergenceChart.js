@@ -20,19 +20,23 @@ import { divergenceTooltip } from './tooltips.jsx'
 // the chart can show is how far apart they end up.
 //
 // Built once and then driven, rather than redrawn: returns { update(progress) }
-// where progress runs 0..1 across the year range. A section-wide sweep is
-// animating three of these at 60fps, so an update has to be an attribute write
+// where progress runs 0..1 across sweepYears. A page can have several of these
+// sweeping independently at 60fps, so an update has to be an attribute write
 // on marks that already exist, not another pass of D3 draw code.
 //
 // Args:
 //   series -- [{ nation, points: [{ year, index, raw, baseYear }] }], in the
 //     order the colours should be assigned
-//   years -- [firstYear, lastYear], shared across every chart in the section
-//     so their sweeps stay in step even when their records end at different
-//     points
+//   years -- [firstYear, lastYear], the x-axis domain. Shared across every
+//     chart on the page so they stay visually aligned.
+//   sweepYears -- [firstYear, lastYear], what progress 0..1 actually sweeps
+//     across. This chart's own clock, so it is this metric's own last real
+//     year, not the page-wide max -- a metric that stops in 2022 finishes at
+//     2022, on its own timer, rather than idling until a 2024 metric catches
+//     up.
 export function buildDivergenceChart(
   svg,
-  { width, height = DIVERGENCE_HEIGHT, series, years, format, showTooltip, hideTooltip, theme = 'light' }
+  { width, height = DIVERGENCE_HEIGHT, series, years, sweepYears, format, showTooltip, hideTooltip, theme = 'light' }
 ) {
   const { ink, surface, palette } = chartTheme(theme)
 
@@ -150,7 +154,7 @@ export function buildDivergenceChart(
 
   function update(progress) {
     const clamped = Math.max(0, Math.min(1, progress))
-    const year = years[0] + (years[1] - years[0]) * clamped
+    const year = sweepYears[0] + (sweepYears[1] - sweepYears[0]) * clamped
     clipRect.attr('width', Math.max(0, x(year) - margin.left))
 
     const placed = marks.map((mark) => {
