@@ -35,13 +35,21 @@ import { scatterBackdrop } from '../content/patterns.js'
 // two: filing it alongside "what the data cannot say" would flatten an
 // argument into one more item on a list of caveats.
 //
-// HOW IT IS BUILT moved to a collapsed disclosure at the very bottom. It is
+// HOW IT IS BUILT moved to a quietly-demoted block at the very bottom. It is
 // real information -- a developer or judge auditing the project may want it --
 // but it answers "what was this made with", not "can this data be trusted",
 // and the rest of this slide is entirely the second question. Demoted rather
 // than deleted or moved to the sources slide: the sources slide is a
 // deliberately quiet footer (see CitationPanel.jsx), and a stack of framework
 // names does not belong in the same register as a list of citations.
+//
+// Demoted with type scale and opacity, not with a collapsed <details> toggle.
+// That was tried first and reverted: it was the only click-to-expand element
+// anywhere in the fourteen-slide deck, arriving on the second-to-last one, and
+// a reader thirteen slides into a consistent, non-interactive design reads a
+// sudden toggle as a different site bolted on at the end -- the same "feels
+// unplanned" complaint this whole restructure exists to fix, recurring in a
+// new spot instead of being solved.
 //
 // PLANNED WORK is the one block here that is not a statement of fact about the
 // build: it is a roadmap, so it goes stale in a way the rest of this slide
@@ -372,38 +380,36 @@ export default function MethodPanel({ style }) {
       </div>
 
       {/* THE DEMOTED TECH STACK. Real information, deliberately last and
-          deliberately quiet: collapsed behind a native <details> disclosure
-          rather than always-open prose, so a reader who wants "what was this
-          built with" can open it and everyone else scrolls past one muted
-          line instead of four cards and a paragraph sitting between two
-          arguments about data trust. Native <details>/<summary> rather than a
-          hand-rolled toggle -- no JS state to wire up, and it is keyboard and
-          screen-reader operable for free. */}
-      <details className="group border-t border-ink/10 pt-4 text-xs opacity-60">
-        <summary className="cursor-pointer select-none list-none font-semibold uppercase tracking-[0.14em] marker:content-none [&::-webkit-details-marker]:hidden">
-          How this site is built{' '}
-          <span aria-hidden="true" className="inline-block transition-transform group-open:rotate-180">
-            &#9662;
-          </span>
-        </summary>
-        <div className="mt-3">
-          <dl className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {BUILD.map((row) => (
-              <div key={row.label} className={CARD}>
-                <dt className="type-eyebrow opacity-60">{row.label}</dt>
-                <dd className="mt-1 text-sm opacity-85">{row.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <p className="prose-column prose-wide mt-2.5 text-sm opacity-80">
-            Charts are drawn directly in D3 rather than through a charting library, so every axis,
-            label and empty state is a decision made here rather than a default inherited from
-            somewhere else. The cleaning scripts are committed alongside the site, and the JSON they
-            produce is what ships &mdash; there is no live API call, and the figures cannot change
-            under the argument after it has been read.
-          </p>
-        </div>
-      </details>
+          deliberately quiet -- but demoted with the type scale and opacity
+          this site already leans on everywhere else, not with a new
+          interaction. A <details> disclosure lived here first; it was the
+          only click-to-expand element anywhere in the deck, arriving on
+          slide 13 of 14, and a reader who has scrolled through thirteen
+          slides of a consistent, non-interactive design language reads a
+          sudden toggle as a different site bolted on at the end -- the exact
+          "feels unplanned" complaint this whole slide was being fixed for,
+          recurring in a new spot. Smaller type and lower opacity say "this
+          matters less" without saying "this behaves differently". */}
+      <div className="border-t border-ink/10 pt-4 text-xs opacity-60">
+        <p className="type-eyebrow mb-3">
+          How this site is built
+        </p>
+        <dl className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          {BUILD.map((row) => (
+            <div key={row.label} className={CARD}>
+              <dt className="type-eyebrow opacity-60">{row.label}</dt>
+              <dd className="mt-1 text-xs opacity-85">{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="prose-column prose-wide mt-2.5 text-xs opacity-80">
+          Charts are drawn directly in D3 rather than through a charting library, so every axis,
+          label and empty state is a decision made here rather than a default inherited from
+          somewhere else. The cleaning scripts are committed alongside the site, and the JSON they
+          produce is what ships &mdash; there is no live API call, and the figures cannot change
+          under the argument after it has been read.
+        </p>
+      </div>
       </div>
     </Section>
   )
