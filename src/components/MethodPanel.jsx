@@ -16,12 +16,32 @@ import { scatterBackdrop } from '../content/patterns.js'
 // It also takes the limitations prose that used to live on the sources slide,
 // which had grown into five paragraphs of caveat under a list of links.
 //
+// THREE ACTS, NOT SIX FLAT SECTIONS. This slide used to read as six same-weight
+// disclosures in a row, with the site's own tech stack sitting between "where
+// the numbers come from" and "what the numbers can't prove" -- a fact about
+// this project's toolchain has nothing to do with whether the data can be
+// trusted, and its presence there made every section beside it feel just as
+// arbitrary by association. The intro paragraph now names the three questions
+// this slide actually answers, and each gets its own type-h3 act heading one
+// step above the type-subhead sections nested under it:
+//   1. What counts, and where it came from (the roster rule + provenance)
+//   2. What the numbers still can't tell you (limitations + what's not built yet)
+//   3. Whose language the record is kept in (standalone -- see below)
+//
 // The closing section is the one part here that argues rather than qualifies.
 // Every limitation above concerns what the records fail to capture; that one
 // concerns who the record is readable by, which is the same inequality one
-// step further on. It is deliberately not filed under PLANNED -- listing it as
-// future work would make it read as a feature that got descoped rather than as
-// part of what the site is about.
+// step further on. It is deliberately its own act rather than folded into act
+// two: filing it alongside "what the data cannot say" would flatten an
+// argument into one more item on a list of caveats.
+//
+// HOW IT IS BUILT moved to a collapsed disclosure at the very bottom. It is
+// real information -- a developer or judge auditing the project may want it --
+// but it answers "what was this made with", not "can this data be trusted",
+// and the rest of this slide is entirely the second question. Demoted rather
+// than deleted or moved to the sources slide: the sources slide is a
+// deliberately quiet footer (see CitationPanel.jsx), and a stack of framework
+// names does not belong in the same register as a list of citations.
 //
 // PLANNED WORK is the one block here that is not a statement of fact about the
 // build: it is a roadmap, so it goes stale in a way the rest of this slide
@@ -128,20 +148,27 @@ export default function MethodPanel({ style }) {
       <div className="prose-column prose-wide text-sm opacity-80">
         <p>
           Everything on the preceding slides rests on two choices: which storms count, and which
-          figures are trusted to describe them. Both are stated here so they can be checked rather
-          than taken on trust, along with what the records do not support, what the site does not
-          yet do, and who it is &mdash; and is not &mdash; legible to.
+          figures are trusted to describe them. What follows checks both, in three parts: what
+          counts and where the numbers came from, what those numbers still can&rsquo;t tell you,
+          and whose language the record was even kept in.
         </p>
       </div>
+
+      {/* ACT ONE: what counts, and where it came from. One step above the
+          type-subhead sections nested under it, so the two read as a
+          hierarchy rather than six same-weight disclosures in a row. */}
+      <h3 className="type-h3">
+        What counts, and where it came from
+      </h3>
 
       {/* The roster rule and its casualties. Yasa is first and given more room:
           it is the exclusion that costs the argument something, and a list
           containing only convenient omissions would be doing the same selective
           work it claims to prevent. */}
       <div>
-        <h3 className="type-subhead mb-1 text-accent">
+        <h4 className="type-subhead mb-1 text-accent">
           The roster rule, and what it left out
-        </h3>
+        </h4>
         <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">
           <p>
             {/* Both counts computed. This paragraph is the one place on the
@@ -200,59 +227,39 @@ export default function MethodPanel({ style }) {
         </p>
       </div>
 
-      {/* Provenance and build, side by side on a wide screen. They were two
-          full-width blocks stacked, and neither fills the measure: one is two
-          short paragraphs, the other is four one-line cards. They are also the
-          same kind of statement -- where this came from, what it was made with
-          -- so pairing them reads as one answer rather than two sections. */}
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div>
-          <h3 className="type-subhead mb-1 text-accent">
-            Where the figures come from
-          </h3>
-          <div className="prose-column prose-wide space-y-2 text-sm opacity-80">
-            <p>
-              All indicator data is drawn from the Pacific Data Hub, the Pacific Community&rsquo;s
-              statistical portal, for Solomon Islands, Vanuatu, Fiji and Tonga across 2013 to 2024.
-              The portal exports whole dataflows; the filtering to these four nations and these
-              twelve years happens in a Python cleaning step, not by hand, so the same rule is
-              applied to every series. Storm dates, categories and death tolls are not portal data
-              &mdash; they come from national meteorological services and UN OCHA, cited per storm.
-              Every source is linked in full on the next slide.
-            </p>
-            <p>
-              The window opens in 2013 rather than at the first storm on the roster because a chart
-              of an event year means nothing without baseline years before it.
-            </p>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="type-subhead mb-1 text-accent">
-            How it is built
-          </h3>
-          <dl className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {BUILD.map((row) => (
-              <div key={row.label} className={CARD}>
-                <dt className="type-eyebrow opacity-60">{row.label}</dt>
-                <dd className="mt-1 text-sm opacity-85">{row.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <p className="prose-column prose-wide mt-2.5 text-sm opacity-80">
-            Charts are drawn directly in D3 rather than through a charting library, so every axis,
-            label and empty state is a decision made here rather than a default inherited from
-            somewhere else. The cleaning scripts are committed alongside the site, and the JSON they
-            produce is what ships &mdash; there is no live API call, and the figures cannot change
-            under the argument after it has been read.
+      {/* Closes Act One. Full width now that it isn't paired with the tech
+          stack -- see the top-of-file note on why that pairing came apart. */}
+      <div>
+        <h4 className="type-subhead mb-1 text-accent">
+          Where the figures come from
+        </h4>
+        <div className="prose-column prose-wide space-y-2 text-sm opacity-80">
+          <p>
+            All indicator data is drawn from the Pacific Data Hub, the Pacific Community&rsquo;s
+            statistical portal, for Solomon Islands, Vanuatu, Fiji and Tonga across 2013 to 2024.
+            The portal exports whole dataflows; the filtering to these four nations and these
+            twelve years happens in a Python cleaning step, not by hand, so the same rule is
+            applied to every series. Storm dates, categories and death tolls are not portal data
+            &mdash; they come from national meteorological services and UN OCHA, cited per storm.
+            Every source is linked in full on the next slide.
+          </p>
+          <p>
+            The window opens in 2013 rather than at the first storm on the roster because a chart
+            of an event year means nothing without baseline years before it.
           </p>
         </div>
       </div>
 
+      {/* ACT TWO: what the numbers still can't tell you. Same act/section
+          hierarchy as Act One above. */}
+      <h3 className="type-h3">
+        What the numbers still can&rsquo;t tell you
+      </h3>
+
       <div>
-        <h3 className="type-subhead mb-1 text-accent">
+        <h4 className="type-subhead mb-1 text-accent">
           What the data cannot say
-        </h3>
+        </h4>
         {/* ONE COLUMN. This was a two-up grid, which was the right call for
             bodies of 300-450 characters and the wrong one for the two-sentence
             bodies above: at half width they set to five or six short lines, so
@@ -282,9 +289,9 @@ export default function MethodPanel({ style }) {
       </div>
 
       <div>
-        <h3 className="type-subhead mb-1 text-accent">
+        <h4 className="type-subhead mb-1 text-accent">
           What is not here yet
-        </h3>
+        </h4>
         {/* Four one-sentence items at the full measure each set to a single
             long line with a wrapped tail. Two columns halves the block and
             fits each item to its own text. */}
@@ -297,15 +304,23 @@ export default function MethodPanel({ style }) {
         </ul>
       </div>
 
-      {/* The closing note, and the one that is an argument rather than a
+      {/* ACT THREE, standalone rather than nested under a group heading like
+          the first two -- see top-of-file note. It gets the same type-h3
+          weight as the other two acts (this IS the act; the section title
+          doubles as the act title, so no separate group label sits above it)
+          and a hairline rule above it, since without a shared group heading
+          to mark the transition, something has to say "new movement starts
+          here" the way "ACT TWO" did for the section above it.
+          
+          The closing note, and the one that is an argument rather than a
           caveat. It is last because it turns the site's own method back on
           itself: every limitation above is about what the records fail to
           capture, and this one is about who the record -- and this site --
           is legible to. Stated as the same finding, not as a roadmap item,
           because filing it under future work would make it sound like a
           feature that was descoped rather than a gap that is the subject. */}
-      <div>
-        <h3 className="type-subhead mb-1 text-accent">
+      <div className="border-t border-ink/10 pt-5">
+        <h3 className="type-h3 mb-1">
           Whose language the record is kept in
         </h3>
         <div className="prose-column prose-wide text-sm opacity-80">
@@ -355,6 +370,40 @@ export default function MethodPanel({ style }) {
             which is where a disclaimer belongs, and saying it twice in
             consecutive slides made neither instance carry weight. */}
       </div>
+
+      {/* THE DEMOTED TECH STACK. Real information, deliberately last and
+          deliberately quiet: collapsed behind a native <details> disclosure
+          rather than always-open prose, so a reader who wants "what was this
+          built with" can open it and everyone else scrolls past one muted
+          line instead of four cards and a paragraph sitting between two
+          arguments about data trust. Native <details>/<summary> rather than a
+          hand-rolled toggle -- no JS state to wire up, and it is keyboard and
+          screen-reader operable for free. */}
+      <details className="group border-t border-ink/10 pt-4 text-xs opacity-60">
+        <summary className="cursor-pointer select-none list-none font-semibold uppercase tracking-[0.14em] marker:content-none [&::-webkit-details-marker]:hidden">
+          How this site is built{' '}
+          <span aria-hidden="true" className="inline-block transition-transform group-open:rotate-180">
+            &#9662;
+          </span>
+        </summary>
+        <div className="mt-3">
+          <dl className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            {BUILD.map((row) => (
+              <div key={row.label} className={CARD}>
+                <dt className="type-eyebrow opacity-60">{row.label}</dt>
+                <dd className="mt-1 text-sm opacity-85">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="prose-column prose-wide mt-2.5 text-sm opacity-80">
+            Charts are drawn directly in D3 rather than through a charting library, so every axis,
+            label and empty state is a decision made here rather than a default inherited from
+            somewhere else. The cleaning scripts are committed alongside the site, and the JSON they
+            produce is what ships &mdash; there is no live API call, and the figures cannot change
+            under the argument after it has been read.
+          </p>
+        </div>
+      </details>
       </div>
     </Section>
   )
