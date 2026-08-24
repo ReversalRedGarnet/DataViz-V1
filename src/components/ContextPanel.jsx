@@ -7,9 +7,9 @@ import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { NATION_NAMES } from '../content/nations.js'
-import { CAPACITY_METRICS, CONTEXT_METRICS } from '../utils/metrics.js'
-import { DATA_YEAR_MAX } from '../content/storms.js'
-import { snapshotRowsByMetric, rowsByMetricForNations } from '../utils/rows.js'
+import { CAPACITY_METRICS, CONTEXT_METRICS, CHAIN_METRICS } from '../utils/metrics.js'
+import { DATA_YEAR_MIN, DATA_YEAR_MAX } from '../content/storms.js'
+import { snapshotRowsByMetric, rowsByMetricForNations, reportingCompletenessByNation } from '../utils/rows.js'
 
 // The capacity chart is flat in every year, so any year is representative --
 // but "any year" still has to be a year the pipeline actually exported. This
@@ -48,6 +48,25 @@ export default function ContextPanel({ data, dataError, style }) {
     () => rowsByMetricForNations(data, CONTEXT_METRICS, NATION_NAMES),
     [data]
   )
+  const completeness = useMemo(
+    () => reportingCompletenessByNation(data, CHAIN_METRICS, NATION_NAMES, DATA_YEAR_MIN, DATA_YEAR_MAX),
+    [data]
+  )
+  // How much of the ripple chain a nation could possibly have reported: every
+  // chain metric, every year in the full data window. Read off the rows
+  // themselves rather than recomputed here, so this can never drift from what
+  // reportingCompletenessByNation actually divided by.
+  const completenessMax = completeness[0]?.possible ?? 0
+
+  // The stations ranking, best to worst, read out of the chart's own rows
+  // rather than typed as nation names in the paragraph below. Typed out by
+  // hand it would go stale silently the moment a data refresh reordered two
+  // nations; read from the rows, the sentence can't disagree with the chart
+  // sitting right next to it.
+  const rankOrder = useMemo(() => {
+    const stationsRows = capacity?.[CAPACITY_METRICS[0].key] ?? []
+    return [...stationsRows].sort((a, b) => b.value - a.value).map((r) => r.nation)
+  }, [capacity])
 
   // No `storm` key at all, which is what tells sectionGuard this section does
   // not depend on one -- these two records exist with or without a selection.
@@ -78,15 +97,21 @@ export default function ContextPanel({ data, dataError, style }) {
             <h3 className="type-subhead mb-1 text-accent">
               Who can observe their own weather
             </h3>
+            {/* Opens on the human sentence rather than closing on it -- it used
+                to be the last clause of this paragraph, which a skim reads
+                right past. The ranking claim itself used to be stated in
+                prose alone ("set this ranking beside the gaps..."); it is now
+                also the second chart below, so the paragraph only needs to
+                point at it, not carry the whole argument in words. */}
             <p className="prose-column prose-wide mb-4 text-sm opacity-80">
-              Monitoring stations per national network, unchanged in every year on record. Set this
-              ranking beside the gaps in the ripple chain and it is the same ranking: Solomon
-              Islands has the fewest stations, no tourist arrivals reported at all, and a single
-              economic-loss figure in twelve years. Uneven data is not only a limitation of this
-              project &mdash; it is an unequal distribution of the ability to describe what
-              happened to you.
+              Uneven data is not only a limitation of this project &mdash; it is an unequal
+              distribution of the ability to describe what happened to you. The two charts below
+              are the same ranking, best to worst: {rankOrder.join(', ')}. One counts monitoring
+              stations, unchanged in every year on record; the other counts how much of the ripple
+              chain each nation actually got to report. Solomon Islands sits last on both &mdash;
+              it has the fewest stations, and no tourist arrivals were ever reported for it at all.
             </p>
-            <div className="grid grid-cols-1 gap-5">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CAPACITY_METRICS.map((m, i) => (
                 <MetricSnapshotChart
                   key={m.key}
@@ -102,6 +127,18 @@ export default function ContextPanel({ data, dataError, style }) {
                   caveat={m.caveat}
                 />
               ))}
+              <MetricSnapshotChart
+                label="Ripple-chain reporting completeness"
+                ariaLabel="Ripple-chain reporting completeness, country-years reported, by nation"
+                rows={completeness}
+                nationsMissing={[]}
+                emptyNote="Data not available."
+                format={(v) => `${v} of ${completenessMax} years`}
+                showTooltip={showTooltip}
+                hideTooltip={hideTooltip}
+                index={CAPACITY_METRICS.length}
+                caveat={`Reported country-years across the same five records as the ripple chain, out of ${completenessMax} possible. A year every nation is equally missing \u2014 power generation's still-unpublished ${DATA_YEAR_MAX} \u2014 counts the same against all four and does not move this ranking; what moves it is a year one nation has and another does not.`}
+              />
             </div>
           </div>
         )}
@@ -113,10 +150,10 @@ export default function ContextPanel({ data, dataError, style }) {
             </h3>
             <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">
               <p>
-                Two regional records, all four nations on each &mdash; the only climate claims this
-                site makes with confidence, and both about trends rather than any individual storm.
                 Warmer seas raise the ceiling on how intense a cyclone can become; emissions per head
-                say who is doing the warming.
+                say who is doing the warming. These are the only two climate claims this site makes
+                with confidence, and both are about trends across all four nations &mdash; not
+                evidence about any one storm.
               </p>
               <p>
                 A third mechanism is stated rather than charted. Sea level rise worsens storm surge —
