@@ -2,6 +2,7 @@ import NoDataNote from './NoDataNote.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { renderSnapshotChart, CHART_HEIGHT } from '../utils/charts/index.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
+import FigureCaption from './FigureCaption.jsx'
 
 // One "all nations, one moment" bar chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every snapshot
@@ -25,6 +26,11 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 //     reader a choice about how it is drawn. Kept generic rather than built in:
 //     only one chart currently has one, and hard-coding it here would put a
 //     people-affected concern inside the shared card.
+//   figure -- { key, source, title? } | undefined. Prints a numbered caption
+//     under the chart: "Fig N - title. Data: source (link)". `key` indexes
+//     content/figures.js, which fixes the numbering in reading order rather
+//     than counting mounts; `title` defaults to this card's own label. Omit the
+//     prop entirely on a chart that is not a numbered figure.
 //   className -- layout hook (e.g. sm:col-span-2 for an odd one out)
 export default function MetricSnapshotChart({
   label,
@@ -42,6 +48,7 @@ export default function MetricSnapshotChart({
   hideTooltip,
   index = 0,
   caveat,
+  figure,
   control,
   className = '',
 }) {
@@ -86,6 +93,14 @@ export default function MetricSnapshotChart({
         >
           {missingNote}
         </NoDataNote>
+      )}
+      {figure && (
+        <FigureCaption
+          figureKey={figure.key}
+          title={figure.title ?? label}
+          source={figure.source}
+          className="mt-2"
+        />
       )}
       {caveat && (
         <p className="mt-2 border-l-2 border-ink/15 pl-3 text-xs italic leading-snug opacity-70">

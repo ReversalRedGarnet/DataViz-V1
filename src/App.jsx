@@ -27,30 +27,20 @@ import { METRICS } from './utils/metrics.js'
 import { STORMS } from './content/storms.js'
 
 const DATA_SOURCES = [
-  {
-    label: 'Number of directly affected persons attributed to disasters — Pacific Data Hub (SPC)',
-    url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&df[vs]=3.0&dq=A.VC_DSR_AFFCT.........&pd=,&to[TIME_PERIOD]=false&lb=bt',
-  },
-  {
-    label: 'Direct disaster economic loss — Pacific Data Hub (SPC)',
-    url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&df[vs]=3.0&dq=A.VC_DSR_AALT...._T.....&pd=,&to[TIME_PERIOD]=false',
-  },
-  {
-    label: 'Crop yield — Pacific Data Hub (SPC)',
-    url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.CROP_YIELD.&pd=,&to[TIME_PERIOD]=false',
-  },
-  {
-    label: 'Tourist arrivals — Pacific Data Hub (SPC)',
-    url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.TRSM_ARR.&pd=,&to[TIME_PERIOD]=false',
-  },
-  {
-    label: 'Power generation — Pacific Data Hub (SPC)',
-    url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.POWER_GEN.&pd=,&to[TIME_PERIOD]=false',
-  },
-  {
-    label: 'Mid-year population estimates — Pacific Data Hub (SPC)',
-    url: 'https://stats.pacificdata.org/',
-  },
+  // THE DATASETS, FROM THE METRICS THEMSELVES.
+  //
+  // This used to be six hand-written entries whose URLs were the same six
+  // strings utils/metrics.js is now the home of. Two copies of a query URL is
+  // two chances for a re-export to update one of them, and nothing about the
+  // page would look wrong afterwards -- the sources slide would simply point a
+  // reader at a query that no longer produces the numbers above it, which is
+  // the most expensive kind of quiet error on a site whose argument is that the
+  // record can be checked.
+  //
+  // One copy now. A metric with no `source` contributes nothing here and
+  // renders its figure caption without a data line; see the note in
+  // utils/metrics.js about the four that are in that position.
+  ...METRICS.filter((m) => m.source).map((m) => m.source),
   // EVERY STORM'S CITATIONS, NOT THE SELECTED STORM'S. This slide is a
   // bibliography for the whole piece rather than a footnote to the reader's
   // current choice: the roster is the argument, so a reader checking whether it

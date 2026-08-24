@@ -9,6 +9,7 @@ import SelectionLegend from './SelectionLegend.jsx'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import TrendChart from './TrendChart.jsx'
+import { NationRefList } from './NationRef.jsx'
 import MetricDetail from './MetricDetail.jsx'
 import InsightsPanel from './InsightsPanel.jsx'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
@@ -67,6 +68,18 @@ function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHand
 // supply and the visitors. It is a plausible sequence, not a measured causal
 // path, and the section says so in prose -- every series is an annual national
 // total that no cyclone has to itself.
+// The five links, numbered. Same reasoning as BigPicture's map: the chain's
+// ORDER is a claim about how damage travels and may be revised, and a figure
+// number that moved when the claim was revised would break every reference to
+// it.
+const CHAIN_FIGURES = {
+  affected_persons: 'chain-affected',
+  crop_yield: 'chain-crop',
+  livestock_yield: 'chain-livestock',
+  power_generation: 'chain-power',
+  tourist_arrivals: 'chain-tourism',
+}
+
 export default function RippleChain({
   data, dataError,
   storm,
@@ -150,6 +163,9 @@ export default function RippleChain({
     ripple: true,
     dimNations: unstruck,
     caveat: metric.caveat,
+    // Both layouts draw from this builder, so the phone accordion and the
+    // desktop grid cannot end up numbering the same chart differently.
+    figure: { key: CHAIN_FIGURES[metric.key], source: metric.source },
   })
 
   return (
@@ -171,7 +187,7 @@ export default function RippleChain({
         <SelectionLegend selected={selectedNations} />
         {unstruck.length > 0 && (
           <p className="prose-wide mt-3 text-xs italic opacity-70">
-            {unstruck.join(' and ')} {unstruck.length === 1 ? 'was' : 'were'} not struck by{' '}
+            <NationRefList nations={unstruck} /> {unstruck.length === 1 ? 'was' : 'were'} not struck by{' '}
             {storm.name}, and {unstruck.length === 1 ? 'is' : 'are'} drawn faded rather than
             removed: the closest thing these records have to a comparison.
           </p>
@@ -247,7 +263,7 @@ export default function RippleChain({
               />
             )}
 
-            <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="section-bleed mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CHAIN_METRICS.map((m, i) => (
                 <TrendChart
                   key={m.key}
