@@ -1,6 +1,11 @@
-// The site's decorative weather: rings spreading from a point, and a slow
-// cyclone. Extracted from Hero.jsx, where it was a local HeroAtmosphere that
-// only the title card could use.
+// The site's decorative weather: rings spreading from a point. Extracted from
+// Hero.jsx, where it was a local HeroAtmosphere that only the title card could
+// use.
+//
+// THERE WAS A SLOW-SPINNING CYCLONE GLYPH HERE TOO, in the top-right corner of
+// every section. It is gone. The one cyclone left on the site is the glyph on
+// the storm journey map, which marks where a storm actually was -- a decorative
+// second one in the corner of every slide only diluted it.
 //
 // Decoration, and treated as such throughout -- hidden from assistive
 // technology, removed entirely under reduced motion, and incapable of taking a
@@ -27,15 +32,18 @@
 
 const VARIANTS = {
   hero: {
-    // Written out in full rather than built with a template literal. Tailwind
-    // drops any rule in @layer components whose class it cannot find in the
-    // source, and `atmos-${variant}` is invisible to that scan -- so
-    // `.atmos-ambient { --atmos-ring-peak: 0.07 }` was being purged while the
-    // descendant rules beside it survived, and the ambient rings animated at
-    // full hero strength behind every chart on the site.
-    className: 'atmos-layer atmos-hero',
+    // No modifier class: the hero IS .atmos-layer's own defaults, and the
+    // ambient variant below is what overrides them. There was an `atmos-hero`
+    // here that no stylesheet ever matched.
+    className: 'atmos-layer',
     delays: ['0ms', '2600ms', '5200ms'],
   },
+  // Written out in full rather than built with a template literal, and that is
+  // load-bearing for this one. Tailwind drops any rule in @layer components
+  // whose class it cannot find in the source, and `atmos-${variant}` is
+  // invisible to that scan -- so `.atmos-ambient { --atmos-ring-peak: 0.07 }`
+  // was purged while the descendant rules beside it survived, and the ambient
+  // rings animated at full hero strength behind every chart on the site.
   ambient: {
     className: 'atmos-layer atmos-ambient',
     // One ring, not three. Three overlapping sweeps read as an event; behind a
@@ -52,13 +60,6 @@ export default function Atmosphere({ variant = 'ambient', className = '' }) {
       {delays.map((animationDelay) => (
         <span key={animationDelay} className="atmos-ring" style={{ animationDelay }} />
       ))}
-      <svg className="atmos-cyclone" viewBox="-20 -20 40 40" fill="none">
-        <g className="cyclone-spin">
-          <path d="M0,-3 C10,-13 22,-9 20,1 C16,-6 7,-7 0,-3 Z" fill="currentColor" />
-          <path d="M0,3 C-10,13 -22,9 -20,-1 C-16,6 -7,7 0,3 Z" fill="currentColor" />
-          <circle r="3.4" fill="currentColor" />
-        </g>
-      </svg>
     </div>
   )
 }

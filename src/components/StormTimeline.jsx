@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import { NATION_NAMES } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { STORMS, ROSTER_START, ROSTER_END, strikeCounts } from '../content/storms.js'
@@ -132,7 +133,7 @@ function StormPreview({ storm, selected }) {
     // storm notes run from two lines to four -- so moving the pointer along the
     // axis pumped the whole slide up and down under the reader's hand. The box
     // is a fixed size that the text lives inside; anything taller scrolls.
-    <div className="storm-preview locked-box mt-4 h-[11rem] rounded-xl border border-ink/10 bg-surface/60 sm:h-[9.5rem] short:mt-3 short:h-[8rem]">
+    <div className="locked-box mt-4 h-[11rem] rounded-xl border border-ink/10 bg-surface/60 sm:h-[9.5rem] short:mt-3 short:h-[8rem]">
       <div ref={scrollRef} data-overflowing={overflowing} className="locked-scroll p-4">
       {storm ? (
         <>
@@ -172,6 +173,9 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
   // the transient one, and keeping the two apart is what lets the reader look
   // at a second storm without losing the one they are following.
   const [previewId, setPreviewId] = useState(null)
+  // The mobile strip scrolls sideways, and every other scrolling region on the
+  // site got an affordance back when the scrollbars went. See useOverflowFade.
+  const { ref: stripRef, overflowing: stripOverflowing } = useOverflowFade([], { axis: 'x' })
   const shownId = previewId ?? selectedId
   const shown = STORMS.find((s) => s.id === shownId) ?? null
 
@@ -180,7 +184,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
   const delayOf = (id) => STORMS.findIndex((s) => s.id === id) * 260
 
   return (
-    <Section style={style}>
+    <Section style={style} backdrop={scatterBackdrop('timeline')}>
       {/*
         One column, full width. This slide used to be split -- prose left,
         evidence right -- because the prose ran long enough that stacking cost
@@ -288,6 +292,16 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       {/*
         NARROW: a swipeable strip, not a squeezed axis.
 
+        BOTH LAYOUTS ARE IN THE DOM AT EVERY WIDTH, and CSS hides one. That is
+        the opposite of what RippleChain does for the same kind of choice, where
+        useMediaQuery builds one tree or the other -- so the difference is worth
+        stating. There, hiding is not the same as not building: both sets of D3
+        charts would still be measured, drawn and animated. Here the hidden
+        layout is a handful of buttons over a roster of six, which costs
+        nothing to build and nothing to leave hidden. CSS is the cheaper tool
+        when the thing being hidden is cheap, and the structural break is only
+        worth its complexity when the thing being hidden is not.
+
         The same year axis turned on its side was honest about the empty years
         and, on a phone, eleven rows tall -- so the reader scrolled a section to
         reach a control and lost the preview off the bottom while doing it.
@@ -301,6 +315,8 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
         sentence above and drawn on the wide axis.
       */}
       <ul
+        ref={stripRef}
+        data-overflowing={stripOverflowing}
         aria-label={axisLabel}
         className="storm-strip mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 lg:hidden"
       >

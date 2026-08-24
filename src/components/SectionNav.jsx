@@ -111,7 +111,7 @@ export default function SectionNav({ availableIds, onNavigate }) {
                 onClick={(event) => {
                   if (onNavigate) {
                     event.preventDefault()
-                    onNavigate(section.id)
+                    onNavigate(section.id, { x: event.clientX, y: event.clientY })
                   }
                   setOpen(false)
                 }}

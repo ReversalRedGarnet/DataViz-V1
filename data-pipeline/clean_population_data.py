@@ -53,6 +53,7 @@ from common import (
     extract_rows,
     find_col,
     write_json,
+    write_bundle,
 )
 
 RAW_FILE = "population.csv"
@@ -119,6 +120,10 @@ def clean_population() -> None:
     write_json(OUT_DIR / OUT_FILE, records)
 
     print(f"\nWrote {len(records)} rows to {OUT_DIR / OUT_FILE}")
+
+    # population.json is part of the same bundle the site fetches, so writing it
+    # on its own still has to refresh that bundle.
+    write_bundle()
     print("\nCoverage:")
     for nation in NATIONS:
         years = sorted(r["year"] for r in records if r["nation"] == nation)

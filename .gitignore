@@ -8,3 +8,8 @@ dist/
 # README.md -> "Data Sources". A few MB each and several are byte-
 # identical whole-dataflow dumps, not worth carrying in git history.
 data-pipeline/raw/*.csv
+
+# Generated from src/styles/tokens.js by scripts/build-tokens.mjs, and
+# rewritten by Vite before every build and dev server start. Committing it
+# would mean a second place for the palette to be wrong.
+src/styles/tokens.css

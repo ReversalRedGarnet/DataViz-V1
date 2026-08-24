@@ -2,7 +2,7 @@ import Section from './Section.jsx'
 import { EXCLUDED, STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
 import { NATION_COUNT } from '../content/nations.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
-import { METHOD_BACKDROP } from '../content/patterns.js'
+import { scatterBackdrop } from '../content/patterns.js'
 
 // How the site was made, and what it cannot say.
 //
@@ -24,9 +24,8 @@ import { METHOD_BACKDROP } from '../content/patterns.js'
 // part of what the site is about.
 //
 // PLANNED WORK is the one block here that is not a statement of fact about the
-// build. Replace it with your own roadmap before submitting -- it is written
-// from what the code currently does not do, not from anything you have told me
-// you intend.
+// build: it is a roadmap, so it goes stale in a way the rest of this slide
+// cannot. Check it against what the site actually does before each release.
 
 // One card style, named once. It was written out identically four times, so a
 // density change meant four edits and any one of them could be missed -- which
@@ -34,7 +33,15 @@ import { METHOD_BACKDROP } from '../content/patterns.js'
 //
 // p-3.5 rather than p-4, and that is the whole of the "shrink things" part of
 // this pass. The rest of the height came out of layout, not type.
-const CARD = 'rounded-xl border border-ink/10 bg-surface/60 p-3.5'
+//
+// SPLIT IN TWO because the exclusions list is a card whose padding sits on its
+// rows rather than on itself, and `${CARD} p-0` would not reliably do that:
+// two Tailwind padding utilities on one element are the same specificity, so
+// the generated stylesheet's own order decides which wins, not the order they
+// are written in the class attribute. Naming the chrome separately makes it a
+// fact rather than a coin flip.
+const CARD_CHROME = 'rounded-xl border border-ink/10 bg-surface/60'
+const CARD = `${CARD_CHROME} p-3.5`
 
 const BUILD = [
   { label: 'Interface', value: 'React 18, built with Vite' },
@@ -43,26 +50,36 @@ const BUILD = [
   { label: 'Data pipeline', value: 'Python and pandas, run offline; the site ships static JSON' },
 ]
 
+// Trimmed to roughly two sentences each. They ran 300-450 characters when they
+// sat two-up, which was a fair measure for a half-width card; stacked at the
+// full column they became five paragraphs a reader scrolls past rather than
+// five caveats a reader reads.
+//
+// WHAT SURVIVED THE CUT, and the rule that decided it: the checkable part. A
+// caveat that says "the sources disagree" is a disclaimer; one that says 69%
+// and 62% is a fact the reader can go and test. Vanuatu's zero, Winston's two
+// shares and the 0.1 m reporting floor are the whole point of the block, so the
+// justifying prose around them went instead.
 const LIMITS = [
   {
     title: 'Annual national totals, not storm totals',
-    body: 'Every series here is a yearly figure for a whole country. A year holding two cyclones reports them as one number, and the 2020–21 stretch carries the pandemic as well as the weather. Nothing on this site isolates the effect of a single storm, and the note under each chart says what that record cannot prove.',
+    body: 'Every series here is a yearly figure for a whole country: a year holding two cyclones reports them as one number, and the 2020\u201321 stretch carries the pandemic as well as the weather. Nothing on this site isolates the effect of a single storm.',
   },
   {
     title: 'A reported zero is not the same as no harm',
-    body: `In the people-affected series a figure of exactly zero is treated as unreported and drawn as missing. That series does not distinguish "nobody was affected" from "nothing was submitted", and the difference is not academic: Vanuatu's official figure for 2015, the year Cyclone Pam became the most destructive storm in its history, is zero. The rule is applied to every zero in the series rather than only to years a storm is known to have struck, so no individual figure is overridden on our judgement.`,
+    body: `In the people-affected series an exact zero is treated as unreported and drawn as missing, because it cannot distinguish "nobody was affected" from "nothing was submitted". Vanuatu's official figure for 2015 \u2014 the year Cyclone Pam became the most destructive storm in its history \u2014 is zero.`,
   },
   {
     title: 'Two sources give two different shares',
-    body: 'The regional snapshot can restate people affected as a share of population, dividing the SPC series by SPC mid-year population estimates. The storm cards quote shares from government and PDNA assessments instead, which count a single event against their own population base. For Cyclone Winston the two give roughly 69% and 62% of Fiji. Neither figure is a correction of the other, and the site prints both rather than picking the one that reads more cleanly.',
+    body: 'The regional snapshot divides the SPC series by SPC population estimates; the storm cards quote government and PDNA assessments, which count a single event against their own base. For Cyclone Winston the two give roughly 69% and 62% of Fiji, and the site prints both rather than picking one.',
   },
   {
     title: 'The gaps are not evenly spread',
-    body: 'Direct economic loss is patchy throughout, tourist arrivals are absent for Solomon Islands entirely, and no disaster figures are reported for any of these countries after 2022. The nations with the fewest weather stations are the same ones missing most often from the disaster records, which is why observing capacity is charted here rather than mentioned in a footnote.',
+    body: 'Direct economic loss is patchy throughout, tourist arrivals are absent for Solomon Islands entirely, and no disaster figures are reported after 2022. The nations with the fewest weather stations are the same ones missing most often from the record.',
   },
   {
     title: 'Sea level rise is described, not charted',
-    body: 'It is the best-attributed of the three mechanisms, with IPCC AR6 rating the human contribution since 1971 very likely. The regional record is reported only to the nearest 0.1 m, which gives three distinct values across twelve years and hides any movement under 10 cm. Charting it would claim a precision the measurement does not have.',
+    body: 'It is the best-attributed of the three mechanisms, with IPCC AR6 rating the human contribution since 1971 very likely. But the regional record is reported only to the nearest 0.1 m \u2014 three distinct values across twelve years \u2014 so charting it would claim a precision the measurement does not have.',
   },
 ]
 
@@ -90,9 +107,11 @@ const PLANNED = [
 
 export default function MethodPanel({ style }) {
   return (
-    // backdrop: the weave motif, because this slide and the sources slide are
-    // apparatus rather than argument. See content/patterns.js.
-    <Section tone="panel" backdrop={METHOD_BACKDROP} style={style}>
+    // The same scatter every other slide carries, seeded with this slide's own
+    // id. It used to be the full-bleed 'weave' tile, which marked this slide as
+    // apparatus by making it the one slide that did not look like the site --
+    // see the note in content/patterns.js.
+    <Section backdrop={scatterBackdrop('method')} style={style}>
       <p className="type-eyebrow mb-1 text-accent">
         Method, data and limitations
       </p>
@@ -105,7 +124,7 @@ export default function MethodPanel({ style }) {
           a paragraph or a grid of cards -- 192px of the scroll, before any
           content. space-y-5 on the wrapper states the gap in one place and lets
           the last block end without a trailing margin. */}
-      <div className="method-stack space-y-5">
+      <div className="space-y-5">
       <div className="prose-column prose-wide text-sm opacity-80">
         <p>
           Everything on the preceding slides rests on two choices: which storms count, and which
@@ -137,16 +156,34 @@ export default function MethodPanel({ style }) {
           </p>
         </div>
 
-        <ul aria-label="Storms excluded by the roster rule" className="grid gap-3 sm:grid-cols-2">
-          {EXCLUDED.map((storm, i) => (
-            <li
-              key={storm.name}
-              className={`${CARD} ${i === 0 ? 'sm:col-span-2' : ''}`}
-            >
+        {/* ONE BOX, NOT FOUR. These were four cards in a two-column grid with
+            Yasa spanning the top, which drew four hard edges around what is a
+            single four-line answer to a single question. Three of the four
+            reasons are a fragment long ("Fiji only.") and got a card the size
+            of a paragraph; the grid then left a hole beside Rae, so the block
+            ended on an empty cell.
+
+            The same card chrome as everything else on this slide, once, with
+            the storms as divided rows inside it. divide-y rather than a border
+            per row so the first row has no rule above it and the last none
+            below -- the card's own edge is doing that job.
+
+            Yasa keeps the room. It is the exclusion that costs the argument
+            something, and a list of exclusions where the expensive one is set
+            like the cheap ones is doing the same flattening the rule exists to
+            prevent. See EXCLUDED in content/storms.js: `cost` is present on
+            exactly one entry, and its presence is what earns the extra lines
+            rather than a hardcoded index here. */}
+        <ul
+          aria-label="Storms excluded by the roster rule"
+          className={`${CARD_CHROME} divide-y divide-ink/10`}
+        >
+          {EXCLUDED.map((storm) => (
+            <li key={storm.name} className="px-3.5 py-3">
               <p className="text-base font-semibold">
                 {storm.name} <span className="text-sm font-normal opacity-60">{storm.year}</span>
               </p>
-              <p className="mt-1 text-sm opacity-80">{storm.reason}</p>
+              <p className="mt-0.5 text-sm opacity-80">{storm.reason}</p>
               {storm.cost && (
                 <p className="mt-2 border-l-2 border-accent pl-3 text-sm italic opacity-80">
                   {storm.cost}
@@ -216,25 +253,29 @@ export default function MethodPanel({ style }) {
         <h3 className="type-subhead mb-1 text-accent">
           What the data cannot say
         </h3>
-        {/* TWO COLUMNS, and this is the single biggest saving on the slide.
-            Five cards of 300-450 characters stacked at the full 1024px measure
-            ran about 700px; the same content in two columns runs about 540px,
-            and the cards were already written for a half-width measure -- the
-            note below has said so all along. Reading order still goes down the
-            page, since a grid fills row by row and each card is self-contained.
+        {/* ONE COLUMN. This was a two-up grid, which was the right call for
+            bodies of 300-450 characters and the wrong one for the two-sentence
+            bodies above: at half width they set to five or six short lines, so
+            two columns produced two ragged narrow blocks side by side and the
+            reader's eye had to find the next card rather than just continuing
+            down. Trimmed text buys the height that the second column used to.
 
-            items-start so a short card does not stretch to match a tall
-            neighbour, which is where a two-column grid usually gives back the
-            height it saved. */}
-        <ul className="grid items-start gap-2.5 sm:grid-cols-2">
+            Five titles in a single left-aligned stack also read as a list of
+            five limitations, which is what this block is. In two columns they
+            read as a grid of cards, which invites comparison between them --
+            and these five have nothing to do with each other. */}
+        <ul className="space-y-2.5">
           {LIMITS.map((limit) => (
             <li key={limit.title} className={CARD}>
               <p className="text-sm font-semibold">{limit.title}</p>
-              {/* Deliberately NOT .prose-short. These bodies run 300-450
-                  characters inside a half-width card, so they set to six or
-                  eight lines and any one badly-stretched line is lost among
-                  the well-set ones. This is the case justification is for. */}
-              <p className="prose-column prose-wide mt-1 text-sm opacity-80">{limit.body}</p>
+              {/* .prose-short now, where it was deliberately justified before.
+                  Same rule as always (see styles/typography.css): justify a
+                  block that sets to four lines or more, range it left below
+                  that. At the full measure these bodies are two lines, and a
+                  justified two-line block shows every gap it opens because
+                  CSS never justifies a last line -- so one of the two lines
+                  is the only justified line there. */}
+              <p className="prose-short prose-wide mt-1 text-sm opacity-80">{limit.body}</p>
             </li>
           ))}
         </ul>

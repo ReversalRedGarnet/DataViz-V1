@@ -9,7 +9,7 @@ import EmptyState from './EmptyState.jsx'
 //
 // Returns an element to render instead of the section, or null to carry on.
 //
-//   const blocked = sectionGuard({ data, storm, style, tone, prompt: '...' })
+//   const blocked = sectionGuard({ data, storm, style, prompt: '...' })
 //   if (blocked) return blocked
 //
 // `prompt` completes the sentence "Pick a storm from the timeline to ..." so
@@ -20,10 +20,16 @@ import EmptyState from './EmptyState.jsx'
 // flight both arrive here as data === null. Without the distinction a 404 read
 // as "waiting on data" and never stopped saying so, which is the one thing a
 // loading message must never do.
-export function sectionGuard({ data, error, storm, style, tone, subject, prompt }) {
+// LEAVING `storm` OUT ENTIRELY means the section does not depend on one, and
+// only the two data checks run. That is not the same as passing null, which
+// still gates. ContextPanel draws regional records that exist with or without a
+// selection, and for want of this it wrote the two data branches out by hand --
+// a seventh copy of the checks this module exists to hold once, and one whose
+// wording had already begun to drift from these.
+export function sectionGuard({ data, error, storm, style, subject, prompt }) {
   if (error) {
     return (
-      <EmptyState tone={tone} style={style}>
+      <EmptyState style={style}>
         {subject} &mdash; the data could not be loaded. Reload the page to try again.
       </EmptyState>
     )
@@ -31,15 +37,17 @@ export function sectionGuard({ data, error, storm, style, tone, subject, prompt 
 
   if (!data) {
     return (
-      <EmptyState tone={tone} style={style}>
+      <EmptyState style={style}>
         {subject} &mdash; waiting on data.
       </EmptyState>
     )
   }
 
+  if (storm === undefined) return null
+
   if (!storm) {
     return (
-      <EmptyState tone={tone} style={style}>
+      <EmptyState style={style}>
         Pick a storm from the timeline to {prompt}.
       </EmptyState>
     )

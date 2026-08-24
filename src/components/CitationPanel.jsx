@@ -8,14 +8,17 @@
 // thing a reader saw was the one thing that did not belong to the design
 // system, and the inconsistency was invisible to anyone reviewing in dark mode.
 //
-// Now bg-panel/text-ink in both, which is Section's default tone. The contrast
-// concern was real but it was answered in the wrong place: the fix is that the
-// small print here is text-ink/75 rather than a low opacity on a dark ground,
-// which clears AA against panel in both themes.
+// Now bg-panel/text-ink in both, which is what every other slide paints. The
+// contrast concern was real but it was answered in the wrong place: the fix is
+// that the small print here is text-ink/75 rather than a low opacity on a dark
+// ground, which clears AA against panel in both themes.
 //
-// What it loses is its distinctiveness as the closing slide. That is carried
-// by the fish backdrop instead -- see content/patterns.js. A texture can mark
-// a slide as different without taking it out of the palette.
+// What it loses is its distinctiveness as the closing slide. It is not bought
+// back with a texture of its own: this panel once carried the site's only
+// edge-to-edge fish tile for that job, which marked it as different by putting
+// it outside the system every other slide belongs to. It now paints the same
+// scatter backdrop as the twelve slides before it. Being last is what makes it
+// the closing slide.
 //
 // Props:
 //   sources -- array of { label, url }
@@ -25,7 +28,7 @@
 //     can say so accurately. Cyclones passes no children.
 //   style -- forwarded onto the <footer>
 import BackgroundPattern from './BackgroundPattern.jsx'
-import { FOOTER_BACKDROP } from '../content/patterns.js'
+import { scatterBackdrop } from '../content/patterns.js'
 
 const YEAR = new Date().getFullYear()
 
@@ -35,7 +38,10 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
       className="animate-pop-in relative overflow-hidden bg-panel px-6 py-10 text-ink md:py-14"
       style={style}
     >
-      <BackgroundPattern backdrop={FOOTER_BACKDROP} />
+      {/* Seeded 'sources', matching this slide's id in App.jsx -- the same
+          convention every Section on the site follows, so the scatter here is
+          reproducible and distinct from the method slide's next door. */}
+      <BackgroundPattern backdrop={scatterBackdrop('sources')} />
 
       {/* .section-content rather than a hand-written max-w-5xl, so the sources
           land on the same left and right edges as every slide above them --
@@ -56,12 +62,26 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
             <ul className="space-y-1.5">
               {sources.map((s) => (
                 <li key={s.url}>
+                  {/* A new tab, and that is about state rather than habit.
+                      Following a citation in place unloads the deck, and coming
+                      back lands on a cold page -- a pasted hash cannot restore
+                      a storm-gated section, because with no storm chosen those
+                      sections do not exist (see useDeck). The reader's storm,
+                      country pair, scrubber position and open ripple link all
+                      go. Checking a source is exactly what a methods-forward
+                      site should encourage, so it should not cost the reader
+                      everything they had assembled.
+
+                      noopener is load-bearing only now that there is a target;
+                      before, it was doing nothing. */}
                   <a
                     href={s.url}
-                    rel="noreferrer"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="underline decoration-ink/40 hover:decoration-ink"
                   >
                     {s.label}
+                    <span className="sr-only"> (opens in a new tab)</span>
                   </a>
                 </li>
               ))}

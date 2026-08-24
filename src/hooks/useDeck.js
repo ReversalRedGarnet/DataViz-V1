@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLatest } from './useLatest.js'
+import { runRippleTransition } from '../utils/rippleTransition.js'
 
 // Which slide is on stage, plus the three ways a reader can change that:
 // the Next/Previous controls, the section menu, and the keyboard.
@@ -14,10 +15,6 @@ import { useLatest } from './useLatest.js'
 // section unreadable by keyboard.
 export function useDeck(sections) {
   const [active, setActive] = useState(0)
-  // Which way the deck last moved. The incoming slide's contents animate in
-  // from the side the reader came from, so a Back press reads as retracing
-  // rather than as more of the same forward motion.
-  const [direction, setDirection] = useState(1)
   const count = sections.length
   const countRef = useLatest(count)
 
@@ -26,31 +23,37 @@ export function useDeck(sections) {
   // the keyboard and the section menu cannot walk around it -- and enforced as
   // a clamp rather than a refusal, so jumping from slide 2 to slide 9 still
   // moves the reader as far as the gate instead of doing nothing.
-  const gateRef = useLatest(sections.map((s) => Boolean(s.requires)))
+  const gateRef = useLatest(useMemo(() => sections.map((s) => Boolean(s.requires)), [sections]))
 
-  const go = useCallback((next) => {
-    setActive((current) => {
-      const target = Math.max(0, Math.min(countRef.current - 1, typeof next === 'function' ? next(current) : next))
-      if (target < current) {
-        setDirection(-1)
-        return target
-      }
-      if (target === current) return target
-      for (let i = current; i < target; i += 1) {
-        if (gateRef.current[i]) {
-          if (i !== current) setDirection(1)
-          return i
-        }
-      }
-      setDirection(1)
-      return target
+  // `origin` is the point the reader pressed -- forwarded to
+  // runRippleTransition so the ripple lands where they were actually looking,
+  // rather than the viewport's centre. Omitted by the keyboard and hash-sync
+  // callers below, neither of which has a point to give it.
+  const go = useCallback((next, origin) => {
+    runRippleTransition({
+      x: origin?.x,
+      y: origin?.y,
+      run: () =>
+        setActive((current) => {
+          const target = Math.max(
+            0,
+            Math.min(countRef.current - 1, typeof next === 'function' ? next(current) : next)
+          )
+          // Backwards is never gated: a gate asks for something before the
+          // reader goes on, not before they go back and look again.
+          if (target <= current) return target
+          for (let i = current; i < target; i += 1) {
+            if (gateRef.current[i]) return i
+          }
+          return target
+        }),
     })
   }, [countRef, gateRef])
 
   const goToId = useCallback(
-    (id) => {
+    (id, origin) => {
       const index = sections.findIndex((s) => s.id === id)
-      if (index >= 0) go(index)
+      if (index >= 0) go(index, origin)
     },
     [sections, go]
   )
@@ -96,14 +99,19 @@ export function useDeck(sections) {
     // "answering with a stale deck".
   }, [goToIdRef])
 
+  // Keyed on the id STRING, not on the sections array. Keyed on the array this
+  // fired on every render of the component above -- which, during a panel
+  // scroll, is every frame -- and WebKit throws a SecurityError after 100
+  // history writes in any 30-second window. An id only changes when the deck
+  // actually moves, which is the only time there is anything to write.
+  const activeId = sections[active]?.id
   useEffect(() => {
-    const id = sections[active]?.id
-    if (!id) return
+    if (!activeId) return
     // replaceState, not a hash assignment: assigning to location.hash pushes a
     // history entry per slide, so Back would walk the reader through every
     // section they had visited rather than out of the piece.
-    window.history.replaceState(null, '', `#${id}`)
-  }, [active, sections])
+    window.history.replaceState(null, '', `#${activeId}`)
+  }, [activeId])
 
   useEffect(() => {
     function onKeyDown(event) {
@@ -132,5 +140,5 @@ export function useDeck(sections) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [go, countRef])
 
-  return { active, direction, go, goToId, count }
+  return { active, go, goToId }
 }

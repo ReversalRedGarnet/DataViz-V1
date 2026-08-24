@@ -12,26 +12,25 @@ export default {
 
   theme: {
     extend: {
-      // TWO NEW BREAKPOINTS, AND THEY ARE NOT THE SAME QUESTION.
+      // ONE EXTRA BREAKPOINT, AND IT IS ABOUT HEIGHT.
       //
-      // `compact` is the width band the compact-laptop pass is written
-      // against: wide enough for every two-column layout the desktop uses,
-      // narrow enough that those columns need their gaps tightened rather
-      // than collapsed. Appended after the defaults, so it wins over `lg`
-      // and `xl` in the generated output the way a later breakpoint should.
+      // Measured across the whole deck, the thing that separates a comfortable
+      // laptop from a cramped one is height, not width: at 1440x900 every
+      // slide fits, and at 1366x768 -- barely narrower -- the timeline, the
+      // map and the journey all overflow. A width-only rule would tighten a
+      // 1280x1024 window that has room to spare and leave a 1600x768 one
+      // broken.
       //
-      // `short` is the one that actually carries this pass. Measured across
-      // the whole deck, the thing that separates a comfortable laptop from a
-      // cramped one is height, not width: at 1440x900 every slide fits, and
-      // at 1366x768 -- barely narrower -- the timeline, the map and the
-      // journey all overflow. A width-only rule would tighten a 1280x1024
-      // window that has room to spare and leave a 1600x768 one broken.
+      // The min-width guard keeps it away from a phone in landscape, which is
+      // short by definition and already has its own layout.
       //
-      // min-width guard on `short` so none of it can reach a phone in
-      // landscape, which is short by definition and already has its own
-      // layout.
+      // There was a `compact` width band here too, declared and documented and
+      // never once used as a variant -- the 1100-1399px rules it described are
+      // written as a plain media query in styles/compact.css instead. Half of
+      // this comment was describing a mechanism that was not in play, which is
+      // the expensive kind of stale comment: confidently wrong about
+      // architecture.
       screens: {
-        compact: { min: '1100px', max: '1399px' },
         short: { raw: '(min-width: 1024px) and (max-height: 960px)' },
       },
 

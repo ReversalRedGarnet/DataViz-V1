@@ -350,10 +350,14 @@ export function strikeCounts(nations) {
 export const ROSTER_START = roster.rosterStart
 export const ROSTER_END = roster.rosterEnd
 
-// The window the cleaned data covers. Wider than the roster on purpose: an
-// event-year chart is meaningless without baseline years before it. Shared with
-// the pipeline, which is what actually does the filtering.
-export const DATA_YEAR_MIN = roster.yearMin
+// The last year the cleaned data covers. The window is wider than the roster on
+// purpose -- an event-year chart is meaningless without baseline years before
+// it -- but only its upper bound is read here, by ContextPanel, which needs a
+// year the pipeline actually exported to draw its capacity snapshot against.
+//
+// roster.yearMin is deliberately not re-exported. It was, and nothing imported
+// it: the lower bound matters to data-pipeline/common.py, which reads
+// roster.json directly, and to nothing on this side.
 export const DATA_YEAR_MAX = roster.yearMax
 
 export function stormById(id) {

@@ -40,7 +40,7 @@ export default function MetricDetail({ metric, rows, nations, onClose }) {
   const after = CHAIN_METRICS[stage + 1]
 
   return (
-    <div className="metric-detail mt-4 rounded-xl border border-accent/30 bg-surface/70 p-4">
+    <div className="mt-4 rounded-xl border border-accent/30 bg-surface/70 p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="type-eyebrow text-accent">

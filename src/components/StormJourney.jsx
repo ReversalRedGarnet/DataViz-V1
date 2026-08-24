@@ -1,18 +1,21 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as d3 from 'd3'
 import Section from './Section.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import { NATION_COORDS, NATION_COUNT } from '../content/nations.js'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import JourneyScrubber from './JourneyScrubber.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useLatest } from '../hooks/useLatest.js'
+import { measureViewBoxScale, useViewBoxScale } from '../hooks/useViewBoxScale.js'
 import { useOverflowFade } from '../hooks/useOverflowFade.js'
 import { chartTheme, MAP_COLORS } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 import { drawBasemap, fitToPoints, pacificProjection } from '../utils/map.js'
+import { shortName } from '../content/nations.js'
 
 // The selected storm's route across the nations it struck, driven by the reader.
 //
@@ -26,9 +29,13 @@ import { drawBasemap, fitToPoints, pacificProjection } from '../utils/map.js'
 // container's measured width. See build() below: it is a plain function so the
 // same pass can run on mount, on resize, on theme change and on index change
 // without four effects disagreeing about what the scene should look like.
-const TRACK_NOTE =
-  'The line joins documented impact points; it is not the official track. Dates, categories and ' +
-  'tolls come from national meteorological services and UN OCHA, cited in full in the sources.'
+// Two notes, because on a phone there is no line to qualify -- see the map's
+// md: gate below. The sourcing half is true either way and is the half that
+// still has to be said.
+const SOURCE_NOTE =
+  'Dates, categories and tolls come from national meteorological services and UN OCHA, cited in ' +
+  'full in the sources.'
+const TRACK_NOTE = 'The line joins documented impact points; it is not the official track. ' + SOURCE_NOTE
 
 const WIDTH = 800
 const HEIGHT = 540
@@ -160,6 +167,18 @@ function paintScene(scene, { active, theme }) {
     .attr('fill-opacity', (_, i) => (i <= active ? 0.7 : 0))
 }
 
+// Keeps the stop markers and the cyclone at a constant pixel size while the
+// geography scales with the box. Applied by build() and again by the effect
+// below, for the same reason paintScene is: whoever builds a scene has to be
+// the one who paints it, because the effect cannot be relied on to fire after
+// an async build that resolved inside a single React batch.
+function applyScale(g, scale) {
+  if (!scale) return
+  const inverse = `scale(${1 / scale})`
+  g.selectAll('g.stop-inner').attr('transform', inverse)
+  g.select('g.eye-scale').attr('transform', inverse)
+}
+
 // Props:
 //   storm -- the selected storm
 //   index -- which documented stop is on the map, from the story state
@@ -200,6 +219,16 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   // repaint the scene, not rebuild it. See hooks/useLatest.js.
   const activeRef = useLatest(active)
   const themeRef = useLatest(theme)
+
+  // How small the fixed viewBox is currently drawn. The stop markers and the
+  // cyclone counter-scale by it, so a 12px name is 12px whether the map is a
+  // half-panel on a laptop or a 147px band on a phone -- it was 3.3px there.
+  //
+  // build() does not read this. It measures the node itself, because on every
+  // storm after the first the coastline is already cached and the await
+  // resolves in a microtask -- possibly before this hook has committed its
+  // first measurement. The effect below carries every change after the build.
+  const scale = useViewBoxScale(svgRef, WIDTH, HEIGHT, storm?.id)
 
   // The stop box swaps text as the reader moves along the track, so whether it
   // overflows is a per-stop question, not a per-storm one.
@@ -259,17 +288,31 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         .attr('class', 'stop')
         .attr('transform', (_, i) => `translate(${positions[i][0]},${positions[i][1]})`)
 
-      stops.append('circle').attr('class', 'stop-halo').attr('r', 15).attr('fill', 'none').attr('stroke-width', 1.5)
-      stops.append('circle').attr('class', 'stop-dot').attr('r', 6).attr('stroke-width', 1.5)
-      stops
+      // The stop carries the projected position; this inner group carries the
+      // counter-scale. Two transforms, so two groups -- a scale written onto
+      // the stop itself would replace the translate that puts it on the track,
+      // which is the same split the cyclone glyph below already uses.
+      //
+      // paintScene reaches these through .select(), which searches descendants,
+      // so the extra level costs it nothing.
+      const stopInner = stops.append('g').attr('class', 'stop-inner')
+
+      stopInner.append('circle').attr('class', 'stop-halo').attr('r', 15).attr('fill', 'none').attr('stroke-width', 1.5)
+      stopInner.append('circle').attr('class', 'stop-dot').attr('r', 6).attr('stroke-width', 1.5)
+      stopInner
         .append('text')
         .attr('class', 'stop-name')
         .attr('x', 12)
         .attr('y', 0)
         .attr('font-size', 12)
         .attr('font-weight', 600)
-        .text((d) => d.name)
-      stops
+        // shortName, for the reason the chart axes use it: this label has to
+        // fit beside its dot on a map that is 218px wide on a phone, and
+        // "Solomon Is." is 66px where "Solomon Islands" is 92px. The full name
+        // is directly beneath in the scrubber readout and again in the stop
+        // card, so nothing here is the only place a country is named.
+        .text((d) => shortName(d.name))
+      stopInner
         .append('text')
         .attr('class', 'stop-meta')
         .attr('x', 12)
@@ -281,7 +324,11 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
       // eye is as much cyclone as survives at this size; the rotation is a CSS
       // animation on an inner group so it can't fight the translate below it.
       const eye = g.append('g').attr('class', 'storm-eye').attr('opacity', 0)
-      const spinner = eye.append('g').attr('class', 'cyclone-spin')
+      // Three nested groups, one transform each: position (eye), counter-scale
+      // (eye-scale), rotation (cyclone-spin, from CSS). Collapsing any two of
+      // them means one transform silently replacing another.
+      const eyeScale = eye.append('g').attr('class', 'eye-scale')
+      const spinner = eyeScale.append('g').attr('class', 'cyclone-spin')
       spinner
         .append('path')
         .attr('d', 'M0,-2 C7,-9 15,-6 14,1 C11,-4 5,-5 0,-2 Z')
@@ -291,6 +338,8 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         .attr('d', 'M0,2 C-7,9 -15,6 -14,-1 C-11,4 -5,5 0,2 Z')
         .attr('class', 'cyclone-arm')
       spinner.append('circle').attr('class', 'cyclone-core').attr('r', 2.6)
+
+      applyScale(g, measureViewBoxScale(svgRef.current, WIDTH, HEIGHT))
 
       sceneRef.current = { g, track, trackNode, totalLength, stopLengths, eye }
       // Painted here, by the code that built it -- see the note on paintScene
@@ -324,25 +373,34 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
     if (sceneRef.current) paintScene(sceneRef.current, { active, theme })
   }, [active, theme, storm?.id])
 
+  // Resizes after the build. The first application happens inside build()
+  // itself, off its own measurement.
+  useEffect(() => {
+    if (sceneRef.current) applyScale(sceneRef.current.g, scale)
+  }, [scale, storm?.id])
+
   const blocked = sectionGuard({
     data: true,
     storm,
     style,
-    tone: 'panel',
     subject: 'Storm journey',
     prompt: 'travel with it',
   })
   if (blocked) return blocked
   if (!hasSteps) {
     return (
-      <EmptyState tone="panel" style={style}>
+      <EmptyState style={style}>
         {storm.name}&rsquo;s stop-by-stop record has not been compiled yet.
       </EmptyState>
     )
   }
 
   return (
-    <Section tone="panel" className="journey-section" style={style}>
+    <Section
+      className="journey-section"
+      style={style}
+      backdrop={scatterBackdrop('storm-journey')}
+    >
       <p className="type-eyebrow mb-1 text-accent">
         {STEPS[0].date} &ndash; {STEPS[STEPS.length - 1].date}
       </p>
@@ -359,17 +417,25 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
       </p>
 
       <div className="journey-split mt-6 md:grid md:grid-cols-2 md:items-start md:gap-10">
-        <div className="journey-sticky sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:px-0 md:pt-0">
+        {/* THE MAP IS DESKTOP-ONLY.
+            At 22vh it was a 218x147px band -- four dots and a curve at
+            thumbnail scale, with labels that could not be made to fit even at a
+            constant pixel size. It was taking a fifth of the screen from the
+            stop text, which is cramped there, and the scrubber below already
+            names the current stop and its date. So the phone layout is the
+            scrubber and the stop card, which is what was carrying the section
+            on a phone anyway. */}
+        <div className="journey-sticky sticky top-[calc(var(--header-height)+8px)] z-10 -mx-6 hidden bg-panel px-6 pb-4 pt-2 sm:-mx-8 sm:px-8 md:mx-0 md:block md:px-0 md:pt-0">
           <svg
             ref={svgRef}
             aria-hidden="true"
             preserveAspectRatio="xMidYMid meet"
-            className="mx-auto block h-auto max-h-[22vh] w-full rounded-2xl border-2 border-ink/15 shadow-sm md:max-h-none"
+            className="mx-auto block h-auto w-full rounded-2xl border-2 border-ink/15 shadow-sm"
           />
           {/* "four documented impact points" was hardcoded. Only Harold has
               four stops; the other five storms have two, and the caption was
               asserting a number the map beside it visibly contradicted. */}
-          <p className="mt-2 hidden text-xs italic leading-snug opacity-65 md:block">{TRACK_NOTE}</p>
+          <p className="mt-2 text-xs italic leading-snug opacity-65">{TRACK_NOTE}</p>
         </div>
 
         <div className="journey-detail mt-5 md:mt-0">
@@ -413,12 +479,10 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
           </article>
         </div>
 
-        {/* Mobile placement of the same note. It sits after the detail rather
-            than under the map, because on a phone the map is a pinned band and
-            anything inside it is pinned too -- four lines of citation following
-            the reader down the screen, in the space the stop text needs. It is
-            md:hidden, so on desktop this is not a third grid child. */}
-        <p className="mt-4 text-xs italic leading-snug opacity-65 md:hidden">{TRACK_NOTE}</p>
+        {/* The sourcing note on a phone, where there is no track to describe.
+            Sits after the detail rather than above it, and is md:hidden so on
+            desktop this is not a third grid child. */}
+        <p className="mt-4 text-xs italic leading-snug opacity-65 md:hidden">{SOURCE_NOTE}</p>
       </div>
     </Section>
   )

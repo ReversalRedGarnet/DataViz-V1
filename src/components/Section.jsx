@@ -1,26 +1,26 @@
 // Section wrapper: semantic <section>, consistent padding, the shared content
 // column, and the site's one entrance animation (.animate-pop-in).
-//
-// `tone` is the background. 'panel' is the site default: a restrained neutral
-// a step away from the sand the header and footer are painted in, so the frame
-// reads as frame and the content reads as content. 'ink' is the inversion the
-// closing citations use -- its dark: pair is bg-panel/text-ink rather than a
-// straight flip, because the flip reads too bright in dark mode.
 import Atmosphere from './Atmosphere.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 
-// THERE USED TO BE AN 'ink' TONE HERE -- bg-ink/text-sand with a
-// dark:bg-panel/dark:text-ink override -- and no section ever passed it. The
-// citations panel hardcoded the same three classes instead, which is how the
-// closing slide came to be a black panel in light mode and an ordinary one in
-// dark, so the inconsistency was invisible to anyone reviewing in dark mode.
+// EVERY SECTION IS bg-panel, AND THERE IS NO LONGER A PROP SAYING SO.
 //
-// Removed rather than left unused: an inverted tone sitting in the palette is
-// an invitation to reintroduce exactly that, and a slide that needs to feel
-// different now has `backdrop` for it.
-const TONES = {
-  panel: 'bg-panel',
-}
+// There was once an inverted 'ink' background -- bg-ink/text-sand with a dark:
+// override -- and no section ever passed it. The citations panel hardcoded the
+// same three classes instead, which is how the closing slide came to be a
+// black panel in light mode and an ordinary one in dark: an inconsistency
+// invisible to anyone reviewing in dark mode. That option was removed and the
+// panel brought back into the palette.
+//
+// What survived the removal was a prop, a lookup table with one entry, and a
+// `?? default` fallback that resolved every possible input to the same class --
+// threaded through Section, EmptyState, sectionGuard and PageHero, and passed
+// explicitly by fourteen call sites that could not change anything by passing
+// it. All of it is gone.
+//
+// A slide that needs to feel different has `backdrop` for it -- though every
+// slide now passes the same scatter, so what it varies is the seed, not the
+// motif.
 
 // THE SITE'S TWO CONTENT WIDTHS, NAMED.
 //
@@ -70,16 +70,19 @@ const WIDTHS = {
 // front of the section's background -- and like the atmosphere it takes no
 // pointer events and is hidden from assistive technology.
 //
-// Off by default on purpose. These textures belong on the slides that are
-// apparatus rather than argument; behind a chart the tiling competes with the
-// marks. See the note on METHOD_BACKDROP for where the line falls.
+// Off by default on the component itself -- every slide opts in explicitly via
+// scatterBackdrop(seed) from content/patterns.js, whose 'weaveScatter' motif
+// scatters into the section's side margins rather than tiling behind it, which
+// is what makes it safe on an argument slide. The tiling motifs
+// (ripples/fish/weave) are chrome-only, and there are no longer any exceptions:
+// the method and sources slides used to be two, and content/patterns.js has the
+// note on why they stopped being.
 //
 // This is also why the section is `relative`: the layer positions against it.
 // Note what is deliberately NOT added alongside -- overflow: hidden. The layer
 // clips its own rings, and a section that clipped its overflow would clip the
 // tooltips that sit near its edges.
 export default function Section({
-  tone = 'panel',
   lock = false,
   width = 'wide',
   atmosphere = 'ambient',
@@ -91,7 +94,7 @@ export default function Section({
 }) {
   return (
     <section
-      className={`animate-pop-in relative px-6 py-14 sm:px-8 md:py-20 ${TONES[tone] ?? TONES.panel} ${
+      className={`animate-pop-in relative bg-panel px-6 py-14 sm:px-8 md:py-20 ${
         lock ? 'section-lock' : ''
       } ${className}`}
       style={{ '--content-max': WIDTHS[width] ?? WIDTHS.wide, ...style }}

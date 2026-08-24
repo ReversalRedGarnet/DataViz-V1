@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useElementWidth } from './useElementWidth.js'
 import { useInView } from './useInView.js'
 import { useTheme } from './useTheme.jsx'
@@ -30,6 +30,15 @@ import { resetSvg } from '../utils/d3helpers.js'
 // element whose visibility gates the draw -- plus the measured `node` itself,
 // for the occasional effect that restyles marks after the fact rather than
 // redrawing them.
+//
+// `drawCount` is what those restyling effects have to depend on. The marks
+// belong to D3 and every redraw destroys and recreates them, so a class applied
+// after the fact is gone the next time the chart is drawn -- on a theme flip,
+// say. Node identity does not change across a redraw and neither does the data
+// the restyle is keyed on, so there is nothing else for such an effect to
+// notice. Depending on this makes "run again after every draw" expressible
+// without falling back to a dependency-free effect that runs after every
+// render, which is what TrendChart was doing.
 export function useChartCanvas({ height, ready = true, waitForInView = true, draw, deps = [] }) {
   const [svgRef, node, width] = useElementWidth()
   const [cardRef, inView] = useInView()
@@ -39,11 +48,18 @@ export function useChartCanvas({ height, ready = true, waitForInView = true, dra
 
   const visible = waitForInView ? inView : true
 
+  const [drawCount, setDrawCount] = useState(0)
+
   useEffect(() => {
     if (!visible || !ready || !node || !width) return
-    return drawRef.current(resetSvg(node, width, height), { width, theme })
+    const cleanup = drawRef.current(resetSvg(node, width, height), { width, theme })
+    // Not in this effect's own dependencies, so it cannot loop. Costs one
+    // extra render per draw, and draws are rare -- the alternative was every
+    // consumer re-running its restyle after every render forever.
+    setDrawCount((n) => n + 1)
+    return cleanup
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, ready, node, width, height, theme, ...deps])
 
-  return { svgRef, cardRef, node, inView, width, theme }
+  return { svgRef, cardRef, node, inView, width, theme, drawCount }
 }

@@ -19,14 +19,12 @@ import SlidePanel from './SlidePanel.jsx'
 // Props:
 //   sections -- [{ id, element, label, requires }], in order
 //   active -- index of the on-stage section
-//   direction -- 1 forward, -1 back; the enter animation reads it
 //   onNavigate -- (index) => void
 //   onProgress -- (fraction 0..1) => void, the active panel's own scroll
 //   storyLength -- the whole story's length, for the footer counter
 export default function PageSections({
   sections,
   active,
-  direction,
   onNavigate,
   onProgress,
   storyLength,
@@ -38,7 +36,7 @@ export default function PageSections({
 
   return (
     <NationHighlightProvider>
-      <div className="slide-viewport" data-dir={direction < 0 ? 'back' : 'forward'}>
+      <div className="slide-viewport">
         <div className="slide-track" style={{ transform: `translateX(-${active * 100}%)` }}>
           {sections.map((section, i) => (
             <SlidePanel

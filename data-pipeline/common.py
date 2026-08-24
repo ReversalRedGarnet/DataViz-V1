@@ -181,3 +181,48 @@ def write_json(path, records):
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(records, indent=2, allow_nan=False) + "\n")
+
+
+# The one file the site actually fetches. Named here rather than in either
+# cleaning script, because both of them write into the same bundle.
+BUNDLE_NAME = "metrics.json"
+
+
+def write_bundle():
+    """Collect every per-metric JSON in OUT_DIR into one file for the site.
+
+    WHY ONE FILE. The site used to fetch all ten datasets separately and wait on
+    Promise.all before rendering anything, so the slowest of ten round trips
+    gated every chart on the page. Together they are about 34 KB -- smaller than
+    a single photograph -- which means what was being paid for was the round
+    trips, not the bytes. On the high-latency mobile connections this project is
+    aimed at, that was the dominant cost of the initial load.
+
+    BUILT BY READING THE DIRECTORY, not from whatever this run happened to
+    clean. A partial run -- one raw CSV present, or clean_population_data.py on
+    its own -- must not drop the nine datasets it did not touch out of the
+    bundle. Reading what is on disk means the bundle always describes the whole
+    of public/data/ rather than the last command someone typed.
+
+    Keyed by filename, deliberately. src/utils/metrics.js already carries a
+    `file` field per metric and this script already knows its json_name, so the
+    two sides agree without either learning a new identifier. The per-metric
+    files stay on disk: they are what this function reads, and they remain the
+    readable unit for anyone inspecting the data by hand.
+    """
+    bundle = {}
+    for path in sorted(OUT_DIR.glob("*.json")):
+        if path.name == BUNDLE_NAME:
+            continue
+        bundle[path.name] = json.loads(path.read_text())
+
+    if not bundle:
+        print(f"No per-metric JSON in {OUT_DIR}; {BUNDLE_NAME} not written.")
+        return
+
+    out = OUT_DIR / BUNDLE_NAME
+    out.write_text(json.dumps(bundle, allow_nan=False) + "\n")
+
+    rows = sum(len(v) for v in bundle.values())
+    kb = out.stat().st_size / 1024
+    print(f"\nBundled {len(bundle)} datasets ({rows} rows) into {BUNDLE_NAME} ({kb:.0f} KB)")

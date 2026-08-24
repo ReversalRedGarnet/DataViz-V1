@@ -78,7 +78,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
   const step = (delta) => onIndex(Math.min(last, Math.max(0, index + delta)))
 
   return (
-    <div className="journey-scrubber">
+    <div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <span className="type-eyebrow text-accent">Move the storm</span>
         <span className="text-xs tabular-nums opacity-60">
