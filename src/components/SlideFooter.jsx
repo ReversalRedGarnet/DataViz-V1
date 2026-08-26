@@ -11,7 +11,9 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 // through it rather than a page with unrelated furniture at each end.
 //
 // Props:
-//   index, total -- position readout
+//   index, total -- Back/Next targeting (index is the real array position)
+//   pageNumber -- the counter's numerator, or null/undefined to hide the
+//     counter entirely -- the cover slide has no page number of its own
 //   nextLabel, prevLabel -- destination names
 //   onNavigate -- (index, origin?) => void; origin is the click point the
 //     ripple transition lands on, see rippleTransition.js
@@ -19,6 +21,7 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 export default function SlideFooter({
   index,
   total,
+  pageNumber,
   nextLabel,
   prevLabel,
   onNavigate,
@@ -69,9 +72,11 @@ export default function SlideFooter({
           <span />
         )}
 
-        <span className="deck-count shrink-0 text-xs tabular-nums opacity-50" aria-hidden="true">
-          {index + 1} / {total}
-        </span>
+        {pageNumber != null && (
+          <span className="deck-count shrink-0 text-xs tabular-nums opacity-50" aria-hidden="true">
+            {pageNumber} / {total}
+          </span>
+        )}
 
         {/* Rendered on `requires` alone, not only on `nextLabel`: a held slide
             can legitimately be the last one in the deck -- the timeline is,

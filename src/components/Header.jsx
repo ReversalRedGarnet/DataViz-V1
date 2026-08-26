@@ -15,11 +15,21 @@ import { HEADER_BACKDROP } from '../content/patterns.js'
 // outline screen reader users rely on.
 //
 // Props:
+//   hidden -- true while the deck is on a chromeless bookend slide (the poem
+//     and the sources slide; see `chromeless` in App.jsx). The header is one
+//     fixed element for the whole app rather than per-slide furniture, so it
+//     is faded out here rather than unmounted -- unmounting would tear down
+//     the ResizeObserver below and report a height of zero, and the height is
+//     what the rest of the layout is measured from. Hidden with visibility
+//     and opacity for the same reason: `display: none` would stop it having a
+//     box to measure. See .site-header in styles/slideshow.css for the fade
+//     and for what takes it out of the tab order.
 //   onHeightChange -- (px) => void, called with the header's actual rendered
 //     height whenever it changes, so App.jsx can give <main> matching padding
 //     and keep --header-height current. Measured rather than hardcoded so it
 //     cannot drift out of sync with a copy or font-size change.
 export default function Header({
+  hidden = false,
   onHeightChange,
   availableIds,
   progress,
@@ -48,7 +58,12 @@ export default function Header({
   // itself, as the water the canoe travels on. A border here would double the
   // line the canoe is supposed to be riding.
   return (
-    <header ref={headerRef} className="fixed inset-x-0 top-0 z-40 bg-sand shadow-sm">
+    <header
+      ref={headerRef}
+      className={`site-header fixed inset-x-0 top-0 z-40 bg-sand shadow-sm${
+        hidden ? ' is-hidden' : ''
+      }`}
+    >
       {/* No overflow-hidden on the header itself: the section menu below opens
           past its bottom edge and would be clipped by it. The backdrop clips
           itself instead.

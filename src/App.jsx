@@ -16,6 +16,7 @@ import StoryConclusion from './components/StoryConclusion.jsx'
 import CitationPanel from './components/CitationPanel.jsx'
 import PageSections from './components/PageSections.jsx'
 import DisplayCheck from './components/DisplayCheck.jsx'
+import IslanderPoem from './components/IslanderPoem.jsx'
 import { useDeck } from './hooks/useDeck.js'
 import { PAGE_SECTIONS } from './content/pageSections.js'
 import { NATION_NAMES } from './content/nations.js'
@@ -64,7 +65,14 @@ const DATA_SOURCES = [
 // the rest appear once a storm is chosen -- split into two lists rather than
 // filtered from one, so where the story opens out is a structural fact of this
 // file rather than an index somebody has to keep in step.
-const SECTION_LABELS = Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label]))
+const SECTION_LABELS = {
+  ...Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label])),
+  // Not in PAGE_SECTIONS on purpose -- the poem is not a destination the
+  // header's jump-to menu should offer, and it does not count toward the
+  // deck's total (see `cover` below). It still needs a name here, though:
+  // this is what the Hero's "Back" button reads once the poem is behind it.
+  'islander-poem': 'The Opening',
+}
 
 // The comparison's pickers offer every in-scope nation, not only the two
 // currently chosen, so the pair can be changed from the section that asks the
@@ -76,7 +84,29 @@ function pageSections(data, dataError, story, onSelectStorm) {
   const { storm, selected } = story
 
   return [
-    { id: 'top', element: <Hero /> },
+    // THE ONE SLIDE THAT ISN'T A FINDING.
+    //
+    // `cover` is read by PageSections.jsx to keep this out of the "N / total"
+    // counter -- it is not the first of fourteen things the piece has to say,
+    // it is what a reader feels before the first of them lands. For the same
+    // reason its id is deliberately absent from content/pageSections.js: nothing
+    // else on the site treats it as a destination, so the header's jump-to menu
+    // shouldn't either.
+    //
+    // `chromeless` is the second flag it carries, and it is a different claim
+    // from `cover`. `cover` is about counting; this is about furniture. The
+    // poem and the sources slide are the piece's two bookends, and a bookend
+    // reads as one because nothing frames it -- so on these two the site
+    // header fades out, <main>'s header offset collapses to zero, and the
+    // footer bar is replaced by a single quiet control. Read in
+    // PageSections.jsx and SlidePanel.jsx, and by AppShell below for the
+    // header. Flagged here rather than matched by id anywhere downstream, so
+    // there is one place to change if either bookend moves.
+    { id: 'islander-poem', cover: true, chromeless: true, element: <IslanderPoem /> },
+    // `cue` overrides what the *previous* footer's Next button says -- see the
+    // note on `cue` in PageSections.jsx. With the poem now in front of it, Hero
+    // is the only section whose Next-button label this affects.
+    { id: 'top', cue: 'Begin', element: <Hero /> },
     {
       id: 'timeline',
       // The same hold the map uses further down, for the same reason: every
@@ -168,7 +198,9 @@ function pageSections(data, dataError, story, onSelectStorm) {
     // It began as an exclusions-only slide in third place, where it broke off
     // the argument to answer an objection nobody had raised yet.
     { id: 'method', element: <MethodPanel /> },
-    { id: 'sources', element: <CitationPanel sources={DATA_SOURCES} /> },
+    // The other bookend. See `chromeless` on the poem above: nothing follows
+    // this slide, so its one control points backwards.
+    { id: 'sources', chromeless: true, element: <CitationPanel sources={DATA_SOURCES} /> },
         ]),
   ].map((section) => ({ ...section, label: SECTION_LABELS[section.id] ?? section.id }))
 }
@@ -193,13 +225,6 @@ function AppShell() {
   useEffect(() => {
     document.documentElement.classList.add('is-slides')
   }, [])
-
-  // Keep the CSS scroll offset in step with the measured header height, so a
-  // jump-to-section link doesn't land with its heading hidden behind the fixed
-  // header (see --header-height in index.css).
-  useEffect(() => {
-    document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
-  }, [headerHeight])
 
   // ONE WAY FORWARD.
   //
@@ -237,6 +262,39 @@ function AppShell() {
 
   const deckProgress = sections.length > 0 ? (active + panelFraction) / sections.length : 0
 
+  // THE TWO BOOKENDS RENDER WITHOUT SITE CHROME. See `chromeless` in
+  // pageSections() above for which slides and why.
+  //
+  // The header is one fixed element for the whole app rather than per-slide
+  // furniture, so "hide it here" can only mean "hide it while the deck is on
+  // one of these slides" -- it fades as `active` crosses in and out. The
+  // fade itself is CSS (.site-header in styles/slideshow.css); this is only
+  // the flag.
+  //
+  // The offset it publishes goes to zero in the same commit. That change is
+  // not animated and does not need to be: the deck's page change already
+  // happens underneath the ripple curtain (utils/rippleTransition.js swaps
+  // the page inside flushSync while the curtain is at full opacity), so the
+  // layout has already settled by the time the reader can see anything. The
+  // header's fade then plays out through the curtain's own fade, which is
+  // what makes it read as dissolving rather than cutting.
+  const chromeless = Boolean(sections[active]?.chromeless)
+  const contentOffset = chromeless ? 0 : headerHeight
+
+  // Keep the CSS scroll offset in step with the measured header height, so a
+  // jump-to-section link doesn't land with its heading hidden behind the fixed
+  // header (see --header-height in index.css).
+  //
+  // `contentOffset` rather than `headerHeight` directly, because a chromeless
+  // slide has no header to clear -- see below. Header.jsx keeps measuring its
+  // real height throughout: it is hidden with visibility and opacity, never
+  // with display, so `headerHeight` stays correct and leaving a bookend
+  // restores the right number rather than re-measuring from zero.
+  useEffect(() => {
+    document.documentElement.style.setProperty('--header-height', `${contentOffset}px`)
+  }, [contentOffset])
+
+
   // Reset the panel's own scroll fraction whenever the deck moves, so the
   // progress readout does not carry the previous slide's position into the
   // next one before its first scroll event arrives.
@@ -256,6 +314,7 @@ function AppShell() {
       </a>
 
       <Header
+        hidden={chromeless}
         onHeightChange={setHeaderHeight}
         availableIds={sections.map((s) => s.id)}
         progress={deckProgress}
@@ -280,7 +339,7 @@ function AppShell() {
           : 'Pick a storm from the timeline to continue.'}
       </div>
 
-      <main id="main-content" style={{ paddingTop: headerHeight }}>
+      <main id="main-content" style={{ paddingTop: contentOffset }}>
         <PageSections
           sections={sections}
           active={active}

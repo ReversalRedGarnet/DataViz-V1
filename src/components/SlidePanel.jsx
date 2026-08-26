@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { ScrollRootProvider } from '../hooks/useScrollRoot.jsx'
 import SlideFooter from './SlideFooter.jsx'
+import SlideEdgeNav from './SlideEdgeNav.jsx'
 import { usePanelFit, usePanelProgress } from '../hooks/usePanelMetrics.js'
 
 // One slide: a bounded scroll region with the deck's footer pinned beneath it.
 //
 // Props:
-//   section -- { id, element, requires }
-//   index, total -- position in the deck
+//   section -- { id, element, requires, chromeless }
+//   index, total -- position in the deck (index drives Back/Next targeting)
+//   pageNumber -- this panel's footer counter value, or null to hide it
+//     entirely (the cover slide has no page number -- see PageSections.jsx)
 //   isActive -- whether this panel is on stage
 //   nextLabel, prevLabel -- footer destinations
 //   onNavigate -- (index) => void
@@ -17,6 +20,7 @@ export default function SlidePanel({
   section,
   index,
   total,
+  pageNumber,
   isActive,
   nextLabel,
   prevLabel,
@@ -40,6 +44,13 @@ export default function SlidePanel({
       id={section.id}
       className="slide-panel"
       data-active={isActive ? 'true' : 'false'}
+      // Published on the panel rather than inferred from the active slide, so
+      // the rule that keeps content clear of the edge control (see
+      // .slide-panel[data-chromeless] in styles/slideshow.css) applies to the
+      // panel that has one -- including while it is off stage and being
+      // measured, which is when usePanelFit decides whether it centres or
+      // scrolls.
+      data-chromeless={section.chromeless ? 'true' : undefined}
       // inert keeps Tab out of the off-stage panels; without it the focus ring
       // walks off the side of the screen and the reader cannot tell where it
       // went. React 18 does not special-case this attribute, hence the empty
@@ -56,14 +67,39 @@ export default function SlidePanel({
             {section.element}
           </div>
 
-          <SlideFooter
-            index={index}
-            total={total}
-            nextLabel={nextLabel}
-            prevLabel={prevLabel}
-            onNavigate={onNavigate}
-            requires={section.requires}
-          />
+          {/* A BOOKEND TAKES ONE CONTROL INSTEAD OF THE FOOTER BAR. See
+              `chromeless` in App.jsx.
+
+              The branch is on the flag, never on an id: which slides are
+              bookends is decided in one place, and this reads that decision
+              rather than restating it. Note what does NOT change with it --
+              the panel is still mounted, still measured, still keyboard
+              navigable through useDeck's window listener. All that moves is
+              which control is drawn.
+
+              Direction follows position rather than a third flag: the poem
+              opens the deck so it can only go forward, and the sources slide
+              closes it so it can only go back. `nextLabel` still supplies the
+              forward wording, so the poem's button keeps saying "Begin" from
+              Hero's `cue` without that string being written down again. */}
+          {section.chromeless ? (
+            <SlideEdgeNav
+              direction={index === 0 ? 'forward' : 'back'}
+              label={index === 0 ? nextLabel : 'Back'}
+              index={index}
+              onNavigate={onNavigate}
+            />
+          ) : (
+            <SlideFooter
+              index={index}
+              total={total}
+              pageNumber={pageNumber}
+              nextLabel={nextLabel}
+              prevLabel={prevLabel}
+              onNavigate={onNavigate}
+              requires={section.requires}
+            />
+          )}
         </div>
       </ScrollRootProvider>
     </div>
