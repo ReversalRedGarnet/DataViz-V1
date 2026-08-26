@@ -17,7 +17,7 @@ import SlidePanel from './SlidePanel.jsx'
 // precisely the failure mode that has produced every rendering bug here.
 //
 // Props:
-//   sections -- [{ id, element, label, requires }], in order
+//   sections -- [{ id, element, label, requires, cover, chromeless }], in order
 //   active -- index of the on-stage section
 //   onNavigate -- (index) => void
 //   onProgress -- (fraction 0..1) => void, the active panel's own scroll
@@ -34,9 +34,24 @@ export default function PageSections({
   // of them do.
   const [more, setMore] = useState(false)
 
+  // The footer's "N / total" counter, kept separate from the array index a
+  // section actually lives at. A `cover` section (the opening poem) still
+  // needs a real index for Back/Next to land on, but it is not one of the
+  // things the piece counts -- so it gets no page number at all, and every
+  // ordinary section after it counts as though the cover were never there.
+  let pageCounter = 0
+  const pageNumbers = sections.map((section) => (section.cover ? null : ++pageCounter))
+
+  // A bookend draws no footer bar (see `chromeless` in App.jsx), so the "more
+  // below" chevron has nothing to clear and sits lower. Read from the active
+  // section rather than set per panel because the chevron lives outside the
+  // track -- there is one of it for the whole deck, and it belongs to whichever
+  // slide is on stage.
+  const chromeless = Boolean(sections[active]?.chromeless)
+
   return (
     <NationHighlightProvider>
-      <div className="slide-viewport">
+      <div className={`slide-viewport${chromeless ? ' is-chromeless' : ''}`}>
         <div className="slide-track" style={{ transform: `translateX(-${active * 100}%)` }}>
           {sections.map((section, i) => (
             <SlidePanel
@@ -49,6 +64,7 @@ export default function PageSections({
               // reader arriving at a fourteen-section piece that it was two
               // pages long, and then appearing to grow under them.
               total={storyLength ?? sections.length}
+              pageNumber={pageNumbers[i]}
               isActive={i === active}
               // `cue` over `label` when a section has one. The menu needs a
               // name for a place ("How Often, and to Whom"); the button that

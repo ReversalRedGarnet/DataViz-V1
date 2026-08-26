@@ -120,6 +120,149 @@
     animation: none;
   }
 
+  /*
+    THE CHROMELESS BOOKENDS -- the opening poem and the closing sources slide.
+    See `chromeless` in App.jsx for which slides carry it and why.
+
+    THE HEADER IS FADED, NOT UNMOUNTED, and that is load-bearing rather than
+    tidy. It is one fixed element for the whole app, and App.jsx measures its
+    height with a ResizeObserver to derive both <main>'s top padding and
+    --header-height. Unmounting it would report zero and take the layout with
+    it; `display: none` would do the same by removing the box. Opacity and
+    visibility leave it fully laid out and fully measurable while it is gone
+    from view.
+
+    visibility is what takes it out of the tab order and the accessibility
+    tree -- pointer-events alone would leave a screen-reader user reading a
+    header that is not on screen, and a Tab press landing on an invisible
+    section menu. It is delayed by the length of the fade so the header is
+    still painted while it dissolves, and only stops existing once it has.
+
+    Transform and opacity only, so the fade itself stays on the compositor.
+    320ms matches .slide-panel's own crossfade above: this is the same event
+    seen from outside the deck, and two different durations would read as two
+    different things happening.
+  */
+  .site-header {
+    transition:
+      opacity 320ms ease-out,
+      transform 320ms ease-out;
+  }
+
+  .site-header.is-hidden {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+    visibility: hidden;
+    transition:
+      opacity 320ms ease-out,
+      transform 320ms ease-out,
+      visibility 0s linear 320ms;
+  }
+
+  /*
+    The bookends' one control, in place of the footer bar. Positioned against
+    the panel rather than sitting in the flex column, so the slide's own
+    content runs the full height of the panel behind it -- which is the whole
+    point of taking the footer away.
+
+    A single button with no bar, no counter and no destination label beyond
+    one word. The footer names where you are going because the middle of a
+    deck needs it; a bookend has only one direction available and nothing to
+    disambiguate.
+  */
+  .slide-edge-nav {
+    position: absolute;
+    z-index: 2;
+    bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--color-ink) / 0.15);
+    background: rgb(var(--color-panel) / 0.75);
+    padding: 0.625rem 1.125rem;
+    /* 44px, the same minimum every other press target on the site keeps. */
+    min-height: 44px;
+    color: rgb(var(--color-ink) / 0.75);
+    font-size: 0.875rem;
+    backdrop-filter: blur(6px);
+    transition:
+      color 180ms ease-out,
+      border-color 180ms ease-out;
+  }
+
+  .slide-edge-nav:hover {
+    color: rgb(var(--color-ink));
+    border-color: rgb(var(--color-ink) / 0.35);
+  }
+
+  .slide-edge-nav-forward {
+    right: 1.5rem;
+  }
+
+  .slide-edge-nav-back {
+    left: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .slide-edge-nav {
+      bottom: 2rem;
+    }
+
+    .slide-edge-nav-forward {
+      right: 2rem;
+    }
+
+    .slide-edge-nav-back {
+      left: 2rem;
+    }
+  }
+
+  /*
+    THE EDGE CONTROL FLOATS, SO THE CONTENT HAS TO CLEAR IT.
+
+    SlideFooter is a real box in the flex column, so a panel's content could
+    never run underneath it. .slide-edge-nav is positioned, which is what lets
+    the slide fill the panel -- and it means the last line of a scrolling
+    bookend would otherwise finish behind the button. It did: on a 390px-wide
+    window the poem's closing stanza was half hidden by "Begin".
+
+    6.5rem is the control's 44px plus its 1.5rem offset plus the 3rem of
+    bottom padding every slide in the deck already carries, which is what the
+    reader sees as the gap after the last line elsewhere.
+  */
+  .slide-viewport .slide-panel[data-chromeless] .slide-scroll > * {
+    padding-bottom: 6.5rem;
+  }
+
+  /*
+    The "more below" chevron clears the footer by 4.75rem. On a bookend there
+    is no footer to clear, so it sits with the edge control instead -- the
+    poem is long enough to scroll on a short window, which is exactly when
+    this matters.
+  */
+  .slide-viewport.is-chromeless .slide-more {
+    bottom: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .slide-viewport.is-chromeless .slide-more {
+      bottom: 2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header,
+    .site-header.is-hidden {
+      transition: none;
+    }
+
+    .slide-edge-nav {
+      transition: none;
+    }
+  }
+
   /* height, not min-height. A floor with no ceiling let a tall section grow
      the flex column to fit, so .slide-scroll never overflowed and never
      scrolled, and the footer was pushed past the panel's clip and vanished.
@@ -130,6 +273,12 @@
     height: 100%;
     min-height: 0;
     flex-direction: column;
+    /* The containing block for .slide-edge-nav on a chromeless bookend. Without
+       it that absolute element resolves against .slide-track -- which carries a
+       transform, and so is a containing block for absolute descendants -- and
+       every panel's control would stack at the same place on screen instead of
+       staying inside its own panel. */
+    position: relative;
   }
 
   /* "There is more down there." The one affordance the deck adds back rather

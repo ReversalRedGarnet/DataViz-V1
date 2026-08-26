@@ -243,9 +243,66 @@ function randomShape(rand, cx, cy, baseR) {
     const r = baseR * (0.84 + rand() * 0.32)
     const x = Math.cos(angle) * r * stretch
     const y = (Math.sin(angle) * r) / stretch
-    pts.push(`${(cx + x * cos - y * sin).toFixed(1)},${(cy + x * sin + y * cos).toFixed(1)}`)
+    // Returned as coordinate pairs rather than as the finished `points`
+    // string: scatterShapes has to be able to ask whether two of these
+    // overlap before it accepts either. Formatting happens at the end, in
+    // pointsAttr below.
+    pts.push([cx + x * cos - y * sin, cy + x * sin + y * cos])
   }
-  return pts.join(' ')
+  return pts
+}
+
+function pointsAttr(pts) {
+  return pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+}
+
+// DO TWO FRAGMENTS SHARE ANY AREA?
+//
+// This is the whole of the mat rule. randomShape can only draw a triangle or a
+// quadrilateral, but that constrains each polygon rather than what the reader
+// sees: every shape is a hole in one shared <clipPath>, so two that overlap
+// stop being two shapes and become a single merged silhouette with as many
+// sides as the union happens to have. A margin full of five- and seven-sided
+// blobs was the result, and it read as torn cloth. Pandanus and coconut-leaf
+// mats are made of discrete pieces laid beside one another, so the fix is to
+// keep the pieces discrete.
+//
+// Edge-crossing first, then containment. Two polygons overlap if any of their
+// edges cross; if no edges cross they are either disjoint or one is entirely
+// inside the other, which a single point-in-polygon test each way settles.
+// Written for the general simple polygon rather than assuming convexity: a
+// quad from randomShape is convex in practice but nothing in that function
+// guarantees it, and a separating-axis test would silently give the wrong
+// answer on the day one is not.
+function cross(ax, ay, bx, by, px, py) {
+  return (bx - ax) * (py - ay) - (by - ay) * (px - ax)
+}
+
+function edgesCross(p1, p2, p3, p4) {
+  const d1 = cross(p3[0], p3[1], p4[0], p4[1], p1[0], p1[1])
+  const d2 = cross(p3[0], p3[1], p4[0], p4[1], p2[0], p2[1])
+  const d3 = cross(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1])
+  const d4 = cross(p1[0], p1[1], p2[0], p2[1], p4[0], p4[1])
+  return d1 > 0 !== d2 > 0 && d3 > 0 !== d4 > 0
+}
+
+function pointInPolygon([x, y], poly) {
+  let inside = false
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i]
+    const [xj, yj] = poly[j]
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside
+  }
+  return inside
+}
+
+function overlaps(a, b) {
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) {
+      if (edgesCross(a[i], a[(i + 1) % a.length], b[j], b[(j + 1) % b.length])) return true
+    }
+  }
+  return pointInPolygon(a[0], b) || pointInPolygon(b[0], a)
 }
 
 // The two margins of the 1200x640 canvas, given as the edges that matter: the
@@ -279,6 +336,22 @@ const BANDS = [
 // centre-only band check did not give it.
 const SHAPE_REACH = 1.62
 
+// How many positions a fragment may be offered before it is dropped. The jitter
+// distribution is unchanged -- each attempt draws from exactly the same
+// `spread` box the single attempt used to -- so this only decides how hard the
+// scatter tries before accepting a gap.
+//
+// 14 IS THE KNEE, AND THE CURVE IS FLAT. Across the site's fourteen seeds the
+// drop rate is 46% at 8 attempts, 44% at 14, 42% at 24 and 35% at 80 -- so
+// raising it buys about one extra fragment per slide for several times the
+// work. The reason it plateaus rather than converging is geometric: a cluster
+// jitters its members inside a box of `spread` (1.6r) while a fragment reaches
+// up to about 2.1r, so a second fragment in a cluster usually has nowhere to go
+// that clears the first, however many times it is asked. That is a property of
+// the cluster sizing, which is deliberately unchanged here -- the scatter is
+// roughly half as dense as it was, and every fragment left is its own shape.
+const PLACEMENT_ATTEMPTS = 14
+
 // Six to thirty fragments, clustered, in the two margins. Small fused clusters rather
 // than one shape per spot: every shape is a hole in one <clipPath>, so
 // overlapping shapes merge instead of doubling in opacity -- which is what
@@ -304,6 +377,11 @@ const SHAPE_REACH = 1.62
 // three separate specks -- a flat jitter did both.
 function scatterShapes(rand, prefix) {
   const shapes = []
+  // Every fragment already accepted, as coordinates, so each new candidate can
+  // be tested against them. Both bands are disjoint in x, so this never
+  // compares a left-hand fragment with a right-hand one in practice -- it is
+  // one list because it does not need to be two.
+  const placed = []
   BANDS.forEach((band, bi) => {
     const clusters = 3 + Math.floor(rand() * 3)
     for (let c = 0; c < clusters; c++) {
@@ -313,20 +391,37 @@ function scatterShapes(rand, prefix) {
       const fused = 1 + Math.floor(rand() * 3)
       const spread = r * 1.6
       for (let s = 0; s < fused; s++) {
-        const jx = (rand() - 0.5) * spread
-        const jy = (rand() - 0.5) * spread
         // Each shape in a cluster varies around the cluster's radius rather
         // than drawing its own, so a cluster still reads as one thing.
+        //
+        // Drawn once, outside the placement loop below, so that rejecting a
+        // position never re-rolls the size. Redrawing it there would quietly
+        // bias the margins small, because a smaller fragment is likelier to
+        // find a free spot -- the sizing distribution has to survive the
+        // rejection sampling unchanged.
         const sr = r * (0.7 + rand() * 0.6)
         // Pushed outward by its own reach if it would otherwise cross into the
         // column. Because the push scales with the fragment, the big ones end
         // up out at the page edge and only the small ones sit close to the
         // text -- which is the gradient a printed margin has anyway.
         const limit = band.inner + band.dir * sr * SHAPE_REACH
-        const x = band.dir < 0 ? Math.min(cx + jx, limit) : Math.max(cx + jx, limit)
-        shapes.push(
-          <polygon key={`${prefix}-${bi}-${c}-${s}`} points={randomShape(rand, x, cy + jy, sr)} />
-        )
+        let shape = null
+        for (let attempt = 0; attempt < PLACEMENT_ATTEMPTS && !shape; attempt++) {
+          const jx = (rand() - 0.5) * spread
+          const jy = (rand() - 0.5) * spread
+          const x = band.dir < 0 ? Math.min(cx + jx, limit) : Math.max(cx + jx, limit)
+          const candidate = randomShape(rand, x, cy + jy, sr)
+          if (!placed.some((other) => overlaps(candidate, other))) shape = candidate
+        }
+        // Nowhere free in this cluster: the fragment is dropped rather than
+        // laid on top of one already there. A cluster of three large shapes in
+        // a spread this tight genuinely cannot hold three, and a mat with a
+        // gap in it is still a mat -- two pieces merged into a seven-sided blob
+        // is not. This is why the fragment count per seed is now a ceiling
+        // rather than an exact number.
+        if (!shape) continue
+        placed.push(shape)
+        shapes.push(<polygon key={`${prefix}-${bi}-${c}-${s}`} points={pointsAttr(shape)} />)
       }
     }
   })
