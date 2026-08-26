@@ -49,11 +49,27 @@ export const HEADER_BACKDROP = {
 // motifs above to chrome only -- but 'weaveScatter' (BackgroundPattern.jsx)
 // doesn't tile the section. It scatters woven shapes into the side margins and
 // leaves the content column clear, the way a page margin can carry a texture a
-// paragraph never could. Every section on the site passes this.
+// paragraph never could.
+//
+// EVERY SECTION PASSES THIS EXCEPT THE TITLE CARD. The hero is the one slide
+// with nothing in its margins to be beside -- no chart, no table, just a
+// headline on an open field -- and it already carries two background layers of
+// its own (Atmosphere's rings and HeroWash's coastline and storm tracks). A
+// third put woven shapes under the lead paragraph and made the opening the
+// busiest screen on the site. See the note in components/Hero.jsx.
 //
 // `seed` is any stable string -- the slide's own id reads well and guarantees
 // no two slides draw the same layout. Passing the same seed always draws the
 // same shapes; change the string to reshuffle a given slide.
-export function scatterBackdrop(seed, { opacity = 0.05, scale = 1 } = {}) {
-  return { pattern: 'weaveScatter', seed, opacity, scale }
+//
+// THERE IS NO `scale` HERE ANY MORE, and its absence is the rule. The weave
+// inside the shapes is one fixed size site-wide (WEAVE_UNIT in
+// BackgroundPattern.jsx); what a seed varies is the shapes cut out of it --
+// their size, position, rotation and proportion -- so every section's margins
+// show different fragments of the same cloth rather than the same pattern at
+// different magnifications. A per-section scale knob is exactly the thing that
+// would break that, so there isn't one. `opacity` stays: it is how loud the
+// texture is, not what it is made of.
+export function scatterBackdrop(seed, { opacity = 0.05 } = {}) {
+  return { pattern: 'weaveScatter', seed, opacity }
 }

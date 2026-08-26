@@ -6,6 +6,7 @@ import { slug } from '../utils/d3helpers.js'
 import { renderMetricChart, CHART_HEIGHT, seriesStyles } from '../utils/charts/index.js'
 import { chartTheme } from '../utils/theme.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
+import FigureCaption from './FigureCaption.jsx'
 
 // One "selected nations, over time" chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every trends section
@@ -34,6 +35,11 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 //     drawing more than two nations need it, since four lines with no key are
 //     four lines the reader has to hover to tell apart.
 //   caveat -- what this series cannot be read as, printed under the chart
+//   figure -- { key, source, title? } | undefined. Prints a numbered caption
+//     under the chart: "Fig N - title. Data: source (link)". `key` indexes
+//     content/figures.js, which fixes the numbering in reading order rather
+//     than counting mounts; `title` defaults to this card's own label. Omit the
+//     prop entirely on a chart that is not a numbered figure.
 //   emphasis -- 'active' | 'dim' | undefined. The ripple chain sets it while a
 //     link is being held: the held card is ringed and the others recede, so
 //     following one thread through five charts is a matter of looking rather
@@ -66,6 +72,7 @@ export default function TrendChart({
   dimNations,
   legend = false,
   caveat,
+  figure,
   emphasis,
   cardHandlers,
   className = '',
@@ -176,6 +183,14 @@ export default function TrendChart({
           report at all. Very small values are drawn at a minimum height so they stay visible
           beside much larger ones &mdash; hover for the exact figure.
         </p>
+      )}
+      {figure && (
+        <FigureCaption
+          figureKey={figure.key}
+          title={figure.title ?? label}
+          source={figure.source}
+          className="mt-2"
+        />
       )}
       {caveat && (
         <p className="mt-2 border-l-2 border-ink/15 pl-3 text-xs italic leading-snug opacity-70">

@@ -3,6 +3,7 @@ import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/charts/index.js'
 import { motionDuration } from '../utils/motion.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
+import FigureCaption from './FigureCaption.jsx'
 
 const SWEEP_MS = 3400
 
@@ -26,6 +27,9 @@ const SWEEP_MS = 3400
 //     section has scrolled into view; the section itself bumps it once that
 //     happens.
 //   format -- the metric's own value formatter, for tooltips
+//   figure -- { key, source, title? } | undefined. Prints a numbered caption
+//     under the chart; see content/figures.js for why the number is written
+//     down rather than counted.
 //   note -- optional caveat printed under the chart
 //   missing -- nation names with no usable record for this metric
 //   className -- layout hook (e.g. lg:col-span-2 for an odd one out)
@@ -37,6 +41,7 @@ export default function DivergenceChart({
   playToken = 0,
   format,
   note,
+  figure,
   missing = [],
   showTooltip,
   hideTooltip,
@@ -178,6 +183,14 @@ export default function DivergenceChart({
         className="block w-full"
         style={{ height: DIVERGENCE_HEIGHT }}
       />
+      {figure && (
+        <FigureCaption
+          figureKey={figure.key}
+          title={figure.title ?? label}
+          source={figure.source}
+          className="mt-2"
+        />
+      )}
       {note && <p className="mt-2 text-xs italic opacity-70">{note}</p>}
       {missing.length > 0 && (
         <p className="mt-1 text-xs italic opacity-70">

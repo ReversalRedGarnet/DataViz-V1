@@ -15,6 +15,26 @@
 // misreading each one guards against happens at the moment the chart is
 // looked at.
 //
+// source: { label, url } -- the FILTERED Pacific Data Hub query this series was
+// exported from, printed under the chart by components/FigureCaption.jsx and
+// collected into the sources slide by App.jsx. It lives here rather than in
+// App.jsx because it is a property of the metric, and because App.jsx used to
+// keep its own hand-written list of exactly these URLs -- two places to type
+// one value, with no way for a search to catch a drift between them. App.jsx
+// now derives its list from this one.
+//
+// FOUR METRICS HAVE NO source AND THAT IS A REAL GAP, not a design decision:
+// livestock_yield, meteo_stations, sst_anomaly and ghg_per_capita were charted
+// and caveated but their query URLs were never recorded anywhere in this
+// repository. A caption without a source renders as the figure number and the
+// title alone, which is honest, and a fabricated link would not be. Paste the
+// four filtered .Stat Explorer URLs in as `source` and the captions and the
+// sources slide both pick them up with no other change.
+//
+// population's URL is the portal root rather than a filtered query, which is
+// what App.jsx already carried. It is a denominator rather than a charted
+// series, so it appears in the sources slide and in no caption.
+//
 // The three groups below are an argument, not a filing convenience.
 //
 // CHAIN metrics are consequences of a disaster, and they are the patchy ones.
@@ -32,6 +52,10 @@ export const CHAIN_METRICS = [
   {
     key: 'affected_persons',
     file: 'disaster_affected_persons.json',
+    source: {
+      label: 'Directly affected persons attributed to disasters \u2014 Pacific Data Hub (SPC)',
+      url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&df[vs]=3.0&dq=A.VC_DSR_AFFCT.........&pd=,&to[TIME_PERIOD]=false&lb=bt',
+    },
     field: 'affected_persons',
     label: 'People affected',
     chartType: 'bar',
@@ -42,6 +66,10 @@ export const CHAIN_METRICS = [
   {
     key: 'crop_yield',
     file: 'crop_yield.json',
+    source: {
+      label: 'Crop yield \u2014 Pacific Data Hub (SPC)',
+      url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.CROP_YIELD.&pd=,&to[TIME_PERIOD]=false',
+    },
     field: 'crop_yield_index',
     label: 'Crop yield (kg/ha)',
     chartType: 'line',
@@ -62,6 +90,10 @@ export const CHAIN_METRICS = [
   {
     key: 'power_generation',
     file: 'power_generation.json',
+    source: {
+      label: 'Power generation \u2014 Pacific Data Hub (SPC)',
+      url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.POWER_GEN.&pd=,&to[TIME_PERIOD]=false',
+    },
     field: 'power_generation_index',
     label: 'Power generation (GWh)',
     chartType: 'line',
@@ -72,6 +104,10 @@ export const CHAIN_METRICS = [
   {
     key: 'tourist_arrivals',
     file: 'tourist_arrivals.json',
+    source: {
+      label: 'Tourist arrivals \u2014 Pacific Data Hub (SPC)',
+      url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_CLIMATE_CHANGE&df[ag]=SPC&df[vs]=1.0&av=true&dq=A.TRSM_ARR.&pd=,&to[TIME_PERIOD]=false',
+    },
     field: 'tourist_arrivals_index',
     label: 'Tourist arrivals',
     chartType: 'area',
@@ -128,6 +164,10 @@ export const FOOTNOTE_METRICS = [
   {
     key: 'economic_loss',
     file: 'disaster_economic_loss.json',
+    source: {
+      label: 'Direct disaster economic loss \u2014 Pacific Data Hub (SPC)',
+      url: 'https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&df[vs]=3.0&dq=A.VC_DSR_AALT...._T.....&pd=,&to[TIME_PERIOD]=false',
+    },
     field: 'economic_loss_usd',
     label: 'Economic loss (US$)',
     chartType: 'bar',
@@ -150,6 +190,10 @@ export const FOOTNOTE_METRICS = [
 const POPULATION_METRIC = {
   key: 'population',
   file: 'population.json',
+  source: {
+    label: 'Mid-year population estimates \u2014 Pacific Data Hub (SPC)',
+    url: 'https://stats.pacificdata.org/',
+  },
   field: 'population',
   label: 'Population',
   // The page is complete without it: losing this file costs the share-of-

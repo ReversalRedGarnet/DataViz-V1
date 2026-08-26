@@ -29,6 +29,33 @@
 */
 
 @layer components {
+  /*
+    THE SECTION AS A MEASURABLE BOX.
+
+    Two declarations, both in service of .section-bleed further down.
+
+    container-type: inline-size makes the section the resolution target for cqw
+    units, so a descendant can ask for the section's width without anybody
+    passing it down and without reading the viewport -- which, inside a deck of
+    transformed panels, is not the same thing.
+
+    --section-pad restates the horizontal padding the Tailwind classes on the
+    element already apply. It has to be restated rather than read, because CSS
+    cannot ask an element for its own resolved padding from inside a calc. The
+    two are kept in step by being adjacent: the values here are px-6 and sm:px-8
+    from Section.jsx, and changing one means changing the other.
+  */
+  .section-frame {
+    container-type: inline-size;
+    --section-pad: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .section-frame {
+      --section-pad: 2rem;
+    }
+  }
+
   .section-content {
     width: 100%;
     max-width: var(--content-max, 64rem);
@@ -67,6 +94,71 @@
   @media (min-width: 1024px) {
     .figure-prose {
       max-width: none;
+    }
+  }
+
+  /*
+    A CHART BAND THAT ESCAPES THE READING COLUMN.
+
+    The deck had one horizontal rhythm: every section set --content-max once
+    and every child obeyed it, so a paragraph and a four-panel chart grid were
+    laid out to the same measure. That is right for the paragraph and wrong for
+    the grid -- the ripple chain draws five charts inside a `narrow` 48rem
+    section, which is a reading measure being asked to hold a figure.
+
+    A band opts out. It takes the section's full inline size, paints a tonal
+    shift so the break reads as deliberate rather than as an overflow, and
+    gives the charts inside it the room the prose does not need.
+
+    HOW IT ESCAPES, AND WHY NOT THE OBVIOUS WAYS. The usual full-bleed tricks
+    are `100vw` with a negative viewport margin, or `position: fixed`. Both are
+    wrong here. The deck's panels are not the viewport, so `vw` overshoots by
+    however much chrome is on screen; and `position: fixed` does not survive a
+    `will-change: transform` ancestor, which this codebase already has.
+
+    Container query units have neither problem. `cqw` resolves against the
+    nearest ancestor with `container-type` -- the <section> itself, see
+    .section-frame below -- so 100cqw is exactly the section's content box:
+    the panel's width minus its own page padding. That is the right target.
+    The band spans the panel edge to edge of the padding, and the padding is
+    what keeps a chart from touching the panel's edge.
+
+    `margin-inline: calc(50% - 50cqw)` centres that wider box inside the
+    narrower column it is a child of. The 50% is of .section-content, the 50cqw
+    is of the section, and the difference is the overhang on each side.
+
+    Vertical padding and the hairline rules are what make it a band rather than
+    a chart that has escaped. Both are quiet on purpose: the tonal step from
+    panel to surface is already the signal, and a heavier frame would turn a
+    change of register into a box.
+  */
+  .section-bleed {
+    width: 100cqw;
+    max-width: 100cqw;
+    margin-inline: calc(50% - 50cqw);
+    padding: 1.5rem var(--section-pad, 1.5rem);
+    background: rgb(var(--color-surface) / 0.55);
+    border-block: 1px solid rgb(var(--color-ink) / 0.08);
+  }
+
+  /*
+    A band is a horizontal device and needs horizontal room to read as one. On
+    a phone the section's padding is most of what separates the content from
+    the panel edge, so a band that ate it would put charts against the edge and
+    gain nothing: the column is already the full width there, so there is
+    nothing to escape from.
+
+    Below the breakpoint it keeps the tonal shift and drops the escape, which
+    still separates the figures from the prose around them.
+  */
+  @media (max-width: 767px) {
+    .section-bleed {
+      width: auto;
+      max-width: none;
+      margin-inline: 0;
+      padding-inline: 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgb(var(--color-ink) / 0.08);
     }
   }
 }

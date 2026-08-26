@@ -4,6 +4,7 @@ import { scatterBackdrop } from '../content/patterns.js'
 import Tooltip from './Tooltip.jsx'
 import TrendChart from './TrendChart.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
+import NationRef, { NationRefList } from './NationRef.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { NATION_NAMES } from '../content/nations.js'
@@ -37,6 +38,11 @@ const CAPACITY_YEAR = DATA_YEAR_MAX
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
 //   style -- forwarded to Section (entrance stagger)
+const CONTEXT_FIGURES = {
+  sst_anomaly: 'context-sst',
+  ghg_per_capita: 'context-ghg',
+}
+
 export default function ContextPanel({ data, dataError, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
 
@@ -115,12 +121,12 @@ export default function ContextPanel({ data, dataError, style }) {
             <p className="prose-column prose-wide mb-4 text-sm opacity-80">
               Uneven data is not only a limitation of this project &mdash; it is an unequal
               distribution of the ability to describe what happened to you. The two charts below
-              are the same ranking, best to worst: {rankOrder.join(', ')}. One counts monitoring
+              are the same ranking, best to worst: <NationRefList nations={rankOrder} join={', '} last={', '} />. One counts monitoring
               stations, unchanged in every year on record; the other counts how much of the ripple
-              chain each nation actually got to report. Solomon Islands sits last on both &mdash;
+              chain each nation actually got to report. <NationRef nation="Solomon Islands" /> sits last on both &mdash;
               it has the fewest stations, and no tourist arrivals were ever reported for it at all.
             </p>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="section-bleed grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CAPACITY_METRICS.map((m, i) => (
                 <MetricSnapshotChart
                   key={m.key}
@@ -134,10 +140,12 @@ export default function ContextPanel({ data, dataError, style }) {
                   hideTooltip={hideTooltip}
                   index={i}
                   caveat={m.caveat}
+                  figure={{ key: 'capacity-stations', source: m.source }}
                 />
               ))}
               <MetricSnapshotChart
                 label="Years of data actually reported"
+                figure={{ key: 'capacity-completeness' }}
                 ariaLabel="Years of data actually reported, out of 60 possible, by nation"
                 rows={completeness}
                 nationsMissing={[]}
@@ -173,7 +181,7 @@ export default function ContextPanel({ data, dataError, style }) {
                 10&nbsp;cm. Charting it would claim a precision the measurement does not have.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="section-bleed grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CONTEXT_METRICS.map((m, i) => (
                 <TrendChart
                   key={m.key}
@@ -188,6 +196,7 @@ export default function ContextPanel({ data, dataError, style }) {
                   index={i}
                   legend
                   caveat={m.caveat}
+                  figure={{ key: CONTEXT_FIGURES[m.key], source: m.source }}
                   className={
                     i === CONTEXT_METRICS.length - 1 && CONTEXT_METRICS.length % 2 !== 0
                       ? 'sm:col-span-2'

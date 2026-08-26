@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import PageHero from './PageHero.jsx'
-import { scatterBackdrop } from '../content/patterns.js'
+import HeroWash from './HeroWash.jsx'
 import { STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
 import { NATIONS, NATION_COUNT } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
@@ -37,16 +37,42 @@ export default function Hero({ style }) {
         STORMS.length
       )} severe cyclones \u00b7 ${numberWordCapitalized(NATION_COUNT)} Pacific nations`}
       headline={`Between ${ROSTER_START} and ${ROSTER_END}, each of these nations was struck multiple times. No two recovered the same way.`}
+      // FOUR BOLD PHRASES, AND THEY ARE THE DECK'S SPINE.
+      //
+      // Not emphasis in the ordinary sense -- nothing here is being said
+      // louder. Each phrase names a section the reader is about to reach: the
+      // same storm is the timeline and the journey, the aftermath is the
+      // ripple chain, the records are the capacity section, and different
+      // outcomes is the divergence view. Read the bold alone and it is the
+      // argument in four beats; read the paragraph and the bold is invisible
+      // until it is useful.
+      //
+      // Which is also the constraint on ever adding a fifth. The device works
+      // because the bold set is small enough to take in at a glance and maps
+      // onto something; a paragraph with eight bold phrases is a paragraph
+      // with none.
       body={
-        'Solomon Islands, Vanuatu, Fiji and Tonga share an ocean as well as a ' +
-        'cyclone season. The same storm may sweep through different territories, ' +
-        `yet the aftermath is seldom ever the same. ${numberWordCapitalized(STORMS.length)} ` +
-        'severe storms, followed ' +
-        'through official records from trusted sources and examined across key ' +
-        'factors, reveal why the same weather can produce such different outcomes.'
+        <>
+          Solomon Islands, Vanuatu, Fiji and Tonga share an ocean as well as a cyclone season.{' '}
+          <strong className="font-semibold">The same storm</strong> may sweep through different
+          territories, yet <strong className="font-semibold">the aftermath</strong> is seldom ever
+          the same. {numberWordCapitalized(STORMS.length)} severe storms, followed through{' '}
+          <strong className="font-semibold">official records</strong> from trusted sources and
+          examined across key factors, reveal why the same weather can produce such{' '}
+          <strong className="font-semibold">different outcomes</strong>.
+        </>
       }
       atmosphere="hero"
-      backdrop={scatterBackdrop('top')}
+      // NO BACKDROP HERE, and it is the one section without one. The title
+      // card already carries three background treatments -- the atmosphere's
+      // rings, the coastline-and-tracks wash, and the headline itself set on
+      // an otherwise empty field. The scattered weave was a fourth, and on a
+      // slide this open it did not read as margin texture: with no chart to
+      // sit beside, its shapes drifted under the lead paragraph and turned the
+      // opening into the busiest screen on the site. The weave stays where it
+      // earns its place -- beside the sections that have something to be
+      // beside. Nothing replaces it.
+      wash={<HeroWash />}
       className={`hero-atmos relative overflow-hidden ${stirred ? 'is-stirred' : ''}`}
       style={style}
     >

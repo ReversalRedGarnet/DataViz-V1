@@ -123,7 +123,7 @@ export default function BigPicture({ data, dataError, storm, style }) {
               reach are shown too &mdash; the point of a same-moment comparison is that it includes
               them.
             </p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="section-bleed mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {CHAIN_METRICS.map((m, i) => {
                 // The toggle is offered only when the denominator actually
                 // arrived. population.json is optional, so a reader whose copy
@@ -166,6 +166,7 @@ export default function BigPicture({ data, dataError, storm, style }) {
                 return (
                   <MetricSnapshotChart
                     key={m.key}
+                    figure={{ key: SNAPSHOT_FIGURES[m.key], title: `${label}, ${storm.year}`, source: m.source }}
                     label={label}
                     ariaLabel={`${label}, ${storm.year}, by nation`}
                     rows={rows}
@@ -195,6 +196,18 @@ export default function BigPicture({ data, dataError, storm, style }) {
       </div>
     </Section>
   )
+}
+
+// The regional snapshot's five cards, in the order CHAIN_METRICS lists them.
+// Written as a map rather than derived from an index so that reordering the
+// chain -- which is an argument about how damage travels, and might well change
+// -- reorders the charts without silently renumbering the figures under them.
+const SNAPSHOT_FIGURES = {
+  affected_persons: 'snapshot-affected',
+  crop_yield: 'snapshot-crop',
+  livestock_yield: 'snapshot-livestock',
+  power_generation: 'snapshot-power',
+  tourist_arrivals: 'snapshot-tourism',
 }
 
 // What the percentage version cannot be read as. The count already carries its

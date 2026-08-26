@@ -45,6 +45,16 @@ function metricNotes(eventYear) {
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
 //   style -- forwarded to Section (entrance stagger)
+// People affected and economic loss are deliberately absent from this view --
+// see the note under the grid -- so this map covers the four metrics that do
+// appear, and a fifth appearing later would be added here rather than counted.
+const DIVERGENCE_FIGURES = {
+  crop_yield: 'divergence-crop',
+  livestock_yield: 'divergence-livestock',
+  power_generation: 'divergence-power',
+  tourist_arrivals: 'divergence-tourism',
+}
+
 export default function DivergenceView({ data, dataError, storm, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
@@ -138,7 +148,7 @@ export default function DivergenceView({ data, dataError, storm, style }) {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="section-bleed grid grid-cols-1 gap-5 lg:grid-cols-2">
             {panels.map((panel, i) => (
               <DivergenceChart
                 key={panel.metric.key}
@@ -150,6 +160,7 @@ export default function DivergenceView({ data, dataError, storm, style }) {
                 format={panel.metric.format}
                 note={notes[panel.metric.key]}
                 missing={panel.missing}
+                figure={{ key: DIVERGENCE_FIGURES[panel.metric.key], source: panel.metric.source }}
                 showTooltip={showTooltip}
                 hideTooltip={hideTooltip}
                 className={i === panels.length - 1 && panels.length % 2 !== 0 ? 'lg:col-span-2' : ''}

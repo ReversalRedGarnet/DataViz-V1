@@ -120,4 +120,102 @@
     text-align: left;
     hyphens: manual;
   }
+
+  /*
+    A COUNTRY NAMED IN A SENTENCE, WHICH IS ALSO A CONTROL.
+
+    See components/NationRef.jsx for what it does. This is the part that decides
+    it still reads as a word.
+
+    It is a <button>, so almost everything here is undoing what a button is:
+    inherited font, no padding, no background, baseline alignment. `display:
+    inline` rather than inline-block is the one that matters -- an inline-block
+    is an unbreakable box, so "Solomon Islands" at the end of a line would push
+    the whole name down instead of breaking between the two words like the
+    prose around it.
+
+    THE UNDERLINE IS THE WHOLE AFFORDANCE, and it is dotted rather than solid
+    so it does not read as a link to somewhere else. These are not navigation:
+    nothing moves, the page does not change, a chart four paragraphs down lights
+    up. A solid underline would promise a destination.
+
+    Colour is deliberately NOT applied at rest. A sentence can carry three of
+    these -- the capacity paragraph names all four nations -- and four coloured
+    words in one paragraph is a link farm. The accent arrives on hover, focus
+    and pin, which is the moment it means something.
+  */
+  .nation-ref {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    cursor: pointer;
+    text-decoration: underline dotted;
+    text-decoration-color: rgb(var(--color-accent) / 0.55);
+    text-underline-offset: 0.2em;
+    transition: color 160ms ease, text-decoration-color 160ms ease;
+  }
+
+  .nation-ref:hover,
+  .nation-ref:focus-visible,
+  .nation-ref.is-pinned {
+    color: rgb(var(--color-accent));
+    text-decoration-color: rgb(var(--color-accent));
+  }
+
+  /* Pinned is a state that survives the pointer leaving, so it needs a cue
+     that is not just colour -- the reader may have pinned it a paragraph ago
+     and scrolled. Solid, and slightly heavier. */
+  .nation-ref.is-pinned {
+    text-decoration-style: solid;
+    text-decoration-thickness: 2px;
+  }
+
+  .nation-ref:focus {
+    outline: none;
+  }
+
+  .nation-ref:focus-visible {
+    outline: 2px solid rgb(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /*
+    FIG N, THE TITLE, AND THE SOURCE -- see components/FigureCaption.jsx.
+
+    Sized and coloured to sit with the per-metric caveat it appears above, so
+    the block under a chart reads as one apparatus rather than as two
+    afterthoughts at different weights. The caveat carries a left rule and this
+    does not: the caveat is an aside about the chart, while this is the chart's
+    own label.
+
+    The number is the one part set in the serif. It is the same argument
+    .type-figure makes about statistics -- Newsreader's figures are most of what
+    separates this page from a dashboard -- applied to the one other place a
+    numeral does real work.
+  */
+  .figure-caption {
+    @apply text-xs leading-snug opacity-70;
+  }
+
+  .figure-caption-n {
+    @apply font-serif font-semibold not-italic;
+    opacity: 0.85;
+  }
+
+  .figure-caption a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: rgb(var(--color-accent) / 0.5);
+  }
+
+  .figure-caption a:hover,
+  .figure-caption a:focus-visible {
+    color: rgb(var(--color-accent));
+    text-decoration-color: rgb(var(--color-accent));
+  }
 }

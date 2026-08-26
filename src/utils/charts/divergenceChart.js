@@ -76,6 +76,43 @@ export function buildDivergenceChart(
     .attr('stroke-width', 1)
     .attr('stroke-dasharray', '3 3')
 
+  // WHICH WAY IS WHICH, SAID IN WORDS.
+  //
+  // The dashed line above is labelled "100" by the y-axis, and the card's
+  // subtitle explains what 100 means. Neither tells the reader what it means to
+  // be ABOVE it, and that is the only thing this chart is for. An index is a
+  // decoding step -- 118 is a number before it is a recovery -- and a reader
+  // who has to perform it on every glance performs it on none.
+  //
+  // Two lines of text remove the step. Above the baseline is more than this
+  // nation had in the base year; below is less. That is the whole reading.
+  //
+  // WHY AT THE TOP AND BOTTOM OF THE PLOT rather than hugging the dashed line,
+  // which is where they logically belong: every series starts at exactly 100 at
+  // the left edge, so text next to the baseline would sit in the one place all
+  // four lines are guaranteed to be. The extremes are where the padding above
+  // and the .nice() rounding leave real space -- and the meaning survives the
+  // move, because up is still up.
+  //
+  // Non-interactive, so they can never take a pointer event meant for a mark,
+  // and appended before the lines so a line crossing one passes over the top
+  // rather than under.
+  const direction = svg.append('g').attr('class', 'divergence-direction').style('pointer-events', 'none')
+
+  for (const [text, yPos] of [
+    [`\u25b2 above its ${years[0]} level`, margin.top + 9],
+    [`\u25bc below its ${years[0]} level`, height - margin.bottom - 7],
+  ]) {
+    direction
+      .append('text')
+      .attr('x', margin.left + 6)
+      .attr('y', yPos)
+      .attr('font-size', AXIS_FONT - 2)
+      .attr('fill', ink)
+      .attr('fill-opacity', 0.5)
+      .text(text)
+  }
+
   const clipId = `divergence-clip-${Math.random().toString(36).slice(2, 9)}`
   const clipRect = svg
     .append('clipPath')

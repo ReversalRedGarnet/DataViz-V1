@@ -82,6 +82,21 @@ const WIDTHS = {
 // Note what is deliberately NOT added alongside -- overflow: hidden. The layer
 // clips its own rings, and a section that clipped its overflow would clip the
 // tooltips that sit near its edges.
+//
+// `.section-frame` is what makes a section measurable from the inside. It sets
+// container-type: inline-size and publishes the section's own horizontal
+// padding as --section-pad, which together are what let a child carrying
+// .section-bleed take the panel's full width instead of the reading column's.
+// See the long note on .section-bleed in styles/layout.css for why container
+// query units and not vw or fixed positioning.
+//
+// One consequence worth stating, because it is the kind of thing that bites
+// later: container-type makes the section a containing block for any
+// fixed-position descendant. Nothing here is fixed -- the tooltip is absolute
+// against the inner .relative wrapper each section already has, and the
+// atmosphere is absolute against the section, which is where it was resolving
+// anyway. If something fixed is ever added inside a section, this is the line
+// that will have moved it.
 export default function Section({
   lock = false,
   width = 'wide',
@@ -94,7 +109,7 @@ export default function Section({
 }) {
   return (
     <section
-      className={`animate-pop-in relative bg-panel px-6 py-14 sm:px-8 md:py-20 ${
+      className={`animate-pop-in section-frame relative bg-panel px-6 py-14 sm:px-8 md:py-20 ${
         lock ? 'section-lock' : ''
       } ${className}`}
       style={{ '--content-max': WIDTHS[width] ?? WIDTHS.wide, ...style }}
