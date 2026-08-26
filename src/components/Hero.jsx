@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import PageHero from './PageHero.jsx'
 import HeroWash from './HeroWash.jsx'
-import { scatterBackdrop } from '../content/patterns.js'
 import { STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
 import { NATIONS, NATION_COUNT } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
@@ -64,7 +63,15 @@ export default function Hero({ style }) {
         </>
       }
       atmosphere="hero"
-      backdrop={scatterBackdrop('top')}
+      // NO BACKDROP HERE, and it is the one section without one. The title
+      // card already carries three background treatments -- the atmosphere's
+      // rings, the coastline-and-tracks wash, and the headline itself set on
+      // an otherwise empty field. The scattered weave was a fourth, and on a
+      // slide this open it did not read as margin texture: with no chart to
+      // sit beside, its shapes drifted under the lead paragraph and turned the
+      // opening into the busiest screen on the site. The weave stays where it
+      // earns its place -- beside the sections that have something to be
+      // beside. Nothing replaces it.
       wash={<HeroWash />}
       className={`hero-atmos relative overflow-hidden ${stirred ? 'is-stirred' : ''}`}
       style={style}
