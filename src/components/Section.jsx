@@ -97,11 +97,22 @@ const WIDTHS = {
 // atmosphere is absolute against the section, which is where it was resolving
 // anyway. If something fixed is ever added inside a section, this is the line
 // that will have moved it.
+// `wash` is a third background layer, below both of the above, and a node
+// rather than a flag because what goes back there is one page's composition
+// rather than a shape every section shares. The opening poem passes
+// <CoastlineWash />; everything else passes nothing and is unchanged.
+//
+// It is rendered here, as a sibling of .section-content, rather than being
+// handed in as a child. That is the difference between spanning the section
+// and spanning the reading column: .section-content is itself positioned, so
+// an absolutely-positioned layer nested inside it sizes to the column -- which
+// for a `narrow` section is 48rem of a much wider panel.
 export default function Section({
   lock = false,
   width = 'wide',
   atmosphere = 'ambient',
   backdrop = null,
+  wash = null,
   className = '',
   style,
   children,
@@ -115,9 +126,11 @@ export default function Section({
       style={{ '--content-max': WIDTHS[width] ?? WIDTHS.wide, ...style }}
       {...rest}
     >
-      {/* Backdrop first: both layers sit below .section-content's z-index 1,
-          so between themselves source order decides, and the tiling should be
-          the further back of the two. */}
+      {/* Wash first, then backdrop, then atmosphere: all three sit below
+          .section-content's z-index 1, so between themselves source order
+          decides. The coastline is a picture and belongs furthest back; the
+          weave is texture over it; the rings are the only one that moves. */}
+      {wash}
       {backdrop && <BackgroundPattern backdrop={backdrop} />}
       {atmosphere && <Atmosphere variant={atmosphere === true ? 'ambient' : atmosphere} />}
       <div className="section-content">{children}</div>

@@ -18,8 +18,9 @@ import { useId } from 'react'
 // The two that stayed did not stay as alternatives to pick between. They divide
 // the page: 'ripples' is the chrome tile, on the header and the slide footer,
 // and the weave is the content one, scattered into the margins of every section
-// but the title card by weaveScatter below. Rings on the two bands a reader
-// never reads *through*, a weave beside the ones they do.
+// by weaveScatter below -- the title card included, since the column guard
+// there keeps fragments off the headline. Rings on the two bands a reader never
+// reads *through*, a weave beside the ones they do.
 //
 // Both are original geometric designs, not reproductions of any specific
 // traditional Pacific textile or tattoo pattern -- the same line the wave divider

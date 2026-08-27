@@ -1,3 +1,4 @@
+import CoastlineWash from './CoastlineWash.jsx'
 import Section from './Section.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
 import VisuallyHidden from './VisuallyHidden.jsx'
@@ -27,21 +28,15 @@ import { scatterBackdrop } from '../content/patterns.js'
 // the prop the panel scrolls like every other long-prose slide and the deck's
 // own chevron says there is more.
 const STANZAS = [
-  // 'solwara' is Tok Pisin for saltwater/ocean. Deliberate, not a typo.
-  'As an Islander, you grew up beneath the sun, the solwara always within reach, salt upon your skin.',
+  'As an Islander, you grew up beneath the sun, the ocean always within reach, salt upon your skin.',
   'You grew up with the wind. You felt it move through the trees, through your hair, through the houses you and your kin had built.',
   'The sea fed you. The wind carried you. They were never things to fear.',
-  'Until one day, the wind came for another visit.',
-  'This time, it came screaming.',
+  'Until one day, the wind came for another visit. This time, it came screaming.',
   'It tore through the trees where you had played and ripped apart the roofs of your homes.',
   'The ocean stirred with a ferocity greater than you had ever known. With one great gulp, it swallowed stretches of coastline, battering the playgrounds of your childhood.',
-  'The sea that once fed your family was now eating away at your shores.',
-  'The wind that once danced through the trees now carried destruction.',
-  'And the things that had always been part of your home began to feel like threats.',
-  'It made you wonder.',
-  'What had you done to deserve this?',
-  'When had the wind stopped being a friend?',
-  'When had the sea stopped being one, too?',
+  'The sea that once fed your family was now eating away at your shores. The wind that once danced through the trees now carried destruction. And the things that had always been part of your home began to feel like threats.',
+  'It made you wonder. What had you done to deserve this?',
+  'When had the wind stopped being a friend? When had the sea stopped being a friend?',
   'You wondered, and wondered, and wondered, while your islands slowly changed beneath you.',
   'Homes were lost. Shorelines disappeared. Ways of life began to fade.',
   'And yet, the actions that had helped bring this changing climate were never your own.',
@@ -54,6 +49,25 @@ export default function IslanderPoem() {
       width="narrow"
       atmosphere={false}
       backdrop={scatterBackdrop('islander-poem')}
+      // TWO DECORATIVE LAYERS, AND THEY DO DIFFERENT JOBS. The weave is
+      // texture in the margins; this is the place the poem is about. It came
+      // off the title card, where it was competing with two other treatments,
+      // and it is drawn much wider here -- `padding` is room left around the
+      // four nations inside a fixed box, so a bigger number fits them into a
+      // smaller area and more of the surrounding ocean survives the crop. At
+      // the title card's 150 the reader gets four countries; at 250 they get
+      // the basin those countries sit in, which is what the poem's "solwara
+      // always within reach" is describing.
+      //
+      // The land only. The six storm tracks came with this layer from the
+      // title card, where they were what the headline was counting; over the
+      // poem they read as a diagram left switched on -- dashed lines with ends,
+      // crossing the text, pointing at something the poem never mentions. See
+      // the note in CoastlineWash.jsx; the drawing path is still there.
+      //
+      // .coast-wash-tall replaces the base mask and opacity, both of which
+      // assume a container exactly one viewport tall. See styles/story.css.
+      wash={<CoastlineWash padding={270} showTracks={false} className="coast-wash-tall" />}
     >
       {/* Every other panel's arrival focus (see useFocusOnArrival in
           SlidePanel.jsx) looks for an h1/h2 to move to. A visible heading

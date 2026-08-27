@@ -115,29 +115,32 @@
   }
 
   /*
-    THE TITLE CARD'S STORM-TRACK WASH -- see components/HeroWash.jsx.
+    THE COASTLINE-AND-STORM-TRACK WASH -- see components/CoastlineWash.jsx.
 
     Sits below the atmosphere, which sits below the content: z-index 0 here as
     well, with source order deciding between the two, exactly as the backdrop
     and the atmosphere already resolve against each other in Section.jsx.
 
-    It clips itself, for the same reason .atmos-layer does: a hero that set
+    It clips itself, for the same reason .atmos-layer does: a section that set
     overflow: hidden to contain this would also clip the tooltips near its
-    edges. Hero.jsx does carry overflow-hidden of its own already, but relying
-    on that would make this layer's correctness a property of one call site.
+    edges, so this layer's correctness must not be a property of one call site.
 
     THE MASK IS THE DIFFERENCE BETWEEN A WASH AND A MAP. Without it the
-    coastline runs edge to edge at even weight and the headline sits on top of
-    a picture. Fading the top and the bottom out to nothing leaves the texture
-    strongest through the middle band, below the h1 and behind the nation
-    nodes, which is where there is room for it.
+    coastline runs edge to edge at even weight and the words sit on top of a
+    picture. Fading the top and the bottom out to nothing leaves the texture
+    strongest through the middle band.
+
+    THESE VALUES ASSUME A CONTAINER ONE VIEWPORT TALL, which is what the title
+    card was. 28%/72% throws away nearly half the height, which on a card is
+    the top and bottom margins and on a scrolling section is most of the read.
+    See .coast-wash-tall below for the version the poem uses.
 
     Deliberately not animated. Everything else on this slide that moves is
     inviting a press; a moving background behind a headline is just movement,
     and the reduced-motion contract elsewhere in this file exists because that
     distinction matters.
   */
-  .hero-wash {
+  .coast-wash {
     position: absolute;
     inset: 0;
     z-index: 0;
@@ -154,7 +157,7 @@
     mask-image: linear-gradient(to bottom, transparent 0%, #000 28%, #000 72%, transparent 100%);
   }
 
-  .hero-wash svg {
+  .coast-wash svg {
     width: 100%;
     height: 100%;
     display: block;
@@ -163,12 +166,12 @@
   /* The coastline as a fill, not a stroke. A stroked outline at this weight
      reads as line art and competes with the tracks drawn over it; a flat fill
      a shade off the panel reads as land. */
-  .hero-wash-land {
+  .coast-wash-land {
     fill: rgb(var(--color-ink) / 0.07);
     stroke: none;
   }
 
-  .hero-wash-track {
+  .coast-wash-track {
     fill: none;
     stroke: rgb(var(--color-accent) / 0.5);
     stroke-width: 1.5;
@@ -187,8 +190,77 @@
     slightly more of it. The track is not, because the accent is the pale end
     of the dark palette and holds at 0.5 either way.
   */
-  .dark .hero-wash-land {
+  .dark .coast-wash-land {
     fill: rgb(var(--color-ink) / 0.09);
+  }
+
+  /*
+    THE SAME WASH IN A CONTAINER THAT SCROLLS -- the opening poem.
+
+    THREE THINGS CHANGE, and all three follow from the container being taller
+    than the viewport rather than exactly one screen of it.
+
+    THE MASK. The base fades from nothing at 0% to solid at 28% and back out
+    from 72%, which spends 56% of the height on fade. Over a card that is the
+    margins; over a poem that scrolls for two or three screens it means the
+    coastline is a band in the middle of the scroll and absent from most of
+    what is actually read. Here the fade is pulled into the edges -- solid
+    across the middle 88% -- so the land is present behind the whole poem and
+    only softens where the section meets its neighbours.
+
+    THE WIDTH. This layer is handed to Section as `wash`, so it is a sibling of
+    .section-content and already spans the section rather than the reading
+    column. It is stretched by --section-pad on each side so it reaches the
+    panel edge instead of stopping at the padding, because a coastline that
+    stops short of the edge reads as a picture in a frame.
+
+    THE OPACITY. 0.5 was this layer alone on a slide. The poem also carries the
+    woven scatter, and two decorative layers at full strength argue with each
+    other and with the text between them. 0.34 is where the coastline still
+    reads as land at a glance without either layer winning.
+
+    NOT position: fixed, and not background-attachment: fixed. The wash scrolls
+    with the poem. Both of those pin against the viewport only until an
+    ancestor carries a transform or will-change, and the slide track carries
+    both -- at which point they silently resolve against the track instead and
+    the layer lands somewhere arbitrary. Absolute inside Section's own
+    positioned root has no such failure mode.
+  */
+  .coast-wash-tall {
+    left: 50%;
+    width: calc(100cqw + var(--section-pad, 1.5rem) * 2);
+    transform: translateX(-50%);
+    opacity: 0.65;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 6%,
+      #000 94%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  }
+
+  /*
+    QUIETER ON A PHONE, and the reason is the crop rather than taste.
+
+    The wash is drawn into a fixed 960x640 box and cropped with `slice`, so a
+    narrow viewport shows a much smaller slice of it at a much larger scale.
+    The weave does not balance it there either: the weave's own crop clears the
+    reading column, which on a phone is the whole screen, so below this
+    breakpoint the coastline is the only decorative layer and every bit of it
+    lands on the words rather than beside them.
+
+    It used to be 0.2, and that was set while the storm tracks were still being
+    drawn -- magnified by the same crop, they arrived as dashes the width of the
+    text and had to be held right down. Land has no ends and crosses nothing, so
+    it can carry far more of the desktop weight; this is now a step down rather
+    than a retreat.
+  */
+  @media (max-width: 767px) {
+    .coast-wash-tall {
+      opacity: 0.45;
+    }
   }
 
   /* The six roster marks under the hero. Lighting one is a colour change; the
