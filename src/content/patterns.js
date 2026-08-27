@@ -51,25 +51,39 @@ export const HEADER_BACKDROP = {
 // leaves the content column clear, the way a page margin can carry a texture a
 // paragraph never could.
 //
-// EVERY SECTION PASSES THIS EXCEPT THE TITLE CARD. The hero is the one slide
-// with nothing in its margins to be beside -- no chart, no table, just a
-// headline on an open field -- and it already carries two background layers of
-// its own (Atmosphere's rings and HeroWash's coastline and storm tracks). A
-// third put woven shapes under the lead paragraph and made the opening the
-// busiest screen on the site. See the note in components/Hero.jsx.
+// EVERY SECTION PASSES THIS, AND THE TITLE CARD USED TO BE THE EXCEPTION.
+// The hero was held out because it has nothing in its margins to be beside --
+// no chart, no table, just a headline on an open field -- and because on an
+// early version the shapes drifted under the lead paragraph.
+//
+// That was true when it was written and stopped being true when the scatter
+// learned to keep out of the way. COLUMN_LEFT/COLUMN_RIGHT in
+// BackgroundPattern.jsx clear the reading column by a fragment's whole reach
+// rather than just its centre, so on the hero at 1440px not one of the eight
+// pieces touches the headline's box. The exception outlived its reason, and
+// the hero now takes the same weave and the same ambient atmosphere as every
+// other slide. See the note in components/Hero.jsx.
 //
 // `seed` is any stable string -- the slide's own id reads well and guarantees
 // no two slides draw the same layout. Passing the same seed always draws the
 // same shapes; change the string to reshuffle a given slide.
 //
+// WHAT THE SHAPES ARE MEANT TO LOOK LIKE: a pandanus or coconut-leaf mat, laid
+// from discrete strips, rather than a piece of draped or torn cloth. That is
+// the whole reason BackgroundPattern.jsx refuses to let two pieces overlap or
+// even touch (see tooClose and MIN_SEPARATION there): every polygon it draws
+// is a triangle or a quadrilateral, but a pair that merges under the shared
+// <clipPath> arrives at the reader as one five- or seven-sided blob, and a
+// margin of those reads as fabric. Kept apart, they read as pieces of a mat.
+//
 // THERE IS NO `scale` HERE ANY MORE, and its absence is the rule. The weave
 // inside the shapes is one fixed size site-wide (WEAVE_UNIT in
 // BackgroundPattern.jsx); what a seed varies is the shapes cut out of it --
 // their size, position, rotation and proportion -- so every section's margins
-// show different fragments of the same cloth rather than the same pattern at
-// different magnifications. A per-section scale knob is exactly the thing that
-// would break that, so there isn't one. `opacity` stays: it is how loud the
-// texture is, not what it is made of.
+// show different pieces of one mat rather than the same pattern at different
+// magnifications. A per-section scale knob is exactly the thing that would
+// break that, so there isn't one. `opacity` stays: it is how loud the texture
+// is, not what it is made of.
 export function scatterBackdrop(seed, { opacity = 0.05 } = {}) {
   return { pattern: 'weaveScatter', seed, opacity }
 }

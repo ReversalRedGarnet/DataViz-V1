@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import PageHero from './PageHero.jsx'
-import HeroWash from './HeroWash.jsx'
+import { scatterBackdrop } from '../content/patterns.js'
 import { STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
 import { NATIONS, NATION_COUNT } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
@@ -62,17 +62,30 @@ export default function Hero({ style }) {
           <strong className="font-semibold">different outcomes</strong>.
         </>
       }
-      atmosphere="hero"
-      // NO BACKDROP HERE, and it is the one section without one. The title
-      // card already carries three background treatments -- the atmosphere's
-      // rings, the coastline-and-tracks wash, and the headline itself set on
-      // an otherwise empty field. The scattered weave was a fourth, and on a
-      // slide this open it did not read as margin texture: with no chart to
-      // sit beside, its shapes drifted under the lead paragraph and turned the
-      // opening into the busiest screen on the site. The weave stays where it
-      // earns its place -- beside the sections that have something to be
-      // beside. Nothing replaces it.
-      wash={<HeroWash />}
+      // THE TITLE CARD IS NOW DRESSED LIKE EVERY OTHER SLIDE, and the
+      // exception it used to be is what this replaces.
+      //
+      // It carried three background treatments of its own: the loud 'hero'
+      // atmosphere (three rings at full strength on a fast cycle), a coastline
+      // and storm-track wash, and no margin weave -- the one section on the
+      // site opting out of the scatter. The reasoning was that an opening
+      // should announce itself. What it produced was a first screen with more
+      // decoration on it than any slide that actually had something to show,
+      // and a piece whose visual system started one slide late.
+      //
+      // So: the ambient atmosphere every section gets, and the same weave
+      // seeded with this section's own id. The coastline moved to the opening
+      // poem (components/CoastlineWash.jsx), where it is the only picture on
+      // the slide instead of the third layer on this one.
+      //
+      // `atmosphere` is omitted rather than set: Section already defaults to
+      // 'ambient', and passing it explicitly would suggest a choice being made
+      // here that isn't.
+      backdrop={scatterBackdrop('top')}
+      // hero-atmos and is-stirred stay. They are Hero's own interactivity --
+      // the rings settle once the reader touches a nation -- and that is a
+      // property of this slide having something to touch, not of which
+      // atmosphere variant is running. It works the same against one ring.
       className={`hero-atmos relative overflow-hidden ${stirred ? 'is-stirred' : ''}`}
       style={style}
     >

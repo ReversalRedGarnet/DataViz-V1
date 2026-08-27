@@ -16,11 +16,12 @@ import Section from './Section.jsx'
 //     page's composition, not a shape every hero shares.
 //   style -- forwarded to Section
 //   backdrop -- forwarded to Section; see content/patterns.js
-//   wash -- an optional background layer, rendered behind everything this
-//     component draws. A node rather than a flag, because what goes back there
-//     is one page's composition: the cyclones hero passes <HeroWash />, which
-//     draws the roster's storm tracks over the region's coastline. A hero that
-//     passes nothing is unchanged.
+//   wash -- an optional background layer, forwarded to Section, which paints it
+//     behind everything else in the section. A node rather than a flag, because
+//     what goes back there is one page's composition. Nothing passes it today:
+//     the cyclones hero used to hand it <CoastlineWash />, and that layer has
+//     moved to the opening poem, which reaches Section directly. Kept because
+//     it costs a prop and is the only way a hero could have one.
 // THREE PROPS WENT WITH THE CLEANUP, and all three were unreachable. `cta` was
 // never passed. `headlineClassName` was never passed either, and its comment
 // pointed at a Home.jsx this repository does not contain. The eyebrow branched
@@ -41,16 +42,10 @@ export default function PageHero({
     <Section
       atmosphere={atmosphere}
       backdrop={backdrop}
+      wash={wash}
       className={`text-center ${className}`}
       style={style}
     >
-      {/* A background layer, and therefore NOT part of `children`. Children are
-          rendered after the lead paragraph and so paint above it; this has to
-          paint below everything. It is a sibling of .section-content for the
-          same reason the atmosphere and the backdrop are -- see Section.jsx --
-          and it takes its own z-index rather than relying on source order
-          against them. */}
-      {wash}
       <p className="type-eyebrow mx-auto max-w-2xl text-accent">{kicker}</p>
       <h1 className="mx-auto mt-4 max-w-3xl font-serif text-3xl font-semibold tracking-tight md:text-5xl">
         {headline}

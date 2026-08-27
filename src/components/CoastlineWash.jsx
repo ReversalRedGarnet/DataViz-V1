@@ -6,14 +6,19 @@ import { loadLandTopology } from '../utils/loadLand.js'
 import { NATION_COORDS } from '../content/nations.js'
 import { STORMS } from '../content/storms.js'
 
-// THE TITLE CARD'S TEXTURE, MADE OF THE ROSTER.
+// THE REGION, DRAWN FROM THE ROSTER, AS A BACKGROUND WASH.
 //
-// What was here before is still here: Atmosphere's rings, and the scattered
-// weave motif from content/patterns.js. Both are decoration in the strict
-// sense -- they carry nothing, and switching them off costs nothing. This
-// layer sits behind them and is decoration that happens to be true: the
-// coastline of the region the piece is about, and the six storm paths the
-// headline is counting.
+// It was HeroWash and it lived on the title card. It is neither any more: the
+// hero now takes the same ambient atmosphere and margin weave every other
+// slide carries, and this layer moved to the opening poem, where a coastline
+// under the words is the whole point rather than a fourth treatment competing
+// with three others. The name went with it, because a component called
+// HeroWash that no hero uses is a comment that lies.
+//
+// It is decoration that happens to be true: the coastline of the region the
+// piece is about, and the six storm paths the roster is made of. Both are
+// decoration in the strict sense -- they carry nothing, and switching them off
+// costs nothing.
 //
 // It is still ornament and is still treated as such -- hidden from assistive
 // technology, incapable of taking a pointer event, and carrying no information
@@ -22,9 +27,9 @@ import { STORMS } from '../content/storms.js'
 // reader with images off or a failed fetch loses nothing but the texture.
 //
 // WHY THE PATHS ARE NOT LABELLED, and why they are drawn this faint: a legible
-// map here would be a second map competing with the real one four slides down,
-// and a legible one competing for the same attention as the headline. The
-// intent is that a reader registers "storm tracks" without reading them --
+// map here would be a second map competing with the real one further down, and
+// a legible one competing for the same attention as the words on top of it.
+// The intent is that a reader registers "storm tracks" without reading them --
 // close to how the eye takes a watermark.
 //
 // WHAT A PATH ACTUALLY IS. The same construction the storm journey uses: a
@@ -39,14 +44,41 @@ import { STORMS } from '../content/storms.js'
 // makes that a property of the code rather than of the current roster.
 
 // The drawing surface. Fixed rather than measured: this is a background wash,
-// so it is sized by CSS to fill the hero and cropped by preserveAspectRatio,
-// which means a resize never needs to reach JavaScript. No observer, no
-// redraw, no work on a window drag -- which is exactly the budget a decorative
-// layer deserves.
+// so it is sized by CSS to fill its container and cropped by
+// preserveAspectRatio, which means a resize never needs to reach JavaScript.
+// No observer, no redraw, no work on a window drag -- which is exactly the
+// budget a decorative layer deserves.
 const VIEW_W = 960
 const VIEW_H = 640
 
-export default function HeroWash({ className = '' }) {
+// HOW MUCH OCEAN COMES WITH THE FOUR NATIONS. `padding` is handed to
+// fitToPoints, which fits the roster inside the box the padding leaves -- so a
+// LARGER number is a SMALLER box for the same four points, which means the
+// projection zooms out and more of the surrounding basin survives the crop.
+// The default is the 150 the title card used, so the original framing is still
+// one argument away; the poem asks for considerably more.
+//
+// COASTLINE WITH OR WITHOUT THE TRACKS. Both halves of this layer were drawn
+// together on the title card, where the tracks were the point: the headline was
+// counting six storms and the paths were those six storms, unlabelled. The poem
+// counts nothing and argues nothing, and over it the dashed paths stopped
+// reading as a watermark and started reading as a diagram somebody had left on
+// -- lines with ends, crossing the text, plainly meaning something the poem
+// never refers to. The coastline alone has no such problem: it is a place, and
+// the poem is about that place.
+//
+// `showTracks` defaults to true so the layer is unchanged wherever it is not
+// asked for, and the drawing path stays put rather than being deleted -- it is
+// the half that would be wanted back first.
+//
+// Props:
+//   padding -- px of room around the four nations, per side, in the 960x640
+//     drawing surface. Must stay under half of VIEW_H or the extent inverts.
+//   showTracks -- draw the six storm paths over the coastline. False leaves the
+//     land alone; see the note above.
+//   className -- extra classes on the layer, for a caller that needs its own
+//     mask or opacity. See .coast-wash-tall in styles/story.css.
+export default function CoastlineWash({ padding = 150, showTracks = true, className = '' }) {
   const ref = useRef(null)
   const [land, setLand] = useState(null)
 
@@ -78,22 +110,24 @@ export default function HeroWash({ className = '' }) {
     const projection = fitToPoints(pacificProjection(), Object.values(NATION_COORDS), {
       width: VIEW_W,
       height: VIEW_H,
-      padding: 150,
+      padding,
     })
 
     if (land) {
       const path = d3.geoPath(projection)
       svg
         .append('path')
-        .attr('class', 'hero-wash-land')
+        .attr('class', 'coast-wash-land')
         .attr('d', path(feature(land, land.objects.land)))
     }
+
+    if (!showTracks) return
 
     const line = d3.line().curve(d3.curveCatmullRom.alpha(0.5))
 
     svg
       .append('g')
-      .attr('class', 'hero-wash-tracks')
+      .attr('class', 'coast-wash-tracks')
       .selectAll('path')
       .data(
         STORMS
@@ -120,12 +154,12 @@ export default function HeroWash({ className = '' }) {
           .filter((coords) => coords.length > 1)
       )
       .join('path')
-      .attr('class', 'hero-wash-track')
+      .attr('class', 'coast-wash-track')
       .attr('d', (coords) => line(coords.map((c) => projection(c))))
-  }, [land])
+  }, [land, padding, showTracks])
 
   return (
-    <div aria-hidden="true" className={`hero-wash ${className}`}>
+    <div aria-hidden="true" className={`coast-wash ${className}`}>
       <svg
         ref={ref}
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}

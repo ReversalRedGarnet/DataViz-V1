@@ -58,6 +58,22 @@ export function useDeck(sections) {
     [sections, go]
   )
 
+  // Same lookup, but it lands somewhere rather than doing nothing when the id
+  // is not in the deck. Only the hash-sync effect below uses it -- see the note
+  // there on why an unresolvable deep link has to fall through to the Hero.
+  const goToIdOrHero = useCallback(
+    (id) => {
+      const index = sections.findIndex((s) => s.id === id)
+      if (index >= 0) {
+        go(index)
+        return
+      }
+      const hero = sections.findIndex((s) => s.id === 'top')
+      if (hero >= 0) go(hero)
+    },
+    [sections, go]
+  )
+
   // goToId is rebuilt whenever the sections array changes shape, and the hash
   // listener below is bound once. Without this ref that listener would hold the
   // very first goToId for the life of the page -- the one closed over the
@@ -70,9 +86,20 @@ export function useDeck(sections) {
   // deck as it currently stands. It does NOT make a pasted #compare link work
   // on a cold load, and this comment used to claim it did. On first load no
   // storm is selected, so the sections from 'storm-journey' onwards genuinely
-  // do not exist yet and there is nothing to jump to -- the reader lands on the
-  // timeline, which is the slide that asks for the one missing choice.
+  // do not exist yet and there is nothing to jump to.
+  //
+  // WHERE AN UNRESOLVABLE LINK LANDS INSTEAD, and why it is stated rather than
+  // left to fall out of the initial state. `active` starts at 0, so "do
+  // nothing" used to mean "show the Hero" -- which was the right answer by
+  // accident. Index 0 is now the opening poem, and the poem is what a reader
+  // arriving with no hash at all should see, not a stand-in for a link that
+  // did not resolve: somebody following a colleague's #compare link has asked
+  // for the argument, and answering with the piece's overture reads as the
+  // link having been ignored. goToIdOrHero above sends them to the Hero, which
+  // is where the deck's first real slide is and where the gate that has to be
+  // answered is one press away.
   const goToIdRef = useLatest(goToId)
+  const goToIdOrHeroRef = useLatest(goToIdOrHero)
 
   // The deck grows from two sections to twelve when a storm is chosen, and
   // collapses again when it is cleared. Clearing while deep in the deck would
@@ -85,8 +112,19 @@ export function useDeck(sections) {
   // Deep links, both directions. The id is the same one the section menu uses,
   // so a URL and a menu entry mean the same thing.
   useEffect(() => {
+    // The arriving link gets the fallback; later hash changes do not.
+    //
+    // THE ASYMMETRY IS THE POINT, and skipping it costs an accessibility
+    // feature. A hash that arrives with the document is a reader asking for a
+    // slide, so failing to find it deserves an answer. A hash that changes
+    // afterwards is any same-page anchor on the site, and not all of them name
+    // a section: "Skip to main content" points at #main-content, which is
+    // <main>'s id and never a slide. Routed through the fallback, pressing the
+    // skip link would page the deck to the Hero and throw away wherever the
+    // reader had got to -- turning a keyboard convenience into a trap. Those
+    // land on goToId, which still does nothing when the id is not a slide.
     const fromHash = window.location.hash.replace('#', '')
-    if (fromHash) goToIdRef.current(fromHash)
+    if (fromHash) goToIdOrHeroRef.current(fromHash)
     function onHashChange() {
       const id = window.location.hash.replace('#', '')
       if (id) goToIdRef.current(id)
@@ -95,9 +133,9 @@ export function useDeck(sections) {
     return () => window.removeEventListener('hashchange', onHashChange)
     // Still runs once -- re-running on every sections change would drag the
     // reader back to the hash's section every time they picked a storm -- but
-    // it now calls through the ref above, so "bound once" no longer means
+    // it now calls through the refs above, so "bound once" no longer means
     // "answering with a stale deck".
-  }, [goToIdRef])
+  }, [goToIdRef, goToIdOrHeroRef])
 
   // Keyed on the id STRING, not on the sections array. Keyed on the array this
   // fired on every render of the component above -- which, during a panel
