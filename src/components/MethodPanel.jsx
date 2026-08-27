@@ -169,7 +169,7 @@ export default function MethodPanel({ style }) {
           </h3>
           <div className="prose-column prose-wide space-y-3 text-sm text-ink">
             <p>
-              Special thanks to Eljevisma Gani, Terah Maitoo Manenau, and Cynthia Oastasia for
+              Special thanks to Eljevisima Gani, Terah Maitoo Manenau, and Cynthia Oatasia for
               their creative input, and to Gregory Malaii, Gabriel Salini, and Aleetza Mahli for
               helping test the site.
             </p>
