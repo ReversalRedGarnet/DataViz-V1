@@ -156,6 +156,25 @@ export default function MethodPanel({ style }) {
             </p>
           </div>
         </div>
+
+        {/* Shortest section on the slide, and deliberately so. It is the only
+            one here that is not about what the data can or cannot say, so
+            giving it the weight of Method or Limitations would misread the
+            page. Same plain register as everything above it -- prose rather
+            than a list, because four names in a bulleted list would take more
+            vertical space than the thanks are asking for. */}
+        <div className="border-t border-ink/10 pt-8">
+          <h3 className="type-h3 mb-2">
+            Acknowledgements
+          </h3>
+          <div className="prose-column prose-wide space-y-3 text-sm text-ink">
+            <p>
+              Special thanks to Eljevisma Gani, Terah Maitoo Manenau, and Cynthia Oastasia for
+              their creative input, and to Gregory Malaii, Gabriel Salini, and Aleetza Mahli for
+              helping test the site.
+            </p>
+          </div>
+        </div>
       </div>
     </Section>
   )
