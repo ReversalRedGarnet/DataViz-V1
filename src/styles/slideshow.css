@@ -220,6 +220,36 @@
   }
 
   /*
+    THE POEM'S THEME TOGGLE, CARRIED OUT TO THE PANEL EDGE.
+
+    With the header faded out the poem hosts the only theme control on that
+    slide, and it has to read as a page-level control rather than as the first
+    line of the poem's layout. Right-aligning it inside .section-content is not
+    enough: that column is `narrow` (48rem), so the button lands well inside
+    the text block with the poem starting immediately beneath it.
+
+    The same escape .section-bleed uses -- 100cqw against the section's
+    container-type, pulled back by half the difference -- but without that
+    class's surface fill and border-block, which would paint a band behind a
+    bare 36px button. It resolves against the section rather than the viewport,
+    which is the distinction that matters inside a deck of transformed panels.
+
+    The result sits at --section-pad from the panel edge, the same inset
+    .slide-edge-nav takes at the bottom, so the slide's two controls line up on
+    opposite corners. Below the breakpoint the column is already the full width
+    of the section, so `50% - 50cqw` evaluates to zero and this quietly becomes
+    a plain right-aligned row -- which is the correct answer on a phone, where
+    there is no margin to escape into.
+  */
+  .poem-chrome {
+    width: 100cqw;
+    max-width: 100cqw;
+    margin-inline: calc(50% - 50cqw);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /*
     THE EDGE CONTROL FLOATS, SO THE CONTENT HAS TO CLEAR IT.
 
     SlideFooter is a real box in the flex column, so a panel's content could

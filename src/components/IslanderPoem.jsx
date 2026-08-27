@@ -1,4 +1,5 @@
 import Section from './Section.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 import VisuallyHidden from './VisuallyHidden.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 
@@ -26,17 +27,25 @@ import { scatterBackdrop } from '../content/patterns.js'
 // the prop the panel scrolls like every other long-prose slide and the deck's
 // own chevron says there is more.
 const STANZAS = [
-  'As an Islander, you grew up beneath the sun, the ocean always within reach, salt upon your skin.',
-  'The wind moved through the trees, through your hair, through the houses you and your kin had built.',
-  'One day, the wind came for another visit. This time, it came screaming.',
+  // 'solwara' is Tok Pisin for saltwater/ocean. Deliberate, not a typo.
+  'As an Islander, you grew up beneath the sun, the solwara always within reach, salt upon your skin.',
+  'You grew up with the wind. You felt it move through the trees, through your hair, through the houses you and your kin had built.',
+  'The sea fed you. The wind carried you. They were never things to fear.',
+  'Until one day, the wind came for another visit.',
+  'This time, it came screaming.',
   'It tore through the trees where you had played and ripped apart the roofs of your homes.',
-  'The ocean stirred with a ferocity greater than you had ever known. It swallowed entire stretches of coastline and battered the playgrounds of your childhood.',
-  'The ocean that had fed your family was now eating away at your shores.',
+  'The ocean stirred with a ferocity greater than you had ever known. With one great gulp, it swallowed stretches of coastline, battering the playgrounds of your childhood.',
+  'The sea that once fed your family was now eating away at your shores.',
+  'The wind that once danced through the trees now carried destruction.',
+  'And the things that had always been part of your home began to feel like threats.',
   'It made you wonder.',
   'What had you done to deserve this?',
   'When had the wind stopped being a friend?',
   'When had the sea stopped being one, too?',
-  'You wondered, and wondered, and wondered, while your islands slowly sank and your culture suffered for actions that were never your own.',
+  'You wondered, and wondered, and wondered, while your islands slowly changed beneath you.',
+  'Homes were lost. Shorelines disappeared. Ways of life began to fade.',
+  'And yet, the actions that had helped bring this changing climate were never your own.',
+  'You were left to suffer the consequences of a changing world you did not create.',
 ]
 
 export default function IslanderPoem() {
@@ -53,6 +62,29 @@ export default function IslanderPoem() {
       <VisuallyHidden>
         <h2>Opening</h2>
       </VisuallyHidden>
+      {/* THE ONE CONTROL THE HEADER USUALLY CARRIES THAT THIS SLIDE STILL
+          NEEDS. With the header faded out (see `chromeless` in App.jsx) the
+          theme toggle is otherwise unreachable here, and this is the first
+          screen of the piece -- a reader who opens the site in the wrong theme
+          would have to page forward to fix it. The sources slide gets no
+          equivalent: a reader who reached the end has had the header on every
+          slide in between.
+
+          In flow rather than positioned. .section-content is itself
+          `position: relative`, so an absolute child anchors to the reading
+          column rather than to the panel, which puts the button in the middle
+          of the text instead of out at the corner. A right-aligned row above
+          the first stanza costs one line of space and needs no positioning at
+          all. ThemeToggle is self-contained -- it reads the theme from context
+          and takes only a className -- so nothing here depends on Header.
+
+          .poem-chrome (styles/slideshow.css) is what carries it out of the
+          reading column to the panel's own edge, where it lines up with the
+          "Begin" control in the opposite corner and reads as belonging to the
+          slide rather than to the poem. */}
+      <div className="poem-chrome mb-10 sm:mb-14">
+        <ThemeToggle />
+      </div>
       {/* The questions carry full ink and the narration sits back at 85%.
           Written as one branch rather than as a base class plus an override:
           `text-ink/85 text-ink` puts two colour utilities of equal specificity
