@@ -142,12 +142,11 @@ function seedFromString(str) {
 
 // THE CANONICAL WEAVE UNIT, and it is one number for the whole site.
 //
-// The cloth and the shape cut out of it are two separate things, and this is
-// the cloth. Every woven fragment anywhere on the site -- whatever size,
+// The weave and the pieces cut from it are two separate things, and this is the
+// weave. Every woven fragment anywhere on the site -- whatever size,
 // rotation or silhouette its outline has -- is filled with weave at exactly
-// this scale, so the margins read as one material seen in different pieces
-// rather than as one pattern re-rendered at whatever size a seed happened to
-// pick. There was per-seed jitter on this (0.7x to 1.3x) and a `scale` knob in
+// this scale, so the margins read as one mat cut into different pieces rather
+// than as one pattern re-rendered at whatever size a seed happened to pick. There was per-seed jitter on this (0.7x to 1.3x) and a `scale` knob in
 // content/patterns.js feeding it; both are gone. Variety lives in the outlines
 // (see randomShape and scatterShapes below), which is where it can vary
 // without the material changing.
@@ -305,6 +304,51 @@ function overlaps(a, b) {
   return pointInPolygon(a[0], b) || pointInPolygon(b[0], a)
 }
 
+function pointToSegment([px, py], [ax, ay], [bx, by]) {
+  const dx = bx - ax
+  const dy = by - ay
+  const lenSq = dx * dx + dy * dy
+  let t = lenSq ? ((px - ax) * dx + (py - ay) * dy) / lenSq : 0
+  t = Math.max(0, Math.min(1, t))
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+}
+
+// The clear ground between two separated polygons. Every vertex of each
+// against every edge of the other, which is exact for shapes this small and is
+// at most 32 distance calculations for two quads.
+function polygonGap(a, b) {
+  let min = Infinity
+  for (const p of a) {
+    for (let j = 0; j < b.length; j++) min = Math.min(min, pointToSegment(p, b[j], b[(j + 1) % b.length]))
+  }
+  for (const p of b) {
+    for (let j = 0; j < a.length; j++) min = Math.min(min, pointToSegment(p, a[j], a[(j + 1) % a.length]))
+  }
+  return min
+}
+
+// NOT OVERLAPPING IS NOT THE SAME AS READING AS TWO PIECES, which is what the
+// separation below is for and why refusing overlap alone was not enough.
+//
+// With only the overlap test in place, 42 pairs across the site's fourteen
+// seeds sat closer than half a weave tile and several were touching outright at
+// a gap of 0.0. Two polygons that share an edge are still two polygons, but
+// they are cut from one <clipPath> and filled with one continuous pattern, so
+// at 0.05 opacity what reaches the reader is a single silhouette with as many
+// sides as the pair happens to have between them -- the same blob the overlap
+// rule was written to remove, arrived at from the other side.
+//
+// Half a weave unit is the threshold because the weave is what makes the gap
+// legible: below roughly half a tile the clear ground is narrower than the
+// strokes on either side of it and closes up visually. Expressed against
+// WEAVE_UNIT rather than as a number, so it keeps meaning "half a tile" if the
+// weave scale is ever changed.
+const MIN_SEPARATION = WEAVE_UNIT / 2
+
+function tooClose(a, b) {
+  return overlaps(a, b) || polygonGap(a, b) < MIN_SEPARATION
+}
+
 // The two margins of the 1200x640 canvas, given as the edges that matter: the
 // cleared reading column between them, and how far past the canvas a fragment
 // may sit. `dir` points away from the column, which is the direction a
@@ -341,28 +385,41 @@ const SHAPE_REACH = 1.62
 // `spread` box the single attempt used to -- so this only decides how hard the
 // scatter tries before accepting a gap.
 //
-// 14 IS THE KNEE, AND THE CURVE IS FLAT. Across the site's fourteen seeds the
-// drop rate is 46% at 8 attempts, 44% at 14, 42% at 24 and 35% at 80 -- so
-// raising it buys about one extra fragment per slide for several times the
-// work. The reason it plateaus rather than converging is geometric: a cluster
-// jitters its members inside a box of `spread` (1.6r) while a fragment reaches
-// up to about 2.1r, so a second fragment in a cluster usually has nowhere to go
-// that clears the first, however many times it is asked. That is a property of
-// the cluster sizing, which is deliberately unchanged here -- the scatter is
-// roughly half as dense as it was, and every fragment left is its own shape.
+// 14 IS THE KNEE, AND THE CURVE IS FLAT. Raising it to 24 buys about half a
+// fragment per slide, and the reason it plateaus rather than converging is
+// geometric: a cluster jitters its members inside a box of `spread` (1.6r)
+// while a fragment reaches up to about 2.1r and must additionally clear
+// MIN_SEPARATION, so a second fragment in a cluster often has nowhere to go
+// however many times it is asked. That is a property of the cluster sizing,
+// which is deliberately unchanged here. The margins carry about seven pieces a
+// side rather than the seventeen they once did, and every one of them is its
+// own legible triangle or quad.
 const PLACEMENT_ATTEMPTS = 14
 
-// Six to thirty fragments, clustered, in the two margins. Small fused clusters rather
-// than one shape per spot: every shape is a hole in one <clipPath>, so
-// overlapping shapes merge instead of doubling in opacity -- which is what
-// makes a cluster read as one torn piece rather than as a darker patch, and
-// what makes this safe to put beside a chart at all.
+// Around seven pieces a side, clustered, in the two margins.
+//
+// CLUSTERS OF SEPARATE PIECES, NOT FUSED ONES. This used to place one to three
+// shapes per cluster and let them overlap on purpose: every shape is a hole in
+// one <clipPath>, so overlapping shapes merge instead of doubling in opacity,
+// and a cluster read as one torn piece rather than as a darker patch. That was
+// a real property and it produced the wrong picture. A merged pair is a single
+// silhouette with five or seven sides, so the margins read as torn cloth --
+// while a pandanus or coconut-leaf mat is made of discrete strips laid beside
+// one another, every one of them still its own clean edge even where the
+// packing is tight.
+//
+// Clustering survives; fusing does not. A cluster still asks for up to three
+// pieces at one spot and they still sit close, but each has to clear every
+// piece already placed by MIN_SEPARATION (see tooClose above), and is dropped
+// rather than laid on top when it cannot. What the merge-instead-of-compound
+// property still buys is the thing that made this safe beside a chart: pieces
+// never stack into a darker patch, so density can never turn into weight.
 //
 // SIZES CAME DOWN when the outlines went to three and four sides. At the old
 // 30-135 cluster radius a fragment could span 350 units of a 340-wide margin,
 // so what the reader saw was one soft-edged mass per side and the geometry was
 // academic. At 32-86 a fragment spans roughly forty to two hundred units --
-// one to six weave units across, which is enough of the tile to read as cloth
+// one to six weave units across, which is enough of the tile to read as woven
 // and little enough that the triangle or quad holding it is still a shape
 // rather than a field. The range is what keeps the margins from settling at
 // one weight: large anchors, small debris.
@@ -372,9 +429,11 @@ const PLACEMENT_ATTEMPTS = 14
 // a smudge -- so the smallest shapes here are still large enough to be
 // recognisably woven.
 //
-// The cluster spread widens with the cluster's own size so a cluster of large
-// shapes does not fuse into one blob while a cluster of small ones sits in
-// three separate specks -- a flat jitter did both.
+// The cluster spread widens with the cluster's own size, so a cluster of large
+// pieces has room to hold more than one of them while a cluster of small ones
+// does not scatter into three separate specks -- a flat jitter did both. It
+// matters more now than it did: with separation enforced, a spread too tight
+// for its own pieces does not fuse them, it drops them.
 function scatterShapes(rand, prefix) {
   const shapes = []
   // Every fragment already accepted, as coordinates, so each new candidate can
@@ -388,9 +447,12 @@ function scatterShapes(rand, prefix) {
       const cx = band.inner + rand() * (band.outer - band.inner)
       const cy = 40 + rand() * 560
       const r = 32 + rand() * 54
-      const fused = 1 + Math.floor(rand() * 3)
+      // Named `fused` while overlap was the point. These are asked for, not
+      // guaranteed: how many actually land is what MIN_SEPARATION and the
+      // spread leave room for.
+      const pieces = 1 + Math.floor(rand() * 3)
       const spread = r * 1.6
-      for (let s = 0; s < fused; s++) {
+      for (let s = 0; s < pieces; s++) {
         // Each shape in a cluster varies around the cluster's radius rather
         // than drawing its own, so a cluster still reads as one thing.
         //
@@ -411,13 +473,13 @@ function scatterShapes(rand, prefix) {
           const jy = (rand() - 0.5) * spread
           const x = band.dir < 0 ? Math.min(cx + jx, limit) : Math.max(cx + jx, limit)
           const candidate = randomShape(rand, x, cy + jy, sr)
-          if (!placed.some((other) => overlaps(candidate, other))) shape = candidate
+          if (!placed.some((other) => tooClose(candidate, other))) shape = candidate
         }
-        // Nowhere free in this cluster: the fragment is dropped rather than
-        // laid on top of one already there. A cluster of three large shapes in
-        // a spread this tight genuinely cannot hold three, and a mat with a
-        // gap in it is still a mat -- two pieces merged into a seven-sided blob
-        // is not. This is why the fragment count per seed is now a ceiling
+        // Nowhere with room in this cluster: the piece is dropped rather than
+        // laid on or against one already there. A cluster of three large
+        // shapes in a spread this tight genuinely cannot hold three, and a mat
+        // with a gap in it is still a mat -- two pieces merged into a
+        // seven-sided blob is not. This is why the count per seed is a ceiling
         // rather than an exact number.
         if (!shape) continue
         placed.push(shape)
@@ -475,7 +537,7 @@ export default function BackgroundPattern({ backdrop, className = '' }) {
 
   // No `scale` here, and that is rule (3): the scatter's weave is WEAVE_UNIT
   // and nothing else, so there is no per-section knob that could put two
-  // sections' margins on different-sized cloth. `scale` still reaches the
+  // sections' margins on differently-scaled weave. `scale` still reaches the
   // tiling motifs below, which are chrome and tile edge to edge.
   if (pattern === 'weaveScatter') {
     return <WeaveScatter seed={seed} opacity={opacity} id={id} />

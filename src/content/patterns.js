@@ -62,14 +62,22 @@ export const HEADER_BACKDROP = {
 // no two slides draw the same layout. Passing the same seed always draws the
 // same shapes; change the string to reshuffle a given slide.
 //
+// WHAT THE SHAPES ARE MEANT TO LOOK LIKE: a pandanus or coconut-leaf mat, laid
+// from discrete strips, rather than a piece of draped or torn cloth. That is
+// the whole reason BackgroundPattern.jsx refuses to let two pieces overlap or
+// even touch (see tooClose and MIN_SEPARATION there): every polygon it draws
+// is a triangle or a quadrilateral, but a pair that merges under the shared
+// <clipPath> arrives at the reader as one five- or seven-sided blob, and a
+// margin of those reads as fabric. Kept apart, they read as pieces of a mat.
+//
 // THERE IS NO `scale` HERE ANY MORE, and its absence is the rule. The weave
 // inside the shapes is one fixed size site-wide (WEAVE_UNIT in
 // BackgroundPattern.jsx); what a seed varies is the shapes cut out of it --
 // their size, position, rotation and proportion -- so every section's margins
-// show different fragments of the same cloth rather than the same pattern at
-// different magnifications. A per-section scale knob is exactly the thing that
-// would break that, so there isn't one. `opacity` stays: it is how loud the
-// texture is, not what it is made of.
+// show different pieces of one mat rather than the same pattern at different
+// magnifications. A per-section scale knob is exactly the thing that would
+// break that, so there isn't one. `opacity` stays: it is how loud the texture
+// is, not what it is made of.
 export function scatterBackdrop(seed, { opacity = 0.05 } = {}) {
   return { pattern: 'weaveScatter', seed, opacity }
 }
