@@ -45,16 +45,32 @@ const STANZAS = [
   'You were left to suffer the consequences of a changing world you did not create.',
 ]
 
-// DELIBERATELY ENGLISH-ONLY FOR NOW. Every other piece of copy on the site
-// gets a mechanical or lightly-edited French counterpart; this one doesn't,
-// on purpose -- the ending is deliberately unresolved and accusatory, and a
-// quick pass here risks unconsciously softening exactly the lines that carry
-// that. The plan (see the French-translation build notes) is a first draft,
-// polished with whoever helped shape the English version, then a slower
-// close-reading pass on the wording itself. That hasn't happened yet, so the
-// poem stays English regardless of the toggle above it -- POEM_NOTE_FR below
-// is the one concession, a quiet acknowledgement rather than a silent gap.
-const POEM_NOTE_FR = 'Traduction française du poème à venir.'
+// French draft by Ayga, September 2026 -- the crafted counterpart the note
+// below used to say was still pending. Kept verbatim as given: this is a
+// creative decision, not a mechanical string swap, and it isn't Claude's text
+// to edit unasked. Any pronoun-register questions on this draft (tu/vous/
+// nous) are worth a look before calling it final -- flagged separately,
+// not resolved here.
+const STANZAS_FR = [
+  'En tant qu\u2019Insulaire, tu as grandi sous le soleil, avec l\u2019océan toujours à portée de main, le sel sur la peau.',
+  'Tu as grandi avec le vent. Tu le sentais traverser les arbres, tes cheveux, les maisons que toi et les tiens aviez construites.',
+  'La mer te nourrissait. Le vent te portait. Ils n\u2019étaient jamais des choses à craindre.',
+  'Jusqu\u2019au jour où le vent revint nous rendre visite. Cette fois, il arriva en hurlant.',
+  'Il déchira les arbres où tu avais joué et arracha les toits de vos maisons.',
+  'L\u2019océan se déchaîna avec une fureur plus grande que tout ce que tu avais connu. D\u2019une seule grande vague, il engloutit des portions entières du littoral, frappant les terrains de jeux de ton enfance.',
+  'La mer qui autrefois nourrissait ta famille dévorait désormais vos côtes. Le vent qui autrefois dansait dans les arbres portait maintenant la destruction. Et les choses qui avaient toujours fait partie de ton foyer commencèrent à ressembler à des menaces.',
+  'Cela t\u2019a fait te demander : qu\u2019avions-nous fait pour mériter cela ?',
+  'À quel moment le vent avait-il cessé d\u2019être un ami ? À quel moment la mer avait-elle cessé d\u2019être une amie ?',
+  'Tu te posais ces questions encore et encore, tandis que tes îles changeaient lentement sous tes yeux.',
+  'Des maisons furent perdues. Des rivages disparurent. Des modes de vie commencèrent à s\u2019effacer.',
+  'Et pourtant, les actions qui avaient contribué à provoquer ce changement climatique n\u2019étaient jamais les tiennes.',
+  'Tu étais laissé à subir les conséquences d\u2019un monde en changement que tu n\u2019avais pas créé.',
+]
+
+// Was the "pending" note pointing at STANZAS_FR above -- removed now that
+// the French draft exists. If STANZAS_FR is ever cleared back out, restore a
+// note here rather than letting the toggle silently show English under a
+// French heading.
 
 export default function IslanderPoem() {
   const { language } = useLanguage()
@@ -126,7 +142,7 @@ export default function IslanderPoem() {
           on the same element, so which one wins is decided by their order in
           the compiled stylesheet rather than by the order they are written
           here -- and the /85 was winning, which made the emphasis a no-op. */}
-      {STANZAS.map((line, i) => (
+      {(language === 'fr' ? STANZAS_FR : STANZAS).map((line, i) => (
         <p
           key={i}
           className={`font-serif text-lg italic leading-relaxed sm:text-xl ${
@@ -136,9 +152,6 @@ export default function IslanderPoem() {
           {line}
         </p>
       ))}
-      {language === 'fr' && (
-        <p className="mt-8 text-sm italic text-ink/60">{POEM_NOTE_FR}</p>
-      )}
     </Section>
   )
 }
