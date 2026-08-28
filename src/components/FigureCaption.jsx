@@ -1,5 +1,6 @@
 import { figureNumber } from '../content/figures.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
+import { sourceLabel } from '../utils/metrics.js'
 
 const STRINGS = {
   en: { fig: 'Fig', data: '. Data: ' },
@@ -56,7 +57,7 @@ export default function FigureCaption({ figureKey, title, source, className = ''
         <>
           {t.data}
           <a href={source.url} target="_blank" rel="noreferrer noopener">
-            {source.label}
+            {sourceLabel(source, language)}
           </a>
         </>
       )}

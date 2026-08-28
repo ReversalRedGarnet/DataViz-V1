@@ -33,12 +33,12 @@ const STRINGS = {
   },
 }
 
-export function pointTooltip(nation, year, value, format) {
+export function pointTooltip(nation, year, value, format, language = 'en') {
   return (
     <>
       <p className="font-semibold">{nation}</p>
       <p className="opacity-80">
-        {year}: {format(value)}
+        {year}: {format(value, language)}
       </p>
     </>
   )
@@ -81,11 +81,11 @@ export function stormPointTooltip(row, nation, language = 'en') {
   )
 }
 
-export function snapshotTooltip(nation, value, format) {
+export function snapshotTooltip(nation, value, format, language = 'en') {
   return (
     <>
       <p className="font-semibold">{nation}</p>
-      <p className="opacity-80">{format(value)}</p>
+      <p className="opacity-80">{format(value, language)}</p>
     </>
   )
 }
@@ -100,7 +100,7 @@ export function divergenceTooltip(nation, point, format, language = 'en') {
     <>
       <p className="font-semibold">{nation}</p>
       <p className="opacity-80">
-        {point.year}: {format(point.raw)}
+        {point.year}: {format(point.raw, language)}
       </p>
       <p className="opacity-70">{against}</p>
     </>

@@ -129,7 +129,7 @@ export default function MetricSnapshotChart({
             {rows.map((d) => (
               <tr key={d.nation}>
                 <td>{nationLabel(d.nation, language)}</td>
-                <td>{format ? format(d.value) : d.value}</td>
+                <td>{format ? format(d.value, language) : d.value}</td>
               </tr>
             ))}
           </tbody>

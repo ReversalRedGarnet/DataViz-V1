@@ -34,6 +34,7 @@ import ThemeToggle from './ThemeToggle.jsx'
 import LanguageToggle from './LanguageToggle.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
+import { sourceLabel } from '../utils/metrics.js'
 
 const YEAR = new Date().getFullYear()
 
@@ -135,7 +136,7 @@ export default function CitationPanel({ sources = [], aboutTitle, children, styl
                     // sits close enough to a tight outline to read as one mark.
                     className="rounded-sm underline decoration-ink/40 hover:decoration-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
                   >
-                    {s.label}
+                    {sourceLabel(s, language)}
                     <span className="sr-only">{t.opensNewTab}</span>
                   </a>
                 </li>

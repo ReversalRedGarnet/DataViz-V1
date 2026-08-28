@@ -74,7 +74,7 @@ export function renderSnapshotChart(
     .attr('stroke', 'transparent')
     .attr('stroke-width', 1.5)
     .on('pointerenter pointermove', function (event, d) {
-      showTooltip(event, snapshotTooltip(nationLabel(d.nation, language), d.value, format))
+      showTooltip(event, snapshotTooltip(nationLabel(d.nation, language), d.value, format, language))
       d3.select(this).attr('stroke', palette.single).attr('stroke-opacity', 0.45)
     })
     .on('pointerleave', function () {
@@ -82,7 +82,7 @@ export function renderSnapshotChart(
       d3.select(this).attr('stroke', 'transparent')
     })
     .on('click', (event, d) =>
-      showTooltip(event, snapshotTooltip(nationLabel(d.nation, language), d.value, format))
+      showTooltip(event, snapshotTooltip(nationLabel(d.nation, language), d.value, format, language))
     )
 
   bars
@@ -127,7 +127,7 @@ export function renderSnapshotChart(
       .attr('font-weight', 600)
       .attr('fill', (d) => (placement(d).inside ? palette.onMark : ink))
       .attr('fill-opacity', 0)
-      .text((d) => format(d.value))
+      .text((d) => format(d.value, language))
       .transition()
       .delay((_, i) => motionDuration(400 + i * 70))
       .duration(motionDuration(300))

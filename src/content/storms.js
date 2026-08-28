@@ -45,8 +45,11 @@ import roster from './roster.json'
 // every existing .fact/.categoryLabel/.lead/.deathsNote/.note read downstream
 // keeps working unchanged. `name` (the nation), `date`, `category`, `deaths`,
 // `deathsKind` and `dodge` are data, not prose, and are never localized.
-// `sources[].label` stays English-only, the same citation convention as
-// utils/metrics.js's source.label -- a bibliography entry, not site copy.
+// `sources[].label` is now { en, fr } too, resolved via sourceLabel() from
+// utils/metrics.js -- descriptive terms (assessment names, report types)
+// translate; organisation and agency names (UN OCHA, ReliefWeb, IFRC, World
+// Bank, VanKIRAP) stay as given, the way an English-language citation isn't
+// re-lettered inside a French sentence either.
 const STORM_DETAIL = {
   pam: {
     profile: [
@@ -85,11 +88,17 @@ const STORM_DETAIL = {
     ],
     sources: [
       {
-        label: 'Tropical Cyclone Pam \u2014 Post-Disaster Needs Assessment, Government of Vanuatu',
+        label: {
+          en: 'Tropical Cyclone Pam \u2014 Post-Disaster Needs Assessment, Government of Vanuatu',
+          fr: 'Cyclone tropical Pam \u2014 Évaluation des besoins post-catastrophe, gouvernement du Vanuatu',
+        },
         url: 'https://reliefweb.int/report/vanuatu/post-disaster-needs-assessment-tropical-cyclone-pam-march-2015',
       },
       {
-        label: 'Tropical Cyclone Pam \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+        label: {
+          en: 'Tropical Cyclone Pam \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+          fr: 'Cyclone tropical Pam \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
+        },
         url: 'https://reliefweb.int/disaster/tc-2015-000020-vut',
       },
     ],
@@ -133,11 +142,17 @@ const STORM_DETAIL = {
     ],
     sources: [
       {
-        label: 'Tropical Cyclone Winston \u2014 Post-Disaster Needs Assessment, Government of Fiji',
+        label: {
+          en: 'Tropical Cyclone Winston \u2014 Post-Disaster Needs Assessment, Government of Fiji',
+          fr: 'Cyclone tropical Winston \u2014 Évaluation des besoins post-catastrophe, gouvernement des Fidji',
+        },
         url: 'https://reliefweb.int/report/fiji/fiji-post-disaster-needs-assessment-may-2016-tropical-cyclone-winston-february-20-2016',
       },
       {
-        label: 'Tropical cyclone record, Tonga Meteorological Service',
+        label: {
+          en: 'Tropical cyclone record, Tonga Meteorological Service',
+          fr: 'Registre des cyclones tropicaux, Service météorologique des Tonga',
+        },
         url: 'https://www.met.gov.to/index_files/TC_list_update.pdf',
       },
     ],
@@ -180,11 +195,17 @@ const STORM_DETAIL = {
     sources: [
       {
         label:
-          'Tropical Cyclone Gita \u2014 Post-Disaster Rapid Assessment, Government of Tonga / World Bank',
+          {
+            en: 'Tropical Cyclone Gita \u2014 Post-Disaster Rapid Assessment, Government of Tonga / World Bank',
+            fr: 'Cyclone tropical Gita \u2014 Évaluation rapide post-catastrophe, gouvernement des Tonga / Banque mondiale',
+          },
         url: 'https://www.gfdrr.org/sites/default/files/publication/tonga-pdna-tc-gita-2018.pdf',
       },
       {
-        label: 'Tropical Cyclone Gita \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+        label: {
+          en: 'Tropical Cyclone Gita \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+          fr: 'Cyclone tropical Gita \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
+        },
         url: 'https://reliefweb.int/disaster/tc-2018-000102-ton',
       },
     ],
@@ -251,11 +272,17 @@ const STORM_DETAIL = {
     sources: [
       {
         label:
-          'Severe Tropical Cyclone Harold \u2014 official cyclone history, Australian Bureau of Meteorology',
+          {
+            en: 'Severe Tropical Cyclone Harold \u2014 official cyclone history, Australian Bureau of Meteorology',
+            fr: 'Cyclone tropical sévère Harold \u2014 historique officiel du cyclone, Bureau de météorologie australien',
+          },
         url: 'http://www.bom.gov.au/cyclone/history/Harold.shtml',
       },
       {
-        label: 'Tropical Cyclone Harold \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+        label: {
+          en: 'Tropical Cyclone Harold \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+          fr: 'Cyclone tropical Harold \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
+        },
         url: 'https://reliefweb.int/disaster/tc-2020-000049-vut',
       },
     ],
@@ -308,12 +335,18 @@ const STORM_DETAIL = {
     sources: [
       {
         label:
-          'Tropical Cyclones Judy and Kevin \u2014 Post-Disaster Needs Assessment, Government of Vanuatu',
+          {
+            en: 'Tropical Cyclones Judy and Kevin \u2014 Post-Disaster Needs Assessment, Government of Vanuatu',
+            fr: 'Cyclones tropicaux Judy et Kevin \u2014 Évaluation des besoins post-catastrophe, gouvernement du Vanuatu',
+          },
         url: 'https://dsppac.gov.vu/index.php?option=com_content&view=article&id=135&Itemid=615',
       },
       {
         label:
-          'Tropical Cyclones Judy and Kevin \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+          {
+            en: 'Tropical Cyclones Judy and Kevin \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+            fr: 'Cyclones tropicaux Judy et Kevin \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
+          },
         url: 'https://reliefweb.int/report/vanuatu/vanuatu-tropical-cyclones-judy-kevin-situation-report-no1-10-march-2023',
       },
     ],
@@ -360,11 +393,17 @@ const STORM_DETAIL = {
     sources: [
       {
         label:
-          'Cyclone Lola \u2014 Vanuatu Meteorology and Geo-hazards Department / VanKIRAP',
+          {
+            en: 'Cyclone Lola \u2014 Vanuatu Meteorology and Geo-hazards Department / VanKIRAP',
+            fr: 'Cyclone Lola \u2014 Département de météorologie et des géorisques de Vanuatu / VanKIRAP',
+          },
         url: 'https://reliefweb.int/report/vanuatu/cyclone-lola-regions-earliest-ever-category-5-cyclone-devastates-vanuatu',
       },
       {
-        label: 'Tropical Cyclone Lola \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 humanitarian situation reports, UN OCHA / ReliefWeb',
+          fr: 'Cyclone tropical Lola \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
+        },
         url: 'https://reliefweb.int/disaster/tc-2023-000207-vut',
       },
     ],

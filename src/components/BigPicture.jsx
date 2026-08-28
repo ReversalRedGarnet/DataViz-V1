@@ -19,7 +19,8 @@ const PER_CAPITA_KEY = 'affected_persons'
 
 // Short enough to sit on top of a bar. The longer phrasing lives in the card
 // heading and the aria-label, which is where a reader looks for the unit.
-const SHARE_FORMAT = (v) => `${v.toFixed(1)}%`
+const SHARE_FORMAT = (v, language = 'en') =>
+  `${v.toLocaleString(language === 'fr' ? 'fr' : 'en', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 const SHARE_TICK_FORMAT = (v) => `${v}%`
 
 // `m.format` and `m.source` come from utils/metrics.js; label/caveat are

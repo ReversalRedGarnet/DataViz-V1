@@ -181,7 +181,7 @@ export default function DivergenceChart({
               <tr key={`${s.nation}-${p.year}`}>
                 <td>{nationLabel(s.nation, language)}</td>
                 <td>{p.year}</td>
-                <td>{format(p.raw)}</td>
+                <td>{format(p.raw, language)}</td>
                 <td>{p.index.toFixed(1)}</td>
               </tr>
             ))

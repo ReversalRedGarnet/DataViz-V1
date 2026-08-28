@@ -218,7 +218,7 @@ function NationSummary({ nation, data, eventYear, color, index, showTooltip, hid
 // underneath is driven by the same eased percentage, capped at 100% of its
 // track -- a metric that tripled and one that quadrupled both fill it, and the
 // printed number is what separates them.
-function Delta({ metric, eventRow, latestRow }) {
+function Delta({ metric, eventRow, latestRow, language }) {
   const target = pctChange(eventRow[metric.field], latestRow[metric.field])
   // All three move together on the same clock -- see hooks/useCountUp.js.
   const [from, to, pct] = useCountUp([
@@ -231,7 +231,8 @@ function Delta({ metric, eventRow, latestRow }) {
   return (
     <span className="flex flex-col items-end">
       <span className="font-medium tabular-nums">
-        {metric.format(from)} <span className="opacity-faint">{'\u2192'}</span> {metric.format(to)}
+        {metric.format(from, language)} <span className="opacity-faint">{'\u2192'}</span>{' '}
+        {metric.format(to, language)}
       </span>
       {target !== null && (
         <>

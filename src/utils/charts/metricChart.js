@@ -82,7 +82,7 @@ export function renderMetricChart(
   function wireMarkInteractions(selection, nation, growTo) {
     selection
       .on('pointerenter pointermove', function (event, d) {
-        showTooltip(event, pointTooltip(nationLabel(nation, language), d.year, d[valueField], format))
+        showTooltip(event, pointTooltip(nationLabel(nation, language), d.year, d[valueField], format, language))
         if (growTo) d3.select(this).transition().duration(motionDuration(120)).attr('r', growTo)
       })
       .on('pointerleave', function () {
@@ -90,7 +90,7 @@ export function renderMetricChart(
         if (growTo) d3.select(this).transition().duration(motionDuration(120)).attr('r', POINT_R)
       })
       .on('click', (event, d) =>
-        showTooltip(event, pointTooltip(nationLabel(nation, language), d.year, d[valueField], format))
+        showTooltip(event, pointTooltip(nationLabel(nation, language), d.year, d[valueField], format, language))
       )
   }
 

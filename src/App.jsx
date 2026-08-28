@@ -40,6 +40,7 @@ const APP_STRINGS = {
       `${stormName} selected. The rest of the story is now available below. ${chain}`,
     pickStorm: 'Pick a storm from the timeline to continue.',
     showingChain: 'Showing its ripple chain.',
+    documentTitle: 'Ripple \u2014 Six cyclones, four Pacific nations, four different recoveries',
   },
   fr: {
     skipToContent: 'Passer au contenu principal',
@@ -52,6 +53,7 @@ const APP_STRINGS = {
       `${stormName} sélectionné. La suite du récit est maintenant disponible ci-dessous. ${chain}`,
     pickStorm: 'Choisissez un cyclone dans la chronologie pour continuer.',
     showingChain: 'Affiche sa chaîne de répercussions.',
+    documentTitle: 'Ripple \u2014 Six cyclones, quatre nations du Pacifique, quatre redressements différents',
   },
 }
 
@@ -248,6 +250,21 @@ function pageSections(data, dataError, story, onSelectStorm, language) {
 function AppShell() {
   const { language } = useLanguage()
   const t = APP_STRINGS[language]
+
+  // The one static-HTML string a client-side toggle CAN reach. index.html's
+  // <title> is what a fresh visitor sees, and stays correct on its own since
+  // the site always opens in English -- see the "no persistence" decision in
+  // the French-translation build notes. This keeps the browser tab in step
+  // after a toggle, the same job useLanguage.jsx already does for
+  // documentElement.lang. og:title/og:description/twitter:* below it cannot
+  // follow this: those are read by server-side link-preview crawlers
+  // (Facebook, X, Slack, Discord) that fetch the raw HTML and do not run this
+  // page's JavaScript at all, so nothing client-side can reach them. They
+  // stay English, matching the same always-English-first-paint default.
+  useEffect(() => {
+    document.title = t.documentTitle
+  }, [t.documentTitle])
+
   const { data, error: dataError } = useMetricData(METRICS)
   // One hook, one source of truth: the storm, the country pair, the reading
   // mode, the position along the storm's path and the open ripple link. Every

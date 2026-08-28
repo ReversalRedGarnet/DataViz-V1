@@ -131,8 +131,8 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear, lang
           stalled,
           eventYear,
           tracked,
-          m.format(trackedEvent[m.field]),
-          m.format(trackedRow[m.field]),
+          m.format(trackedEvent[m.field], language),
+          m.format(trackedRow[m.field], language),
           trackedRow.year
         ),
       }
