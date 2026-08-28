@@ -493,7 +493,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
             </p>
           </>
         ) : (
-          <p className="opacity-60">
+          <p className="opacity-soft">
             Point at a country, or tab to one, for what {storm ? storm.name : 'the storm'} did
             there.
           </p>

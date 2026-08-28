@@ -31,7 +31,7 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
           full-width rows a thumb cannot miss, against four 7px pins inside a
           pannable SVG. The wording follows the fact rather than describing the
           desktop arrangement. */}
-      <p className="type-eyebrow mb-2 opacity-60">
+      <p className="type-eyebrow mb-2 opacity-soft">
         <span className="sm:hidden">Choose a country</span>
         <span className="hidden sm:inline">Or choose from the list</span>
       </p>
@@ -75,7 +75,7 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
                 {nation.name}
                 {/* Not colour alone: a country the storm missed says so in a
                     word as well as by being drawn faint. */}
-                {missed && <span className="text-[10px] uppercase tracking-wide opacity-60">missed</span>}
+                {missed && <span className="text-[10px] uppercase tracking-wide opacity-soft">missed</span>}
                 {/* A tick as well as the badge and the fill: three cues for
                     one state, none of them colour on its own. It sits at the
                     end of a full-width row, which is where a thumb has just

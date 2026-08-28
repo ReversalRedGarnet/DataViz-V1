@@ -78,7 +78,14 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline decoration-ink/40 hover:decoration-ink"
+                    // THE SAME RING EVERY OTHER CONTROL ON THE SITE USES. These
+                    // eighteen links were the one place that fell through to
+                    // the browser's default outline -- focusable and visible,
+                    // but a different shape and colour from the ring a keyboard
+                    // reader had been following for fourteen slides. rounded-sm
+                    // and the offset keep the ring off the underline, which
+                    // sits close enough to a tight outline to read as one mark.
+                    className="rounded-sm underline decoration-ink/40 hover:decoration-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
                   >
                     {s.label}
                     <span className="sr-only"> (opens in a new tab)</span>

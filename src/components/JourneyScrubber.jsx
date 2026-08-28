@@ -27,12 +27,24 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
   const fraction = stops.length > 1 ? index / last : 0
   const current = stops[index]
 
+  // Which stop a press at this x belongs to.
+  //
+  // Measured against the rail's own span rather than the track's whole box.
+  // The track is inset by --scrub-inset (styles/story.css) so the end ticks and
+  // the handle have room to draw, and that inset is padding -- inside the box
+  // that takes the pointer, so the ends are pressable, but outside the span the
+  // ticks are laid out on. Reading the resolved padding back off the element
+  // keeps this in step with the stylesheet through the phone breakpoint, which
+  // widens the inset to 16px, without the number being written down twice.
   function indexFromClientX(clientX) {
     const el = trackRef.current
     if (!el) return index
     const rect = el.getBoundingClientRect()
-    if (rect.width === 0) return index
-    const t = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width))
+    const style = getComputedStyle(el)
+    const inset = parseFloat(style.paddingLeft) || 0
+    const span = rect.width - inset - (parseFloat(style.paddingRight) || 0)
+    if (span <= 0) return index
+    const t = Math.min(1, Math.max(0, (clientX - rect.left - inset) / span))
     return Math.round(t * last)
   }
 
@@ -81,7 +93,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
     <div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <span className="type-eyebrow text-accent">Move the storm</span>
-        <span className="text-xs tabular-nums opacity-60">
+        <span className="text-xs tabular-nums opacity-soft">
           Stop {index + 1} of {stops.length}
         </span>
       </div>
@@ -93,7 +105,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
           line is never more than a line, so it always fits. */}
       <p className="scrub-readout">
         <span className="font-semibold">{current?.name}</span>
-        <span className="opacity-60"> &middot; {current?.date}</span>
+        <span className="opacity-soft"> &middot; {current?.date}</span>
       </p>
 
       <div className="flex items-center gap-2">
@@ -142,7 +154,15 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
             key={stop.name}
             aria-hidden="true"
             className={`scrub-tick ${i <= index ? 'is-reached' : ''}`}
-            style={{ left: `${stops.length > 1 ? (i / last) * 100 : 0}%` }}
+            // A percentage would resolve against the track's padding box, which
+            // is wider than the rail by --scrub-inset at each end, so the ticks
+            // would drift outwards from the positions the handle actually
+            // stops at. The calc walks the same span indexFromClientX measures.
+            style={{
+              left: `calc(var(--scrub-inset) + ${
+                stops.length > 1 ? i / last : 0
+              } * (100% - var(--scrub-inset) * 2))`,
+            }}
           />
         ))}
         <span
@@ -183,7 +203,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
                   : 'border-ink/20 bg-surface/60 hover:border-accent/60'
               }`}
             >
-              <span className="mr-1.5 tabular-nums opacity-50">{i + 1}</span>
+              <span className="mr-1.5 tabular-nums opacity-quiet">{i + 1}</span>
               {stop.name}
             </button>
           </li>

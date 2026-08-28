@@ -16,7 +16,7 @@ function Action({ children, onClick, title }) {
       type="button"
       onClick={onClick}
       title={title}
-      className="shrink-0 rounded px-1.5 py-1 underline decoration-ink/30 underline-offset-2 opacity-60 transition-opacity duration-150 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="shrink-0 rounded px-1.5 py-1 underline decoration-ink/30 underline-offset-2 opacity-soft transition-opacity duration-150 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
     >
       {children}
     </button>
@@ -72,7 +72,7 @@ export default function StoryStateBar({ storm, selectedNations, onClearNations, 
               {/* The long form only where it fits. On a phone the map slide is
                   where this is answered and the reader is on their way to it;
                   the short form still says the choice is outstanding. */}
-              <span className="opacity-60">
+              <span className="opacity-soft">
                 <span className="sm:hidden">Not chosen</span>
                 <span className="hidden sm:inline">Not chosen yet &mdash; pick one on the map</span>
               </span>
@@ -85,7 +85,7 @@ export default function StoryStateBar({ storm, selectedNations, onClearNations, 
         </>
       ) : (
         <Field label="Storm">
-          <span className="opacity-60">
+          <span className="opacity-soft">
             <span className="sm:hidden">Not chosen</span>
             <span className="hidden sm:inline">Not chosen yet &mdash; pick one on the timeline</span>
           </span>

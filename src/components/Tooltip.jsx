@@ -23,6 +23,11 @@
 // still overhang the edge it was being kept away from.
 export const TOOLTIP_MAX_WIDTH = 190
 
+// How far above the anchored point the box's bottom edge sits. Exported for
+// the same reason the width is: useTooltip clamps against the box's real
+// footprint, and that footprint starts here.
+export const TOOLTIP_GAP = 10
+
 export default function Tooltip({ tooltip }) {
   if (!tooltip) return null
 
@@ -30,7 +35,23 @@ export default function Tooltip({ tooltip }) {
     <div
       role="tooltip"
       className="animate-tooltip-pop-in pointer-events-none absolute z-30 rounded-md border border-ink/15 bg-sand px-2.5 py-1.5 text-[11px] leading-snug text-ink shadow-md"
-      style={{ left: tooltip.x, top: tooltip.y - 10, maxWidth: TOOLTIP_MAX_WIDTH }}
+      style={{
+        left: tooltip.x,
+        top: tooltip.y - TOOLTIP_GAP,
+        maxWidth: TOOLTIP_MAX_WIDTH,
+        // WRITTEN HERE, NOT ONLY IN THE KEYFRAMES. This is what makes (x, y)
+        // mean "the point the box is centred over and sits above" rather than
+        // "the box's top-left corner", and the clamps in useTooltip are
+        // computed against exactly that. It used to arrive only as a side
+        // effect of tooltip-pop-in's `both` fill -- so under
+        // prefers-reduced-motion, where index.css sets `animation: none`, the
+        // transform vanished with it: the box dropped below its mark and sat
+        // half a width to the right of where the x clamp had placed it, which
+        // put it over the container's right edge on any mark past centre.
+        // The keyframes still carry the same translate, so this changes
+        // nothing for a reader who has motion on.
+        transform: 'translate(-50%, -100%)',
+      }}
     >
       {tooltip.content}
     </div>

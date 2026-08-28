@@ -47,7 +47,7 @@ export default function SlideFooter({
           worse than none. Desktop keeps the labels in the buttons. */}
       {(nextLabel || requires) && (
         <p className="deck-destination sm:hidden">
-          <span className="opacity-55">{requires ? 'To continue' : 'Next'}</span>{' '}
+          <span className="opacity-quiet">{requires ? 'To continue' : 'Next'}</span>{' '}
           {requires || nextLabel}
         </p>
       )}
@@ -64,7 +64,7 @@ export default function SlideFooter({
             </span>
             <span className="min-w-0 font-medium sm:hidden">Back</span>
             <span className="hidden min-w-0 sm:block">
-              <span className="type-meta block opacity-55">Back</span>
+              <span className="type-meta block opacity-quiet">Back</span>
               <span className="block truncate font-medium">{prevLabel}</span>
             </span>
           </button>
@@ -73,7 +73,7 @@ export default function SlideFooter({
         )}
 
         {pageNumber != null && (
-          <span className="deck-count shrink-0 text-xs tabular-nums opacity-50" aria-hidden="true">
+          <span className="deck-count shrink-0 text-xs tabular-nums opacity-quiet" aria-hidden="true">
             {pageNumber} / {total}
           </span>
         )}
@@ -99,7 +99,7 @@ export default function SlideFooter({
           >
             <span className="min-w-0 font-medium sm:hidden">Next</span>
             <span className="hidden min-w-0 sm:block">
-              <span className="type-meta block opacity-55">
+              <span className="type-meta block opacity-quiet">
                 {requires ? 'To continue' : 'Next'}
               </span>
               <span className="block truncate">{requires || nextLabel}</span>

@@ -109,7 +109,7 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
         }`}
       >
         <CoverageDots struck={storm.nations} />
-        <span className="text-[10px] leading-none tabular-nums opacity-60">
+        <span className="text-[10px] leading-none tabular-nums opacity-soft">
           {storm.nations.length} of {NATION_NAMES.length}
         </span>
       </span>
@@ -155,7 +155,7 @@ function StormPreview({ storm, selected }) {
           </p>
         </>
       ) : (
-        <p className="text-sm opacity-60">
+        <p className="text-sm opacity-soft">
           Point at a cyclone, or tab to one, to see where it went. Press it to follow it.
         </p>
       )}
@@ -278,7 +278,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
                 />
                 <p
                   className={`text-center text-xs tabular-nums ${
-                    hit ? 'font-semibold opacity-80' : 'opacity-40'
+                    hit ? 'font-semibold opacity-80' : 'opacity-faint'
                   }`}
                 >
                   {year}

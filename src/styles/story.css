@@ -354,8 +354,23 @@
     flex: 1 1 auto;
     min-width: 0;
     /* Inset by half the handle's width, so the end ticks and the handle have
-       room to be drawn instead of being clipped by the column's overflow. */
-    margin-inline: 12px;
+       room to be drawn instead of being clipped by the column's overflow.
+       Every absolutely positioned child below anchors to this same inset, and
+       indexFromClientX in JourneyScrubber.jsx measures the same span by reading
+       the resolved padding back off the element -- so the number is written
+       here once and the layout, the ticks and the hit-testing all follow it.
+       The phone override further down only has to change this one value. */
+    --scrub-inset: 12px;
+    /* PADDING, NOT MARGIN, AND THAT IS THE WHOLE POINT. Margin sits outside the
+       box that takes the pointer, so the end ticks and the handle -- which are
+       drawn in this 12px -- were visible but not clickable. On a 352px track
+       the box ended at x=1156 while the last tick spanned 1151-1161: a press on
+       the tick's own centre fell a pixel outside the track and did nothing,
+       while a press one pixel to its left selected the final stop. Same gap at
+       the other end. Dragging past the end always worked, because pointer
+       capture keeps the track steering once a drag has started -- which is what
+       kept this quiet. */
+    padding-inline: var(--scrub-inset);
     height: 2.75rem;
     display: flex;
     align-items: center;
@@ -379,13 +394,36 @@
     border-radius: 9999px;
   }
 
+  /* left/right rather than 0, because an absolutely positioned child anchors to
+     its parent's PADDING box: with the inset moved to padding, `left: 0` would
+     stretch the rail out under the steppers and take the ticks' percentages
+     with it. Anchoring to the inset keeps every mark exactly where it was drawn
+     before, on a track whose hit area is now the full visual width. */
   .scrub-rail,
   .scrub-fill {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: var(--scrub-inset);
+    right: var(--scrub-inset);
     height: 4px;
     border-radius: 9999px;
+  }
+
+  /* THE TRACK IS THE ONLY POINTER TARGET. Everything inside it is decoration,
+     and the handle's layer is why this has to be said rather than assumed: it
+     is a full-width band translated by the current fraction, so at every stop
+     past the first it hangs past the track's right edge -- a third of the
+     track's width at Harold's second stop -- straight over the + stepper
+     beside it. The press then landed on the layer and bubbled to the track's
+     own pointerdown, where an x beyond the right edge clamps to 1 and picks
+     the LAST stop. Pressing + at Harold's second stop jumped to his fourth,
+     skipping Fiji; at his third it jumped to the fourth as well, which is the
+     right answer by coincidence and is why the fault looked like a one-off.
+     The ticks overhang too, by half their width. */
+  .scrub-rail,
+  .scrub-fill,
+  .scrub-tick,
+  .scrub-knob-layer {
+    pointer-events: none;
   }
 
   .scrub-rail {
@@ -415,8 +453,8 @@
 
   .scrub-knob-layer {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: var(--scrub-inset);
+    right: var(--scrub-inset);
     transition: transform 420ms cubic-bezier(0.16, 0.84, 0.28, 1);
   }
 
@@ -501,8 +539,10 @@
       margin-left: -14px;
     }
 
+    /* Wider handle, so a wider inset. padding-inline and every anchored child
+       read this, so this one line moves all of them together. */
     .scrub-track {
-      margin-inline: 16px;
+      --scrub-inset: 16px;
     }
   }
 

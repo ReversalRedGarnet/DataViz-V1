@@ -40,3 +40,38 @@ export const THEME_TOKENS = {
     accent: '#8FBACD',
   },
 }
+
+// HOW FAR TEXT IS ALLOWED TO STEP BACK, PER THEME.
+//
+// De-emphasis on this site is element opacity over the theme's own ground, and
+// the two themes are not symmetrical about it. Dark ink on sand loses contrast
+// far faster than light ink on a dark panel: at 0.60 the same text reads 3.55:1
+// in light and 5.45:1 in dark. The scale was tuned while looking at the dark
+// theme, so one flat set of numbers left the light theme's small text below
+// WCAG AA in 67 places -- the timeline's gap years at 2.18:1, the deck counter
+// at 2.84:1, the footer's Back/Next sublabels at 3.23:1.
+//
+// So the numbers are per theme, the way MAP_COLORS and chartTheme() in
+// utils/theme.js already are, and they are named for the job rather than for a
+// percentage. A call site asks for the level of step-back it wants and each
+// theme answers with a value that still clears 4.5:1 on its own ground.
+//
+// THE FLOORS, MEASURED AGAINST THE DARKEST GROUND EACH THEME PAINTS. Light ink
+// (#24333A) over panel (#F1EADC) needs 0.69 to reach 4.5:1; dark ink (#F0ECE3)
+// over surface (#293236) needs 0.55. Everything below sits above its floor with
+// room to spare, so a future panel a shade darker does not silently drop a
+// level under the line.
+//
+// The consequence for light is real and intended: its usable de-emphasis range
+// is 0.72-1.0 rather than 0.40-1.0, so the three levels sit closer together
+// than they used to. Where a step-back has to read as a state rather than as a
+// texture -- the hero's unlit years, the timeline's gap years -- the colour and
+// weight cues beside the text are what carry it, and those are untouched.
+//
+//   faint  a thing that is present but not part of what is being compared
+//   quiet  chrome that must not compete with the content it frames
+//   soft   supporting prose: notes, dates, captions, counts
+export const DIM_TOKENS = {
+  light: { faint: 0.72, quiet: 0.78, soft: 0.84 },
+  dark: { faint: 0.58, quiet: 0.62, soft: 0.66 },
+}

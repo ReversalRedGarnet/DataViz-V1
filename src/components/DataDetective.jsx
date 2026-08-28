@@ -141,12 +141,12 @@ export default function DataDetective({ storm, style }) {
             <div className="animate-pop-in rounded-xl border border-accent/30 bg-surface/70 p-4">
               <p className="type-eyebrow text-accent">What this site actually shows</p>
               <p className="mt-2 text-sm leading-snug opacity-85">{factor.evidence}</p>
-              <p className="mt-3 text-xs opacity-65">
+              <p className="mt-3 text-xs opacity-soft">
                 Where to look: <span className="font-semibold">{sectionLabel(factor.section)}</span>.
               </p>
             </div>
           ) : (
-            <p className="text-sm opacity-55">
+            <p className="text-sm opacity-quiet">
               Your pick decides which evidence appears here.
             </p>
           )}
