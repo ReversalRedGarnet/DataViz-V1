@@ -40,6 +40,16 @@ const TRACK_NOTE = 'The line joins documented impact points; it is not the offic
 const WIDTH = 800
 const HEIGHT = 540
 
+// Stop-label furniture, in CSS pixels rather than viewBox units. The labels
+// counter-scale with the markers (see applyScale), so these are the sizes they
+// are actually drawn at whatever box the map ends up in.
+//
+// Named to match MapView's, because they are the same two numbers doing the
+// same job: the gap between a dot and its name, and the margin that name has
+// to keep from the map's edge before it flips to the other side of the dot.
+const LABEL_GAP = 12
+const LABEL_MARGIN = 6
+
 // One coordinate set for the whole site: NATION_COORDS is the same approximate
 // capital-city positions the interactive map uses, from content/nations.js.
 
@@ -174,9 +184,55 @@ function paintScene(scene, { active, theme }) {
 // an async build that resolved inside a single React batch.
 function applyScale(g, scale) {
   if (!scale) return
-  const inverse = `scale(${1 / scale})`
-  g.selectAll('g.stop-inner').attr('transform', inverse)
-  g.select('g.eye-scale').attr('transform', inverse)
+  const inverse = 1 / scale
+  g.selectAll('g.stop-inner').attr('transform', `scale(${inverse})`)
+  g.select('g.eye-scale').attr('transform', `scale(${inverse})`)
+
+  // AND THEN FLIP THE ONES THAT NO LONGER FIT.
+  //
+  // The same pass MapView runs on its country names, for the same reason and
+  // in the same place. Counter-scaling is what makes a label legible and it is
+  // also what makes it wide: a stop's name and date occupy `inverse` times the
+  // viewBox room they were drawn at, while the projection's padding is a fixed
+  // 58 units chosen when the labels were small. Harold's last stop is Tonga,
+  // which sits nearest the right edge, and "Cat 1 - 9 April 2020" ran straight
+  // off it -- as does every storm with a stop near an edge, which is most of
+  // them.
+  //
+  // THIS BELONGS IN THE SCALE PASS RATHER THAN IN build(). The projected
+  // positions do not move when the box resizes, but the width these labels
+  // occupy in viewBox units is `inverse` times their rendered width -- so the
+  // answer to "does this fit" changes with every resize even though nothing
+  // about the geography did. Living here means both callers get it: build()
+  // off its own measurement, and the scale effect on every resize after.
+  g.selectAll('g.stop').each(function () {
+    const labels = d3.select(this).selectAll('text.stop-name, text.stop-meta')
+    if (labels.empty()) return
+    const px = Number(this.getAttribute('data-px'))
+
+    // MEASURED TOGETHER, BECAUSE THEY FLIP TOGETHER. The meta line is the
+    // longer of the two on every stop the roster holds today, but that is a
+    // fact about the current data rather than a rule -- and a name and its
+    // date on opposite sides of the same dot would read worse than either of
+    // them overhanging. getComputedTextLength reports the real advance width
+    // in the label's own units, which is the pre-counter-scale space the
+    // multiplication below converts.
+    let width = 0
+    labels.each(function () {
+      width = Math.max(width, this.getComputedTextLength())
+    })
+
+    const reach = (LABEL_GAP + width) * inverse
+    // Flipped only when the other side actually has the room. At a narrow fit
+    // a label can be wider than the map's whole padding, and a stop close to
+    // both edges would otherwise trade an overhang on the right for one on the
+    // left -- with the name now running back across its own track. Vertically
+    // there is nothing to do: the pair sits within 14px of its dot, which even
+    // at the tightest fit is inside the 58 units the projection already keeps
+    // clear of the top and bottom edges.
+    const flip = px + reach > WIDTH - LABEL_MARGIN && px - reach > LABEL_MARGIN
+    labels.attr('x', flip ? -LABEL_GAP : LABEL_GAP).attr('text-anchor', flip ? 'end' : 'start')
+  })
 }
 
 // Props:
@@ -287,6 +343,10 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         .join('g')
         .attr('class', 'stop')
         .attr('transform', (_, i) => `translate(${positions[i][0]},${positions[i][1]})`)
+        // Kept on the node because applyScale's label-flip pass needs each
+        // stop's x in viewBox units and the projection is not in scope there.
+        // The same note MapView's markers carry, for the same pass.
+        .attr('data-px', (_, i) => positions[i][0])
 
       // The stop carries the projected position; this inner group carries the
       // counter-scale. Two transforms, so two groups -- a scale written onto
@@ -302,7 +362,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
       stopInner
         .append('text')
         .attr('class', 'stop-name')
-        .attr('x', 12)
+        .attr('x', LABEL_GAP)
         .attr('y', 0)
         .attr('font-size', 12)
         .attr('font-weight', 600)
@@ -315,7 +375,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
       stopInner
         .append('text')
         .attr('class', 'stop-meta')
-        .attr('x', 12)
+        .attr('x', LABEL_GAP)
         .attr('y', 14)
         .attr('font-size', 10.5)
         .text((d) => `Cat ${d.category} \u00b7 ${d.date}`)
