@@ -1,4 +1,17 @@
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
+
+const STRINGS = {
+  en: {
+    emphasise: (name) => `Emphasise ${name}'s trajectory on every chart in this section`,
+    focusNote: (name) => `${name}. Focus to emphasise it on every chart in this section.`,
+  },
+  fr: {
+    emphasise: (name) => `Mettre en évidence la trajectoire de ${name} sur chaque graphique de cette section`,
+    focusNote: (name) => `${name}. Sélectionnez pour la mettre en évidence sur chaque graphique de cette section.`,
+  },
+}
 
 // THE KEY FOR A MULTI-NATION CHART: a line preview, its dash pattern, and a
 // name.
@@ -24,6 +37,8 @@ import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlig
 //   className -- layout hook
 export default function SeriesLegend({ styles, pinned, onPin, className = '' }) {
   const { setHighlight } = useNationHighlight()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   if (!styles || styles.length === 0) return null
 
   const pressable = typeof onPin === 'function'
@@ -31,6 +46,7 @@ export default function SeriesLegend({ styles, pinned, onPin, className = '' }) 
   return (
     <ul className={`flex flex-wrap items-center gap-x-4 gap-y-2 ${className}`}>
       {styles.map(({ nation, color, dash }) => {
+        const displayName = nationLabel(nation, language)
         const swatch = (
           <svg width="26" height="8" aria-hidden="true" className="shrink-0">
             <line
@@ -53,14 +69,14 @@ export default function SeriesLegend({ styles, pinned, onPin, className = '' }) 
                 type="button"
                 onClick={() => onPin(pinned === nation ? null : nation)}
                 aria-pressed={pinned === nation}
-                aria-label={`Emphasise ${nation}'s trajectory on every chart in this section`}
+                aria-label={t.emphasise(displayName)}
                 className={`press-target flex min-h-[44px] items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                   pinned === nation ? 'border-accent bg-accent/10' : 'border-transparent hover:border-ink/15'
                 }`}
                 {...highlightHandlers(nation, setHighlight)}
               >
                 {swatch}
-                {nation}
+                {displayName}
               </button>
             </li>
           )
@@ -74,12 +90,12 @@ export default function SeriesLegend({ styles, pinned, onPin, className = '' }) 
             key={nation}
             tabIndex={0}
             role="note"
-            aria-label={`${nation}. Focus to emphasise it on every chart in this section.`}
+            aria-label={t.focusNote(displayName)}
             className="flex cursor-help items-center gap-2 rounded text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             {...highlightHandlers(nation, setHighlight)}
           >
             {swatch}
-            {nation}
+            {displayName}
           </li>
         )
       })}

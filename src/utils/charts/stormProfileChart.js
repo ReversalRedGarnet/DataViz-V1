@@ -6,12 +6,35 @@ import { AXIS_FONT, INT_FORMAT, POP_EASE, STORM_CHART_HEIGHT } from './constants
 import { shortName, textWidth } from './labels.js'
 import { drawXAxis, drawYAxis } from './axes.js'
 import { stormPointTooltip } from './tooltips.jsx'
+import { nationLabel } from '../../content/nations.js'
+
+const STRINGS = {
+  en: {
+    deathsNotReported: 'Deaths not reported',
+    categoryAxis: 'Storm category at closest approach',
+    deathsAxis: 'Deaths',
+  },
+  fr: {
+    deathsNotReported: 'Décès non recensés',
+    categoryAxis: "Catégorie du cyclone à l'approche la plus proche",
+    deathsAxis: 'Décès',
+  },
+}
 
 // Deaths against storm category, one dot per nation-storm stop.
 export function renderStormProfileChart(
   svg,
-  { width, height = STORM_CHART_HEIGHT, rows, showTooltip, hideTooltip, theme = 'light' }
+  {
+    width,
+    height = STORM_CHART_HEIGHT,
+    rows,
+    showTooltip,
+    hideTooltip,
+    theme = 'light',
+    language = 'en',
+  }
 ) {
+  const t = STRINGS[language]
   // Wider than the shared margins: this is the one chart with axis titles.
   const margin = { top: 20, right: 18, bottom: 52, left: 58 }
   const { ink, surface, palette } = chartTheme(theme)
@@ -77,7 +100,7 @@ export function renderStormProfileChart(
       .attr('font-style', 'italic')
       .attr('fill', ink)
       .attr('fill-opacity', 0.6)
-      .text('Deaths not reported')
+      .text(t.deathsNotReported)
   }
   drawXAxis(svg, d3.axisBottom(x).ticks(5).tickFormat(INT_FORMAT), { ink, height, margin })
 
@@ -90,7 +113,7 @@ export function renderStormProfileChart(
     .attr('font-weight', 600)
     .attr('fill', ink)
     .attr('fill-opacity', 0.7)
-    .text('Storm category at closest approach')
+    .text(t.categoryAxis)
 
   svg
     .append('text')
@@ -100,7 +123,7 @@ export function renderStormProfileChart(
     .attr('font-weight', 600)
     .attr('fill', ink)
     .attr('fill-opacity', 0.7)
-    .text('Deaths')
+    .text(t.deathsAxis)
 
   // A hollow marker for deaths that were not caused by the storm directly.
   // Lola's four Solomon Islands deaths were a dysentery outbreak weeks after
@@ -125,14 +148,16 @@ export function renderStormProfileChart(
     .attr('stroke-width', (d) => (isIndirect(d) || d.deaths == null ? 2 : 1.5))
     .attr('stroke-dasharray', (d) => (d.deaths == null ? '3 2' : null))
     .on('pointerenter pointermove', function (event, d) {
-      showTooltip(event, stormPointTooltip(d))
+      showTooltip(event, stormPointTooltip(d, nationLabel(d.name, language), language))
       d3.select(this).transition().duration(motionDuration(120)).attr('r', 10)
     })
     .on('pointerleave', function () {
       hideTooltip()
       d3.select(this).transition().duration(motionDuration(120)).attr('r', 7)
     })
-    .on('click', (event, d) => showTooltip(event, stormPointTooltip(d)))
+    .on('click', (event, d) =>
+      showTooltip(event, stormPointTooltip(d, nationLabel(d.name, language), language))
+    )
 
   points
     .transition()
@@ -163,7 +188,7 @@ export function renderStormProfileChart(
     .attr('font-weight', 600)
     .attr('fill', ink)
     .attr('fill-opacity', 0)
-    .text((d) => shortName(d.name))
+    .text((d) => shortName(d.name, language))
     .transition()
     .delay((_, i) => motionDuration(300 + i * 90))
     .duration(motionDuration(300))

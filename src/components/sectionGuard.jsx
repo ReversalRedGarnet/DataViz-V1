@@ -9,12 +9,15 @@ import EmptyState from './EmptyState.jsx'
 //
 // Returns an element to render instead of the section, or null to carry on.
 //
-//   const blocked = sectionGuard({ data, storm, style, prompt: '...' })
+//   const blocked = sectionGuard({ data, storm, style, prompt: '...', language })
 //   if (blocked) return blocked
 //
 // `prompt` completes the sentence "Pick a storm from the timeline to ..." so
 // each section can say what it specifically offers, which is the part worth
-// varying. `subject` names the section in the loading message.
+// varying. `subject` names the section in the loading message. Both are
+// call-site strings, not {en, fr} objects -- the caller already has its own
+// `language` in scope and passes the resolved string for that language, the
+// same convention every other component here uses for its own copy.
 //
 // `error` is checked before `data`, because a failed load and a load still in
 // flight both arrive here as data === null. Without the distinction a 404 read
@@ -26,31 +29,34 @@ import EmptyState from './EmptyState.jsx'
 // selection, and for want of this it wrote the two data branches out by hand --
 // a seventh copy of the checks this module exists to hold once, and one whose
 // wording had already begun to drift from these.
-export function sectionGuard({ data, error, storm, style, subject, prompt }) {
+const STRINGS = {
+  en: {
+    couldNotLoad: (subject) => `${subject} \u2014 the data could not be loaded. Reload the page to try again.`,
+    waiting: (subject) => `${subject} \u2014 waiting on data.`,
+    pickStorm: (prompt) => `Pick a storm from the timeline to ${prompt}.`,
+  },
+  fr: {
+    couldNotLoad: (subject) => `${subject} \u2014 les données n\u2019ont pas pu être chargées. Rechargez la page pour réessayer.`,
+    waiting: (subject) => `${subject} \u2014 en attente des données.`,
+    pickStorm: (prompt) => `Choisissez un cyclone dans la chronologie pour ${prompt}.`,
+  },
+}
+
+export function sectionGuard({ data, error, storm, style, subject, prompt, language = 'en' }) {
+  const t = STRINGS[language]
+
   if (error) {
-    return (
-      <EmptyState style={style}>
-        {subject} &mdash; the data could not be loaded. Reload the page to try again.
-      </EmptyState>
-    )
+    return <EmptyState style={style}>{t.couldNotLoad(subject)}</EmptyState>
   }
 
   if (!data) {
-    return (
-      <EmptyState style={style}>
-        {subject} &mdash; waiting on data.
-      </EmptyState>
-    )
+    return <EmptyState style={style}>{t.waiting(subject)}</EmptyState>
   }
 
   if (storm === undefined) return null
 
   if (!storm) {
-    return (
-      <EmptyState style={style}>
-        Pick a storm from the timeline to {prompt}.
-      </EmptyState>
-    )
+    return <EmptyState style={style}>{t.pickStorm(prompt)}</EmptyState>
   }
 
   return null

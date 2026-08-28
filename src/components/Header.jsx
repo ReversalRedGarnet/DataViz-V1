@@ -2,9 +2,16 @@ import { useLayoutEffect, useRef } from 'react'
 import ScrollProgress from './ScrollProgress.jsx'
 import SectionNav from './SectionNav.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
+import LanguageToggle from './LanguageToggle.jsx'
 import StoryStateBar from './StoryStateBar.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+
+const TAGLINE = {
+  en: "Climate doesn\u2019t create inequality. It reveals it.",
+  fr: "Le climat ne crée pas les inégalités. Il les révèle.",
+}
 
 // Persistent site header: wordmark, thesis, controls, scroll progress. Fixed
 // from the top, since the progress bar has to be visible there.
@@ -40,6 +47,7 @@ export default function Header({
   onReset,
 }) {
   const headerRef = useRef(null)
+  const { language } = useLanguage()
 
   // useLayoutEffect, not useEffect: this measurement drives another element's
   // layout, so it has to run before paint or the hero flashes unpadded under
@@ -94,11 +102,12 @@ export default function Header({
                 repeating on every section for no gain. Hero carries it there
                 instead, at the top of the piece. */}
             <p className="hidden font-serif text-sm italic leading-snug text-ink/70 sm:block md:border-l md:border-ink/15 md:pl-3 md:text-lg short:text-base">
-              Climate doesn&rsquo;t create inequality. It reveals it.
+              {TAGLINE[language]}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <SectionNav availableIds={availableIds} onNavigate={onNavigate} />
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>

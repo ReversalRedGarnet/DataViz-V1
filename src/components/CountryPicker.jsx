@@ -1,4 +1,21 @@
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
+
+const STRINGS = {
+  en: {
+    chooseCountry: 'Choose a country',
+    orChoose: 'Or choose from the list',
+    notStruck: (name, stormName) => `${name}. Not struck by ${stormName}; shown for comparison.`,
+    missed: 'missed',
+  },
+  fr: {
+    chooseCountry: 'Choisir un pays',
+    orChoose: 'Ou choisir dans la liste',
+    notStruck: (name, stormName) => `${name}. Non touché par ${stormName}\u00A0; affiché à des fins de comparaison.`,
+    missed: 'non touché',
+  },
+}
 
 // The map, as a row of buttons.
 //
@@ -23,6 +40,8 @@ import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlig
 //   onToggle / onPreview -- selection, and the hover/focus summary above
 export default function CountryPicker({ nations, selected, storm, onToggle, onPreview }) {
   const { setHighlight } = useNationHighlight()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
 
   return (
     <div>
@@ -32,14 +51,15 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
           pannable SVG. The wording follows the fact rather than describing the
           desktop arrangement. */}
       <p className="type-eyebrow mb-2 opacity-soft">
-        <span className="sm:hidden">Choose a country</span>
-        <span className="hidden sm:inline">Or choose from the list</span>
+        <span className="sm:hidden">{t.chooseCountry}</span>
+        <span className="hidden sm:inline">{t.orChoose}</span>
       </p>
       <ul className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
         {nations.map((nation) => {
           const index = selected.indexOf(nation.name)
           const picked = index !== -1
           const missed = storm != null && !storm.nations.includes(nation.name)
+          const displayName = nationLabel(nation.name, language)
           return (
             <li key={nation.name}>
               <button
@@ -51,11 +71,7 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
                 onBlur={() => onPreview?.(null)}
                 {...highlightHandlers(nation.name, setHighlight)}
                 aria-pressed={picked}
-                aria-label={
-                  missed
-                    ? `${nation.name}. Not struck by ${storm.name}; shown for comparison.`
-                    : nation.name
-                }
+                aria-label={missed ? t.notStruck(displayName, storm.name) : displayName}
                 className={`press-target flex w-full min-h-[48px] items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel sm:w-auto sm:min-h-[44px] sm:rounded-full sm:py-2 ${
                   picked
                     ? 'border-accent bg-accent/10 font-semibold'
@@ -72,10 +88,10 @@ export default function CountryPicker({ nations, selected, storm, onToggle, onPr
                 >
                   {picked ? index + 1 : '+'}
                 </span>
-                {nation.name}
+                {displayName}
                 {/* Not colour alone: a country the storm missed says so in a
                     word as well as by being drawn faint. */}
-                {missed && <span className="text-[10px] uppercase tracking-wide opacity-soft">missed</span>}
+                {missed && <span className="text-[10px] uppercase tracking-wide opacity-soft">{t.missed}</span>}
                 {/* A tick as well as the badge and the fill: three cues for
                     one state, none of them colour on its own. It sits at the
                     end of a full-width row, which is where a thumb has just

@@ -22,17 +22,53 @@
 //
 // Props:
 //   sources -- array of { label, url }
-//   aboutTitle -- heading for the disclaimer block, default "About this data"
+//   aboutTitle -- heading for the disclaimer block, per-language; default is
+//     the standard {en, fr} pair below. Overridden by whatever page mounts
+//     this with different data, same shape.
 //   children -- optional; replaces the default Cyclone-specific
 //     disclaimer paragraphs so a page with different data gaps/caveats
 //     can say so accurately. Cyclones passes no children.
 //   style -- forwarded onto the <footer>
 import BackgroundPattern from './BackgroundPattern.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
+import LanguageToggle from './LanguageToggle.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 
 const YEAR = new Date().getFullYear()
 
-export default function CitationPanel({ sources = [], aboutTitle = 'About this data', children, style }) {
+const DEFAULT_ABOUT_TITLE = { en: 'About this data', fr: 'À propos de ces données' }
+
+const STRINGS = {
+  en: {
+    dataSources: 'Data sources',
+    noSources: 'No data sources listed yet.',
+    opensNewTab: ' (opens in a new tab)',
+    disclaimer1:
+      'Figures are drawn from official Pacific Data Hub statistics for Solomon Islands, Vanuatu, Fiji and Tonga, covering 2013 to 2024. Coverage varies by country and by metric, and missing figures are labelled unavailable rather than left blank. How the roster was chosen, what the gaps are and where they fall is set out on the previous slide.',
+    disclaimer2:
+      "This site is illustrative and isn\u2019t intended to inform policy, funding, or financial decisions.",
+    copyright: (year) =>
+      `\u00A9 ${year} Aziel Douglas Orihao. Code licensed under MIT (see LICENSE in the repository). Underlying datasets belong to their original sources, listed here, under their own respective licenses.`,
+  },
+  fr: {
+    dataSources: 'Sources des données',
+    noSources: 'Aucune source de données répertoriée pour le moment.',
+    opensNewTab: ' (ouvre un nouvel onglet)',
+    disclaimer1:
+      'Les chiffres proviennent des statistiques officielles du Pacific Data Hub pour les Îles Salomon, Vanuatu, Fidji et Tonga, de 2013 à 2024. La couverture varie selon le pays et l\u2019indicateur, et les chiffres manquants sont indiqués comme non disponibles plutôt que laissés vides. La façon dont la liste des cyclones a été établie, ainsi que la nature et l\u2019emplacement des lacunes, sont expliquées sur la diapositive précédente.',
+    disclaimer2:
+      "Ce site est illustratif et n\u2019a pas vocation à orienter des décisions de politique publique, de financement ou d\u2019ordre financier.",
+    copyright: (year) =>
+      `\u00A9 ${year} Aziel Douglas Orihao. Code sous licence MIT (voir LICENSE dans le dépôt). Les jeux de données sous-jacents appartiennent à leurs sources d\u2019origine, listées ci-dessus, sous leurs propres licences respectives.`,
+  },
+}
+
+export default function CitationPanel({ sources = [], aboutTitle, children, style }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
+  const title = aboutTitle ? (aboutTitle[language] ?? aboutTitle.en) : DEFAULT_ABOUT_TITLE[language]
+
   return (
     <footer
       className="animate-pop-in relative overflow-hidden bg-panel px-6 py-10 text-ink md:py-14"
@@ -54,10 +90,22 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
           content and centre that". An explicit width keeps the column the same
           measure in both layouts. */}
       <div className="section-content relative space-y-8 text-sm">
+        {/* THE SAME PAIR THE POEM CARRIES, AND FOR THE SAME REASON: with the
+            header faded out on this bookend too (see `chromeless` in App.jsx),
+            neither control is reachable any other way from here. See the note
+            in IslanderPoem.jsx -- a reader who set French on slide one still
+            wants French here without it having silently reverted, which is
+            why this pair exists even though the theme toggle alone was judged
+            unnecessary before French existed. */}
+        <div className="flex items-center justify-end gap-1">
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
+
         <div>
-          <h2 className="type-eyebrow mb-3 opacity-80">Data sources</h2>
+          <h2 className="type-eyebrow mb-3 opacity-80">{t.dataSources}</h2>
           {sources.length === 0 ? (
-            <p className="text-ink/75">No data sources listed yet.</p>
+            <p className="text-ink/75">{t.noSources}</p>
           ) : (
             <ul className="space-y-1.5">
               {sources.map((s) => (
@@ -88,7 +136,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
                     className="rounded-sm underline decoration-ink/40 hover:decoration-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
                   >
                     {s.label}
-                    <span className="sr-only"> (opens in a new tab)</span>
+                    <span className="sr-only">{t.opensNewTab}</span>
                   </a>
                 </li>
               ))}
@@ -97,7 +145,7 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
         </div>
 
         <div className="prose-column prose-wide">
-          <h2 className="type-eyebrow mb-3 opacity-80">{aboutTitle}</h2>
+          <h2 className="type-eyebrow mb-3 opacity-80">{title}</h2>
           {children ?? (
             <>
               {/* Trimmed to a pointer. The gaps, the zero-as-unreported rule and
@@ -105,28 +153,17 @@ export default function CitationPanel({ sources = [], aboutTitle = 'About this d
                   sitting under a list of links; they are the subject of the
                   method slide before this one, and stating them twice made
                   neither slide readable. */}
-              <p className="prose-column prose-wide text-ink/85">
-                Figures are drawn from official Pacific Data Hub statistics for Solomon Islands,
-                Vanuatu, Fiji and Tonga, covering 2013 to 2024. Coverage varies by country and by
-                metric, and missing figures are labelled unavailable rather than left blank. How
-                the roster was chosen, what the gaps are and where they fall is set out on the
-                previous slide.
-              </p>
+              <p className="prose-column prose-wide text-ink/85">{t.disclaimer1}</p>
 
               <p className="prose-column prose-wide prose-short mt-3 text-ink/85">
-                This site is illustrative and isn&rsquo;t intended to inform policy, funding, or financial
-                decisions.
+                {t.disclaimer2}
               </p>
             </>
           )}
         </div>
 
         <div className="text-xs text-ink/75">
-          <p>
-            © {YEAR} Aziel Douglas Orihao. Code licensed under MIT (see LICENSE in the repository).
-            Underlying datasets belong to their original sources, listed here, under their own
-            respective licenses.
-          </p>
+          <p>{t.copyright(YEAR)}</p>
         </div>
       </div>
     </footer>

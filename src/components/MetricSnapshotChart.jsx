@@ -3,6 +3,13 @@ import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { renderSnapshotChart, CHART_HEIGHT } from '../utils/charts/index.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 import FigureCaption from './FigureCaption.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
+
+const STRINGS = {
+  en: { country: 'Country', value: 'Value' },
+  fr: { country: 'Pays', value: 'Valeur' },
+}
 
 // One "all nations, one moment" bar chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every snapshot
@@ -52,12 +59,14 @@ export default function MetricSnapshotChart({
   control,
   className = '',
 }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const { svgRef, cardRef, inView } = useChartCanvas({
     height: CHART_HEIGHT,
     ready: rows.length > 0,
     deps: [rows, format, yTickFormat, showTooltip, hideTooltip],
-    draw: (svg, { width, theme }) =>
-      renderSnapshotChart(svg, { width, rows, format, showTooltip, hideTooltip, yTickFormat, theme }),
+    draw: (svg, { width, theme, language }) =>
+      renderSnapshotChart(svg, { width, rows, format, showTooltip, hideTooltip, yTickFormat, theme, language }),
   })
 
   return (
@@ -112,14 +121,14 @@ export default function MetricSnapshotChart({
           <caption>{ariaLabel}</caption>
           <thead>
             <tr>
-              <th scope="col">Country</th>
-              <th scope="col">Value</th>
+              <th scope="col">{t.country}</th>
+              <th scope="col">{t.value}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((d) => (
               <tr key={d.nation}>
-                <td>{d.nation}</td>
+                <td>{nationLabel(d.nation, language)}</td>
                 <td>{format ? format(d.value) : d.value}</td>
               </tr>
             ))}

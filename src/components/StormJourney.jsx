@@ -7,12 +7,14 @@ import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import JourneyScrubber from './JourneyScrubber.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { useLatest } from '../hooks/useLatest.js'
 import { measureViewBoxScale, useViewBoxScale } from '../hooks/useViewBoxScale.js'
 import { useOverflowFade } from '../hooks/useOverflowFade.js'
 import { chartTheme, MAP_COLORS } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
+import { pluralize } from '../utils/pluralize.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 import { drawBasemap, fitToPoints, pacificProjection } from '../utils/map.js'
 import { shortName } from '../content/nations.js'
@@ -32,10 +34,42 @@ import { shortName } from '../content/nations.js'
 // Two notes, because on a phone there is no line to qualify -- see the map's
 // md: gate below. The sourcing half is true either way and is the half that
 // still has to be said.
-const SOURCE_NOTE =
-  'Dates, categories and tolls come from national meteorological services and UN OCHA, cited in ' +
-  'full in the sources.'
-const TRACK_NOTE = 'The line joins documented impact points; it is not the official track. ' + SOURCE_NOTE
+const STRINGS = {
+  en: {
+    sourceNote:
+      'Dates, categories and tolls come from national meteorological services and UN OCHA, cited in full in the sources.',
+    trackNoteSuffix:
+      'The line joins documented impact points; it is not the official track. ',
+    follow: (name) => `Follow ${name}`,
+    reachedCountries: (stormName, count, total) =>
+      `${stormName} reached ${count} of these ${total} countries. Drag the control beside the map, or use the arrow keys, to travel with it.`,
+    scrubberLabel: (name) => `${name}: move between documented impact points`,
+    deathsNotReported: 'deaths not reported',
+    deaths: (n) => `${n} ${pluralize(n, { one: 'death', other: 'deaths' }, 'en')}`,
+    indirect: ', indirect',
+    catLabel: (category, date) => `Cat ${category} \u00b7 ${date}`,
+    notCompiled: (name) => `${name}\u2019s stop-by-stop record has not been compiled yet.`,
+    guardSubject: 'Storm journey',
+    guardPrompt: 'travel with it',
+  },
+  fr: {
+    sourceNote:
+      'Les dates, catégories et bilans proviennent des services météorologiques nationaux et de l\u2019OCHA de l\u2019ONU, cités en intégralité dans les sources.',
+    trackNoteSuffix:
+      'La ligne relie les points d\u2019impact documentés\u00A0; ce n\u2019est pas la trajectoire officielle. ',
+    follow: (name) => `Suivre ${name}`,
+    reachedCountries: (stormName, count, total) =>
+      `${stormName} a touché ${count} de ces ${total} pays. Faites glisser le curseur près de la carte, ou utilisez les flèches du clavier, pour le suivre.`,
+    scrubberLabel: (name) => `${name}\u00A0: se déplacer entre les points d\u2019impact documentés`,
+    deathsNotReported: 'décès non recensés',
+    deaths: (n) => `${n} ${pluralize(n, { one: 'décès', other: 'décès' }, 'fr')}`,
+    indirect: ', indirects',
+    catLabel: (category, date) => `Catég. ${category} \u00b7 ${date}`,
+    notCompiled: (name) => `Le parcours de ${name} n\u2019a pas encore été compilé.`,
+    guardSubject: 'Trajectoire du cyclone',
+    guardPrompt: 'le suivre',
+  },
+}
 
 const WIDTH = 800
 const HEIGHT = 540
@@ -262,6 +296,8 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
     sceneRef.current = null
   }, [storm?.id])
   const { theme } = useTheme()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   // Clamped rather than trusted. The index is shared state and the stop list is
   // per storm -- Harold has four stops, Pam has two -- so a stale index is a
   // read past the end of an array rather than a cosmetic fault. useStory resets
@@ -275,6 +311,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   // repaint the scene, not rebuild it. See hooks/useLatest.js.
   const activeRef = useLatest(active)
   const themeRef = useLatest(theme)
+  const languageRef = useLatest(language)
 
   // How small the fixed viewBox is currently drawn. The stop markers and the
   // cyclone counter-scale by it, so a 12px name is 12px whether the map is a
@@ -371,14 +408,20 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         // "Solomon Is." is 66px where "Solomon Islands" is 92px. The full name
         // is directly beneath in the scrubber readout and again in the stop
         // card, so nothing here is the only place a country is named.
-        .text((d) => shortName(d.name))
+        //
+        // languageRef, not language directly -- build() is a plain function
+        // captured once inside an effect keyed on storm?.id, not language, so
+        // it must read the current language through a ref the same way it
+        // reads theme. The dedicated effect below (paint on language change)
+        // handles any language toggle after this initial build.
+        .text((d) => shortName(d.name, languageRef.current))
       stopInner
         .append('text')
         .attr('class', 'stop-meta')
         .attr('x', LABEL_GAP)
         .attr('y', 14)
         .attr('font-size', 10.5)
-        .text((d) => `Cat ${d.category} \u00b7 ${d.date}`)
+        .text((d) => STRINGS[languageRef.current].catLabel(d.category, d.date))
 
       // The storm itself, riding the head of the drawn track. Two arms and an
       // eye is as much cyclone as survives at this size; the rotation is a CSS
@@ -423,7 +466,20 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
     // the two always change together, a coincidence nothing enforced. activeRef
     // and themeRef are stable ref objects; naming them costs nothing and lets
     // the dependency array be honest.
-  }, [storm?.id, STEPS, activeRef, themeRef])
+  }, [storm?.id, STEPS, activeRef, themeRef, languageRef])
+
+  // Repaint the stop labels on a language change, without rebuilding the
+  // scene -- the same split MapView.jsx makes between its storm-fade effect
+  // and its dedicated marker-label effect. A full rebuild would replay the
+  // track's draw-in animation for a change that has nothing to do with which
+  // storm or stop is showing.
+  useEffect(() => {
+    if (!sceneRef.current) return
+    sceneRef.current.g.selectAll('text.stop-name').text((d) => shortName(d.name, language))
+    sceneRef.current.g
+      .selectAll('text.stop-meta')
+      .text((d) => STRINGS[language].catLabel(d.category, d.date))
+  }, [language])
 
   // Repaint on progress or theme. The scene is also painted at the end of
   // build(), so this effect is the update path rather than the first paint;
@@ -443,14 +499,15 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
     data: true,
     storm,
     style,
-    subject: 'Storm journey',
-    prompt: 'travel with it',
+    subject: t.guardSubject,
+    prompt: t.guardPrompt,
+    language,
   })
   if (blocked) return blocked
   if (!hasSteps) {
     return (
       <EmptyState style={style}>
-        {storm.name}&rsquo;s stop-by-stop record has not been compiled yet.
+        {t.notCompiled(storm.name)}
       </EmptyState>
     )
   }
@@ -465,15 +522,14 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         {STEPS[0].date} &ndash; {STEPS[STEPS.length - 1].date}
       </p>
       <h2 className="type-h2 mb-2">
-        Follow {storm.name}
+        {t.follow(storm.name)}
       </h2>
       <p className="prose-column prose-wide prose-short text-sm opacity-75">
         {/* NATION_COUNT, not a typed 4. Same drift the timeline's eyebrow had:
             the scope of this project is four countries today and the number is
             written down in one place, so this sentence should read it rather
             than repeat it. */}
-        {storm.name} reached {STEPS.length} of these {NATION_COUNT} countries. Drag the control
-        beside the map, or use the arrow keys, to travel with it.
+        {t.reachedCountries(storm.name, STEPS.length, NATION_COUNT)}
       </p>
 
       <div className="journey-split mt-6 md:grid md:grid-cols-2 md:items-start md:gap-10">
@@ -495,7 +551,10 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
           {/* "four documented impact points" was hardcoded. Only Harold has
               four stops; the other five storms have two, and the caption was
               asserting a number the map beside it visibly contradicted. */}
-          <p className="mt-2 text-xs italic leading-snug opacity-soft">{TRACK_NOTE}</p>
+          <p className="mt-2 text-xs italic leading-snug opacity-soft">
+            {t.trackNoteSuffix}
+            {t.sourceNote}
+          </p>
         </div>
 
         <div className="journey-detail mt-5 md:mt-0">
@@ -503,7 +562,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
             stops={STEPS}
             index={active}
             onIndex={onIndex}
-            label={`${storm.name}: move between documented impact points`}
+            label={t.scrubberLabel(storm.name)}
           />
 
         {/*
@@ -525,10 +584,8 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
             <p className="type-meta mt-3 opacity-soft">
               {step.categoryLabel} &middot;{' '}
               {step.deaths == null
-                ? 'deaths not reported'
-                : `${step.deaths} ${step.deaths === 1 ? 'death' : 'deaths'}${
-                    step.deathsKind === 'indirect' ? ', indirect' : ''
-                  }`}
+                ? t.deathsNotReported
+                : `${t.deaths(step.deaths)}${step.deathsKind === 'indirect' ? t.indirect : ''}`}
             </p>
             {step.deathsNote && (
               <p className="mt-2 border-l-2 border-ink/15 pl-3 text-xs italic leading-snug opacity-70">
@@ -542,7 +599,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         {/* The sourcing note on a phone, where there is no track to describe.
             Sits after the detail rather than above it, and is md:hidden so on
             desktop this is not a third grid child. */}
-        <p className="mt-4 text-xs italic leading-snug opacity-soft md:hidden">{SOURCE_NOTE}</p>
+        <p className="mt-4 text-xs italic leading-snug opacity-soft md:hidden">{t.sourceNote}</p>
       </div>
     </Section>
   )

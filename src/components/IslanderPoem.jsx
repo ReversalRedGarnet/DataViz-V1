@@ -1,8 +1,10 @@
 import CoastlineWash from './CoastlineWash.jsx'
 import Section from './Section.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
+import LanguageToggle from './LanguageToggle.jsx'
 import VisuallyHidden from './VisuallyHidden.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 
 // The site's one slide that isn't a finding. It carries no chart and no
 // `requires`, and it is deliberately not counted toward the deck's "N /
@@ -43,7 +45,20 @@ const STANZAS = [
   'You were left to suffer the consequences of a changing world you did not create.',
 ]
 
+// DELIBERATELY ENGLISH-ONLY FOR NOW. Every other piece of copy on the site
+// gets a mechanical or lightly-edited French counterpart; this one doesn't,
+// on purpose -- the ending is deliberately unresolved and accusatory, and a
+// quick pass here risks unconsciously softening exactly the lines that carry
+// that. The plan (see the French-translation build notes) is a first draft,
+// polished with whoever helped shape the English version, then a slower
+// close-reading pass on the wording itself. That hasn't happened yet, so the
+// poem stays English regardless of the toggle above it -- POEM_NOTE_FR below
+// is the one concession, a quiet acknowledgement rather than a silent gap.
+const POEM_NOTE_FR = 'Traduction française du poème à venir.'
+
 export default function IslanderPoem() {
+  const { language } = useLanguage()
+
   return (
     <Section
       width="narrow"
@@ -74,29 +89,35 @@ export default function IslanderPoem() {
           would compete with the poem for the reader's first look, so this
           one exists for screen readers and keyboard focus only. */}
       <VisuallyHidden>
-        <h2>Opening</h2>
+        <h2>{language === 'fr' ? 'Ouverture' : 'Opening'}</h2>
       </VisuallyHidden>
       {/* THE ONE CONTROL THE HEADER USUALLY CARRIES THAT THIS SLIDE STILL
-          NEEDS. With the header faded out (see `chromeless` in App.jsx) the
-          theme toggle is otherwise unreachable here, and this is the first
-          screen of the piece -- a reader who opens the site in the wrong theme
-          would have to page forward to fix it. The sources slide gets no
-          equivalent: a reader who reached the end has had the header on every
-          slide in between.
+          NEEDS -- now two of them. With the header faded out (see `chromeless`
+          in App.jsx) neither the theme toggle nor the language toggle is
+          otherwise reachable here, and this is the first screen of the piece --
+          a reader who opens the site in the wrong theme, or wants French before
+          reading the opening poem's English, would have to page forward to fix
+          it. The sources slide carries the same pair now too (see
+          CitationPanel.jsx): it used to get no equivalent, on the reasoning
+          that a reader who reached the end had had the header on every slide in
+          between -- true for theme, but not for language, since a reader who
+          set French on slide one still wants French on the last slide without
+          it silently reverting.
 
           In flow rather than positioned. .section-content is itself
           `position: relative`, so an absolute child anchors to the reading
           column rather than to the panel, which puts the button in the middle
           of the text instead of out at the corner. A right-aligned row above
           the first stanza costs one line of space and needs no positioning at
-          all. ThemeToggle is self-contained -- it reads the theme from context
-          and takes only a className -- so nothing here depends on Header.
+          all. Both toggles are self-contained -- each reads its own context and
+          takes only a className -- so nothing here depends on Header.
 
           .poem-chrome (styles/slideshow.css) is what carries it out of the
           reading column to the panel's own edge, where it lines up with the
           "Begin" control in the opposite corner and reads as belonging to the
           slide rather than to the poem. */}
-      <div className="poem-chrome mb-10 sm:mb-14">
+      <div className="poem-chrome mb-10 sm:mb-14 flex items-center gap-1">
+        <LanguageToggle />
         <ThemeToggle />
       </div>
       {/* The questions carry full ink and the narration sits back at 85%.
@@ -115,6 +136,9 @@ export default function IslanderPoem() {
           {line}
         </p>
       ))}
+      {language === 'fr' && (
+        <p className="mt-8 text-sm italic text-ink/60">{POEM_NOTE_FR}</p>
+      )}
     </Section>
   )
 }

@@ -18,14 +18,42 @@ import PageSections from './components/PageSections.jsx'
 import DisplayCheck from './components/DisplayCheck.jsx'
 import IslanderPoem from './components/IslanderPoem.jsx'
 import { useDeck } from './hooks/useDeck.js'
-import { PAGE_SECTIONS } from './content/pageSections.js'
+import { PAGE_SECTIONS, sectionLabel } from './content/pageSections.js'
 import { NATION_NAMES } from './content/nations.js'
 import { ThemeProvider } from './hooks/useTheme.jsx'
+import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx'
 import { useStory } from './hooks/useStory.js'
 import { selectionAnnouncement } from './hooks/useSelection.js'
 import { useMetricData } from './hooks/useMetricData.js'
 import { METRICS } from './utils/metrics.js'
-import { STORMS } from './content/storms.js'
+import { STORMS, localizeStorm } from './content/storms.js'
+
+const APP_STRINGS = {
+  en: {
+    skipToContent: 'Skip to main content',
+    openingLabel: 'The Opening',
+    beginCue: 'Begin',
+    chooseStormCue: 'Choose a storm',
+    selectCycloneRequires: 'Select a cyclone',
+    pickCountryRequires: 'Pick a country on the map',
+    stormSelected: (stormName, chain) =>
+      `${stormName} selected. The rest of the story is now available below. ${chain}`,
+    pickStorm: 'Pick a storm from the timeline to continue.',
+    showingChain: 'Showing its ripple chain.',
+  },
+  fr: {
+    skipToContent: 'Passer au contenu principal',
+    openingLabel: "L'ouverture",
+    beginCue: 'Commencer',
+    chooseStormCue: 'Choisir un cyclone',
+    selectCycloneRequires: 'Sélectionner un cyclone',
+    pickCountryRequires: 'Choisir un pays sur la carte',
+    stormSelected: (stormName, chain) =>
+      `${stormName} sélectionné. La suite du récit est maintenant disponible ci-dessous. ${chain}`,
+    pickStorm: 'Choisissez un cyclone dans la chronologie pour continuer.',
+    showingChain: 'Affiche sa chaîne de répercussions.',
+  },
+}
 
 const DATA_SOURCES = [
   // THE DATASETS, FROM THE METRICS THEMSELVES.
@@ -65,13 +93,19 @@ const DATA_SOURCES = [
 // the rest appear once a storm is chosen -- split into two lists rather than
 // filtered from one, so where the story opens out is a structural fact of this
 // file rather than an index somebody has to keep in step.
-const SECTION_LABELS = {
-  ...Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, s.label])),
-  // Not in PAGE_SECTIONS on purpose -- the poem is not a destination the
-  // header's jump-to menu should offer, and it does not count toward the
-  // deck's total (see `cover` below). It still needs a name here, though:
-  // this is what the Hero's "Back" button reads once the poem is behind it.
-  'islander-poem': 'The Opening',
+// Resolved per-language rather than a module constant, since 'islander-poem'
+// (and every PAGE_SECTIONS label) now carries both languages -- see
+// sectionLabel() in content/pageSections.js.
+function sectionLabels(language) {
+  const t = APP_STRINGS[language]
+  return {
+    ...Object.fromEntries(PAGE_SECTIONS.map((s) => [s.id, sectionLabel(s, language)])),
+    // Not in PAGE_SECTIONS on purpose -- the poem is not a destination the
+    // header's jump-to menu should offer, and it does not count toward the
+    // deck's total (see `cover` below). It still needs a name here, though:
+    // this is what the Hero's "Back" button reads once the poem is behind it.
+    'islander-poem': t.openingLabel,
+  }
 }
 
 // The comparison's pickers offer every in-scope nation, not only the two
@@ -80,8 +114,14 @@ const SECTION_LABELS = {
 // content/nations.js; this file used to derive it here, and so did BigPicture,
 // ContextPanel and DivergenceView, each independently.
 
-function pageSections(data, dataError, story, onSelectStorm) {
+function pageSections(data, dataError, story, onSelectStorm, language) {
   const { storm, selected } = story
+  const t = APP_STRINGS[language]
+  // Swapped in once, here, rather than at each of the nine places `storm` is
+  // passed down -- see the note at the top of content/storms.js. Boolean
+  // checks below (`!storm`, `storm?.id`) still read the original `storm`;
+  // only the object actually handed to a child needs its prose localized.
+  const localizedStorm = localizeStorm(storm, language)
 
   return [
     // THE ONE SLIDE THAT ISN'T A FINDING.
@@ -106,7 +146,7 @@ function pageSections(data, dataError, story, onSelectStorm) {
     // `cue` overrides what the *previous* footer's Next button says -- see the
     // note on `cue` in PageSections.jsx. With the poem now in front of it, Hero
     // is the only section whose Next-button label this affects.
-    { id: 'top', cue: 'Begin', element: <Hero /> },
+    { id: 'top', cue: t.beginCue, element: <Hero /> },
     {
       id: 'timeline',
       // The same hold the map uses further down, for the same reason: every
@@ -116,12 +156,12 @@ function pageSections(data, dataError, story, onSelectStorm) {
       // It is also a structural fact rather than only a narrative one: with no
       // storm chosen the later sections do not exist, so there is nothing to
       // walk forward into until this question is answered.
-      requires: storm ? null : 'Select a cyclone',
+      requires: storm ? null : t.selectCycloneRequires,
       // What the opening slide's Next button says. The section is still called
       // "How Often, and to Whom" everywhere it is a destination -- in the menu,
       // in the progress readout -- but the control that walks a reader into it
       // asks them for the one thing it wants.
-      cue: 'Choose a storm',
+      cue: t.chooseStormCue,
       element: <StormTimeline selectedId={storm?.id ?? null} onSelect={onSelectStorm} />,
     },
     ...(!storm
@@ -130,11 +170,11 @@ function pageSections(data, dataError, story, onSelectStorm) {
     {
       id: 'storm-journey',
       element: (
-        <StormJourney storm={storm} index={story.journeyIndex} onIndex={story.setStop} />
+        <StormJourney storm={localizedStorm} index={story.journeyIndex} onIndex={story.setStop} />
       ),
     },
-    { id: 'storm-profile', element: <StormProfile storm={storm} /> },
-    { id: 'big-picture', element: <BigPicture data={data} dataError={dataError} storm={storm} /> },
+    { id: 'storm-profile', element: <StormProfile storm={localizedStorm} /> },
+    { id: 'big-picture', element: <BigPicture data={data} dataError={dataError} storm={localizedStorm} /> },
     {
       id: 'map',
       // Everything from here on is driven by the map's selection: the ripple
@@ -142,10 +182,10 @@ function pageSections(data, dataError, story, onSelectStorm) {
       // past without a country picked would show three empty states in a row
       // and read as a broken site rather than an unanswered question.
       //
-      requires: selected.length === 0 ? 'Pick a country on the map' : null,
+      requires: selected.length === 0 ? t.pickCountryRequires : null,
       element: (
         <MapView
-          storm={storm}
+          storm={localizedStorm}
           selected={selected}
           onToggle={story.toggleNation}
           onClear={story.clearNations}
@@ -158,14 +198,14 @@ function pageSections(data, dataError, story, onSelectStorm) {
         <RippleChain
           data={data}
           dataError={dataError}
-          storm={storm}
+          storm={localizedStorm}
           selectedNations={selected}
           activeMetric={story.activeMetric}
           onActiveMetric={story.setActiveMetric}
         />
       ),
     },
-    { id: 'divergence', element: <DivergenceView data={data} dataError={dataError} storm={storm} /> },
+    { id: 'divergence', element: <DivergenceView data={data} dataError={dataError} storm={localizedStorm} /> },
     { id: 'context', element: <ContextPanel data={data} dataError={dataError} /> },
     {
       id: 'compare',
@@ -173,7 +213,7 @@ function pageSections(data, dataError, story, onSelectStorm) {
         <ComparisonView
           data={data}
           dataError={dataError}
-          storm={storm}
+          storm={localizedStorm}
           selectedNations={selected}
           nations={NATION_NAMES}
           onSetNationAt={story.setNationAt}
@@ -186,12 +226,12 @@ function pageSections(data, dataError, story, onSelectStorm) {
     // is the only honest moment to ask them what they make of it.
     {
       id: 'detective',
-      element: <DataDetective storm={storm} />,
+      element: <DataDetective storm={localizedStorm} />,
     },
     {
       id: 'conclusion',
       element: (
-        <StoryConclusion storm={storm} selectedNations={selected} onReset={story.reset} />
+        <StoryConclusion storm={localizedStorm} selectedNations={selected} onReset={story.reset} />
       ),
     },
     // Method sits second to last, immediately before the sources it explains.
@@ -202,10 +242,12 @@ function pageSections(data, dataError, story, onSelectStorm) {
     // this slide, so its one control points backwards.
     { id: 'sources', chromeless: true, element: <CitationPanel sources={DATA_SOURCES} /> },
         ]),
-  ].map((section) => ({ ...section, label: SECTION_LABELS[section.id] ?? section.id }))
+  ].map((section) => ({ ...section, label: sectionLabels(language)[section.id] ?? section.id }))
 }
 
 function AppShell() {
+  const { language } = useLanguage()
+  const t = APP_STRINGS[language]
   const { data, error: dataError } = useMetricData(METRICS)
   // One hook, one source of truth: the storm, the country pair, the reading
   // mode, the position along the storm's path and the open ripple link. Every
@@ -254,8 +296,8 @@ function AppShell() {
   // `story` is itself memoised (see useStory), so this rebuilds when the
   // reader changes something and not when they scroll.
   const sections = useMemo(
-    () => pageSections(data, dataError, story, story.selectStorm),
-    [data, dataError, story]
+    () => pageSections(data, dataError, story, story.selectStorm, language),
+    [data, dataError, story, language]
   )
   const deck = useDeck(sections)
   const { active, go, goToId } = deck
@@ -310,7 +352,7 @@ function AppShell() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:rounded-br-md focus:bg-ink focus:px-4 focus:py-2 focus:text-white"
       >
-        Skip to main content
+        {t.skipToContent}
       </a>
 
       <Header
@@ -332,11 +374,11 @@ function AppShell() {
           country twice on every arrow press. */}
       <div aria-live="polite" className="sr-only">
         {storm
-          ? `${storm.name} selected. The rest of the story is now available below. ${selectionAnnouncement(
-              story.selected,
-              'Showing its ripple chain.'
-            )}`
-          : 'Pick a storm from the timeline to continue.'}
+          ? t.stormSelected(
+              storm.name,
+              selectionAnnouncement(story.selected, t.showingChain, language)
+            )
+          : t.pickStorm}
       </div>
 
       <main id="main-content" style={{ paddingTop: contentOffset }}>
@@ -359,8 +401,10 @@ function AppShell() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppShell />
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <AppShell />
+      </ThemeProvider>
+    </LanguageProvider>
   )
 }

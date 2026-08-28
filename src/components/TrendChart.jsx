@@ -7,6 +7,32 @@ import { renderMetricChart, CHART_HEIGHT, seriesStyles } from '../utils/charts/i
 import { chartTheme } from '../utils/theme.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 import FigureCaption from './FigureCaption.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
+import { formatNationList } from '../utils/formatNationList.js'
+
+const STRINGS = {
+  en: {
+    defaultEmptyNote: 'Data not available for this metric.',
+    noDataFor: (list) => `No data available for ${list}.`,
+    reportedZero:
+      'A \u201c0\u201d on the baseline is a reported zero. An empty slot is a year with no report at all. Very small values are drawn at a minimum height so they stay visible beside much larger ones \u2014 hover for the exact figure.',
+    tableCaption: (label) => `${label} by year and country`,
+    country: 'Country',
+    year: 'Year',
+    value: 'Value',
+  },
+  fr: {
+    defaultEmptyNote: 'Données non disponibles pour cet indicateur.',
+    noDataFor: (list) => `Aucune donnée disponible pour ${list}.`,
+    reportedZero:
+      'Un «\u00A00\u00A0» sur la ligne de base est un zéro déclaré. Une case vide est une année sans aucune déclaration. Les valeurs très faibles sont dessinées à une hauteur minimale pour rester visibles à côté de valeurs bien plus grandes \u2014 survolez pour le chiffre exact.',
+    tableCaption: (label) => `${label} par année et par pays`,
+    country: 'Pays',
+    year: 'Année',
+    value: 'Valeur',
+  },
+}
 
 // One "selected nations, over time" chart card: heading, chart or placeholder,
 // a missing-nations note, and the matching sr-only table. Every trends section
@@ -63,7 +89,7 @@ export default function TrendChart({
   chartType,
   format,
   yTickFormat,
-  emptyNote = 'Data not available for this metric.',
+  emptyNote,
   showTooltip,
   hideTooltip,
   index = 0,
@@ -77,6 +103,9 @@ export default function TrendChart({
   cardHandlers,
   className = '',
 }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
+  const resolvedEmptyNote = emptyNote ?? t.defaultEmptyNote
   const nationsMissing = nations.filter((n) => !allRows.some((d) => d.nation === n))
   // Only worth explaining where a reported zero is actually on screen.
   const hasReportedZero = chartType === 'bar' && allRows.some((d) => d[valueField] === 0)
@@ -85,7 +114,7 @@ export default function TrendChart({
     height: CHART_HEIGHT,
     ready: allRows?.length > 0,
     deps: [allRows, nations, valueField, chartType, format, yTickFormat, showTooltip, hideTooltip],
-    draw: (svg, { width, theme }) =>
+    draw: (svg, { width, theme, language }) =>
       renderMetricChart(svg, {
         width,
         allRows,
@@ -97,6 +126,7 @@ export default function TrendChart({
         hideTooltip,
         yTickFormat,
         theme,
+        language,
       }),
   })
 
@@ -165,7 +195,7 @@ export default function TrendChart({
           hideTooltip={hideTooltip}
           className="block py-6 text-center text-sm italic opacity-70"
         >
-          {emptyNote}
+          {resolvedEmptyNote}
         </NoDataNote>
       )}
       {allRows.length > 0 && nationsMissing.length > 0 && (
@@ -174,14 +204,12 @@ export default function TrendChart({
           hideTooltip={hideTooltip}
           className="mt-1 inline-block text-xs italic opacity-70"
         >
-          No data available for {nationsMissing.join(' and ')}.
+          {t.noDataFor(formatNationList(nationsMissing.map((n) => nationLabel(n, language)), language))}
         </NoDataNote>
       )}
       {hasReportedZero && (
         <p className="mt-2 text-xs italic leading-snug opacity-70">
-          A &ldquo;0&rdquo; on the baseline is a reported zero. An empty slot is a year with no
-          report at all. Very small values are drawn at a minimum height so they stay visible
-          beside much larger ones &mdash; hover for the exact figure.
+          {t.reportedZero}
         </p>
       )}
       {figure && (
@@ -199,18 +227,18 @@ export default function TrendChart({
       )}
       <VisuallyHidden>
         <table>
-          <caption>{label} by year and country</caption>
+          <caption>{t.tableCaption(label)}</caption>
           <thead>
             <tr>
-              <th scope="col">Country</th>
-              <th scope="col">Year</th>
-              <th scope="col">Value</th>
+              <th scope="col">{t.country}</th>
+              <th scope="col">{t.year}</th>
+              <th scope="col">{t.value}</th>
             </tr>
           </thead>
           <tbody>
             {allRows.map((d) => (
               <tr key={`${d.nation}-${d.year}`}>
-                <td>{d.nation}</td>
+                <td>{nationLabel(d.nation, language)}</td>
                 <td>{d.year}</td>
                 <td>{d[valueField]}</td>
               </tr>

@@ -2,9 +2,10 @@ import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { sectionGuard } from './sectionGuard.jsx'
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { useInView } from '../hooks/useInView.js'
 import { chartColorsFor } from '../utils/theme.js'
-import { NATION_COUNT, NATION_NAMES } from '../content/nations.js'
+import { NATION_COUNT, NATION_NAMES, nationLabel } from '../content/nations.js'
 import { formatNationList } from '../utils/formatNationList.js'
 
 // THE END OF THE ARGUMENT, NOT THE END OF THE PAGE.
@@ -47,6 +48,38 @@ const PATHS = [
   'M8,60 C90,64 150,80 292,104',
 ]
 
+const STRINGS = {
+  en: {
+    whatShowed: (name) => `What ${name} showed`,
+    heading: 'A shared storm is not a shared recovery.',
+    intro: (name, reachedList, year, missedClause, comparedClause) =>
+      `${name} reached ${reachedList} in ${year}${missedClause}. Indexed to their own figures in that year, the four national trajectories start from one point and do not stay together: the harvest, the herds, the power supply and the visitors move by different amounts, for different lengths of time, and the record of them is least complete where the capacity to record was thinnest.${comparedClause} None of that ranks these countries, and this site does not: no trajectory here is a score, and the ones with the largest movements are not the ones that coped worst.`,
+    missedClause: (list) => ` and missed ${list}`,
+    comparedClause: (a, b) => ` You compared ${a} and ${b}; the same storm, and two different afterwards.`,
+    lookAgain: 'Look again',
+    startAgain: 'Start again with another storm',
+    footnote:
+      'Or page back with the footer: the map takes another pair of countries against this same storm, and Where They Part Ways replays the divergence. How the roster was built, what it excludes and where every figure came from are in the two sections after this one.',
+    guardSubject: 'The finding',
+    guardPrompt: 'see what it all adds up to',
+  },
+  fr: {
+    whatShowed: (name) => `Ce qu\u2019a montré ${name}`,
+    heading: 'Un cyclone partagé n\u2019est pas un redressement partagé.',
+    intro: (name, reachedList, year, missedClause, comparedClause) =>
+      `${name} a touché ${reachedList} en ${year}${missedClause}. Indexées à leur propre chiffre de cette année-là, les quatre trajectoires nationales partent d\u2019un même point et ne restent pas ensemble\u00A0: la récolte, le cheptel, l\u2019approvisionnement électrique et les visiteurs évoluent d\u2019amplitudes différentes, sur des durées différentes, et leur suivi est le moins complet là où la capacité à l\u2019assurer était la plus faible.${comparedClause} Rien de tout cela ne classe ces pays, et ce site ne le fait pas\u00A0: aucune trajectoire ici n\u2019est un score, et celles aux mouvements les plus marqués ne sont pas celles qui s\u2019en sont le moins bien sorties.`,
+    missedClause: (list) => ` et n\u2019a pas touché ${list}`,
+    comparedClause: (a, b) =>
+      ` Vous avez comparé ${a} et ${b}\u00A0: le même cyclone, et deux suites différentes.`,
+    lookAgain: 'Regarder à nouveau',
+    startAgain: 'Recommencer avec un autre cyclone',
+    footnote:
+      'Ou revenez en arrière avec le pied de page\u00A0: la carte permet de choisir une autre paire de pays face à ce même cyclone, et « Où les trajectoires divergent » relance la divergence. Comment la liste des cyclones a été établie, ce qu\u2019elle exclut et d\u2019où proviennent tous les chiffres se trouvent dans les deux sections suivantes.',
+    guardSubject: 'Le résultat',
+    guardPrompt: 'voir ce que cela signifie dans son ensemble',
+  },
+}
+
 function ConvergeDiverge({ inView }) {
   const { theme } = useTheme()
   const palette = chartColorsFor(theme)
@@ -78,43 +111,50 @@ function ConvergeDiverge({ inView }) {
 
 export default function StoryConclusion({ storm, selectedNations, onReset, style }) {
   const [sectionRef, inView] = useInView({ threshold: 0.3 })
+  const { language } = useLanguage()
+  const t = STRINGS[language]
 
   const blocked = sectionGuard({
     data: true,
     storm,
     style,
-    subject: 'The finding',
-    prompt: 'see what it all adds up to',
+    subject: t.guardSubject,
+    prompt: t.guardPrompt,
+    language,
   })
   if (blocked) return blocked
 
   const pair = selectedNations ?? []
 
+  const missedClause =
+    storm.nations.length < NATION_COUNT
+      ? t.missedClause(
+          formatNationList(
+            NATION_NAMES.filter((n) => !storm.nations.includes(n)).map((n) => nationLabel(n, language)),
+            language
+          )
+        )
+      : ''
+  const comparedClause =
+    pair.length === 2
+      ? t.comparedClause(nationLabel(pair[0], language), nationLabel(pair[1], language))
+      : ''
+
   return (
     <Section width="narrow" style={style} backdrop={scatterBackdrop('conclusion')}>
       <div ref={sectionRef}>
-        <p className="type-eyebrow mb-1 text-accent">What {storm.name} showed</p>
-        <h2 className="type-h2 mb-3">A shared storm is not a shared recovery.</h2>
+        <p className="type-eyebrow mb-1 text-accent">{t.whatShowed(storm.name)}</p>
+        <h2 className="type-h2 mb-3">{t.heading}</h2>
 
         <div className="md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8">
           <p className="prose-column prose-wide text-sm leading-snug opacity-85">
-            {storm.name} reached {formatNationList(storm.nations)} in {storm.year}
-            {storm.nations.length < NATION_COUNT &&
-              ` and missed ${formatNationList(
-                NATION_NAMES.filter((n) => !storm.nations.includes(n))
-              )}`}
-            . Indexed to their own figures in that year, the four national trajectories start from
-            one point and do not stay together: the harvest, the herds, the power supply and the
-            visitors move by different amounts, for different lengths of time, and the record of
-            them is least complete where the capacity to record was thinnest.
-            {pair.length === 2 && (
-              <>
-                {' '}
-                You compared {pair[0]} and {pair[1]}; the same storm, and two different afterwards.
-              </>
-            )}{' '}
-            None of that ranks these countries, and this site does not: no trajectory here is a
-            score, and the ones with the largest movements are not the ones that coped worst.
+            {t.intro(
+              storm.name,
+              formatNationList(storm.nations.map((n) => nationLabel(n, language)), language),
+              storm.year,
+              missedClause,
+              comparedClause
+            )}
           </p>
           <div className="mt-5 w-full max-w-[320px] md:mt-0 md:w-[300px]">
             <ConvergeDiverge inView={inView} />
@@ -122,19 +162,15 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
         </div>
 
         <div className="mt-8">
-          <p className="type-eyebrow mb-3 text-accent">Look again</p>
+          <p className="type-eyebrow mb-3 text-accent">{t.lookAgain}</p>
           <button
             type="button"
             onClick={onReset}
             className="press-target min-h-[44px] rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            Start again with another storm
+            {t.startAgain}
           </button>
-          <p className="mt-4 figure-prose text-xs italic leading-snug opacity-70">
-            Or page back with the footer: the map takes another pair of countries against this same
-            storm, and Where They Part Ways replays the divergence. How the roster was built, what
-            it excludes and where every figure came from are in the two sections after this one.
-          </p>
+          <p className="mt-4 figure-prose text-xs italic leading-snug opacity-70">{t.footnote}</p>
         </div>
       </div>
     </Section>

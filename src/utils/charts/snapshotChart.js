@@ -13,6 +13,7 @@ import { labelsFit, shortName, valueLabelsFit } from './labels.js'
 import { barTopAndHeight, zeroAnchoredDomain } from './scales.js'
 import { drawXAxis, drawYAxis, drawZeroLine } from './axes.js'
 import { snapshotTooltip } from './tooltips.jsx'
+import { nationLabel } from '../../content/nations.js'
 
 // One bar per nation for a single year.
 export function renderSnapshotChart(
@@ -26,6 +27,7 @@ export function renderSnapshotChart(
     hideTooltip,
     yTickFormat = d3.format('~s'),
     theme = 'light',
+    language = 'en',
   }
 ) {
   const { ink, palette } = chartTheme(theme)
@@ -50,7 +52,7 @@ export function renderSnapshotChart(
     .range([height - margin.bottom, margin.top])
 
   drawYAxis(svg, y, { ink, width, margin, tickFormat: yTickFormat })
-  drawXAxis(svg, d3.axisBottom(x).tickSizeOuter(0).tickFormat(shortName), {
+  drawXAxis(svg, d3.axisBottom(x).tickSizeOuter(0).tickFormat((d) => shortName(d, language)), {
     ink,
     height,
     margin,
@@ -72,14 +74,16 @@ export function renderSnapshotChart(
     .attr('stroke', 'transparent')
     .attr('stroke-width', 1.5)
     .on('pointerenter pointermove', function (event, d) {
-      showTooltip(event, snapshotTooltip(d, format))
+      showTooltip(event, snapshotTooltip(nationLabel(d.nation, language), d.value, format))
       d3.select(this).attr('stroke', palette.single).attr('stroke-opacity', 0.45)
     })
     .on('pointerleave', function () {
       hideTooltip()
       d3.select(this).attr('stroke', 'transparent')
     })
-    .on('click', (event, d) => showTooltip(event, snapshotTooltip(d, format)))
+    .on('click', (event, d) =>
+      showTooltip(event, snapshotTooltip(nationLabel(d.nation, language), d.value, format))
+    )
 
   bars
     .transition()

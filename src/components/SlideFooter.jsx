@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+
+const STRINGS = {
+  en: { back: 'Back', next: 'Next', toContinue: 'To continue' },
+  fr: { back: 'Retour', next: 'Suivant', toContinue: 'Pour continuer' },
+}
 
 // The section's own end, and where to go from it. Named destinations rather
 // than bare arrows: a reader deciding whether to move on should be able to see
@@ -27,6 +33,9 @@ export default function SlideFooter({
   onNavigate,
   requires,
 }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
+
   // A truly disabled button swallows the click, so a reader who presses it
   // gets no answer at all -- and the most likely reason for pressing it is not
   // having noticed what it is asking for. aria-disabled keeps it announced as
@@ -47,7 +56,7 @@ export default function SlideFooter({
           worse than none. Desktop keeps the labels in the buttons. */}
       {(nextLabel || requires) && (
         <p className="deck-destination sm:hidden">
-          <span className="opacity-quiet">{requires ? 'To continue' : 'Next'}</span>{' '}
+          <span className="opacity-quiet">{requires ? t.toContinue : t.next}</span>{' '}
           {requires || nextLabel}
         </p>
       )}
@@ -62,9 +71,9 @@ export default function SlideFooter({
             <span aria-hidden="true" className="deck-btn-arrow">
               &larr;
             </span>
-            <span className="min-w-0 font-medium sm:hidden">Back</span>
+            <span className="min-w-0 font-medium sm:hidden">{t.back}</span>
             <span className="hidden min-w-0 sm:block">
-              <span className="type-meta block opacity-quiet">Back</span>
+              <span className="type-meta block opacity-quiet">{t.back}</span>
               <span className="block truncate font-medium">{prevLabel}</span>
             </span>
           </button>
@@ -97,10 +106,10 @@ export default function SlideFooter({
               nudging ? ' is-refusing' : ''
             }`}
           >
-            <span className="min-w-0 font-medium sm:hidden">Next</span>
+            <span className="min-w-0 font-medium sm:hidden">{t.next}</span>
             <span className="hidden min-w-0 sm:block">
               <span className="type-meta block opacity-quiet">
-                {requires ? 'To continue' : 'Next'}
+                {requires ? t.toContinue : t.next}
               </span>
               <span className="block truncate">{requires || nextLabel}</span>
             </span>

@@ -5,8 +5,9 @@ import { sectionGuard } from './sectionGuard.jsx'
 import Tooltip from './Tooltip.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
-import { NATION_NAMES, NATION_COUNT } from '../content/nations.js'
-import { CHAIN_METRICS } from '../utils/metrics.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { NATION_NAMES, NATION_COUNT, nationLabel } from '../content/nations.js'
+import { CHAIN_METRICS, metricLabel } from '../utils/metrics.js'
 import { formatNationList } from '../utils/formatNationList.js'
 import { missingNations, snapshotRowsByMetric, shareOfPopulationRows } from '../utils/rows.js'
 
@@ -21,7 +22,91 @@ const PER_CAPITA_KEY = 'affected_persons'
 const SHARE_FORMAT = (v) => `${v.toFixed(1)}%`
 const SHARE_TICK_FORMAT = (v) => `${v}%`
 
+// `m.format` and `m.source` come from utils/metrics.js; label/caveat are
+// resolved through metricLabel()/metricCaveat() there. The rest of this
+// page's copy translates now.
+const STRINGS = {
+  en: {
+    heading: 'The Bigger Picture',
+    intro:
+      'A shared disaster, and a recovery shaped by far more than the weather. All four nations at the same moment, before the rest of the story takes them one at a time.',
+    whatHappened: 'What happened',
+    nationsOf: (n, total) => `${n} of ${total} nations`,
+    peopleAffected: (year) => `People affected, ${year}`,
+    notReported: 'Not reported',
+    noFigureFiled: (year) => `No national figure was filed for ${year}`,
+    acrossAllFour: 'Across all four nations combined',
+    hardestVsLeast: 'Hardest- vs. least-hit',
+    notApplicable: 'n/a',
+    vsDetail: (max, min, shareBasis, year) => `${max} vs. ${min}, ${shareBasis} for ${year}`,
+    asShareOfPop: 'as a share of population',
+    byReportedCount: 'by reported count',
+    noComparable: (year) => `No comparable figures for ${year}`,
+    economicLoss: 'Economic loss reported',
+    forYearOfficial: (year) => `For ${year} itself, in the official dataset`,
+    seriesGap: (year) =>
+      `The disaster-impact series does not extend to ${year}. The regional snapshot below is drawn from what was reported; the empty panels are gaps in the record, not a problem with the page.`,
+    regionalSnapshot: (year) => `Regional Snapshot \u2014 ${year}`,
+    snapshotIntro: (stormName) =>
+      `All four nations at one moment rather than over time. Countries ${stormName} did not reach are shown too \u2014 the point of a same-moment comparison is that it includes them.`,
+    noDataAvailable: (year, list) => `No ${year} data available for ${list}.`,
+    noPopFigure: (year, list, plural) =>
+      `No ${year} population figure for ${list}, so ${plural ? 'they are' : 'it is'} left out of this view.`,
+    peopleAffectedShare: 'People affected (share of population)',
+    ariaLabelFor: (label, year) => `${label}, ${year}, by nation`,
+    emptyNote: (year) => `Data not available for ${year}.`,
+    measureGroup: 'Measure people affected as a count or as a share of population',
+    count: 'Count',
+    share: 'Share',
+    shareCaveat:
+      'Figures are divided by each nation\u2019s mid-year population for that year, as an annual all-hazard total. SPC-derived percentages may not match the storm cards\u2019 shares, which use government/PDNA figures for a single event \u2014 e.g., for Cyclone Winston, 69% vs. 62% of Fiji. Both are reported figures.',
+    guardSubject: 'The bigger picture',
+    guardPrompt: 'see how the region looked that year',
+  },
+  fr: {
+    heading: "Vue d'ensemble",
+    intro:
+      "Une catastrophe partagée, et un redressement façonné par bien plus que la météo. Les quatre nations au même moment, avant que le reste du récit ne les prenne une à une.",
+    whatHappened: 'Ce qui s\u2019est passé',
+    nationsOf: (n, total) => `${n} nation(s) sur ${total}`,
+    peopleAffected: (year) => `Personnes touchées, ${year}`,
+    notReported: 'Non recensé',
+    noFigureFiled: (year) => `Aucun chiffre national n\u2019a été déclaré pour ${year}`,
+    acrossAllFour: 'Sur l\u2019ensemble des quatre nations',
+    hardestVsLeast: 'Le plus touché vs le moins touché',
+    notApplicable: 's.o.',
+    vsDetail: (max, min, shareBasis, year) => `${max} vs ${min}, ${shareBasis} pour ${year}`,
+    asShareOfPop: 'en proportion de la population',
+    byReportedCount: 'selon le nombre déclaré',
+    noComparable: (year) => `Aucun chiffre comparable pour ${year}`,
+    economicLoss: 'Pertes économiques déclarées',
+    forYearOfficial: (year) => `Pour ${year} même, dans le jeu de données officiel`,
+    seriesGap: (year) =>
+      `La série d\u2019impact des catastrophes ne s\u2019étend pas jusqu\u2019à ${year}. L\u2019aperçu régional ci-dessous est établi à partir de ce qui a été déclaré\u00A0; les panneaux vides sont des lacunes dans les données, pas un problème d\u2019affichage.`,
+    regionalSnapshot: (year) => `Aperçu régional \u2014 ${year}`,
+    snapshotIntro: (stormName) =>
+      `Les quatre nations à un même moment plutôt que dans le temps. Les pays que ${stormName} n\u2019a pas touchés sont aussi affichés \u2014 l\u2019intérêt d\u2019une comparaison au même moment est justement de les inclure.`,
+    noDataAvailable: (year, list) => `Aucune donnée disponible pour ${year} concernant ${list}.`,
+    noPopFigure: (year, list, plural) =>
+      `Aucun chiffre de population pour ${year} concernant ${list}, ${
+        plural ? 'ils sont donc exclus' : 'il est donc exclu'
+      } de cette vue.`,
+    peopleAffectedShare: 'Personnes touchées (part de la population)',
+    ariaLabelFor: (label, year) => `${label}, ${year}, par nation`,
+    emptyNote: (year) => `Données non disponibles pour ${year}.`,
+    measureGroup: 'Mesurer les personnes touchées en nombre ou en proportion de la population',
+    count: 'Nombre',
+    share: 'Proportion',
+    shareCaveat:
+      'Les chiffres sont divisés par la population en milieu d\u2019année de chaque nation pour cette année-là, en tant que total annuel tous risques confondus. Les pourcentages dérivés du SPC peuvent différer des parts indiquées sur les fiches de cyclones, qui utilisent des chiffres gouvernementaux/PDNA pour un seul événement \u2014 par exemple, pour le cyclone Winston, 69\u00A0% contre 62\u00A0% pour Fidji. Les deux sont des chiffres déclarés.',
+    guardSubject: "Vue d'ensemble",
+    guardPrompt: 'voir à quoi ressemblait la région cette année-là',
+  },
+}
+
 export default function BigPicture({ data, dataError, storm, style }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const eventYear = storm?.year ?? null
   const [perCapita, setPerCapita] = useState(false)
   const hasPopulation = (data?.population?.length ?? 0) > 0
@@ -44,21 +129,19 @@ export default function BigPicture({ data, dataError, storm, style }) {
     error: dataError,
     storm,
     style,
-    subject: 'The bigger picture',
-    prompt: 'see how the region looked that year',
+    subject: t.guardSubject,
+    prompt: t.guardPrompt,
+    language,
   })
   if (blocked) return blocked
 
   return (
     <Section style={style} backdrop={scatterBackdrop('big-picture')}>
       <div ref={containerRef} className="relative">
-        <h2 className="type-h2 mb-2">The Bigger Picture</h2>
+        <h2 className="type-h2 mb-2">{t.heading}</h2>
 
         <div className="prose-column prose-wide prose-short space-y-3 text-sm opacity-80">
-          <p>
-            A shared disaster, and a recovery shaped by far more than the weather. All four nations
-            at the same moment, before the rest of the story takes them one at a time.
-          </p>
+          <p>{t.intro}</p>
         </div>
 
         {/* No loading branch here. sectionGuard above has already returned for
@@ -67,37 +150,36 @@ export default function BigPicture({ data, dataError, storm, style }) {
         <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatTile
             index={0}
-            label="What happened"
-            value={`${storm.nations.length} of ${NATION_COUNT} nations`}
+            label={t.whatHappened}
+            value={t.nationsOf(storm.nations.length, NATION_COUNT)}
             detail={`${storm.name}, ${storm.year}`}
           />
           <StatTile
             index={1}
-            label={`People affected, ${storm.year}`}
-            value={stats.totalAffected == null ? 'Not reported' : stats.totalAffected.toLocaleString()}
-            detail={
-              stats.totalAffected == null
-                ? `No national figure was filed for ${storm.year}`
-                : 'Across all four nations combined'
-            }
+            label={t.peopleAffected(storm.year)}
+            value={stats.totalAffected == null ? t.notReported : stats.totalAffected.toLocaleString(language === 'fr' ? 'fr' : 'en')}
+            detail={stats.totalAffected == null ? t.noFigureFiled(storm.year) : t.acrossAllFour}
           />
           <StatTile
             index={2}
-            label="Hardest- vs. least-hit"
-            value={stats.ratio ? `${stats.ratio.toLocaleString()}×` : 'n/a'}
+            label={t.hardestVsLeast}
+            value={stats.ratio ? `${stats.ratio.toLocaleString(language === 'fr' ? 'fr' : 'en')}\u00d7` : t.notApplicable}
             detail={
               stats.maxNation
-                ? `${stats.maxNation} vs. ${stats.minNation}, ${
-                    showShareStats ? 'as a share of population' : 'by reported count'
-                  } for ${storm.year}`
-                : `No comparable figures for ${storm.year}`
+                ? t.vsDetail(
+                    nationLabel(stats.maxNation, language),
+                    nationLabel(stats.minNation, language),
+                    showShareStats ? t.asShareOfPop : t.byReportedCount,
+                    storm.year
+                  )
+                : t.noComparable(storm.year)
             }
           />
           <StatTile
             index={3}
-            label="Economic loss reported"
-            value={`${stats.economicLossReported} of ${NATION_COUNT} nations`}
-            detail={`For ${storm.year} itself, in the official dataset`}
+            label={t.economicLoss}
+            value={t.nationsOf(stats.economicLossReported, NATION_COUNT)}
+            detail={t.forYearOfficial(storm.year)}
           />
         </div>
 
@@ -105,23 +187,13 @@ export default function BigPicture({ data, dataError, storm, style }) {
             four tiles and five charts that all happen to be empty. This is a
             reporting gap, which is one of the things this site is about -- so
             it is stated as a finding, not shown as a failure. */}
-        {stats.totalAffected == null && (
-          <p className="mt-3 text-sm opacity-70">
-            The disaster-impact series does not extend to {storm.year}. The regional snapshot below
-            is drawn from what was reported; the empty panels are gaps in the record, not a problem
-            with the page.
-          </p>
-        )}
+        {stats.totalAffected == null && <p className="mt-3 text-sm opacity-70">{t.seriesGap(storm.year)}</p>}
 
         {snapshots && (
           <div className="mt-6">
-            <h3 className="type-subhead mb-1 text-accent">
-              Regional Snapshot — {storm.year}
-            </h3>
+            <h3 className="type-subhead mb-1 text-accent">{t.regionalSnapshot(storm.year)}</h3>
             <p className="prose-column prose-wide prose-short mb-3 text-sm opacity-80">
-              All four nations at one moment rather than over time. Countries {storm.name} did not
-              reach are shown too &mdash; the point of a same-moment comparison is that it includes
-              them.
+              {t.snapshotIntro(storm.name)}
             </p>
             <div className="section-bleed mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {CHAIN_METRICS.map((m, i) => {
@@ -152,33 +224,35 @@ export default function BigPicture({ data, dataError, storm, style }) {
                 const notReported = nationsMissing.filter((n) => !noDenominator.includes(n))
                 const missingNote = [
                   notReported.length > 0
-                    ? `No ${storm.year} data available for ${formatNationList(notReported)}.`
+                    ? t.noDataAvailable(storm.year, formatNationList(notReported.map((n) => nationLabel(n, language)), language))
                     : '',
                   noDenominator.length > 0
-                    ? `No ${storm.year} population figure for ${formatNationList(noDenominator)}, so ${
-                        noDenominator.length > 1 ? 'they are' : 'it is'
-                      } left out of this view.`
+                    ? t.noPopFigure(
+                        storm.year,
+                        formatNationList(noDenominator.map((n) => nationLabel(n, language)), language),
+                        noDenominator.length > 1
+                      )
                     : '',
                 ]
                   .filter(Boolean)
                   .join(' ')
-                const label = showShare ? 'People affected (share of population)' : m.label
+                const label = showShare ? t.peopleAffectedShare : metricLabel(m, language)
                 return (
                   <MetricSnapshotChart
                     key={m.key}
                     figure={{ key: SNAPSHOT_FIGURES[m.key], title: `${label}, ${storm.year}`, source: m.source }}
                     label={label}
-                    ariaLabel={`${label}, ${storm.year}, by nation`}
+                    ariaLabel={t.ariaLabelFor(label, storm.year)}
                     rows={rows}
                     nationsMissing={nationsMissing}
                     missingNote={missingNote}
-                    emptyNote={`Data not available for ${storm.year}.`}
+                    emptyNote={t.emptyNote(storm.year)}
                     format={showShare ? SHARE_FORMAT : m.format}
                     yTickFormat={showShare ? SHARE_TICK_FORMAT : undefined}
-                    caveat={showShare ? SHARE_CAVEAT : undefined}
+                    caveat={showShare ? t.shareCaveat : undefined}
                     control={
                       offerToggle ? (
-                        <PerCapitaToggle value={perCapita} onChange={setPerCapita} />
+                        <PerCapitaToggle value={perCapita} onChange={setPerCapita} language={language} />
                       ) : undefined
                     }
                     showTooltip={showTooltip}
@@ -210,19 +284,8 @@ const SNAPSHOT_FIGURES = {
   tourist_arrivals: 'snapshot-tourism',
 }
 
-// What the percentage version cannot be read as. The count already carries its
-// own caveats in metrics.js; these are the ones the division adds.
-//
-// The source note is here rather than only in the methods panel because this is
-// where the conflict becomes visible: the storm cards quote shares from
-// government and PDNA assessments, and dividing the SPC series gives a
-// different figure for the same event. Naming both is the only honest option --
-// silently printing 68.9% beside a card that says 62% invites the reader to
-// assume one of them is a mistake.
-const SHARE_CAVEAT =
-  'Figures are divided by each nation\u2019s mid-year population for that year, as an annual all-hazard total. SPC-derived percentages may not match the storm cards\u2019 shares, which use government/PDNA figures for a single event \u2014 e.g., for Cyclone Winston, 69% vs. 62% of Fiji. Both are reported figures.'
-
-function PerCapitaToggle({ value, onChange }) {
+function PerCapitaToggle({ value, onChange, language }) {
+  const t = STRINGS[language]
   const option = (active) =>
     `press-target rounded-md px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
       active ? 'bg-accent/15 font-semibold text-accent' : 'opacity-70 hover:opacity-100'
@@ -231,14 +294,14 @@ function PerCapitaToggle({ value, onChange }) {
   return (
     <div
       role="group"
-      aria-label="Measure people affected as a count or as a share of population"
+      aria-label={t.measureGroup}
       className="flex shrink-0 items-center rounded-lg border border-ink/15 p-0.5 text-xs"
     >
       <button type="button" onClick={() => onChange(false)} aria-pressed={!value} className={option(!value)}>
-        Count
+        {t.count}
       </button>
       <button type="button" onClick={() => onChange(true)} aria-pressed={value} className={option(value)}>
-        Share
+        {t.share}
       </button>
     </div>
   )
@@ -335,4 +398,3 @@ function computeStats(data, eventYear, perCapita) {
 
   return { totalAffected, maxNation, minNation, ratio, economicLossReported }
 }
-

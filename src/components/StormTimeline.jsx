@@ -1,20 +1,61 @@
 import { useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
-import { NATION_NAMES } from '../content/nations.js'
+import { NATION_NAMES, nationLabel } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
-import { STORMS, ROSTER_START, ROSTER_END, strikeCounts } from '../content/storms.js'
+import { STORMS, ROSTER_START, ROSTER_END, strikeCounts, localizeStorm } from '../content/storms.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 import { formatNationList } from '../utils/formatNationList.js'
 import { useOverflowFade } from '../hooks/useOverflowFade.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 
 const YEARS = Array.from({ length: ROSTER_END - ROSTER_START + 1 }, (_, i) => ROSTER_START + i)
 
 // Counts set in words, because the eyebrow and the button labels are prose and
 // a digit reads as data there. The helper is shared -- see utils/numberWords.js
 // for the drift it closes and why the roster figures are computed rather than
-// typed.
-const NATION_COUNT_WORD = numberWord(NATION_NAMES.length)
+// typed. Resolved per-language inside the component now rather than as a
+// module constant, since numberWord takes a language.
+
+// `m.label`/`storm.note` etc. from content/storms.js are still English-only;
+// everything else on this slide translates.
+const STRINGS = {
+  en: {
+    cardAria: (name, year, count, total) => `${name}, ${year}. Struck ${count} of ${total} nations.`,
+    selected: 'Selected',
+    reachedNote: (list, count, total) => `Reached ${list} \u2014 ${count} of ${total} nations in scope.`,
+    pointAt: 'Point at a cyclone, or tab to one, to see where it went. Press it to follow it.',
+    eyebrow: (start, end, stormWord, nationWord) =>
+      `${start}\u2013${end} \u00b7 ${stormWord} severe cyclones \u00b7 ${nationWord} Pacific nations`,
+    heading: 'How often, and to whom',
+    intro: (start, end) =>
+      `This site records every severe cyclone that struck more than one of these four nations from ${start}\u2013${end}.`,
+    countAria: (count, nation, start, end) =>
+      `${count} severe cyclones struck ${nation} between ${start} and ${end}.`,
+    strucRow: (nation) => `severe cyclones struck ${nation}`,
+    selectCyclone: 'Select a cyclone',
+    axisLabel: (start, end) => `Severe cyclones by year, ${start} to ${end}`,
+    of: 'of',
+  },
+  fr: {
+    cardAria: (name, year, count, total) => `${name}, ${year}. A touché ${count} des ${total} nations.`,
+    selected: 'Sélectionné',
+    reachedNote: (list, count, total) =>
+      `A touché ${list} \u2014 ${count} des ${total} nations concernées.`,
+    pointAt: 'Pointez un cyclone, ou naviguez jusqu\u2019à un, pour voir où il est passé. Sélectionnez-le pour le suivre.',
+    eyebrow: (start, end, stormWord, nationWord) =>
+      `${start}\u2013${end} \u00b7 ${stormWord} cyclones sévères \u00b7 ${nationWord} nations du Pacifique`,
+    heading: 'À quelle fréquence, et pour qui',
+    intro: (start, end) =>
+      `Ce site recense chaque cyclone sévère ayant touché plus d\u2019une de ces quatre nations entre ${start} et ${end}.`,
+    countAria: (count, nation, start, end) =>
+      `${count} cyclones sévères ont touché ${nation} entre ${start} et ${end}.`,
+    strucRow: (nation) => `cyclones sévères ont touché ${nation}`,
+    selectCyclone: 'Choisir un cyclone',
+    axisLabel: (start, end) => `Cyclones sévères par année, ${start} à ${end}`,
+    of: 'sur',
+  },
+}
 
 // The opening. Six storms on a ten-year axis, and the strike count per nation
 // above it.
@@ -60,7 +101,7 @@ function CoverageDots({ struck }) {
 // `awaiting` is true only while no storm is chosen; it drives the faint accent
 // ring that marks these as the thing to press. `strip` is the phone-sized
 // variant: same button, same handlers, same state, sized to be thumbed.
-function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, row = false, strip = false }) {
+function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, row = false, strip = false, t }) {
   return (
     <button
       type="button"
@@ -75,7 +116,7 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
       onFocus={() => onPreview(storm.id)}
       onBlur={() => onPreview(null)}
       aria-pressed={active}
-      aria-label={`${storm.name}, ${storm.year}. Struck ${storm.nations.length} of ${NATION_COUNT_WORD} nations.`}
+      aria-label={t.cardAria(storm.name, storm.year, storm.nations.length, NATION_NAMES.length)}
       style={awaiting ? { animationDelay: `${delay}ms` } : undefined}
       className={`press-target storm-card relative cursor-pointer rounded-lg border text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
         strip ? 'h-full w-full rounded-xl px-4 py-3.5' : 'min-h-[44px] px-2.5 py-2'
@@ -110,7 +151,7 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
       >
         <CoverageDots struck={storm.nations} />
         <span className="text-[10px] leading-none tabular-nums opacity-soft">
-          {storm.nations.length} of {NATION_NAMES.length}
+          {storm.nations.length} {t.of} {NATION_NAMES.length}
         </span>
       </span>
     </button>
@@ -123,7 +164,7 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
 // could not check against content/storms.js. It shows the hovered or focused
 // storm if there is one and otherwise the selected storm, so the panel is never
 // empty once a choice has been made.
-function StormPreview({ storm, selected }) {
+function StormPreview({ storm, selected, t, language }) {
   // Re-measured whenever the storm changes: the same box overflows for one
   // storm's note and has room to spare for the next.
   const { ref: scrollRef, overflowing } = useOverflowFade([storm?.id])
@@ -142,22 +183,23 @@ function StormPreview({ storm, selected }) {
             <span className="type-eyebrow text-accent">{storm.year}</span>
             {selected && (
               <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-                Selected
+                {t.selected}
               </span>
             )}
           </div>
           <p className="mt-1 text-xs opacity-70">
-            Reached {formatNationList(storm.nations)} &mdash; {storm.nations.length} of{' '}
-            {NATION_COUNT_WORD} nations in scope.
+            {t.reachedNote(
+              formatNationList(storm.nations.map((n) => nationLabel(n, language)), language),
+              storm.nations.length,
+              numberWord(NATION_NAMES.length, { language, gender: 'f' })
+            )}
           </p>
           <p className="mt-2 figure-prose text-sm opacity-85">
             {storm.note ?? storm.profile?.[0]?.lead ?? ''}
           </p>
         </>
       ) : (
-        <p className="text-sm opacity-soft">
-          Point at a cyclone, or tab to one, to see where it went. Press it to follow it.
-        </p>
+        <p className="text-sm opacity-soft">{t.pointAt}</p>
       )}
       </div>
     </div>
@@ -166,9 +208,11 @@ function StormPreview({ storm, selected }) {
 
 export default function StormTimeline({ selectedId, onSelect, style }) {
   const { setHighlight } = useNationHighlight()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const counts = strikeCounts(NATION_NAMES)
   const awaiting = selectedId == null
-  const axisLabel = `Severe cyclones by year, ${ROSTER_START} to ${ROSTER_END}`
+  const axisLabel = t.axisLabel(ROSTER_START, ROSTER_END)
   // Hover/focus only. The committed choice lives in App's story state; this is
   // the transient one, and keeping the two apart is what lets the reader look
   // at a second storm without losing the one they are following.
@@ -177,7 +221,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
   // site got an affordance back when the scrollbars went. See useOverflowFade.
   const { ref: stripRef, overflowing: stripOverflowing } = useOverflowFade([], { axis: 'x' })
   const shownId = previewId ?? selectedId
-  const shown = STORMS.find((s) => s.id === shownId) ?? null
+  const shown = localizeStorm(STORMS.find((s) => s.id === shownId) ?? null, language)
 
   // Stagger index, assigned in roster order rather than per year, so the rings
   // travel left to right across the axis instead of pulsing in unison.
@@ -192,16 +236,15 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
         is nothing left for a side column, and a timeline wants the full measure.
       */}
       <p className="type-eyebrow mb-1 text-accent">
-        {ROSTER_START}&ndash;{ROSTER_END} &middot; {numberWordCapitalized(STORMS.length)} severe
-        cyclones &middot; {numberWordCapitalized(NATION_NAMES.length)} Pacific nations
+        {t.eyebrow(
+          ROSTER_START,
+          ROSTER_END,
+          numberWordCapitalized(STORMS.length, { language, gender: 'm' }),
+          numberWordCapitalized(NATION_NAMES.length, { language, gender: 'f' })
+        )}
       </p>
-      <h2 className="type-h2 mb-2">
-        How often, and to whom
-      </h2>
-      <p className="figure-prose text-sm opacity-80">
-        This site records every severe cyclone that struck more than one of these four nations from{' '}
-        {ROSTER_START}&ndash;{ROSTER_END}.
-      </p>
+      <h2 className="type-h2 mb-2">{t.heading}</h2>
+      <p className="figure-prose text-sm opacity-80">{t.intro(ROSTER_START, ROSTER_END)}</p>
 
       {/* The cards take focus so a keyboard user can reach the cross-chart
           highlight, which is otherwise pointer-only. Each carries its own full
@@ -213,7 +256,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
             key={nation}
             tabIndex={0}
             role="note"
-            aria-label={`${count} severe cyclones struck ${nation} between ${ROSTER_START} and ${ROSTER_END}.`}
+            aria-label={t.countAria(count, nationLabel(nation, language), ROSTER_START, ROSTER_END)}
             className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 short:p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
             {...highlightHandlers(nation, setHighlight)}
           >
@@ -221,7 +264,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
               {count}
             </p>
             <p aria-hidden="true" className="mt-1 text-xs leading-snug opacity-70">
-              severe cyclones struck {nation}
+              {t.strucRow(nationLabel(nation, language))}
             </p>
           </li>
         ))}
@@ -231,7 +274,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
           slide and the ring alone can't say what pressing one is for. */}
       <p className="type-eyebrow mt-7 flex items-center gap-2 text-accent short:mt-5">
         <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
-        Select a cyclone
+        {t.selectCyclone}
       </p>
 
       {/*
@@ -262,6 +305,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
                     delay={delayOf(storm.id)}
                     onSelect={onSelect}
                     onPreview={setPreviewId}
+                    t={t}
                   />
                 ))}
               </div>
@@ -330,6 +374,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
               onSelect={onSelect}
               onPreview={setPreviewId}
               strip
+              t={t}
             />
           </li>
         ))}
@@ -339,7 +384,12 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
           opening inside the timeline would move every other card whenever the
           pointer crossed one; a fixed place to look means the reader's eye
           learns where the answer appears and stays there. */}
-      <StormPreview storm={shown} selected={shown != null && shown.id === selectedId} />
+      <StormPreview
+        storm={shown}
+        selected={shown != null && shown.id === selectedId}
+        t={t}
+        language={language}
+      />
     </Section>
   )
 }

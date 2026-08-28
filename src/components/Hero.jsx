@@ -2,9 +2,66 @@ import { useState } from 'react'
 import PageHero from './PageHero.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { STORMS, ROSTER_START, ROSTER_END } from '../content/storms.js'
-import { NATIONS, NATION_COUNT } from '../content/nations.js'
+import { NATIONS, NATION_COUNT, nationLabel } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { numberWordCapitalized } from '../utils/numberWords.js'
+import { formatNationList } from '../utils/formatNationList.js'
+
+const STRINGS = {
+  en: {
+    tagline: "Climate doesn\u2019t create inequality. It reveals it.",
+    kicker: (start, end, stormWord, nationWord) =>
+      `${start}\u2013${end} \u00b7 ${stormWord} severe cyclones \u00b7 ${nationWord} Pacific nations`,
+    headline: (start, end) =>
+      `Between ${start} and ${end}, each of these nations was struck multiple times. No two recovered the same way.`,
+    body: (nationsList, stormWord) => (
+      <>
+        {nationsList} share an ocean as well as a cyclone season.{' '}
+        <strong className="font-semibold">The same storm</strong> may sweep through different
+        territories, yet <strong className="font-semibold">the aftermath</strong> is seldom ever
+        the same. {stormWord} severe storms, followed through{' '}
+        <strong className="font-semibold">official records</strong> from trusted sources and
+        examined across key factors, reveal why the same weather can produce such{' '}
+        <strong className="font-semibold">different outcomes</strong>.
+      </>
+    ),
+    struckSentence: (name, count, total, labels) => (
+      <>
+        <span className="font-semibold">{name}</span> was in the path of{' '}
+        <span className="font-semibold text-accent">{count}</span> of these {total} storms{' \u2014 '}
+        {labels}.
+      </>
+    ),
+    pointAt: 'Point at a country, or press one, to see its share of the decade.',
+  },
+  fr: {
+    tagline: "Le climat ne crée pas les inégalités. Il les révèle.",
+    kicker: (start, end, stormWord, nationWord) =>
+      `${start}\u2013${end} \u00b7 ${stormWord} cyclones sévères \u00b7 ${nationWord} nations du Pacifique`,
+    headline: (start, end) =>
+      `Entre ${start} et ${end}, chacune de ces nations a été frappée à plusieurs reprises. Aucune ne s\u2019en est redressée de la même façon.`,
+    body: (nationsList, stormWord) => (
+      <>
+        {nationsList} partagent un océan autant qu’une saison cyclonique.{' '}
+        <strong className="font-semibold">Le même cyclone</strong> peut traverser des territoires
+        différents, et pourtant <strong className="font-semibold">les suites</strong> sont rarement
+        les mêmes. {stormWord} cyclones sévères, suivis à travers{' '}
+        <strong className="font-semibold">des données officielles</strong> issues de sources fiables
+        et examinés selon des facteurs clés, révèlent pourquoi une même intempérie peut produire des{' '}
+        <strong className="font-semibold">résultats aussi différents</strong>.
+      </>
+    ),
+    struckSentence: (name, count, total, labels) => (
+      <>
+        <span className="font-semibold">{name}</span>{' s\u2019est trouvé sur la trajectoire de '}
+        <span className="font-semibold text-accent">{count}</span> de ces {total} cyclones{' \u2014 '}
+        {labels}.
+      </>
+    ),
+    pointAt: 'Pointez un pays, ou sélectionnez-en un, pour voir sa part de la décennie.',
+  },
+}
 
 // The opening claim is a count, not a trend. Every figure in the headline is
 // computed from the roster, so a change to content/storms.js reaches the first
@@ -16,6 +73,8 @@ import { numberWordCapitalized } from '../utils/numberWords.js'
 // that the marks under the headline mean something.
 export default function Hero({ style }) {
   const { setHighlight } = useNationHighlight()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   // Which nation the reader is pointing at, and whether they pinned it. Pinning
   // exists because hover does not: on a touch screen there is no pointer to
   // rest, and an opening whose only interaction is hover is an opening with no
@@ -33,10 +92,13 @@ export default function Hero({ style }) {
 
   return (
     <PageHero
-      kicker={`${ROSTER_START}\u2013${ROSTER_END} \u00b7 ${numberWordCapitalized(
-        STORMS.length
-      )} severe cyclones \u00b7 ${numberWordCapitalized(NATION_COUNT)} Pacific nations`}
-      headline={`Between ${ROSTER_START} and ${ROSTER_END}, each of these nations was struck multiple times. No two recovered the same way.`}
+      kicker={t.kicker(
+        ROSTER_START,
+        ROSTER_END,
+        numberWordCapitalized(STORMS.length, { language, gender: 'm' }),
+        numberWordCapitalized(NATION_COUNT, { language, gender: 'f' })
+      )}
+      headline={t.headline(ROSTER_START, ROSTER_END)}
       // FOUR BOLD PHRASES, AND THEY ARE THE DECK'S SPINE.
       //
       // Not emphasis in the ordinary sense -- nothing here is being said
@@ -51,17 +113,10 @@ export default function Hero({ style }) {
       // because the bold set is small enough to take in at a glance and maps
       // onto something; a paragraph with eight bold phrases is a paragraph
       // with none.
-      body={
-        <>
-          Solomon Islands, Vanuatu, Fiji and Tonga share an ocean as well as a cyclone season.{' '}
-          <strong className="font-semibold">The same storm</strong> may sweep through different
-          territories, yet <strong className="font-semibold">the aftermath</strong> is seldom ever
-          the same. {numberWordCapitalized(STORMS.length)} severe storms, followed through{' '}
-          <strong className="font-semibold">official records</strong> from trusted sources and
-          examined across key factors, reveal why the same weather can produce such{' '}
-          <strong className="font-semibold">different outcomes</strong>.
-        </>
-      }
+      body={t.body(
+        formatNationList(NATIONS.map((n) => nationLabel(n.name, language)), language),
+        numberWordCapitalized(STORMS.length, { language, gender: 'm' })
+      )}
       // THE TITLE CARD IS NOW DRESSED LIKE EVERY OTHER SLIDE, and the
       // exception it used to be is what this replaces.
       //
@@ -95,7 +150,7 @@ export default function Hero({ style }) {
           instead -- once, at the top of the piece, rather than on all fourteen
           sections. */}
       <p className="relative mt-3 font-serif text-base italic leading-snug text-ink/70 sm:hidden">
-        Climate doesn&rsquo;t create inequality. It reveals it.
+        {t.tagline}
       </p>
 
       {/* The four nations, as the thing to touch first. Buttons, not labels:
@@ -121,7 +176,7 @@ export default function Hero({ style }) {
                     : 'border-ink/20 bg-surface/60 hover:border-accent/60'
                 }`}
               >
-                {nation.name}
+                {nationLabel(nation.name, language)}
               </button>
             </li>
           )
@@ -162,15 +217,14 @@ export default function Hero({ style }) {
 
         <p className="mt-4 min-h-[3.25rem] text-sm leading-snug opacity-80 short:mt-3 short:min-h-[2.5rem]">
           {active ? (
-            <>
-              <span className="font-semibold">{active}</span> was in the path of{' '}
-              <span className="font-semibold text-accent">{struck.length}</span> of these{' '}
-              {STORMS.length} storms &mdash; {struck.map((s) => s.label).join(', ')}.
-            </>
+            t.struckSentence(
+              nationLabel(active, language),
+              struck.length,
+              STORMS.length,
+              struck.map((s) => s.label).join(', ')
+            )
           ) : (
-            <span className="opacity-70">
-              Point at a country, or press one, to see its share of the decade.
-            </span>
+            <span className="opacity-70">{t.pointAt}</span>
           )}
         </p>
       </div>

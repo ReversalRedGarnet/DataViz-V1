@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { nationLabel } from '../content/nations.js'
 
 // "Pick up to two nations to compare" -- owned by the story state hook
 // (useStory) and passed down to the map, the ripple chain and the comparison.
@@ -44,9 +45,18 @@ export function useSelection() {
 
 // Copy for each page's aria-live region -- the charts below it update
 // silently otherwise. `singleNote` is an optional extra sentence for
-// the one-nation case (Cyclones points at its ripple chain).
-export function selectionAnnouncement(selected, singleNote = '') {
+// the one-nation case (Cyclones points at its ripple chain). `selected` holds
+// the canonical (English) nation names every chart is keyed by; nationLabel()
+// resolves the display form so the announcement itself can still be French.
+export function selectionAnnouncement(selected, singleNote = '', language = 'en') {
   if (selected.length === 0) return ''
-  if (selected.length === 1) return `${selected[0]} selected.${singleNote ? ` ${singleNote}` : ''}`
-  return `Comparing ${selected[0]} and ${selected[1]}.`
+  const names = selected.map((n) => nationLabel(n, language))
+  if (selected.length === 1) {
+    return language === 'fr'
+      ? `${names[0]} sélectionné.${singleNote ? ` ${singleNote}` : ''}`
+      : `${names[0]} selected.${singleNote ? ` ${singleNote}` : ''}`
+  }
+  return language === 'fr'
+    ? `Comparaison de ${names[0]} et ${names[1]}.`
+    : `Comparing ${names[0]} and ${names[1]}.`
 }

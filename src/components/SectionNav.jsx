@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { PAGE_SECTIONS } from '../content/pageSections.js'
+import { PAGE_SECTIONS, sectionLabel } from '../content/pageSections.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+
+const STRINGS = {
+  en: { openMenu: 'Open section menu', closeMenu: 'Close section menu' },
+  fr: { openMenu: 'Ouvrir le menu des sections', closeMenu: 'Fermer le menu des sections' },
+}
 
 // Three bars morphing into an X, drawn as one component rather than two icons
 // so the morph itself gives feedback that the button did something.
@@ -57,6 +63,9 @@ function HamburgerIcon({ open }) {
 // each section is still a shareable URL that the hash sync in useDeck will
 // honour on load.
 export default function SectionNav({ availableIds, onNavigate }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
+
   // While the story is gated, most sections are not in the document at all.
   // Listing them anyway would give the reader links that scroll nowhere, so the
   // menu shows only what currently exists.
@@ -92,7 +101,7 @@ export default function SectionNav({ availableIds, onNavigate }) {
         aria-expanded={open}
         aria-haspopup="true"
         aria-controls="section-nav-menu"
-        aria-label={open ? 'Close section menu' : 'Open section menu'}
+        aria-label={open ? t.closeMenu : t.openMenu}
         className="flex h-9 w-9 items-center justify-center rounded-md text-ink transition-colors hover:bg-ink/5"
       >
         <HamburgerIcon open={open} />
@@ -117,7 +126,7 @@ export default function SectionNav({ availableIds, onNavigate }) {
                 }}
                 className="block px-4 py-2 text-sm text-ink/80 transition-colors hover:bg-ink/5 hover:text-ink"
               >
-                {section.label}
+                {sectionLabel(section, language)}
               </a>
             </li>
           ))}

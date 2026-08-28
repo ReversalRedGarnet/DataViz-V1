@@ -1,11 +1,45 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/charts/index.js'
 import { motionDuration } from '../utils/motion.js'
+import { nationLabel } from '../content/nations.js'
+import { formatNationList } from '../utils/formatNationList.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 import FigureCaption from './FigureCaption.jsx'
 
 const SWEEP_MS = 3400
+
+const STRINGS = {
+  en: {
+    indexedTo: (year) => `Indexed to each nation\u2019s own ${year} figure = 100`,
+    tableCaption: (label, year) => `${label}, indexed to each nation\u2019s own ${year} figure`,
+    country: 'Country',
+    year: 'Year',
+    value: 'Value',
+    indexOf: (year) => `Index (${year} = 100)`,
+    playing: 'Playing\u2026',
+    replay: 'Replay',
+    play: 'Play',
+    latestAvailable: 'Latest data available',
+    chartAria: (label, year) => `${label}, each nation indexed to its own ${year} figure`,
+    noRecord: (list) => `No usable record for ${list} on this metric.`,
+  },
+  fr: {
+    indexedTo: (year) => `Indexé au chiffre de ${year} de chaque nation = 100`,
+    tableCaption: (label, year) => `${label}, indexé au chiffre de ${year} de chaque nation`,
+    country: 'Pays',
+    year: 'Année',
+    value: 'Valeur',
+    indexOf: (year) => `Indice (${year} = 100)`,
+    playing: 'Lecture\u2026',
+    replay: 'Relancer',
+    play: 'Lire',
+    latestAvailable: 'Dernières données disponibles',
+    chartAria: (label, year) => `${label}, chaque nation indexée à son propre chiffre de ${year}`,
+    noRecord: (list) => `Aucune donnée exploitable pour ${list} sur cet indicateur.`,
+  },
+}
 
 // One panel of the divergence section. Each panel now owns its own sweep
 // clock and its own mini play button, rather than being driven by a single
@@ -49,6 +83,8 @@ export default function DivergenceChart({
 }) {
   const apiRef = useRef(null)
   const frameRef = useRef(null)
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const [progress, setProgress] = useState(0)
   // Explicit rather than inferred from `progress < 1` -- see DivergenceView's
   // former version of this same comment. Inferred, the button read "Playing"
@@ -96,7 +132,7 @@ export default function DivergenceChart({
     ready: series.length > 0,
     waitForInView: false,
     deps: [series, years, lastYear, format, showTooltip, hideTooltip],
-    draw: (svg, { width, theme }) => {
+    draw: (svg, { width, theme, language }) => {
       apiRef.current = buildDivergenceChart(svg, {
         width,
         series,
@@ -106,6 +142,7 @@ export default function DivergenceChart({
         showTooltip,
         hideTooltip,
         theme,
+        language,
       })
       apiRef.current.update(progressRef.current)
       return () => {
@@ -129,20 +166,20 @@ export default function DivergenceChart({
   const table = useMemo(
     () => (
       <table>
-        <caption>{label}, indexed to each nation&rsquo;s own {years[0]} figure</caption>
+        <caption>{t.tableCaption(label, years[0])}</caption>
         <thead>
           <tr>
-            <th scope="col">Country</th>
-            <th scope="col">Year</th>
-            <th scope="col">Value</th>
-            <th scope="col">Index ({years[0]} = 100)</th>
+            <th scope="col">{t.country}</th>
+            <th scope="col">{t.year}</th>
+            <th scope="col">{t.value}</th>
+            <th scope="col">{t.indexOf(years[0])}</th>
           </tr>
         </thead>
         <tbody>
           {series.flatMap((s) =>
             s.points.map((p) => (
               <tr key={`${s.nation}-${p.year}`}>
-                <td>{s.nation}</td>
+                <td>{nationLabel(s.nation, language)}</td>
                 <td>{p.year}</td>
                 <td>{format(p.raw)}</td>
                 <td>{p.index.toFixed(1)}</td>
@@ -152,7 +189,7 @@ export default function DivergenceChart({
         </tbody>
       </table>
     ),
-    [label, series, years, format]
+    [label, series, years, format, t, language]
   )
 
   // Rounded rather than floored so the counter reads as the year the sweep is
@@ -162,7 +199,7 @@ export default function DivergenceChart({
   return (
     <div className={`rounded-xl border border-ink/10 bg-surface/60 p-4 ${className}`}>
       <h3 className="mb-1 text-sm font-semibold">{label}</h3>
-      <p className="mb-2 text-xs opacity-soft">Indexed to each nation&rsquo;s own {years[0]} figure = 100</p>
+      <p className="mb-2 text-xs opacity-soft">{t.indexedTo(years[0])}</p>
       <div className="mb-3 flex items-center gap-3">
         <button
           type="button"
@@ -170,16 +207,16 @@ export default function DivergenceChart({
           disabled={playState === 'playing'}
           className="rounded-full border border-ink/20 px-3 py-1 text-xs font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95 disabled:opacity-55 disabled:hover:scale-100 disabled:hover:bg-transparent"
         >
-          {playState === 'playing' ? 'Playing\u2026' : playState === 'done' ? 'Replay' : 'Play'}
+          {playState === 'playing' ? t.playing : playState === 'done' ? t.replay : t.play}
         </button>
         <span className="type-figure text-sm tabular-nums" aria-hidden="true">
-          {playState === 'done' ? 'Latest data available' : sweepYear}
+          {playState === 'done' ? t.latestAvailable : sweepYear}
         </span>
       </div>
       <svg
         ref={svgRef}
         role="img"
-        aria-label={`${label}, each nation indexed to its own ${years[0]} figure`}
+        aria-label={t.chartAria(label, years[0])}
         className="block w-full"
         style={{ height: DIVERGENCE_HEIGHT }}
       />
@@ -194,7 +231,7 @@ export default function DivergenceChart({
       {note && <p className="mt-2 text-xs italic opacity-70">{note}</p>}
       {missing.length > 0 && (
         <p className="mt-1 text-xs italic opacity-70">
-          No usable record for {missing.join(' or ')} on this metric.
+          {t.noRecord(formatNationList(missing.map((n) => nationLabel(n, language)), language))}
         </p>
       )}
       <VisuallyHidden>{table}</VisuallyHidden>

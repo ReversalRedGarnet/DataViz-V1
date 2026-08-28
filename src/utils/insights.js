@@ -1,5 +1,6 @@
-import { CHAIN_METRICS } from './metrics.js'
+import { CHAIN_METRICS, metricLabel } from './metrics.js'
 import { pctChange } from './rows.js'
+import { nationLabel } from '../content/nations.js'
 
 // One bullet per metric, comparing the two selected nations from the event year
 // to the latest on record. Deliberately not a ranking of "most interesting"
@@ -23,7 +24,11 @@ import { pctChange } from './rows.js'
 // no-new-data cases, which summary excludes). summary is a single sentence
 // naming how many of the comparable metrics moved in opposite directions, or
 // null when fewer than two metrics are comparable -- not enough to summarise.
-
+//
+// `comparison` stays one of the four internal English keys below regardless
+// of `language` -- RippleChain.jsx filters on it (=== 'opposite') to count the
+// summary, so it has to be a stable code, not display text. `text`, `summary`
+// and the resolved metric label (via metricLabel()) are the translated parts.
 
 function formatPct(p) {
   if (p === null) return null
@@ -31,10 +36,63 @@ function formatPct(p) {
   return `${sign}${p.toFixed(0)}%`
 }
 
-export function buildComparativeInsights(data, nationA, nationB, eventYear) {
+const STRINGS = {
+  en: {
+    notReportedEither: (label, a, b) =>
+      `${label}: not reliably reported for either ${a} or ${b} in the official dataset.`,
+    gapReporting: (label, present, missing) =>
+      `${label}: reported for ${present} but not for ${missing} -- a gap in reporting capacity, not necessarily in impact.`,
+    neitherHasData: (label, a, b, year) =>
+      `${label}: neither ${a} nor ${b} has data beyond ${year} in the official dataset.`,
+    stalledVsTracked: (label, stalled, year, tracked, from, to, toYear) =>
+      `${label}: ${stalled} has no data beyond ${year}, while ${tracked} went from ${from} to ${to} by ${toYear}.`,
+    comparisonWord: {
+      opposite: 'opposite directions',
+      sameDirNoWindow: 'the same direction',
+      similar: 'a similar trajectory',
+      samePaceDiffers: 'the same direction, but at a very different pace',
+    },
+    comparisonSentence: (label, comparisonText, year, a, changeA, b, changeB, windowNote) =>
+      `${label}: ${comparisonText} since ${year} (${a} ${changeA ?? '\u2014'}, ${b} ${changeB ?? '\u2014'}).${windowNote}`,
+    windowNote: ' Spans differ in length, so these percentages aren\u2019t directly comparable.',
+    dash: '\u2014',
+    summary: (opposing, comparable, year) =>
+      `${opposing} of ${comparable} comparable metrics moved in opposite directions since ${year}.`,
+  },
+  fr: {
+    notReportedEither: (label, a, b) =>
+      `${label}\u00A0: non recensé de façon fiable pour ${a} ni pour ${b} dans le jeu de données officiel.`,
+    gapReporting: (label, present, missing) =>
+      `${label}\u00A0: déclaré pour ${present} mais pas pour ${missing} \u2014 un écart de capacité de déclaration, pas nécessairement d\u2019impact.`,
+    neitherHasData: (label, a, b, year) =>
+      `${label}\u00A0: ni ${a} ni ${b} n\u2019a de données au-delà de ${year} dans le jeu de données officiel.`,
+    stalledVsTracked: (label, stalled, year, tracked, from, to, toYear) =>
+      `${label}\u00A0: ${stalled} n\u2019a pas de données au-delà de ${year}, tandis que ${tracked} est passé de ${from} à ${to} d\u2019ici ${toYear}.`,
+    comparisonWord: {
+      opposite: 'directions opposées',
+      sameDirNoWindow: 'la même direction',
+      similar: 'une trajectoire similaire',
+      samePaceDiffers: 'la même direction, mais à un rythme très différent',
+    },
+    comparisonSentence: (label, comparisonText, year, a, changeA, b, changeB, windowNote) =>
+      `${label}\u00A0: ${comparisonText} depuis ${year} (${a} ${changeA ?? '\u2014'}, ${b} ${changeB ?? '\u2014'}).${windowNote}`,
+    windowNote:
+      ' Les périodes couvertes diffèrent en longueur, donc ces pourcentages ne sont pas directement comparables.',
+    dash: '\u2014',
+    summary: (opposing, comparable, year) =>
+      `${opposing} indicateur(s) comparable(s) sur ${comparable} a (ont) évolué en directions opposées depuis ${year}.`,
+  },
+}
+
+export function buildComparativeInsights(data, nationA, nationB, eventYear, language = 'en') {
+  const t = STRINGS[language]
   if (!data) return { items: [], summary: null }
 
+  const nameA = nationLabel(nationA, language)
+  const nameB = nationLabel(nationB, language)
+
   const items = CHAIN_METRICS.map((m) => {
+    const label = metricLabel(m, language)
     const rowsA = (data[m.key] ?? []).filter((d) => d.nation === nationA).sort((a, b) => a.year - b.year)
     const rowsB = (data[m.key] ?? []).filter((d) => d.nation === nationB).sort((a, b) => a.year - b.year)
     const eventA = rowsA.find((r) => r.year === eventYear)
@@ -46,18 +104,12 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear) {
     const hasB = Boolean(eventB && latestB)
 
     if (!hasA && !hasB) {
-      return {
-        key: m.key,
-        text: `${m.label}: not reliably reported for either ${nationA} or ${nationB} in the official dataset.`,
-      }
+      return { key: m.key, text: t.notReportedEither(label, nameA, nameB) }
     }
     if (!hasA || !hasB) {
-      const missing = hasA ? nationB : nationA
-      const present = hasA ? nationA : nationB
-      return {
-        key: m.key,
-        text: `${m.label}: reported for ${present} but not for ${missing} -- a gap in reporting capacity, not necessarily in impact.`,
-      }
+      const missing = hasA ? nameB : nameA
+      const present = hasA ? nameA : nameB
+      return { key: m.key, text: t.gapReporting(label, present, missing) }
     }
 
     // The event year can also be the last year on record: no post-event data
@@ -65,21 +117,24 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear) {
     const noNewDataA = latestA.year === eventYear
     const noNewDataB = latestB.year === eventYear
     if (noNewDataA && noNewDataB) {
-      return {
-        key: m.key,
-        text: `${m.label}: neither ${nationA} nor ${nationB} has data beyond ${eventYear} in the official dataset.`,
-      }
+      return { key: m.key, text: t.neitherHasData(label, nameA, nameB, eventYear) }
     }
     if (noNewDataA || noNewDataB) {
-      const stalled = noNewDataA ? nationA : nationB
-      const tracked = noNewDataA ? nationB : nationA
+      const stalled = noNewDataA ? nameA : nameB
+      const tracked = noNewDataA ? nameB : nameA
       const trackedRow = noNewDataA ? latestB : latestA
       const trackedEvent = noNewDataA ? eventB : eventA
       return {
         key: m.key,
-        text: `${m.label}: ${stalled} has no data beyond ${eventYear}, while ${tracked} went from ${m.format(
-          trackedEvent[m.field]
-        )} to ${m.format(trackedRow[m.field])} by ${trackedRow.year}.`,
+        text: t.stalledVsTracked(
+          label,
+          stalled,
+          eventYear,
+          tracked,
+          m.format(trackedEvent[m.field]),
+          m.format(trackedRow[m.field]),
+          trackedRow.year
+        ),
       }
     }
 
@@ -94,32 +149,38 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear) {
     // paragraph exists to avoid making.
     const sameWindow = latestA.year === latestB.year
 
+    // Internal key, stable across languages -- see the note at the top of
+    // this file. comparisonWord[comparison] is the only translated form.
     let comparison
-    if (!sameDirection) comparison = 'opposite directions'
-    else if (!sameWindow) comparison = 'the same direction'
-    else if (gap !== null && gap < 25) comparison = 'a similar trajectory'
-    else comparison = 'the same direction, but at a very different pace'
+    if (!sameDirection) comparison = 'opposite'
+    else if (!sameWindow) comparison = 'sameDirNoWindow'
+    else if (gap !== null && gap < 25) comparison = 'similar'
+    else comparison = 'samePaceDiffers'
 
     const changeA = formatPct(pctA)
     const changeB = formatPct(pctB)
 
-    const windowNote = sameWindow ? '' : ' Spans differ in length, so these percentages aren\u2019t directly comparable.'
+    const windowNote = sameWindow ? '' : t.windowNote
 
     return {
       key: m.key,
       comparison,
-      text: `${m.label}: ${comparison} since ${eventYear} (${nationA} ${changeA ?? '\u2014'}, ${nationB} ${
-        changeB ?? '\u2014'
-      }).${windowNote}`,
+      text: t.comparisonSentence(
+        label,
+        t.comparisonWord[comparison],
+        eventYear,
+        nameA,
+        changeA,
+        nameB,
+        changeB,
+        windowNote
+      ),
     }
   })
 
   const comparable = items.filter((item) => item.comparison !== undefined)
-  const opposing = comparable.filter((item) => item.comparison === 'opposite directions')
-  const summary =
-    comparable.length >= 2
-      ? `${opposing.length} of ${comparable.length} comparable metrics moved in opposite directions since ${eventYear}.`
-      : null
+  const opposing = comparable.filter((item) => item.comparison === 'opposite')
+  const summary = comparable.length >= 2 ? t.summary(opposing.length, comparable.length, eventYear) : null
 
   return { items, summary }
 }

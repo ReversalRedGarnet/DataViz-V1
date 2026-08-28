@@ -1,4 +1,19 @@
 import { useRef, useState } from 'react'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
+
+const STRINGS = {
+  en: {
+    moveStorm: 'Move the storm',
+    stopOf: (i, total) => `Stop ${i} of ${total}`,
+    stopValueText: (i, total, name, date) => `Stop ${i} of ${total}: ${name}, ${date}`,
+  },
+  fr: {
+    moveStorm: 'Déplacer le cyclone',
+    stopOf: (i, total) => `Étape ${i} sur ${total}`,
+    stopValueText: (i, total, name, date) => `Étape ${i} sur ${total}\u00A0: ${name}, ${date}`,
+  },
+}
 
 // THE STORM, UNDER THE READER'S THUMB.
 //
@@ -23,6 +38,8 @@ import { useRef, useState } from 'react'
 export default function JourneyScrubber({ stops, index, onIndex, label }) {
   const trackRef = useRef(null)
   const [dragging, setDragging] = useState(false)
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const last = Math.max(1, stops.length - 1)
   const fraction = stops.length > 1 ? index / last : 0
   const current = stops[index]
@@ -92,10 +109,8 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
   return (
     <div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <span className="type-eyebrow text-accent">Move the storm</span>
-        <span className="text-xs tabular-nums opacity-soft">
-          Stop {index + 1} of {stops.length}
-        </span>
+        <span className="type-eyebrow text-accent">{t.moveStorm}</span>
+        <span className="text-xs tabular-nums opacity-soft">{t.stopOf(index + 1, stops.length)}</span>
       </div>
 
       {/* Where the storm is now, directly above the control that moves it. The
@@ -104,7 +119,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
           you cannot see while using it is a control you stop trusting. This
           line is never more than a line, so it always fits. */}
       <p className="scrub-readout">
-        <span className="font-semibold">{current?.name}</span>
+        <span className="font-semibold">{current ? nationLabel(current.name, language) : ''}</span>
         <span className="opacity-soft"> &middot; {current?.date}</span>
       </p>
 
@@ -131,7 +146,11 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
         aria-valuemin={0}
         aria-valuemax={last}
         aria-valuenow={index}
-        aria-valuetext={current ? `Stop ${index + 1} of ${stops.length}: ${current.name}, ${current.date}` : undefined}
+        aria-valuetext={
+          current
+            ? t.stopValueText(index + 1, stops.length, nationLabel(current.name, language), current.date)
+            : undefined
+        }
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -204,7 +223,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
               }`}
             >
               <span className="mr-1.5 tabular-nums opacity-quiet">{i + 1}</span>
-              {stop.name}
+              {nationLabel(stop.name, language)}
             </button>
           </li>
         ))}
