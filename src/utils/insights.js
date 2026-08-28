@@ -65,7 +65,7 @@ const STRINGS = {
     gapReporting: (label, present, missing) =>
       `${label}\u00A0: déclaré pour ${present} mais pas pour ${missing} \u2014 un écart de capacité de déclaration, pas nécessairement d\u2019impact.`,
     neitherHasData: (label, a, b, year) =>
-      `${label}\u00A0: ni ${a} ni ${b} n\u2019a de données au-delà de ${year} dans le jeu de données officiel.`,
+      `${label}\u00A0: ni ${a} ni ${b} n\u2019ont de données au-delà de ${year} dans le jeu de données officiel.`,
     stalledVsTracked: (label, stalled, year, tracked, from, to, toYear) =>
       `${label}\u00A0: ${stalled} n\u2019a pas de données au-delà de ${year}, tandis que ${tracked} est passé de ${from} à ${to} d\u2019ici ${toYear}.`,
     comparisonWord: {

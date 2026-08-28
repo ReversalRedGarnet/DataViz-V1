@@ -54,7 +54,7 @@ const STRINGS = {
     ),
     struckSentence: (name, count, total, labels) => (
       <>
-        <span className="font-semibold">{name}</span>{' s\u2019est trouvé sur la trajectoire de '}
+        <span className="font-semibold">{name}</span>{' a figuré sur la trajectoire de '}
         <span className="font-semibold text-accent">{count}</span> de ces {total} cyclones{' \u2014 '}
         {labels}.
       </>

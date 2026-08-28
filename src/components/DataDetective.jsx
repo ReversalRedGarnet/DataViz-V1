@@ -152,7 +152,7 @@ const STRINGS = {
     pickToSee: 'Votre choix détermine quelle preuve apparaît ici.',
     whatEvidenceSupports: 'Ce que les données appuient',
     closing:
-      'Tout ceci est visible dans les données, et rien n\u2019est mesuré ici comme une cause. Ce que montrent ces dix années, c\u2019est que des pays touchés par le même cyclone n\u2019ont pas suivi le même chemin par la suite, et que les pays ayant le moins de capacité à observer et déclarer sont aussi ceux dont les suites sont le moins complètement enregistrées. C\u2019est une association, et c\u2019est un contexte. Ce n\u2019est pas une comparaison contrôlée\u00A0: quatre nations, six événements et des totaux nationaux annuels ne peuvent pas isoler un cyclone d\u2019une sécheresse, d\u2019une pandémie ou d\u2019une politique survenue la même année, et ce site ne prétend pas l\u2019avoir fait.',
+      'Tout ceci est visible dans les données, et rien n\u2019est mesuré ici comme une cause. Ce que montrent ces dix années, c\u2019est que des pays touchés par le même cyclone n\u2019ont pas suivi le même chemin par la suite, et que les pays ayant le moins de capacité à observer et déclarer sont aussi ceux dont les suites sont les moins complètement enregistrées. C\u2019est une association, et c\u2019est un contexte. Ce n\u2019est pas une comparaison contrôlée\u00A0: quatre nations, six événements et des totaux nationaux annuels ne peuvent pas isoler un cyclone d\u2019une sécheresse, d\u2019une pandémie ou d\u2019une politique survenue la même année, et ce site ne prétend pas l\u2019avoir fait.',
     guardSubject: 'La question',
     guardPrompt: 'vous demander ce qui a fait la différence',
   },

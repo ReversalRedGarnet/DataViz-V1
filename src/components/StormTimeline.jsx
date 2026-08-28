@@ -38,10 +38,10 @@ const STRINGS = {
     of: 'of',
   },
   fr: {
-    cardAria: (name, year, count, total) => `${name}, ${year}. A touché ${count} des ${total} nations.`,
+    cardAria: (name, year, count, total) => `${name}, ${year}. ${name} a touché ${count} des ${total} nations.`,
     selected: 'Sélectionné',
     reachedNote: (list, count, total) =>
-      `A touché ${list} \u2014 ${count} des ${total} nations concernées.`,
+      `Cyclone ayant touché ${list} \u2014 ${count} des ${total} nations concernées.`,
     pointAt: 'Pointez un cyclone, ou naviguez jusqu\u2019à un, pour voir où il est passé. Sélectionnez-le pour le suivre.',
     eyebrow: (start, end, stormWord, nationWord) =>
       `${start}\u2013${end} \u00b7 ${stormWord} cyclones sévères \u00b7 ${nationWord} nations du Pacifique`,

@@ -79,7 +79,7 @@ export const CHAIN_METRICS = [
         : `${Math.round(v).toLocaleString('en')} people`,
     caveat: {
       en: 'Annual, all-hazard national totals -- not one storm alone. A year holding two cyclones reports them as a single figure. Years where the official figure was exactly zero are shown as missing rather than as zero, because this series cannot distinguish "nobody affected" from "nothing reported" -- Vanuatu\u2019s figure for 2015, the year Cyclone Pam struck, is zero. Gaps here are reporting gaps, and they fall most often on the countries least able to report.',
-      fr: 'Totaux nationaux annuels, tous risques confondus \u2014 pas un seul cyclone. Une année comportant deux cyclones les déclare comme un chiffre unique. Les années où le chiffre officiel était exactement zéro sont affichées comme manquantes plutôt que comme zéro, car cette série ne peut pas distinguer « personne touché » de « rien déclaré » \u2014 le chiffre de Vanuatu pour 2015, l\u2019année du cyclone Pam, est zéro. Les lacunes ici sont des lacunes de déclaration, et elles touchent le plus souvent les pays les moins en mesure de déclarer.',
+      fr: 'Totaux nationaux annuels, tous risques confondus \u2014 pas un seul cyclone. Une année comportant deux cyclones les déclare comme un chiffre unique. Les années où le chiffre officiel était exactement zéro sont affichées comme manquantes plutôt que comme zéro, car cette série ne peut pas distinguer « personne touchée » de « rien déclaré » \u2014 le chiffre de Vanuatu pour 2015, l\u2019année du cyclone Pam, est zéro. Les lacunes ici sont des lacunes de déclaration, et elles touchent le plus souvent les pays les moins en mesure de déclarer.',
     },
   },
   {
@@ -112,7 +112,7 @@ export const CHAIN_METRICS = [
       `${v.toLocaleString(language === 'fr' ? 'fr' : 'en', { maximumFractionDigits: 0 })} kg/animal`,
     caveat: {
       en: 'Output per animal, not herd size \u2014 a year that kills stock can still show flat or rising yield. Moves independently of crop yield, so losing one doesn\u2019t mean losing both.',
-      fr: 'Le rendement par animal, pas la taille du cheptel \u2014 une année qui décime le cheptel peut malgré tout afficher un rendement stable ou en hausse. Évolue indépendamment du rendement des cultures\u00A0: perdre l\u2019un ne signifie pas perdre les deux.',
+      fr: 'Le rendement par animal, pas la taille du cheptel \u2014 une année qui décime le cheptel peut malgré tout afficher un rendement stable ou en hausse. Il évolue indépendamment du rendement des cultures\u00A0: perdre l\u2019un ne signifie pas perdre les deux.',
     },
   },
   {
