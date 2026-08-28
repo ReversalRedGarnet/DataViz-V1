@@ -15,7 +15,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { THEME_TOKENS } from '../src/styles/tokens.js'
+import { DIM_TOKENS, THEME_TOKENS } from '../src/styles/tokens.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const TARGET = path.join(here, '..', 'src', 'styles', 'tokens.css')
@@ -30,10 +30,23 @@ function channels(hex) {
   return [0, 2, 4].map((i) => parseInt(clean.slice(i, i + 2), 16)).join(' ')
 }
 
-function block(selector, tokens) {
-  const lines = Object.entries(tokens).map(
-    ([name, hex]) => `    --color-${name}: ${channels(hex)};`
-  )
+// The de-emphasis scale needs no conversion -- an opacity is a bare number in
+// both worlds -- but it is generated from the same source for the same reason
+// the colours are: so there is one place to change a value. Guarded because a
+// stray string here would reach the stylesheet as a silently invalid
+// declaration, which reads at a glance as the level simply not applying.
+function opacity(value, name) {
+  if (typeof value !== 'number' || !(value > 0) || value > 1) {
+    throw new Error(`tokens.js: dim "${name}" must be a number in (0, 1], got ${value}`)
+  }
+  return String(value)
+}
+
+function block(selector, tokens, dims) {
+  const lines = [
+    ...Object.entries(tokens).map(([name, hex]) => `    --color-${name}: ${channels(hex)};`),
+    ...Object.entries(dims).map(([name, value]) => `    --dim-${name}: ${opacity(value, name)};`),
+  ]
   return `  ${selector} {\n${lines.join('\n')}\n  }`
 }
 
@@ -48,9 +61,9 @@ export function buildTokens() {
     '*/',
     '',
     '@layer base {',
-    block(':root', THEME_TOKENS.light),
+    block(':root', THEME_TOKENS.light, DIM_TOKENS.light),
     '',
-    block('.dark', THEME_TOKENS.dark),
+    block('.dark', THEME_TOKENS.dark, DIM_TOKENS.dark),
     '}',
     '',
   ].join('\n')

@@ -495,7 +495,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
           {/* "four documented impact points" was hardcoded. Only Harold has
               four stops; the other five storms have two, and the caption was
               asserting a number the map beside it visibly contradicted. */}
-          <p className="mt-2 text-xs italic leading-snug opacity-65">{TRACK_NOTE}</p>
+          <p className="mt-2 text-xs italic leading-snug opacity-soft">{TRACK_NOTE}</p>
         </div>
 
         <div className="journey-detail mt-5 md:mt-0">
@@ -522,7 +522,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
                 to render it as the empty string followed by the word
                 "deaths". Same distinction the profile chart's unreported
                 band makes, in the one place a reader meets it first. */}
-            <p className="type-meta mt-3 opacity-60">
+            <p className="type-meta mt-3 opacity-soft">
               {step.categoryLabel} &middot;{' '}
               {step.deaths == null
                 ? 'deaths not reported'
@@ -542,7 +542,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         {/* The sourcing note on a phone, where there is no track to describe.
             Sits after the detail rather than above it, and is md:hidden so on
             desktop this is not a third grid child. */}
-        <p className="mt-4 text-xs italic leading-snug opacity-65 md:hidden">{SOURCE_NOTE}</p>
+        <p className="mt-4 text-xs italic leading-snug opacity-soft md:hidden">{SOURCE_NOTE}</p>
       </div>
     </Section>
   )

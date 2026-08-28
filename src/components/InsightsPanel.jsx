@@ -26,7 +26,7 @@ export default function InsightsPanel({ title, summary, items, staggerItems = fa
             className={staggerItems ? 'animate-pop-in flex gap-2' : 'flex gap-2'}
             style={staggerItems ? { animationDelay: `${160 + i * 70}ms` } : undefined}
           >
-            <span aria-hidden="true" className="opacity-50">
+            <span aria-hidden="true" className="opacity-quiet">
               •
             </span>
             <span>{item.text}</span>

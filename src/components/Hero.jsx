@@ -150,7 +150,7 @@ export default function Hero({ style }) {
                 />
                 <span
                   className={`text-[10px] tabular-nums transition-opacity duration-200 ${
-                    lit === false ? 'opacity-25' : 'opacity-60'
+                    lit === false ? 'opacity-faint' : 'opacity-soft'
                   }`}
                 >
                   {storm.year}

@@ -45,6 +45,20 @@ export default {
         serif: ['Newsreader', 'Georgia', 'ui-serif', 'serif'],
       },
 
+      // THE DE-EMPHASIS SCALE, AS THREE NAMED LEVELS RATHER THAN FIVE NUMBERS.
+      //
+      // `opacity-soft` resolves per theme through the custom properties
+      // styles/tokens.css generates -- see DIM_TOKENS in styles/tokens.js for
+      // the values and why the two themes need different ones. Numeric
+      // utilities (opacity-40, opacity-60) still exist and still mean exactly
+      // what they say; they are the right tool for anything that is not text
+      // stepping back from its own background.
+      opacity: {
+        faint: 'var(--dim-faint)',
+        quiet: 'var(--dim-quiet)',
+        soft: 'var(--dim-soft)',
+      },
+
       colors: {
         // Fixed brand colors used across both themes.
         ocean: '#5B8FA3',

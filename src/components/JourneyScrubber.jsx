@@ -81,7 +81,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
     <div>
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <span className="type-eyebrow text-accent">Move the storm</span>
-        <span className="text-xs tabular-nums opacity-60">
+        <span className="text-xs tabular-nums opacity-soft">
           Stop {index + 1} of {stops.length}
         </span>
       </div>
@@ -93,7 +93,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
           line is never more than a line, so it always fits. */}
       <p className="scrub-readout">
         <span className="font-semibold">{current?.name}</span>
-        <span className="opacity-60"> &middot; {current?.date}</span>
+        <span className="opacity-soft"> &middot; {current?.date}</span>
       </p>
 
       <div className="flex items-center gap-2">
@@ -183,7 +183,7 @@ export default function JourneyScrubber({ stops, index, onIndex, label }) {
                   : 'border-ink/20 bg-surface/60 hover:border-accent/60'
               }`}
             >
-              <span className="mr-1.5 tabular-nums opacity-50">{i + 1}</span>
+              <span className="mr-1.5 tabular-nums opacity-quiet">{i + 1}</span>
               {stop.name}
             </button>
           </li>

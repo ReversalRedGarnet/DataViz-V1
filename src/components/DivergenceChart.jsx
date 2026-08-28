@@ -162,7 +162,7 @@ export default function DivergenceChart({
   return (
     <div className={`rounded-xl border border-ink/10 bg-surface/60 p-4 ${className}`}>
       <h3 className="mb-1 text-sm font-semibold">{label}</h3>
-      <p className="mb-2 text-xs opacity-60">Indexed to each nation&rsquo;s own {years[0]} figure = 100</p>
+      <p className="mb-2 text-xs opacity-soft">Indexed to each nation&rsquo;s own {years[0]} figure = 100</p>
       <div className="mb-3 flex items-center gap-3">
         <button
           type="button"

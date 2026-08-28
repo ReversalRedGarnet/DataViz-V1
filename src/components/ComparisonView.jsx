@@ -77,7 +77,7 @@ export default function ComparisonView({
         <div className="compare-pickers mb-6">
           {[0, 1].map((side) => (
             <label key={side} className="flex min-w-0 flex-col gap-1 text-xs">
-              <span className="type-eyebrow opacity-60">
+              <span className="type-eyebrow opacity-soft">
                 {side === 0 ? 'Left' : 'Right'}
               </span>
               <select
@@ -200,7 +200,7 @@ function Delta({ metric, eventRow, latestRow }) {
   return (
     <span className="flex flex-col items-end">
       <span className="font-medium tabular-nums">
-        {metric.format(from)} <span className="opacity-40">→</span> {metric.format(to)}
+        {metric.format(from)} <span className="opacity-faint">→</span> {metric.format(to)}
       </span>
       {target !== null && (
         <>

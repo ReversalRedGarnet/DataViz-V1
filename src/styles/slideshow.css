@@ -555,7 +555,13 @@
     }
 
     to {
-      opacity: 0.5;
+      /* The token, not the 0.5 that used to be typed here. `both` fill means
+         this keyframe's value is what the counter keeps for the life of the
+         element, so a literal here silently outranked the opacity utility on
+         the span -- which is how the counter stayed at 2.84:1 in light while
+         every other footer label moved. Read from the same custom property the
+         utility does, so the two cannot drift again. */
+      opacity: var(--dim-quiet);
       transform: translateY(0);
     }
   }
