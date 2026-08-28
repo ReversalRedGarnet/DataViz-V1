@@ -388,6 +388,24 @@
     border-radius: 9999px;
   }
 
+  /* THE TRACK IS THE ONLY POINTER TARGET. Everything inside it is decoration,
+     and the handle's layer is why this has to be said rather than assumed: it
+     is a full-width band translated by the current fraction, so at every stop
+     past the first it hangs past the track's right edge -- a third of the
+     track's width at Harold's second stop -- straight over the + stepper
+     beside it. The press then landed on the layer and bubbled to the track's
+     own pointerdown, where an x beyond the right edge clamps to 1 and picks
+     the LAST stop. Pressing + at Harold's second stop jumped to his fourth,
+     skipping Fiji; at his third it jumped to the fourth as well, which is the
+     right answer by coincidence and is why the fault looked like a one-off.
+     The ticks overhang too, by half their width. */
+  .scrub-rail,
+  .scrub-fill,
+  .scrub-tick,
+  .scrub-knob-layer {
+    pointer-events: none;
+  }
+
   .scrub-rail {
     background-color: rgb(var(--color-ink) / 0.15);
   }
