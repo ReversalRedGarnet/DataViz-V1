@@ -514,6 +514,15 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
         */}
           <article className="journey-stop locked-box mt-5 border-l-2 border-accent">
             <div ref={stopScrollRef} data-overflowing={stopOverflowing} className="locked-scroll pl-5 pr-1">
+            {/* Keyed to the storm and the stop, so the text arrives rather
+                than snapping every time the scrubber moves -- the box itself
+                is locked to one size (see the note above), so only the words
+                move. Remounted rather than transitioned because the content
+                is prose, not a value with a "from" to ease out of; the short
+                lift is the same one the ripple chain's accordion panel uses,
+                since a drag can retrigger this many times in a few seconds
+                and anything slower would read as lag rather than motion. */}
+            <div key={`${storm.id}-${active}`} className="journey-stop-content">
             <p className="type-eyebrow text-accent">{step.date}</p>
             <h3 className="type-h3 mt-1">{step.name}</h3>
             <p className="mt-2 text-sm font-medium">{step.lead}</p>
@@ -535,6 +544,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
                 {step.deathsNote}
               </p>
             )}
+            </div>
             </div>
           </article>
         </div>
