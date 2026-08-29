@@ -1,4 +1,11 @@
 import { figureNumber } from '../content/figures.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { sourceLabel } from '../utils/metrics.js'
+
+const STRINGS = {
+  en: { fig: 'Fig', data: '. Data: ' },
+  fr: { fig: 'Fig.', data: '. Données\u00A0: ' },
+}
 
 // FIG N, THE TITLE, AND WHERE THE NUMBERS CAME FROM -- UNDER THE CHART.
 //
@@ -30,6 +37,8 @@ import { figureNumber } from '../content/figures.js'
 //   className -- spacing at the call site
 export default function FigureCaption({ figureKey, title, source, className = '' }) {
   const n = figureNumber(figureKey)
+  const { language } = useLanguage()
+  const t = STRINGS[language]
 
   return (
     <p className={`figure-caption ${className}`}>
@@ -39,16 +48,16 @@ export default function FigureCaption({ figureKey, title, source, className = ''
           careful. */}
       {n != null && (
         <span className="figure-caption-n">
-          Fig&nbsp;{n}
+          {t.fig}&nbsp;{n}
           {'\u00a0\u00b7 '}
         </span>
       )}
       {title}
       {source && (
         <>
-          {'. Data: '}
+          {t.data}
           <a href={source.url} target="_blank" rel="noreferrer noopener">
-            {source.label}
+            {sourceLabel(source, language)}
           </a>
         </>
       )}

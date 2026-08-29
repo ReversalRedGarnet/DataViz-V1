@@ -1,6 +1,13 @@
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { chartColorsFor } from '../utils/theme.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
+import { nationLabel } from '../content/nations.js'
+
+const STRINGS = {
+  en: (i, name) => `Selection ${i}: ${name}. Focus to emphasise it on every chart in this section.`,
+  fr: (i, name) => `Sélection ${i}\u00A0: ${name}. Sélectionnez pour la mettre en évidence sur chaque graphique de cette section.`,
+}
 
 // The key tying a chart series to a map pin. The swatch carries the same
 // number the pin does, so the two picks are told apart by a digit and not only
@@ -12,6 +19,7 @@ import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlig
 // there's nothing a reader can trigger by accident.
 export default function SelectionLegend({ selected }) {
   const { theme } = useTheme()
+  const { language } = useLanguage()
   const palette = chartColorsFor(theme)
   const { setHighlight } = useNationHighlight()
 
@@ -27,7 +35,7 @@ export default function SelectionLegend({ selected }) {
           key={name}
           tabIndex={0}
           role="note"
-          aria-label={`Selection ${i + 1}: ${name}. Focus to emphasise it on every chart in this section.`}
+          aria-label={STRINGS[language](i + 1, nationLabel(name, language))}
           className="flex cursor-help items-center gap-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           {...highlightHandlers(name, setHighlight)}
         >
@@ -38,7 +46,7 @@ export default function SelectionLegend({ selected }) {
           >
             {i + 1}
           </span>
-          {name}
+          {nationLabel(name, language)}
         </li>
       ))}
     </ul>

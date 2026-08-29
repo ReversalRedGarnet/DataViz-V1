@@ -16,6 +16,7 @@ import { seriesStyles } from './series.js'
 import { barTopAndHeight, zeroAnchoredDomain } from './scales.js'
 import { drawXAxis, drawYAxis, drawZeroLabels, drawZeroLine } from './axes.js'
 import { pointTooltip } from './tooltips.jsx'
+import { nationLabel } from '../../content/nations.js'
 
 // The multi-year trend chart, in bar, line or area form.
 export function renderMetricChart(
@@ -32,6 +33,7 @@ export function renderMetricChart(
     hideTooltip,
     yTickFormat = d3.format('~s'),
     theme = 'light',
+    language = 'en',
   }
 ) {
   const margin = MARGIN
@@ -80,7 +82,7 @@ export function renderMetricChart(
   function wireMarkInteractions(selection, nation, growTo) {
     selection
       .on('pointerenter pointermove', function (event, d) {
-        showTooltip(event, pointTooltip(nation, d.year, d[valueField], format))
+        showTooltip(event, pointTooltip(nationLabel(nation, language), d.year, d[valueField], format, language))
         if (growTo) d3.select(this).transition().duration(motionDuration(120)).attr('r', growTo)
       })
       .on('pointerleave', function () {
@@ -88,7 +90,7 @@ export function renderMetricChart(
         if (growTo) d3.select(this).transition().duration(motionDuration(120)).attr('r', POINT_R)
       })
       .on('click', (event, d) =>
-        showTooltip(event, pointTooltip(nation, d.year, d[valueField], format))
+        showTooltip(event, pointTooltip(nationLabel(nation, language), d.year, d[valueField], format, language))
       )
   }
 

@@ -14,6 +14,18 @@ import { shortName, spreadLabels } from './labels.js'
 import { indexAtYear } from './scales.js'
 import { drawXAxis, drawYAxis } from './axes.js'
 import { divergenceTooltip } from './tooltips.jsx'
+import { nationLabel } from '../../content/nations.js'
+
+const STRINGS = {
+  en: {
+    above: (year) => `\u25b2 above its ${year} level`,
+    below: (year) => `\u25bc below its ${year} level`,
+  },
+  fr: {
+    above: (year) => `\u25b2 au-dessus de son niveau de ${year}`,
+    below: (year) => `\u25bc en dessous de son niveau de ${year}`,
+  },
+}
 
 // A "same start, different finish" chart: every nation indexed to its own
 // value in the event year, so all four lines begin at 100 and the only thing
@@ -36,8 +48,20 @@ import { divergenceTooltip } from './tooltips.jsx'
 //     up.
 export function buildDivergenceChart(
   svg,
-  { width, height = DIVERGENCE_HEIGHT, series, years, sweepYears, format, showTooltip, hideTooltip, theme = 'light' }
+  {
+    width,
+    height = DIVERGENCE_HEIGHT,
+    series,
+    years,
+    sweepYears,
+    format,
+    showTooltip,
+    hideTooltip,
+    theme = 'light',
+    language = 'en',
+  }
 ) {
+  const t = STRINGS[language]
   const { ink, surface, palette } = chartTheme(theme)
 
   // Right margin holds the travelling end labels; they are what makes the
@@ -100,8 +124,8 @@ export function buildDivergenceChart(
   const direction = svg.append('g').attr('class', 'divergence-direction').style('pointer-events', 'none')
 
   for (const [text, yPos] of [
-    [`\u25b2 above its ${years[0]} level`, margin.top + 9],
-    [`\u25bc below its ${years[0]} level`, height - margin.bottom - 7],
+    [t.above(years[0]), margin.top + 9],
+    [t.below(years[0]), height - margin.bottom - 7],
   ]) {
     direction
       .append('text')
@@ -169,7 +193,7 @@ export function buildDivergenceChart(
       .attr('font-weight', 600)
       .attr('fill', color)
       .attr('dominant-baseline', 'middle')
-      .text(shortName(s.nation))
+      .text(shortName(s.nation, language))
 
     // The hit targets sit on the real measured years only, so a tooltip can
     // never report a value from the sweep's interpolation.
@@ -182,9 +206,13 @@ export function buildDivergenceChart(
       .attr('cy', (d) => y(d.index))
       .attr('r', POINT_R_HOVER)
       .attr('fill', 'transparent')
-      .on('pointerenter pointermove', (event, d) => showTooltip(event, divergenceTooltip(s.nation, d, format)))
+      .on('pointerenter pointermove', (event, d) =>
+        showTooltip(event, divergenceTooltip(nationLabel(s.nation, language), d, format, language))
+      )
       .on('pointerleave', hideTooltip)
-      .on('click', (event, d) => showTooltip(event, divergenceTooltip(s.nation, d, format)))
+      .on('click', (event, d) =>
+        showTooltip(event, divergenceTooltip(nationLabel(s.nation, language), d, format, language))
+      )
 
     return { series: s, dot, label, color }
   })

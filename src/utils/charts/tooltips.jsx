@@ -7,13 +7,38 @@
 // components/Tooltip.jsx for what happens when it becomes one. Anything longer
 // than a line belongs under the chart, where it can be read without holding a
 // pointer still.
+//
+// `nation` arguments below are already display strings (the renderer that
+// calls these has resolved nationLabel(name, language) before handing it
+// over) -- these functions are presentational only and don't themselves know
+// which language a raw nation name should render in.
+import { pluralize } from '../pluralize.js'
 
-export function pointTooltip(nation, year, value, format) {
+const STRINGS = {
+  en: {
+    deathsNotReported: 'Deaths not reported',
+    death: 'death',
+    deaths: 'deaths',
+    indirect: ', indirect',
+    levelWith: (year) => `level with ${year}`,
+    vs: (year) => `vs ${year}`,
+  },
+  fr: {
+    deathsNotReported: 'Décès non recensés',
+    death: 'décès',
+    deaths: 'décès',
+    indirect: ', indirects',
+    levelWith: (year) => `au niveau de ${year}`,
+    vs: (year) => `vs ${year}`,
+  },
+}
+
+export function pointTooltip(nation, year, value, format, language = 'en') {
   return (
     <>
       <p className="font-semibold">{nation}</p>
       <p className="opacity-80">
-        {year}: {format(value)}
+        {year}: {format(value, language)}
       </p>
     </>
   )
@@ -28,12 +53,18 @@ function categoryHeadline(label) {
   return label.split(';')[0].trim()
 }
 
-export function stormPointTooltip(row) {
+// `nation` -- already resolved to a display string by the caller, same
+// convention as the other tooltips here; stormProfileChart.js passes
+// nationLabel(row.name, language). `language` drives the deaths sentence
+// itself: singular/plural selection (French treats zero as singular; see
+// utils/pluralize.js) and the "not reported" / "indirect" wording.
+export function stormPointTooltip(row, nation, language = 'en') {
+  const t = STRINGS[language]
   const deaths =
     row.deaths == null
-      ? 'Deaths not reported'
-      : `${row.deaths} ${row.deaths === 1 ? 'death' : 'deaths'}${
-          row.deathsKind === 'indirect' ? ', indirect' : ''
+      ? t.deathsNotReported
+      : `${row.deaths} ${pluralize(row.deaths, { one: t.death, other: t.deaths }, language)}${
+          row.deathsKind === 'indirect' ? t.indirect : ''
         }`
 
   // The researched `fact` and `deathsNote` used to be appended here, which is
@@ -43,32 +74,33 @@ export function stormPointTooltip(row) {
   // Nothing was removed from the dataset -- only from the hover.
   return (
     <>
-      <p className="font-semibold">{row.name}</p>
+      <p className="font-semibold">{nation}</p>
       <p className="opacity-80">{categoryHeadline(row.categoryLabel)}</p>
       <p className="opacity-80">{deaths}</p>
     </>
   )
 }
 
-export function snapshotTooltip(row, format) {
+export function snapshotTooltip(nation, value, format, language = 'en') {
   return (
     <>
-      <p className="font-semibold">{row.nation}</p>
-      <p className="opacity-80">{format(row.value)}</p>
+      <p className="font-semibold">{nation}</p>
+      <p className="opacity-80">{format(value, language)}</p>
     </>
   )
 }
 
-export function divergenceTooltip(nation, point, format) {
+export function divergenceTooltip(nation, point, format, language = 'en') {
+  const t = STRINGS[language]
   const delta = point.index - 100
   const against =
-    delta === 0 ? `level with ${point.baseYear}` : `${delta > 0 ? '+' : ''}${delta.toFixed(0)}% vs ${point.baseYear}`
+    delta === 0 ? t.levelWith(point.baseYear) : `${delta > 0 ? '+' : ''}${delta.toFixed(0)}% ${t.vs(point.baseYear)}`
 
   return (
     <>
       <p className="font-semibold">{nation}</p>
       <p className="opacity-80">
-        {point.year}: {format(point.raw)}
+        {point.year}: {format(point.raw, language)}
       </p>
       <p className="opacity-70">{against}</p>
     </>

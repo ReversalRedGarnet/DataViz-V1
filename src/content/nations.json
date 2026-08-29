@@ -12,13 +12,21 @@
     "codes are the ISO-2 and ISO-3 forms the Pacific Data Hub exports use. Only",
     "the pipeline reads these; the site matches on name.",
     "",
-    "short is the axis-label form, used where a band can be under 50px wide."
+    "short is the axis-label form, used where a band can be under 50px wide.",
+    "",
+    "nameFr/shortFr are added display fields for the French toggle, additive",
+    "only. `name` stays the join key data-pipeline/common.py and the site's own",
+    "nation-matching (matchesNation in nations.js, chart data keyed by nation)",
+    "read -- nothing downstream should ever compare against nameFr. Two of the",
+    "four don't change (Vanuatu, Tonga); Fiji and Solomon Islands do."
   ],
 
   "nations": [
     {
       "name": "Fiji",
       "short": "Fiji",
+      "nameFr": "Fidji",
+      "shortFr": "Fidji",
       "lat": -18.14,
       "lon": 178.44,
       "codes": ["FJ", "FJI"]
@@ -26,6 +34,8 @@
     {
       "name": "Solomon Islands",
       "short": "Solomon Is.",
+      "nameFr": "Îles Salomon",
+      "shortFr": "Îles Salomon",
       "lat": -9.43,
       "lon": 159.95,
       "codes": ["SB", "SLB"]
@@ -33,6 +43,8 @@
     {
       "name": "Vanuatu",
       "short": "Vanuatu",
+      "nameFr": "Vanuatu",
+      "shortFr": "Vanuatu",
       "lat": -17.73,
       "lon": 168.32,
       "codes": ["VU", "VUT"]
@@ -40,6 +52,8 @@
     {
       "name": "Tonga",
       "short": "Tonga",
+      "nameFr": "Tonga",
+      "shortFr": "Tonga",
       "lat": -21.14,
       "lon": -175.2,
       "codes": ["TO", "TON"]

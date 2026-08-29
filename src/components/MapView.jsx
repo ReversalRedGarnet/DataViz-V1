@@ -7,15 +7,73 @@ import CountryPicker from './CountryPicker.jsx'
 import MapControlButton from './MapControlButton.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { useLatest } from '../hooks/useLatest.js'
 import { useViewBoxScale } from '../hooks/useViewBoxScale.js'
 import { chartColorsFor } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
+import { pluralize } from '../utils/pluralize.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 import { drawBasemap, fitToPoints, pacificProjection, recolourBasemap } from '../utils/map.js'
-import { NATIONS } from '../content/nations.js'
+import { NATIONS, nationLabel } from '../content/nations.js'
 import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
+
+const STRINGS = {
+  en: {
+    exploreHeading: 'Explore the Pacific',
+    exploreBody:
+      'Every country on this map is selectable. Tap a marker to select it, tap a second one to compare, and the ripple chain, the divergence and the comparison all follow your pick. Drag to pan, pinch to zoom, or use the buttons.',
+    mapAriaWithStorm: (nationCount, stormName, hitCount) =>
+      `Map of the Pacific with ${nationCount} selectable nations. ${stormName} struck ${hitCount} of them.`,
+    mapAriaNoStorm: (nationCount) => `Map of the Pacific with ${nationCount} selectable nations`,
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    resetView: 'Reset view',
+    selectedBadge: (n) => `Selected ${n}`,
+    noStormSelected: 'No storm selected.',
+    pointAt: (stormName) => `Point at a country, or tab to one, for what ${stormName} did there.`,
+    theStorm: 'the storm',
+    clearSelection: 'Clear selection',
+    select: (name) => `Select ${name}`,
+    selectNotStruck: (name, stormName) =>
+      `Select ${name}. Not struck by ${stormName}; shown for comparison.`,
+    didNotReach: (stormName, name) => `${stormName} did not reach ${name}.`,
+    deathsNeverReported: 'Deaths never reported.',
+    deathsReported: (n) => `${n} ${pluralize(n, { one: 'death', other: 'deaths' }, 'en')} reported.`,
+    selectedTapDeselect: 'Selected -- tap again to deselect.',
+    tapToSwap: 'Tap to swap into the comparison.',
+    tapToCompare: 'Tap to compare with your first pick.',
+    tapToSelect: 'Tap to select.',
+  },
+  fr: {
+    exploreHeading: 'Explorer le Pacifique',
+    exploreBody:
+      "Chaque pays sur cette carte est sélectionnable. Touchez un repère pour le sélectionner, touchez-en un deuxième pour comparer : la chaîne de répercussions, la divergence et la comparaison suivent votre choix. Faites glisser pour vous déplacer, pincez pour zoomer, ou utilisez les boutons.",
+    mapAriaWithStorm: (nationCount, stormName, hitCount) =>
+      `Carte du Pacifique avec ${nationCount} nations sélectionnables. ${stormName} en a touché ${hitCount}.`,
+    mapAriaNoStorm: (nationCount) => `Carte du Pacifique avec ${nationCount} nations sélectionnables`,
+    zoomIn: 'Zoomer',
+    zoomOut: 'Dézoomer',
+    resetView: 'Réinitialiser la vue',
+    selectedBadge: (n) => `Sélection ${n}`,
+    noStormSelected: 'Aucun cyclone sélectionné.',
+    pointAt: (stormName) =>
+      `Pointez un pays, ou naviguez jusqu\u2019à un pays, pour voir ce que ${stormName} y a fait.`,
+    theStorm: 'le cyclone',
+    clearSelection: 'Effacer la sélection',
+    select: (name) => `Sélectionner ${name}`,
+    selectNotStruck: (name, stormName) =>
+      `Sélectionner ${name}. Non touché par ${stormName}\u00A0; affiché à des fins de comparaison.`,
+    didNotReach: (stormName, name) => `${stormName} n\u2019a pas touché ${name}.`,
+    deathsNeverReported: 'Décès jamais recensés.',
+    deathsReported: (n) => `${n} ${pluralize(n, { one: 'décès', other: 'décès' }, 'fr')} recensés.`,
+    selectedTapDeselect: 'Sélectionné — touchez à nouveau pour désélectionner.',
+    tapToSwap: 'Touchez pour remplacer dans la comparaison.',
+    tapToCompare: 'Touchez pour comparer avec votre premier choix.',
+    tapToSelect: 'Touchez pour sélectionner.',
+  },
+}
 
 // Illustrative Pacific map: real coastlines, fixed markers, pan and zoom, click
 // to select. Two selections at most, because everything downstream of this
@@ -49,33 +107,37 @@ const LABEL_MARGIN = 6
 // reported/unreported distinction the profile chart makes. A nation the storm
 // never reached says so, because a marker with nothing under it reads as
 // missing data rather than as a country that was spared.
-function stormBlurb(nationName, storm) {
+//
+// `entry.date`/`entry.categoryLabel` come straight from content/storms.js,
+// which is still English-only -- see the note in that file. Only the
+// surrounding grammar translates until that content itself does.
+function stormBlurb(nationName, storm, language = 'en') {
+  const t = STRINGS[language]
   if (!storm) return null
   const entry = storm.profile?.find((p) => p.name === nationName)
-  if (!entry) return `${storm.name} did not reach ${nationName}.`
+  const displayName = nationLabel(nationName, language)
+  if (!entry) return t.didNotReach(storm.name, displayName)
 
-  const toll =
-    entry.deaths == null
-      ? 'Deaths never reported.'
-      : `${entry.deaths} ${entry.deaths === 1 ? 'death' : 'deaths'} reported.`
+  const toll = entry.deaths == null ? t.deathsNeverReported : t.deathsReported(entry.deaths)
   return `${entry.date}. ${entry.categoryLabel}. ${toll}`
 }
 
 // Built from live selection state so the "tap to select / compare / deselect"
 // hint is accurate whenever the hover, focus or tap happens.
-function markerTooltipContent(nation, selected, storm) {
+function markerTooltipContent(nation, selected, storm, language = 'en') {
+  const t = STRINGS[language]
   const i = selected.indexOf(nation.name)
   let status
-  if (i !== -1) status = 'Selected -- tap again to deselect.'
-  else if (selected.length >= 2) status = 'Tap to swap into the comparison.'
-  else if (selected.length === 1) status = 'Tap to compare with your first pick.'
-  else status = 'Tap to select.'
+  if (i !== -1) status = t.selectedTapDeselect
+  else if (selected.length >= 2) status = t.tapToSwap
+  else if (selected.length === 1) status = t.tapToCompare
+  else status = t.tapToSelect
 
-  const blurb = stormBlurb(nation.name, storm)
+  const blurb = stormBlurb(nation.name, storm, language)
 
   return (
     <>
-      <p className="font-semibold">{nation.name}</p>
+      <p className="font-semibold">{nationLabel(nation.name, language)}</p>
       {blurb && <p className="opacity-80">{blurb}</p>}
       <p className="mt-1 opacity-70">{status}</p>
     </>
@@ -108,6 +170,8 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
+  const { language } = useLanguage()
+  const languageRef = useLatest(language)
 
 // Which country the reader is pointing at, for the summary under the map.
 // Kept apart from the committed selection so hovering a second country does not
@@ -214,7 +278,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .on('click', (event, d) => {
           onToggle(d.name)
           // selectedRef hasn't caught this toggle yet: one beat behind, once.
-          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
+          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current, languageRef.current))
         })
         .on('keydown', (event, d) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -225,7 +289,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .on('pointerenter pointermove', (event, d) => {
           setHighlightRef.current(d.name)
           setPreviewRef.current(d.name)
-          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
+          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current, languageRef.current))
         })
         .on('pointerleave', () => {
           setHighlightRef.current(null)
@@ -235,7 +299,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .on('focus', (event, d) => {
           setHighlightRef.current(d.name)
           setPreviewRef.current(d.name)
-          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current))
+          showTooltip(event, markerTooltipContent(d, selectedRef.current, stormRef.current, languageRef.current))
         })
         .on('blur', () => {
           setHighlightRef.current(null)
@@ -360,6 +424,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   // pointer events are untouched, because these markers must stay clickable.
   useEffect(() => {
     if (!gRef.current) return
+    const t = STRINGS[language]
     gRef.current
       .selectAll('g.marker')
       .transition()
@@ -371,12 +436,25 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
     // two effects cannot fight over the same attribute.
     gRef.current
       .selectAll('g.marker')
-      .attr('aria-label', (d) =>
-        !storm || storm.nations.includes(d.name)
-          ? `Select ${d.name}`
-          : `Select ${d.name}. Not struck by ${storm.name}; shown for comparison.`
-      )
-  }, [storm, built])
+      .attr('aria-label', (d) => {
+        const name = nationLabel(d.name, language)
+        return !storm || storm.nations.includes(d.name)
+          ? t.select(name)
+          : t.selectNotStruck(name, storm.name)
+      })
+  }, [storm, built, language])
+
+  // The visible label beside each pin. A separate effect from the storm-fade
+  // one above -- this has nothing to do with which storm is selected, only
+  // with which language is -- and separate from the setup effect, which
+  // draws it once at mount and never again (rebuilding there would drop pan
+  // and zoom). `built` guards the same race every other post-setup effect
+  // here does: on mount the coastline is still loading and there is nothing
+  // to select yet.
+  useEffect(() => {
+    if (!gRef.current) return
+    gRef.current.selectAll('text.marker-label').text((d) => nationLabel(d.name, language))
+  }, [language, built])
 
   // Counter-scale the marker furniture so the labels and tap targets stay the
   // size they were designed at while the geography scales with the box. `built`
@@ -411,7 +489,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         .attr('x', overflows ? -LABEL_GAP : LABEL_GAP)
         .attr('text-anchor', overflows ? 'end' : 'start')
     })
-  }, [scale, built])
+  }, [scale, built, language])
 
   // No-ops if setup() hasn't finished; that race is covered by themeRef.
   useEffect(() => {
@@ -442,11 +520,9 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 
   return (
     <Section style={style} backdrop={scatterBackdrop('map')}>
-      <h2 className="type-h2 mb-2">Explore the Pacific</h2>
+      <h2 className="type-h2 mb-2">{STRINGS[language].exploreHeading}</h2>
       <p className="prose-column prose-wide prose-short mb-3 text-sm opacity-70">
-        Every country on this map is selectable. Tap a marker to select it, tap a second one to
-        compare, and the ripple chain, the divergence and the comparison all follow your pick. Drag
-        to pan, pinch to zoom, or use the buttons.
+        {STRINGS[language].exploreBody}
       </p>
       <div ref={containerRef} className="map-frame relative">
         {/* overflow-hidden is load-bearing: the ocean rect is drawn far past
@@ -458,16 +534,16 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
           role="img"
           aria-label={
             storm
-              ? `Map of the Pacific with ${nations.length} selectable nations. ${storm.name} struck ${storm.nations.length} of them.`
-              : `Map of the Pacific with ${nations.length} selectable nations`
+              ? STRINGS[language].mapAriaWithStorm(nations.length, storm.name, storm.nations.length)
+              : STRINGS[language].mapAriaNoStorm(nations.length)
           }
           className="h-auto w-full overflow-hidden rounded-2xl border-2 border-ink/15 shadow-sm"
         />
         {/* Top-right: a bottom-right column covered Tonga's label. */}
         <div className="absolute top-3 right-3 flex flex-col gap-1.5">
-          <MapControlButton kind="zoomIn" onClick={() => zoomBy(1.5)} label="Zoom in" />
-          <MapControlButton kind="zoomOut" onClick={() => zoomBy(1 / 1.5)} label="Zoom out" />
-          <MapControlButton kind="reset" onClick={resetView} label="Reset view" />
+          <MapControlButton kind="zoomIn" onClick={() => zoomBy(1.5)} label={STRINGS[language].zoomIn} />
+          <MapControlButton kind="zoomOut" onClick={() => zoomBy(1 / 1.5)} label={STRINGS[language].zoomOut} />
+          <MapControlButton kind="reset" onClick={resetView} label={STRINGS[language].resetView} />
         </div>
         <Tooltip tooltip={tooltip} />
       </div>
@@ -481,21 +557,20 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         {summaryFor ? (
           <>
             <p className="font-semibold">
-              {summaryFor}
+              {nationLabel(summaryFor, language)}
               {selected.includes(summaryFor) && (
                 <span className="ml-2 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-                  Selected {selected.indexOf(summaryFor) + 1}
+                  {STRINGS[language].selectedBadge(selected.indexOf(summaryFor) + 1)}
                 </span>
               )}
             </p>
             <p className="mt-1 text-xs leading-snug opacity-75">
-              {stormBlurb(summaryFor, storm) ?? 'No storm selected.'}
+              {stormBlurb(summaryFor, storm, language) ?? STRINGS[language].noStormSelected}
             </p>
           </>
         ) : (
           <p className="opacity-soft">
-            Point at a country, or tab to one, for what {storm ? storm.name : 'the storm'} did
-            there.
+            {STRINGS[language].pointAt(storm ? storm.name : STRINGS[language].theStorm)}
           </p>
         )}
       </div>
@@ -519,7 +594,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
               onClick={onClear}
               className="press-target animate-pop-in min-h-[44px] rounded-full border border-ink/20 px-4 py-2 text-sm opacity-80 transition-opacity duration-150 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
-              Clear selection
+              {STRINGS[language].clearSelection}
             </button>
           )}
         </div>

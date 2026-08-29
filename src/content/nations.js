@@ -50,6 +50,38 @@ const SHORT_NAMES = {
   ...Object.fromEntries(scope.nations.map((n) => [n.name, n.short])),
 }
 
-export function shortName(nation) {
-  return SHORT_NAMES[nation] ?? nation
+// language defaults to 'en' so every existing call site keeps working
+// unchanged; only call sites that now have a language in scope pass it.
+export function shortName(nation, language = 'en') {
+  const table = language === 'fr' ? SHORT_NAMES_FR : SHORT_NAMES
+  return table[nation] ?? nation
+}
+
+// FRENCH DISPLAY NAMES. `name` in nations.json (and everywhere in this file
+// above) stays the join key -- it's what data-pipeline/common.py matches
+// against and what chart data is keyed by. These are read-only display
+// lookups layered on top, never substituted into NATIONS/NATION_NAMES/
+// NATION_COORDS themselves, so nothing that matches or sorts by nation name
+// can be affected by which language is on screen.
+const NAME_FR = Object.fromEntries(scope.nations.map((n) => [n.name, n.nameFr ?? n.name]))
+
+const SHORT_NAMES_FR = {
+  'Federated States of Micronesia': 'Micronésie',
+  'Papua New Guinea': 'PNG',
+  'Marshall Islands': 'Îles Marshall',
+  'Cook Islands': 'Îles Cook',
+  'New Caledonia': 'Nouvelle-Calédonie',
+  'French Polynesia': 'Polynésie fr.',
+  ...Object.fromEntries(scope.nations.map((n) => [n.name, n.shortFr ?? n.short])),
+}
+
+// The one function components should call to display a nation's name. Takes
+// the canonical (English) name -- the value every chart, selection and prop
+// on the site already carries -- and the current language, and returns
+// whichever is right to put on screen. Falls back to the canonical name for
+// anything outside the four in-scope nations (e.g. NationRef links to a
+// broader roster), matching shortName's existing fallback behaviour.
+export function nationLabel(name, language = 'en') {
+  if (language === 'fr') return NAME_FR[name] ?? name
+  return name
 }

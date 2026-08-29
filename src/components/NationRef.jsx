@@ -1,4 +1,6 @@
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
 
 // A COUNTRY NAMED IN A SENTENCE, AS A CONTROL.
 //
@@ -27,8 +29,16 @@ import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlig
 // mid-paragraph, several to a sentence, and anything louder turns a paragraph
 // into a row of links with prose in between. The word has to still read as a
 // word.
+//
+// `nation` is always the canonical (English) name -- the join key every chart
+// and selection on the site already uses. `children`, when passed, is taken
+// as-is (a caller supplying its own text already knows what language it's
+// in); the default display falls back to nationLabel(nation, language) rather
+// than the raw nation prop, so an un-overridden reference still shows the
+// right language.
 export default function NationRef({ nation, children, className = '' }) {
   const { setHighlight, pinned, setPinned } = useNationHighlight()
+  const { language } = useLanguage()
   const isPinned = pinned === nation
 
   return (
@@ -39,7 +49,7 @@ export default function NationRef({ nation, children, className = '' }) {
       {...highlightHandlers(nation, setHighlight)}
       className={`nation-ref ${isPinned ? 'is-pinned' : ''} ${className}`}
     >
-      {children ?? nation}
+      {children ?? nationLabel(nation, language)}
     </button>
   )
 }
@@ -54,12 +64,20 @@ export default function NationRef({ nation, children, className = '' }) {
 // line break fall inside a country's name, which looks like a rendering fault.
 //
 // `join` is the separator for all but the last gap; `last` is the final one.
-// The defaults give "Fiji, Tonga and Vanuatu" -- no serial comma, matching the
-// prose elsewhere on the site.
-export function NationRefList({ nations, join = ', ', last = ' and ' }) {
+// Defaulted per language rather than a fixed English string, so a call site
+// that doesn't override them (RippleChain.jsx) still gets "Fiji, Tonga and
+// Vanuatu" in English and "Fidji, Tonga et Vanuatu" in French -- no serial
+// comma either way, matching the prose elsewhere on the site. A call site
+// that wants uniform commas throughout (ContextPanel.jsx, for a ranked list
+// rather than a grouped one) still overrides both explicitly.
+const DEFAULT_LAST = { en: ' and ', fr: ' et ' }
+
+export function NationRefList({ nations, join = ', ', last }) {
+  const { language } = useLanguage()
+  const resolvedLast = last ?? DEFAULT_LAST[language]
   return nations.map((nation, i) => (
     <span key={nation}>
-      {i > 0 && (i === nations.length - 1 ? last : join)}
+      {i > 0 && (i === nations.length - 1 ? resolvedLast : join)}
       <NationRef nation={nation} />
     </span>
   ))

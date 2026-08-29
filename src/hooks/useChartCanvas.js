@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react'
 import { useElementWidth } from './useElementWidth.js'
 import { useInView } from './useInView.js'
 import { useTheme } from './useTheme.jsx'
+import { useLanguage } from './useLanguage.jsx'
 import { useLatest } from './useLatest.js'
 import { resetSvg } from '../utils/d3helpers.js'
 
 // The scaffolding every D3 chart card on this page needs: measure the card in
 // real pixels, wait until it is on screen, clear the SVG, draw, and redraw when
-// the theme flips.
+// the theme flips -- and now, when the language flips, since axis labels,
+// tooltips and any text drawn with d3's own .text() (rather than JSX) need a
+// full redraw to pick up new strings; there is no CSS-only path for imperative
+// SVG text the way there is for colour.
 //
 // Worth centralising because the ordering is where the bugs live. A draw effect
 // that runs before its data or its container is ready must still run again once
@@ -22,9 +26,11 @@ import { resetSvg } from '../utils/d3helpers.js'
 //   waitForInView -- default true. Charts that animate on arrival want it;
 //     a chart driven by an external scroll position does not, since it is
 //     already mid-view by the time anything drives it.
-//   draw -- (svg, { width, theme }) => cleanup?. Read from a ref, so a caller
-//     can pass an inline closure without retriggering the effect every render.
-//   deps -- what should cause a redraw, beyond size, theme and readiness.
+//   draw -- (svg, { width, theme, language }) => cleanup?. Read from a ref, so
+//     a caller can pass an inline closure without retriggering the effect
+//     every render.
+//   deps -- what should cause a redraw, beyond size, theme, language and
+//     readiness.
 //
 // Returns the two refs the card needs -- `svgRef` on the <svg>, `cardRef` on the
 // element whose visibility gates the draw -- plus the measured `node` itself,
@@ -43,6 +49,7 @@ export function useChartCanvas({ height, ready = true, waitForInView = true, dra
   const [svgRef, node, width] = useElementWidth()
   const [cardRef, inView] = useInView()
   const { theme } = useTheme()
+  const { language } = useLanguage()
 
   const drawRef = useLatest(draw)
 
@@ -52,14 +59,14 @@ export function useChartCanvas({ height, ready = true, waitForInView = true, dra
 
   useEffect(() => {
     if (!visible || !ready || !node || !width) return
-    const cleanup = drawRef.current(resetSvg(node, width, height), { width, theme })
+    const cleanup = drawRef.current(resetSvg(node, width, height), { width, theme, language })
     // Not in this effect's own dependencies, so it cannot loop. Costs one
     // extra render per draw, and draws are rare -- the alternative was every
     // consumer re-running its restyle after every render forever.
     setDrawCount((n) => n + 1)
     return cleanup
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, ready, node, width, height, theme, ...deps])
+  }, [visible, ready, node, width, height, theme, language, ...deps])
 
-  return { svgRef, cardRef, node, inView, width, theme, drawCount }
+  return { svgRef, cardRef, node, inView, width, theme, language, drawCount }
 }

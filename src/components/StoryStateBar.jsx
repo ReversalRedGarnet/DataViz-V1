@@ -1,4 +1,31 @@
 import { formatNationList } from '../utils/formatNationList.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
+
+const STRINGS = {
+  en: {
+    storm: 'Storm',
+    country: 'Country',
+    clearTitle: 'Clear the country selection',
+    clear: 'Clear',
+    resetTitle: 'Clear the storm and start again',
+    reset: 'Reset',
+    notChosen: 'Not chosen',
+    notChosenMap: 'Not chosen yet \u2014 pick one on the map',
+    notChosenTimeline: 'Not chosen yet \u2014 pick one on the timeline',
+  },
+  fr: {
+    storm: 'Cyclone',
+    country: 'Pays',
+    clearTitle: 'Effacer la sélection de pays',
+    clear: 'Effacer',
+    resetTitle: 'Effacer le cyclone et recommencer',
+    reset: 'Réinitialiser',
+    notChosen: 'Non choisi',
+    notChosenMap: 'Pas encore choisi \u2014 sélectionnez-en un sur la carte',
+    notChosenTimeline: 'Pas encore choisi \u2014 sélectionnez-en un dans la chronologie',
+  },
+}
 
 // WHAT THE READER HAS CHOSEN, VISIBLE FROM EVERY SLIDE.
 //
@@ -37,6 +64,8 @@ function Field({ label, children }) {
 
 export default function StoryStateBar({ storm, selectedNations, onClearNations, onReset }) {
   const nations = selectedNations ?? []
+  const { language } = useLanguage()
+  const t = STRINGS[language]
 
   return (
     // One row on a phone, wrapping only from sm up. Two rows of state above
@@ -47,7 +76,7 @@ export default function StoryStateBar({ storm, selectedNations, onClearNations, 
     <div className="deck-status mt-1.5 flex flex-nowrap items-center gap-x-2.5 gap-y-1 overflow-hidden border-t border-ink/10 pt-1.5 text-xs sm:mt-2 sm:flex-wrap sm:gap-x-3 sm:pt-2">
       {storm ? (
         <>
-          <Field label="Storm">
+          <Field label={t.storm}>
             <span className="font-medium text-accent">
               {storm.name.replace(/^Cyclones? /, '')} &middot; {storm.year}
             </span>
@@ -59,35 +88,37 @@ export default function StoryStateBar({ storm, selectedNations, onClearNations, 
 
           {nations.length > 0 ? (
             <>
-              <Field label="Country">{formatNationList(nations)}</Field>
-              <Action onClick={onClearNations} title="Clear the country selection">
-                Clear
+              <Field label={t.country}>
+                {formatNationList(nations.map((n) => nationLabel(n, language)), language)}
+              </Field>
+              <Action onClick={onClearNations} title={t.clearTitle}>
+                {t.clear}
               </Action>
             </>
           ) : (
             // Not styled as a warning. Nothing is broken -- the reader simply
             // has not answered the next question yet, and the bar's job here is
             // to say which question that is and where it is asked.
-            <Field label="Country">
+            <Field label={t.country}>
               {/* The long form only where it fits. On a phone the map slide is
                   where this is answered and the reader is on their way to it;
                   the short form still says the choice is outstanding. */}
               <span className="opacity-soft">
-                <span className="sm:hidden">Not chosen</span>
-                <span className="hidden sm:inline">Not chosen yet &mdash; pick one on the map</span>
+                <span className="sm:hidden">{t.notChosen}</span>
+                <span className="hidden sm:inline">{t.notChosenMap}</span>
               </span>
             </Field>
           )}
 
-          <Action onClick={onReset} title="Clear the storm and start again">
-            Reset
+          <Action onClick={onReset} title={t.resetTitle}>
+            {t.reset}
           </Action>
         </>
       ) : (
-        <Field label="Storm">
+        <Field label={t.storm}>
           <span className="opacity-soft">
-            <span className="sm:hidden">Not chosen</span>
-            <span className="hidden sm:inline">Not chosen yet &mdash; pick one on the timeline</span>
+            <span className="sm:hidden">{t.notChosen}</span>
+            <span className="hidden sm:inline">{t.notChosenTimeline}</span>
           </span>
         </Field>
       )}

@@ -4,10 +4,12 @@ import { scatterBackdrop } from '../content/patterns.js'
 import Tooltip from './Tooltip.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/charts/index.js'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { formatNationList } from '../utils/formatNationList.js'
+import { nationLabel } from '../content/nations.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 
 // Per-nation storm facts live in src/content/storms.js, in the order each storm
@@ -22,11 +24,68 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 // that is a different 1974 Australian storm. Each storm carries its own source
 // pair in the registry for exactly this reason.
 
+// `storm.note`, `row.categoryLabel`, `row.fact` and `row.deathsNote` are
+// researched prose from content/storms.js, still English-only -- see the note
+// at the top of that file. Everything else here (headings, table headers,
+// the caveats around the chart) translates now; the data prose catches up in
+// a later pass.
+const STRINGS = {
+  en: {
+    atAGlance: (name) => `${name} at a glance`,
+    struckIntro: (name, list, year) =>
+      `${name} struck ${list} in ${year}. The same weather system throughout, and a different storm on arrival: a direct landfall at full strength in one country, a weakened system or only rough seas and coastal flooding in another.`,
+    belowNote:
+      'Below: category at closest approach against reported deaths. The two do not reliably move together.',
+    chartAria: (name) =>
+      `Scatter chart comparing ${name}'s category at closest approach against deaths, for each nation it struck`,
+    unreportedNote: (list) =>
+      `${list} sits in the band above the chart rather than on it: no national fatality figure was ever published for that impact. That is not a toll of zero, and it is not drawn as one. Every unreported stop on this roster is the secondary nation in its storm \u2014 the smaller impact, on the more remote islands, in the country least able to run an assessment.`,
+    indirectNote: (list) =>
+      `${list} is drawn as a hollow marker: those deaths were indirect, following the storm rather than caused by it in the moment. They are counted here because they are real, and marked apart because they are not the same kind of fact as a drowning during the storm.`,
+    tableCaption: (name) => `${name}: category at closest approach and deaths, by nation`,
+    thCountry: 'Country',
+    thCategory: 'Category at closest approach',
+    thDeaths: 'Deaths',
+    thLocalDetail: 'Local detail',
+    notReported: 'Not reported',
+    indirectSuffix: ' (indirect)',
+    notCompiled: (name) =>
+      `${name} has a full ripple chain, but its per-nation impact record has not been compiled yet.`,
+    guardSubject: 'Storm profile',
+    guardPrompt: 'see how it compared',
+  },
+  fr: {
+    atAGlance: (name) => `${name} en un coup d\u2019\u0153il`,
+    struckIntro: (name, list, year) =>
+      `${name} a touché ${list} en ${year}. Le même système météorologique tout du long, et un cyclone différent à l\u2019arrivée\u00A0: un atterrissage direct à pleine puissance dans un pays, un système affaibli ou seulement une mer agitée et des inondations côtières dans un autre.`,
+    belowNote:
+      'Ci-dessous\u00A0: la catégorie à l\u2019approche la plus proche comparée aux décès recensés. Les deux n\u2019évoluent pas de façon fiable ensemble.',
+    chartAria: (name) =>
+      `Nuage de points comparant la catégorie de ${name} à l\u2019approche la plus proche aux décès, pour chaque nation touchée`,
+    unreportedNote: (list) =>
+      `${list} figure dans la bande au-dessus du graphique plutôt que dessus\u00A0: aucun bilan national n\u2019a jamais été publié pour cet impact. Ce n\u2019est pas un bilan de zéro, et ce n\u2019est pas représenté comme tel. Chaque étape non recensée de cette liste est la nation secondaire de son cyclone \u2014 l\u2019impact le plus faible, sur les îles les plus isolées, dans le pays le moins en mesure de mener une évaluation.`,
+    indirectNote: (list) =>
+      `${list} est représenté par un marqueur creux\u00A0: ces décès étaient indirects, survenus à la suite du cyclone plutôt que causés par lui sur le moment. Ils sont comptabilisés ici parce qu\u2019ils sont réels, et distingués parce qu\u2019ils ne sont pas de la même nature qu\u2019une noyade pendant le cyclone.`,
+    tableCaption: (name) => `${name}\u00A0: catégorie à l\u2019approche la plus proche et décès, par nation`,
+    thCountry: 'Pays',
+    thCategory: 'Catégorie à l\u2019approche la plus proche',
+    thDeaths: 'Décès',
+    thLocalDetail: 'Détail local',
+    notReported: 'Non recensé',
+    indirectSuffix: ' (indirect)',
+    notCompiled: (name) =>
+      `${name} a une chaîne de répercussions complète, mais son bilan par nation n\u2019a pas encore été compilé.`,
+    guardSubject: 'Profil du cyclone',
+    guardPrompt: 'voir comment il s\u2019est comparé',
+  },
+}
 
 // Props:
 //   style -- forwarded to the underlying Section, used by App.jsx to
 //     stagger each section's entrance on first load
 export default function StormProfile({ storm, style }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const rows = storm?.profile ?? null
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
 
@@ -84,7 +143,7 @@ export default function StormProfile({ storm, style }) {
     height: chartHeight,
     ready: Boolean(rows),
     deps: [rows, showTooltip, hideTooltip],
-    draw: (svg, { width, theme }) =>
+    draw: (svg, { width, theme, language: drawLanguage }) =>
       renderStormProfileChart(svg, {
         width,
         height: chartHeight,
@@ -92,6 +151,7 @@ export default function StormProfile({ storm, style }) {
         showTooltip,
         hideTooltip,
         theme,
+        language: drawLanguage,
       }),
   })
 
@@ -99,17 +159,13 @@ export default function StormProfile({ storm, style }) {
     data: true,
     storm,
     style,
-    subject: 'Storm profile',
-    prompt: 'see how it compared',
+    subject: t.guardSubject,
+    prompt: t.guardPrompt,
+    language,
   })
   if (blocked) return blocked
   if (!rows) {
-    return (
-      <EmptyState style={style}>
-        {storm.name} has a full ripple chain, but its per-nation impact record has not been
-        compiled yet.
-      </EmptyState>
-    )
+    return <EmptyState style={style}>{t.notCompiled(storm.name)}</EmptyState>
   }
 
   const unreported = rows.filter((r) => r.deaths == null)
@@ -118,16 +174,10 @@ export default function StormProfile({ storm, style }) {
   return (
     <Section lock width="narrow" style={style} backdrop={scatterBackdrop('storm-profile')}>
       <div ref={containerRef} className="relative">
-        <h2 className="type-h2 mb-2">
-          {storm.name} at a glance
-        </h2>
+        <h2 className="type-h2 mb-2">{t.atAGlance(storm.name)}</h2>
 
         <div className="prose-column figure-prose space-y-3 text-sm opacity-80">
-          <p>
-            {storm.name} struck {formatNationList(storm.nations)} in {storm.year}. The same weather
-            system throughout, and a different storm on arrival: a direct landfall at full strength
-            in one country, a weakened system or only rough seas and coastal flooding in another.
-          </p>
+          <p>{t.struckIntro(storm.name, formatNationList(storm.nations, language), storm.year)}</p>
 
           {storm.note && <p>{storm.note}</p>}
 
@@ -136,17 +186,14 @@ export default function StormProfile({ storm, style }) {
               a chart directly above the chart, and on a two-stop storm --
               Judy & Kevin, one stated zero and one unreported -- there is no
               visible mismatch for it to point at. */}
-          <p>
-            Below: category at closest approach against reported deaths. The two do not reliably
-            move together.
-          </p>
+          <p>{t.belowNote}</p>
         </div>
 
         <div ref={cardRef}>
           <svg
             ref={svgRef}
             role="img"
-            aria-label={`Scatter chart comparing ${storm.name}'s category at closest approach against deaths, for each nation it struck`}
+            aria-label={t.chartAria(storm.name)}
             className="mt-5 block w-full"
             style={{ height: chartHeight }}
           />
@@ -155,21 +202,10 @@ export default function StormProfile({ storm, style }) {
         {(unreported.length > 0 || indirect.length > 0) && (
           <div className="mt-3 figure-prose space-y-2 border-l-2 border-ink/15 pl-3 text-xs italic opacity-75">
             {unreported.length > 0 && (
-              <p>
-                {formatNationList(unreported.map((r) => r.name))} sits in the band above the chart
-                rather than on it: no national fatality figure was ever published for that impact.
-                That is not a toll of zero, and it is not drawn as one. Every unreported stop on
-                this roster is the secondary nation in its storm &mdash; the smaller impact, on the
-                more remote islands, in the country least able to run an assessment.
-              </p>
+              <p>{t.unreportedNote(formatNationList(unreported.map((r) => r.name), language))}</p>
             )}
             {indirect.length > 0 && (
-              <p>
-                {formatNationList(indirect.map((r) => r.name))} is drawn as a hollow marker: those
-                deaths were indirect, following the storm rather than caused by it in the moment.
-                They are counted here because they are real, and marked apart because they are not
-                the same kind of fact as a drowning during the storm.
-              </p>
+              <p>{t.indirectNote(formatNationList(indirect.map((r) => r.name), language))}</p>
             )}
           </div>
         )}
@@ -185,24 +221,24 @@ export default function StormProfile({ storm, style }) {
             sentences. */}
         <VisuallyHidden>
           <table>
-            <caption>{storm.name}: category at closest approach and deaths, by nation</caption>
+            <caption>{t.tableCaption(storm.name)}</caption>
             <thead>
               <tr>
-                <th scope="col">Country</th>
-                <th scope="col">Category at closest approach</th>
-                <th scope="col">Deaths</th>
-                <th scope="col">Local detail</th>
+                <th scope="col">{t.thCountry}</th>
+                <th scope="col">{t.thCategory}</th>
+                <th scope="col">{t.thDeaths}</th>
+                <th scope="col">{t.thLocalDetail}</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={row.name}>
-                  <td>{row.name}</td>
+                  <td>{nationLabel(row.name, language)}</td>
                   <td>{row.categoryLabel}</td>
                   <td>
                     {row.deaths == null
-                      ? 'Not reported'
-                      : `${row.deaths}${row.deathsKind === 'indirect' ? ' (indirect)' : ''}`}
+                      ? t.notReported
+                      : `${row.deaths}${row.deathsKind === 'indirect' ? t.indirectSuffix : ''}`}
                   </td>
                   <td>
                     {row.fact}

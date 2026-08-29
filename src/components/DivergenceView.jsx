@@ -9,11 +9,12 @@ import SeriesLegend from './SeriesLegend.jsx'
 import { NATION_NAMES } from '../content/nations.js'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { useInView } from '../hooks/useInView.js'
 import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 import { chartColorsFor } from '../utils/theme.js'
 import { seriesStyles } from '../utils/charts/index.js'
-import { CHAIN_METRICS } from '../utils/metrics.js'
+import { CHAIN_METRICS, metricLabel } from '../utils/metrics.js'
 import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.js'
 
 // Caveats that belong to a specific metric rather than to the section. Kept
@@ -25,13 +26,48 @@ import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.
 // simply false -- arrivals in 2015 were not collapsed by anything. COVID is
 // still relevant to an earlier baseline, because the sweep crosses 2020-21 on
 // its way to the present, so the note changes form rather than disappearing.
-function metricNotes(eventYear) {
+function metricNotes(eventYear, language) {
   const baselineIsCollapsed = eventYear === 2020 || eventYear === 2021
-  return {
-    tourist_arrivals: baselineIsCollapsed
+  const notes = {
+    en: baselineIsCollapsed
       ? 'Arrivals in the baseline year were already collapsed by COVID-19 border closures, so this traces recovery from that floor rather than from the cyclone alone.'
       : 'The 2020\u201321 stretch of this line is dominated by COVID-19 border closures, not by the storm.',
+    fr: baselineIsCollapsed
+      ? "Les arrivées de l\u2019année de référence étaient déjà effondrées par les fermetures de frontières liées à la COVID-19, donc ceci retrace un redressement depuis ce plancher plutôt que depuis le seul cyclone."
+      : "Le tronçon 2020\u20132021 de cette ligne est dominé par les fermetures de frontières liées à la COVID-19, pas par le cyclone.",
   }
+  return { tourist_arrivals: notes[language] }
+}
+
+const STRINGS = {
+  en: {
+    eyebrow: 'One storm, one starting point',
+    heading: (name) => `Where the four nations part ways after ${name}`,
+    intro: (year) =>
+      `Each line begins at 100 \u2014 that nation\u2019s own figure in ${year}. Nothing else is adjusted and no country is measured against another, so the only thing left for the chart to show is the distance that opens up afterwards.`,
+    replayAll: 'Replay all',
+    notEnoughData: (year) => `No metric in this chain has enough data after ${year} to index.`,
+    footnote1:
+      'People affected is left out of this view and economic loss is not in the chain at all: both are reported in scattered years, and an index across gaps draws a confident line over years nobody measured.',
+    footnote2: (name) =>
+      `The further right the sweep runs, the less of what it shows belongs to ${name}. Read the separation as the shape of four different recoveries, not as a measurement of one storm\u2019s reach.`,
+    guardSubject: 'The divergence',
+    guardPrompt: 'see how the four nations moved apart after it',
+  },
+  fr: {
+    eyebrow: 'Un cyclone, un même point de départ',
+    heading: (name) => `Où les quatre nations divergent après ${name}`,
+    intro: (year) =>
+      `Chaque ligne commence à 100 \u2014 le chiffre propre à cette nation en ${year}. Rien d\u2019autre n\u2019est ajusté et aucun pays n\u2019est comparé à un autre, donc la seule chose que le graphique peut montrer est l\u2019écart qui se creuse ensuite.`,
+    replayAll: 'Tout relancer',
+    notEnoughData: (year) => `Aucun indicateur de cette chaîne n\u2019a assez de données après ${year} pour être indexé.`,
+    footnote1:
+      "Les personnes touchées sont exclues de cette vue et les pertes économiques ne font pas partie de la chaîne\u00A0: toutes deux sont déclarées de façon éparse selon les années, et un indice construit sur des lacunes tracerait une ligne trompeusement assurée sur des années jamais mesurées.",
+    footnote2: (name) =>
+      `Plus le balayage avance vers la droite, moins ce qu\u2019il montre appartient à ${name}. Lisez cet écart comme la forme de quatre redressements différents, pas comme une mesure de la portée d\u2019un seul cyclone.`,
+    guardSubject: 'La divergence',
+    guardPrompt: 'voir comment les quatre nations se sont éloignées après le cyclone',
+  },
 }
 
 // The legend's colours and dashes come from seriesStyles(), the same resolver
@@ -58,6 +94,8 @@ const DIVERGENCE_FIGURES = {
 export default function DivergenceView({ data, dataError, storm, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const palette = chartColorsFor(theme)
   const [sectionRef, inView] = useInView({ threshold: 0.25 })
   const { pinned, setPinned } = useNationHighlight()
@@ -78,7 +116,7 @@ export default function DivergenceView({ data, dataError, storm, style }) {
     () => (eventYear ? divergenceYearRange(panels, eventYear) : [0, 0]),
     [panels, eventYear]
   )
-  const notes = useMemo(() => metricNotes(eventYear), [eventYear])
+  const notes = useMemo(() => metricNotes(eventYear, language), [eventYear, language])
   const legendStyles = useMemo(() => seriesStyles(NATION_NAMES, palette), [palette])
 
   // Runs itself once, when the section is actually on screen. The whole point
@@ -94,32 +132,23 @@ export default function DivergenceView({ data, dataError, storm, style }) {
     error: dataError,
     storm,
     style,
-    subject: 'The divergence',
-    prompt: 'see how the four nations moved apart after it',
+    subject: t.guardSubject,
+    prompt: t.guardPrompt,
+    language,
   })
   if (blocked) return blocked
   if (panels.length === 0) {
-    return (
-      <EmptyState style={style}>
-        No metric in this chain has enough data after {storm.year} to index.
-      </EmptyState>
-    )
+    return <EmptyState style={style}>{t.notEnoughData(storm.year)}</EmptyState>
   }
 
   return (
     <Section style={style} backdrop={scatterBackdrop('divergence')}>
       <div ref={sectionRef}>
         <div ref={containerRef} className="relative">
-          <p className="type-eyebrow mb-1 text-accent">
-            One storm, one starting point
-          </p>
-          <h2 className="type-h2 mb-2">
-            Where the four nations part ways after {storm.name}
-          </h2>
+          <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
+          <h2 className="type-h2 mb-2">{t.heading(storm.name)}</h2>
           <p className="prose-column prose-wide prose-short mb-6 text-sm opacity-75">
-            Each line begins at 100 &mdash; that nation&rsquo;s own figure in {storm.year}. Nothing
-            else is adjusted and no country is measured against another, so the only thing left for
-            the chart to show is the distance that opens up afterwards.
+            {t.intro(storm.year)}
           </p>
 
           {/* Buttons, not decorative swatches -- see SeriesLegend. Pointing at
@@ -144,7 +173,7 @@ export default function DivergenceView({ data, dataError, storm, style }) {
               onClick={() => setPlayToken((t) => t + 1)}
               className="rounded-full border border-ink/20 px-4 py-2 text-sm font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95"
             >
-              Replay all
+              {t.replayAll}
             </button>
           </div>
 
@@ -152,7 +181,7 @@ export default function DivergenceView({ data, dataError, storm, style }) {
             {panels.map((panel, i) => (
               <DivergenceChart
                 key={panel.metric.key}
-                label={panel.metric.label}
+                label={metricLabel(panel.metric, language)}
                 series={panel.series}
                 years={years}
                 lastYear={panel.lastYear}
@@ -168,16 +197,8 @@ export default function DivergenceView({ data, dataError, storm, style }) {
             ))}
           </div>
 
-          <p className="prose-wide mt-6 text-xs italic opacity-70">
-            People affected is left out of this view and economic loss is not in the chain at all:
-            both are reported in scattered years, and an index across gaps draws a confident line
-            over years nobody measured.
-          </p>
-          <p className="prose-wide mt-2 text-xs italic opacity-70">
-            The further right the sweep runs, the less of what it shows belongs to {storm.name}.
-            Read the separation as the shape of four different recoveries, not as a measurement of
-            one storm&rsquo;s reach.
-          </p>
+          <p className="prose-wide mt-6 text-xs italic opacity-70">{t.footnote1}</p>
+          <p className="prose-wide mt-2 text-xs italic opacity-70">{t.footnote2(storm.name)}</p>
 
           <Tooltip tooltip={tooltip} />
         </div>

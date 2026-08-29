@@ -1,5 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useViewportFit, MIN_WIDTH, MIN_HEIGHT } from '../hooks/useViewportFit.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+
+const STRINGS = {
+  en: {
+    largerWindow: 'a larger window',
+    widerWindow: 'a wider window',
+    tallerWindow: 'a taller window',
+    bestIn: 'This deck is best in',
+    around: 'around',
+    orMore: 'or more. Everything still works at this size.',
+    dismiss: 'Dismiss display size notice',
+  },
+  fr: {
+    largerWindow: 'une fenêtre plus grande',
+    widerWindow: 'une fenêtre plus large',
+    tallerWindow: 'une fenêtre plus haute',
+    bestIn: 'Ce diaporama est optimisé pour',
+    around: 'environ',
+    orMore: 'ou plus. Tout fonctionne encore à cette taille.',
+    dismiss: "Ignorer l'avis de taille d'affichage",
+  },
+}
 
 /*
   A one-line notice for readers whose viewport is outside the range the deck was
@@ -47,6 +69,8 @@ function writeDismissed() {
 export default function DisplayCheck() {
   const { fits, width, height } = useViewportFit()
   const [dismissed, setDismissed] = useState(readDismissed)
+  const { language } = useLanguage()
+  const t = STRINGS[language]
 
   // Persist on the way out rather than inside the click handler alone, so the
   // stored flag and the state that hides the notice cannot disagree.
@@ -63,10 +87,10 @@ export default function DisplayCheck() {
   const tooShort = height < MIN_HEIGHT
   const reason =
     tooNarrow && tooShort
-      ? 'a larger window'
+      ? t.largerWindow
       : tooNarrow
-        ? 'a wider window'
-        : 'a taller window'
+        ? t.widerWindow
+        : t.tallerWindow
 
   return (
     <div
@@ -77,18 +101,18 @@ export default function DisplayCheck() {
       className="display-check"
     >
       <p className="display-check-text">
-        This deck is best in{' '}
-        <span className="whitespace-nowrap">{reason}</span> &mdash; around{' '}
+        {t.bestIn}{' '}
+        <span className="whitespace-nowrap">{reason}</span> &mdash; {t.around}{' '}
         <span className="whitespace-nowrap tabular-nums">
           {MIN_WIDTH}&times;{MIN_HEIGHT}
         </span>{' '}
-        or more. Everything still works at this size.
+        {t.orMore}
       </p>
       <button
         type="button"
         onClick={() => setDismissed(true)}
         className="display-check-dismiss"
-        aria-label="Dismiss display size notice"
+        aria-label={t.dismiss}
       >
         <span aria-hidden="true">&times;</span>
       </button>

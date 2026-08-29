@@ -1,4 +1,7 @@
-import { CHAIN_METRICS } from '../utils/metrics.js'
+import { CHAIN_METRICS, metricLabel, metricCaveat } from '../utils/metrics.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+import { nationLabel } from '../content/nations.js'
+import { pluralize } from '../utils/pluralize.js'
 
 // What one link of the ripple chain actually is, opened in place.
 //
@@ -21,6 +24,34 @@ import { CHAIN_METRICS } from '../utils/metrics.js'
 //   rows -- that metric's rows, already filtered to the selected nations
 //   nations -- the selected nations, in order
 //   onClose -- () => void
+//
+// `metric.label`/`metric.caveat` (utils/metrics.js) are resolved through
+// metricLabel()/metricCaveat(); everything else here translates directly.
+const STRINGS = {
+  en: {
+    linkOf: (n, total) => `Link ${n} of ${total}`,
+    close: 'Close',
+    follows: (label) => `Follows ${label}. `,
+    firstLink: 'The first link: who the storm reached. ',
+    feedsInto: (label) => `Feeds into ${label}.`,
+    lastLink: 'The last link in the chain.',
+    nothingReported: 'nothing reported for this metric.',
+    yearsReported: (n, from, to) => `${n} ${pluralize(n, { one: 'year', other: 'years' }, 'en')} reported, ${from}\u2013${to}`,
+    reportedZero: (n) => ` \u00b7 ${n} of them a reported zero, not a gap`,
+  },
+  fr: {
+    linkOf: (n, total) => `Maillon ${n} sur ${total}`,
+    close: 'Fermer',
+    follows: (label) => `Fait suite à ${label}. `,
+    firstLink: 'Le premier maillon\u00A0: qui le cyclone a touché. ',
+    feedsInto: (label) => `Alimente ${label}.`,
+    lastLink: 'Le dernier maillon de la chaîne.',
+    nothingReported: 'rien de déclaré pour cet indicateur.',
+    yearsReported: (n, from, to) => `${n} ${pluralize(n, { one: 'an', other: 'ans' }, 'fr')} déclaré${n === 1 ? '' : 's'}, ${from}\u2013${to}`,
+    reportedZero: (n) => ` \u00b7 ${n} d\u2019entre eux un zéro déclaré, pas une lacune`,
+  },
+}
+
 function coverage(rows, nation, field) {
   const mine = rows.filter((r) => r.nation === nation)
   if (mine.length === 0) return { reported: 0 }
@@ -35,6 +66,8 @@ function coverage(rows, nation, field) {
 }
 
 export default function MetricDetail({ metric, rows, nations, onClose }) {
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   const stage = CHAIN_METRICS.findIndex((m) => m.key === metric.key)
   const before = CHAIN_METRICS[stage - 1]
   const after = CHAIN_METRICS[stage + 1]
@@ -43,17 +76,15 @@ export default function MetricDetail({ metric, rows, nations, onClose }) {
     <div className="mt-4 rounded-xl border border-accent/30 bg-surface/70 p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="type-eyebrow text-accent">
-            Link {stage + 1} of {CHAIN_METRICS.length}
-          </p>
-          <h3 className="type-h3 mt-0.5 text-base">{metric.label}</h3>
+          <p className="type-eyebrow text-accent">{t.linkOf(stage + 1, CHAIN_METRICS.length)}</p>
+          <h3 className="type-h3 mt-0.5 text-base">{metricLabel(metric, language)}</h3>
         </div>
         <button
           type="button"
           onClick={onClose}
           className="min-h-[44px] shrink-0 rounded-full px-3 text-xs underline decoration-ink/30 underline-offset-2 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          Close
+          {t.close}
         </button>
       </div>
 
@@ -62,8 +93,8 @@ export default function MetricDetail({ metric, rows, nations, onClose }) {
           and a reader who has opened one card should not have to count cards
           to see what it follows. */}
       <p className="mt-2 text-xs opacity-70">
-        {before ? `Follows ${before.label.toLowerCase()}. ` : 'The first link: who the storm reached. '}
-        {after ? `Feeds into ${after.label.toLowerCase()}.` : 'The last link in the chain.'}
+        {before ? t.follows(metricLabel(before, language).toLowerCase()) : t.firstLink}
+        {after ? t.feedsInto(metricLabel(after, language).toLowerCase()) : t.lastLink}
       </p>
 
       <ul className="mt-3 space-y-1 text-xs">
@@ -71,18 +102,13 @@ export default function MetricDetail({ metric, rows, nations, onClose }) {
           const c = coverage(rows, nation, metric.field)
           return (
             <li key={nation} className="flex flex-wrap gap-x-2 opacity-80">
-              <span className="font-semibold">{nation}:</span>
+              <span className="font-semibold">{nationLabel(nation, language)}:</span>
               {c.reported === 0 ? (
-                <span className="italic">nothing reported for this metric.</span>
+                <span className="italic">{t.nothingReported}</span>
               ) : (
                 <span className="tabular-nums">
-                  {c.reported} {c.reported === 1 ? 'year' : 'years'} reported, {c.from}&ndash;{c.to}
-                  {c.zeros > 0 && (
-                    <span className="not-italic">
-                      {' '}
-                      &middot; {c.zeros} of them a reported zero, not a gap
-                    </span>
-                  )}
+                  {t.yearsReported(c.reported, c.from, c.to)}
+                  {c.zeros > 0 && <span className="not-italic">{t.reportedZero(c.zeros)}</span>}
                 </span>
               )}
             </li>
@@ -91,7 +117,7 @@ export default function MetricDetail({ metric, rows, nations, onClose }) {
       </ul>
 
       <p className="mt-3 border-l-2 border-ink/15 pl-3 text-xs italic leading-snug opacity-75">
-        {metric.caveat}
+        {metricCaveat(metric, language)}
       </p>
     </div>
   )

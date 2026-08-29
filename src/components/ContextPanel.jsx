@@ -7,8 +7,9 @@ import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import NationRef, { NationRefList } from './NationRef.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { NATION_NAMES } from '../content/nations.js'
-import { CAPACITY_METRICS, CONTEXT_METRICS, CHAIN_METRICS } from '../utils/metrics.js'
+import { CAPACITY_METRICS, CONTEXT_METRICS, CHAIN_METRICS, metricLabel, metricCaveat } from '../utils/metrics.js'
 import { DATA_YEAR_MIN, DATA_YEAR_MAX } from '../content/storms.js'
 import { snapshotRowsByMetric, rowsByMetricForNations, reportingCompletenessByNation } from '../utils/rows.js'
 
@@ -18,6 +19,71 @@ import { snapshotRowsByMetric, rowsByMetricForNations, reportingCompletenessByNa
 // would not have been updated when the window moved, leaving this section
 // silently empty. Both now read src/content/roster.json.
 const CAPACITY_YEAR = DATA_YEAR_MAX
+
+// `m.format` comes from utils/metrics.js; label/caveat are resolved through
+// metricLabel()/metricCaveat() there.
+const STRINGS = {
+  en: {
+    eyebrow: 'Underneath the chain',
+    heading: 'Who can measure, and what is changing',
+    intro:
+      'Every record in the ripple chain has holes in it. These two do not, for the same reason the others do: a disaster figure only exists if a country had the capacity to assess and file it after being hit, while the records below are structural or measured from orbit and need nobody to report them.',
+    observeHeading: 'Who can observe their own weather',
+    rankingIntro: (rankingList) => (
+      <>
+        {'Uneven data is not only a limitation of this project \u2014 it is an unequal distribution of '}
+        the ability to describe what happened to you. The two charts below are the same ranking,
+        best to worst: {rankingList}. One counts monitoring stations, unchanged in every year on
+        record; the other counts how much of the ripple chain each nation actually got to report.{' '}
+        <NationRef nation="Solomon Islands" />
+        {' sits last on both \u2014 it has the fewest stations, and no tourist arrivals were ever reported for it at all.'}
+      </>
+    ),
+    dataNotAvailable: 'Data not available.',
+    ariaByNation: (label) => `${label}, by nation`,
+    yearsReported: 'Years of data actually reported',
+    yearsReportedAria: 'Years of data actually reported, out of 60 possible, by nation',
+    completenessCaveat: (max, yearMax) =>
+      `Out of ${max} possible country-years (5 records \u00d7 12 years), this counts how many each nation actually reported. A gap shared by all four nations \u2014 like ${yearMax} power-generation data, not yet published for anyone \u2014 doesn't count against any one country. Only gaps that fall unevenly, where one nation has data and another doesn't, move this ranking.`,
+    changingHeading: 'What is changing underneath',
+    changingP1:
+      'Warmer seas raise the ceiling on how intense a cyclone can become; emissions per head say who is doing the warming. These are the only two climate claims this site makes with confidence, and both are about trends across all four nations \u2014 not evidence about any one storm.',
+    changingP2:
+      'A third mechanism is stated rather than charted. Sea level rise worsens storm surge \u2014 a storm arriving on a higher ocean reaches further inland \u2014 and it is the best-attributed link of the three, with IPCC AR6 rating the human contribution since 1971 very likely. The regional record is reported only to the nearest 0.1\u00A0m, giving three distinct values across twelve years and hiding any movement under 10\u00A0cm. Charting it would claim a precision the measurement does not have.',
+    guardSubject: 'Context',
+  },
+  fr: {
+    eyebrow: 'Sous la chaîne',
+    heading: 'Qui peut mesurer, et ce qui change',
+    intro:
+      "Chaque indicateur de la chaîne de répercussions comporte des lacunes. Ces deux-là n\u2019en ont pas, pour la raison même qui explique les autres\u00A0: un chiffre de catastrophe n\u2019existe que si un pays avait la capacité d\u2019évaluer et de déclarer l\u2019impact après avoir été touché, alors que les indicateurs ci-dessous sont structurels ou mesurés par satellite et ne nécessitent aucune déclaration.",
+    observeHeading: 'Qui peut observer sa propre météo',
+    rankingIntro: (rankingList) => (
+      <>
+        {'Des données inégales ne sont pas seulement une limite de ce projet \u2014 c\u2019est une '}
+        {'répartition inégale de la capacité à décrire ce qui vous est arrivé. Les deux graphiques '}
+        {'ci-dessous montrent le même classement, du meilleur au pire\u00A0: '}
+        {rankingList}
+        {'. L\u2019un compte les stations de surveillance, inchangées chaque année sur la période\u00A0; '}
+        {'l\u2019autre compte la part de la chaîne de répercussions que chaque nation a effectivement pu déclarer.'}{' '}
+        <NationRef nation="Solomon Islands" />
+        {' arrive dernier dans les deux cas \u2014 c\u2019est le pays avec le moins de stations, et aucune arrivée touristique n\u2019y a jamais été déclarée.'}
+      </>
+    ),
+    dataNotAvailable: 'Données non disponibles.',
+    ariaByNation: (label) => `${label}, par nation`,
+    yearsReported: 'Années de données effectivement déclarées',
+    yearsReportedAria: 'Années de données effectivement déclarées, sur 60 possibles, par nation',
+    completenessCaveat: (max, yearMax) =>
+      `Sur ${max} années-pays possibles (5 indicateurs \u00d7 12 ans), ce chiffre compte combien chaque nation en a effectivement déclaré. Une lacune partagée par les quatre nations \u2014 comme les données de production électrique ${yearMax}, non encore publiées pour aucune d\u2019elles \u2014 ne compte contre aucun pays en particulier. Seules les lacunes réparties de façon inégale, où une nation a des données et une autre non, déplacent ce classement.`,
+    changingHeading: 'Ce qui change en profondeur',
+    changingP1:
+      "Des mers plus chaudes relèvent le plafond d\u2019intensité qu\u2019un cyclone peut atteindre\u00A0; les émissions par habitant indiquent qui est à l\u2019origine du réchauffement. Ce sont les deux seules affirmations climatiques que ce site avance avec confiance, et toutes deux portent sur des tendances à travers les quatre nations \u2014 non sur la preuve d\u2019un cyclone en particulier.",
+    changingP2:
+      "Un troisième mécanisme est énoncé plutôt que représenté graphiquement. L\u2019élévation du niveau de la mer aggrave les ondes de tempête \u2014 un cyclone arrivant sur un océan plus haut pénètre plus loin dans les terres \u2014 et c\u2019est le lien le mieux établi des trois, le rapport du GIEC AR6 jugeant très probable la contribution humaine depuis 1971. Le relevé régional n\u2019est rapporté qu\u2019au 0,1\u00A0m près, ce qui donne trois valeurs distinctes sur douze ans et masque tout mouvement inférieur à 10\u00A0cm. Le représenter graphiquement reviendrait à revendiquer une précision que la mesure n\u2019a pas.",
+    guardSubject: 'Contexte',
+  },
+}
 
 // The two things the ripple chain cannot show about itself.
 //
@@ -45,6 +111,8 @@ const CONTEXT_FIGURES = {
 
 export default function ContextPanel({ data, dataError, style }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
 
   const capacity = useMemo(
     () => snapshotRowsByMetric(data, CAPACITY_METRICS, CAPACITY_YEAR, NATION_NAMES),
@@ -71,7 +139,11 @@ export default function ContextPanel({ data, dataError, style }) {
   // tooltip state that lives in this component -- so every hover was
   // recreating this closure and the chart was redrawing itself, entrance
   // animation and all, on every pointer move.
-  const completenessFormat = useMemo(() => (v) => `${v} of ${completenessMax} years`, [completenessMax])
+  const yearsWord = language === 'fr' ? 'ans' : 'years'
+  const completenessFormat = useMemo(
+    () => (v) => `${v} ${language === 'fr' ? 'sur' : 'of'} ${completenessMax} ${yearsWord}`,
+    [completenessMax, language, yearsWord]
+  )
 
   // The stations ranking, best to worst, read out of the chart's own rows
   // rather than typed as nation names in the paragraph below. Typed out by
@@ -88,30 +160,19 @@ export default function ContextPanel({ data, dataError, style }) {
   // The error and loading branches used to be written out here by hand for
   // want of that, and had already drifted from the wording every other section
   // uses.
-  const blocked = sectionGuard({ data, error: dataError, style, subject: 'Context' })
+  const blocked = sectionGuard({ data, error: dataError, style, subject: t.guardSubject, language })
   if (blocked) return blocked
 
   return (
     <Section style={style} backdrop={scatterBackdrop('context')}>
       <div ref={containerRef} className="relative">
-        <p className="type-eyebrow mb-1 text-accent">
-          Underneath the chain
-        </p>
-        <h2 className="type-h2 mb-2">
-          Who can measure, and what is changing
-        </h2>
-        <p className="prose-column prose-wide mb-8 text-sm opacity-75">
-          Every record in the ripple chain has holes in it. These two do not, for the same reason
-          the others do: a disaster figure only exists if a country had the capacity to assess and
-          file it after being hit, while the records below are structural or measured from orbit
-          and need nobody to report them.
-        </p>
+        <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
+        <h2 className="type-h2 mb-2">{t.heading}</h2>
+        <p className="prose-column prose-wide mb-8 text-sm opacity-75">{t.intro}</p>
 
         {capacity && (
           <div className="mb-10">
-            <h3 className="type-subhead mb-1 text-accent">
-              Who can observe their own weather
-            </h3>
+            <h3 className="type-subhead mb-1 text-accent">{t.observeHeading}</h3>
             {/* Opens on the human sentence rather than closing on it -- it used
                 to be the last clause of this paragraph, which a skim reads
                 right past. The ranking claim itself used to be stated in
@@ -119,42 +180,37 @@ export default function ContextPanel({ data, dataError, style }) {
                 also the second chart below, so the paragraph only needs to
                 point at it, not carry the whole argument in words. */}
             <p className="prose-column prose-wide mb-4 text-sm opacity-80">
-              Uneven data is not only a limitation of this project &mdash; it is an unequal
-              distribution of the ability to describe what happened to you. The two charts below
-              are the same ranking, best to worst: <NationRefList nations={rankOrder} join={', '} last={', '} />. One counts monitoring
-              stations, unchanged in every year on record; the other counts how much of the ripple
-              chain each nation actually got to report. <NationRef nation="Solomon Islands" /> sits last on both &mdash;
-              it has the fewest stations, and no tourist arrivals were ever reported for it at all.
+              {t.rankingIntro(<NationRefList nations={rankOrder} join=", " last=", " />)}
             </p>
             <div className="section-bleed grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CAPACITY_METRICS.map((m, i) => (
                 <MetricSnapshotChart
                   key={m.key}
-                  label={m.label}
-                  ariaLabel={`${m.label}, by nation`}
+                  label={metricLabel(m, language)}
+                  ariaLabel={t.ariaByNation(metricLabel(m, language))}
                   rows={capacity[m.key]}
                   nationsMissing={[]}
-                  emptyNote="Data not available."
+                  emptyNote={t.dataNotAvailable}
                   format={m.format}
                   showTooltip={showTooltip}
                   hideTooltip={hideTooltip}
                   index={i}
-                  caveat={m.caveat}
+                  caveat={metricCaveat(m, language)}
                   figure={{ key: 'capacity-stations', source: m.source }}
                 />
               ))}
               <MetricSnapshotChart
-                label="Years of data actually reported"
+                label={t.yearsReported}
                 figure={{ key: 'capacity-completeness' }}
-                ariaLabel="Years of data actually reported, out of 60 possible, by nation"
+                ariaLabel={t.yearsReportedAria}
                 rows={completeness}
                 nationsMissing={[]}
-                emptyNote="Data not available."
+                emptyNote={t.dataNotAvailable}
                 format={completenessFormat}
                 showTooltip={showTooltip}
                 hideTooltip={hideTooltip}
                 index={CAPACITY_METRICS.length}
-                caveat={`Out of ${completenessMax} possible country-years (5 records \u00d7 12 years), this counts how many each nation actually reported. A gap shared by all four nations \u2014 like ${DATA_YEAR_MAX} power-generation data, not yet published for anyone \u2014 doesn't count against any one country. Only gaps that fall unevenly, where one nation has data and another doesn't, move this ranking.`}
+                caveat={t.completenessCaveat(completenessMax, DATA_YEAR_MAX)}
               />
             </div>
           </div>
@@ -162,30 +218,16 @@ export default function ContextPanel({ data, dataError, style }) {
 
         {context && (
           <div>
-            <h3 className="type-subhead mb-1 text-accent">
-              What is changing underneath
-            </h3>
+            <h3 className="type-subhead mb-1 text-accent">{t.changingHeading}</h3>
             <div className="prose-column prose-wide mb-4 space-y-3 text-sm opacity-80">
-              <p>
-                Warmer seas raise the ceiling on how intense a cyclone can become; emissions per head
-                say who is doing the warming. These are the only two climate claims this site makes
-                with confidence, and both are about trends across all four nations &mdash; not
-                evidence about any one storm.
-              </p>
-              <p>
-                A third mechanism is stated rather than charted. Sea level rise worsens storm surge —
-                a storm arriving on a higher ocean reaches further inland — and it is the
-                best-attributed link of the three, with IPCC AR6 rating the human contribution since
-                1971 very likely. The regional record is reported only to the nearest 0.1&nbsp;m,
-                giving three distinct values across twelve years and hiding any movement under
-                10&nbsp;cm. Charting it would claim a precision the measurement does not have.
-              </p>
+              <p>{t.changingP1}</p>
+              <p>{t.changingP2}</p>
             </div>
             <div className="section-bleed grid grid-cols-1 gap-5 sm:grid-cols-2">
               {CONTEXT_METRICS.map((m, i) => (
                 <TrendChart
                   key={m.key}
-                  label={m.label}
+                  label={metricLabel(m, language)}
                   allRows={context[m.key]}
                   nations={NATION_NAMES}
                   valueField={m.field}
@@ -195,7 +237,7 @@ export default function ContextPanel({ data, dataError, style }) {
                   hideTooltip={hideTooltip}
                   index={i}
                   legend
-                  caveat={m.caveat}
+                  caveat={metricCaveat(m, language)}
                   figure={{ key: CONTEXT_FIGURES[m.key], source: m.source }}
                   className={
                     i === CONTEXT_METRICS.length - 1 && CONTEXT_METRICS.length % 2 !== 0

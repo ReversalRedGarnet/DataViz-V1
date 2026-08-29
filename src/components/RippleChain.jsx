@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import { CHAIN_METRICS, FOOTNOTE_METRICS } from '../utils/metrics.js'
+import { CHAIN_METRICS, FOOTNOTE_METRICS, metricLabel, metricCaveat } from '../utils/metrics.js'
 import { buildComparativeInsights } from '../utils/insights.js'
 import { rowsByMetricForNations } from '../utils/rows.js'
 import { useTooltip } from '../hooks/useTooltip.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import SelectionLegend from './SelectionLegend.jsx'
@@ -10,10 +11,56 @@ import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import TrendChart from './TrendChart.jsx'
 import { NationRefList } from './NationRef.jsx'
+import { nationLabel } from '../content/nations.js'
 import MetricDetail from './MetricDetail.jsx'
 import InsightsPanel from './InsightsPanel.jsx'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import Tooltip from './Tooltip.jsx'
+
+// `metric.label`/`metric.caveat` (from utils/metrics.js) are resolved
+// through metricLabel()/metricCaveat(); everything else here translates.
+const STRINGS = {
+  en: {
+    showAction: 'Show this record and what it can and cannot show.',
+    openAction: 'Open what this record can and cannot show.',
+    linkAria: (stage, total, label, action) => `Link ${stage} of ${total}: ${label}. ${action}`,
+    after: (name, year) => `After ${name}, ${year}`,
+    chainIntro:
+      'Five linked records, in the order the damage travels: who was hit, then the harvest, the herds, the power supply and the visitors. Read it as plausible links, not a measured causal path \u2014 every series is an annual national total no cyclone has to itself, and its 2020\u201321 stretch carries the pandemic too. The note under each chart says what that record cannot prove.',
+    unstruckNote: (plural, stormName) =>
+      `${plural ? 'were' : 'was'} not struck by ${stormName}, and ${
+        plural ? 'are' : 'is'
+      } drawn faded rather than removed: the closest thing these records have to a comparison.`,
+    chooseCountry: 'Choose a country in the map section to see its ripple chain.',
+    footnote: (caveat) =>
+      `Direct economic loss is deliberately not a link here. ${caveat} A chart of it would be mostly empty space, and an empty chart argues that little was lost.`,
+    insightsTitle: (a, b) => `${a} vs. ${b}: similarities and differences`,
+    guardSubject: 'Ripple chain',
+    guardPrompt: 'follow what came after it',
+  },
+  fr: {
+    showAction: 'Afficher cet indicateur et ce qu\u2019il peut et ne peut pas montrer.',
+    openAction: 'Ouvrir ce que cet indicateur peut et ne peut pas montrer.',
+    linkAria: (stage, total, label, action) => `Maillon ${stage} sur ${total}\u00A0: ${label}. ${action}`,
+    after: (name, year) => `Après ${name}, ${year}`,
+    chainIntro:
+      'Cinq indicateurs liés, dans l\u2019ordre où les dégâts se propagent\u00A0: qui a été touché, puis la récolte, le cheptel, l\u2019approvisionnement électrique et les visiteurs. À lire comme des liens plausibles, pas une chaîne causale mesurée \u2014 chaque série est un total national annuel qu\u2019aucun cyclone ne s\u2019attribue seul, et sa période 2020\u20132021 porte aussi la pandémie. La note sous chaque graphique précise ce que cet indicateur ne peut pas prouver.',
+    unstruckNote: (plural, stormName) =>
+      `n\u2019${plural ? 'ont' : 'a'} pas été touché${plural ? 's' : ''} par ${stormName}, et ${
+        plural ? 'sont' : 'est'
+      } affiché${plural ? 's' : ''} en estompé plutôt que retiré${plural ? 's' : ''}\u00A0: ce qui se rapproche le plus d\u2019une comparaison pour ces indicateurs.`,
+    was: '',
+    were: '',
+    is: '',
+    are: '',
+    chooseCountry: 'Choisissez un pays dans la section carte pour voir sa chaîne de répercussions.',
+    footnote: (caveat) =>
+      `Les pertes économiques directes ne sont délibérément pas un maillon ici. ${caveat} Un graphique de ces pertes serait en grande partie vide, et un graphique vide laisserait croire que peu a été perdu.`,
+    insightsTitle: (a, b) => `${a} vs ${b}\u00A0: similitudes et différences`,
+    guardSubject: 'Chaîne de répercussions',
+    guardPrompt: 'suivre ce qui s\u2019est passé ensuite',
+  },
+}
 
 // One of the five links on the rail.
 //
@@ -32,11 +79,10 @@ import Tooltip from './Tooltip.jsx'
 //   onToggle -- () => void
 //   hoverHandlers -- pointer/focus emphasis, desktop only
 //   style -- entrance stagger
-function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHandlers, style }) {
+function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHandlers, style, t, language }) {
   const isAccordion = expanded !== undefined
-  const action = isAccordion
-    ? 'Show this record and what it can and cannot show.'
-    : 'Open what this record can and cannot show.'
+  const action = isAccordion ? t.showAction : t.openAction
+  const label = metricLabel(metric, language)
 
   return (
     <button
@@ -44,6 +90,8 @@ function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHand
       onClick={onToggle}
       aria-expanded={isAccordion ? expanded : undefined}
       aria-pressed={isAccordion ? undefined : isHeld}
+      aria-label={t.linkAria(stage, total, label, action)}
+      className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
       aria-label={`Link ${stage} of ${total}: ${metric.label}. ${action}`}
       className={`animate-pop-in press-target chain-link ${isHeld ? 'is-held' : ''}`}
       style={style}
@@ -52,7 +100,7 @@ function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHand
       <span aria-hidden="true" className="chain-link-stage">
         {stage}
       </span>
-      <span className="chain-link-label">{metric.label}</span>
+      <span className="chain-link-label">{label}</span>
       {isAccordion && (
         <span aria-hidden="true" className="chain-link-caret">
           {expanded ? '\u2212' : '+'}
@@ -89,6 +137,8 @@ export default function RippleChain({
   style,
 }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
+  const { language } = useLanguage()
+  const t = STRINGS[language]
   // Pointing at a link is not the same as opening one, so the two are kept
   // apart: `hovered` evaporates when the pointer leaves, `activeMetric`
   // survives until the reader closes it. Emphasis follows whichever is live,
@@ -128,8 +178,8 @@ export default function RippleChain({
 
   const insights = useMemo(() => {
     if (!data || !storm || selectedNations.length !== 2) return null
-    return buildComparativeInsights(data, selectedNations[0], selectedNations[1], storm.year)
-  }, [data, storm, selectedNations])
+    return buildComparativeInsights(data, selectedNations[0], selectedNations[1], storm.year, language)
+  }, [data, storm, selectedNations, language])
   const insightItems = insights?.items
   const insightSummary = insights?.summary
 
@@ -138,19 +188,20 @@ export default function RippleChain({
     error: dataError,
     storm,
     style,
-    subject: 'Ripple chain',
-    prompt: 'follow what came after it',
+    subject: t.guardSubject,
+    prompt: t.guardPrompt,
+    language,
   })
   if (blocked) return blocked
   if (!selectedNations || selectedNations.length === 0) {
-    return <EmptyState style={style}>Choose a country in the map section to see its ripple chain.</EmptyState>
+    return <EmptyState style={style}>{t.chooseCountry}</EmptyState>
   }
 
   // The thirteen props every chain chart takes, in one place. Both layouts drew
   // the same chart from the same data and each wrote the list out in full, so a
   // prop added for one was a prop silently missing from the other.
   const chainChartProps = (metric, index) => ({
-    label: metric.label,
+    label: metricLabel(metric, language),
     allRows: filteredByMetric[metric.key],
     nations: selectedNations,
     valueField: metric.field,
@@ -162,7 +213,7 @@ export default function RippleChain({
     stage: CHAIN_METRICS.indexOf(metric) + 1,
     ripple: true,
     dimNations: unstruck,
-    caveat: metric.caveat,
+    caveat: metricCaveat(metric, language),
     // Both layouts draw from this builder, so the phone accordion and the
     // desktop grid cannot end up numbering the same chart differently.
     figure: { key: CHAIN_FIGURES[metric.key], source: metric.source },
@@ -171,25 +222,16 @@ export default function RippleChain({
   return (
     <Section width="narrow" style={style} backdrop={scatterBackdrop('ripple-chain')}>
       <div ref={containerRef} className="relative">
-        <h2 className="type-h2 mb-2">
-          After {storm.name}, {storm.year}
-        </h2>
+        <h2 className="type-h2 mb-2">{t.after(storm.name, storm.year)}</h2>
         {/* "2020 in particular carries the pandemic alongside the storm" read
             as though the storm were always Harold. The caveat belongs to the
             data window, not to the selected event. */}
-        <p className="prose-column prose-wide mb-4 text-sm opacity-70">
-          Five linked records, in the order the damage travels: who was hit, then the harvest, the
-          herds, the power supply and the visitors. Read it as plausible links, not a measured
-          causal path &mdash; every series is an annual national total no cyclone has to itself,
-          and its 2020&ndash;21 stretch carries the pandemic too. The note under each chart says
-          what that record cannot prove.
-        </p>
+        <p className="prose-column prose-wide mb-4 text-sm opacity-70">{t.chainIntro}</p>
         <SelectionLegend selected={selectedNations} />
         {unstruck.length > 0 && (
           <p className="prose-wide mt-3 text-xs italic opacity-70">
-            <NationRefList nations={unstruck} /> {unstruck.length === 1 ? 'was' : 'were'} not struck by{' '}
-            {storm.name}, and {unstruck.length === 1 ? 'is' : 'are'} drawn faded rather than
-            removed: the closest thing these records have to a comparison.
+            <NationRefList nations={unstruck} />{' '}
+            {t.unstruckNote(unstruck.length > 1, storm.name)}
           </p>
         )}
         {/*
@@ -214,6 +256,8 @@ export default function RippleChain({
                     isHeld={isOpen}
                     expanded={isOpen}
                     onToggle={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
+                    t={t}
+                    language={language}
                     style={{ animationDelay: `${i * 90}ms` }}
                   />
 
@@ -250,6 +294,8 @@ export default function RippleChain({
                       onBlur: () => setHovered(null),
                     }}
                     style={{ animationDelay: `${i * 90}ms` }}
+                    t={t}
+                    language={language}
                   />
                 </li>
               ))}
@@ -283,14 +329,11 @@ export default function RippleChain({
           </>
         )}
 
-        <p className="prose-wide mt-6 text-xs italic opacity-70">
-          Direct economic loss is deliberately not a link here. {FOOTNOTE_METRICS[0].caveat} A chart
-          of it would be mostly empty space, and an empty chart argues that little was lost.
-        </p>
+        <p className="prose-wide mt-6 text-xs italic opacity-70">{t.footnote(metricCaveat(FOOTNOTE_METRICS[0], language))}</p>
 
         {insights && (
           <InsightsPanel
-            title={`${selectedNations[0]} vs. ${selectedNations[1]}: similarities and differences`}
+            title={t.insightsTitle(nationLabel(selectedNations[0], language), nationLabel(selectedNations[1], language))}
             summary={insightSummary}
             items={insightItems}
             staggerItems

@@ -26,6 +26,15 @@
       relative path, and a broken image is worse than no card at all. The image
       itself is public/og-image.png, generated from the real crop-yield data
       rather than a mock-up, so the card can't show a shape the site doesn't.
+
+      STAYS ENGLISH REGARDLESS OF THE LANGUAGE TOGGLE, AND HAS TO. Everything
+      below reads from the raw HTML this file serves, fetched by a
+      server-side bot (Facebook, X, Slack, Discord) that does not execute
+      src/main.jsx or any other JavaScript on this page -- so there is no
+      client-side state a toggle could hand it. <title> is the one exception:
+      see the effect in App.jsx that keeps the browser tab in step after a
+      toggle, which this static tag still gets right at first paint since the
+      site always opens in English (see the French-translation build notes).
     -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Ripple" />
