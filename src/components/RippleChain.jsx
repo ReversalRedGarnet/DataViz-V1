@@ -92,6 +92,8 @@ function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHand
       aria-pressed={isAccordion ? undefined : isHeld}
       aria-label={t.linkAria(stage, total, label, action)}
       className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
+      aria-label={`Link ${stage} of ${total}: ${metric.label}. ${action}`}
+      className={`animate-pop-in press-target chain-link ${isHeld ? 'is-held' : ''}`}
       style={style}
       {...hoverHandlers}
     >
@@ -256,6 +258,7 @@ export default function RippleChain({
                     onToggle={() => onActiveMetric(activeMetric === m.key ? null : m.key)}
                     t={t}
                     language={language}
+                    style={{ animationDelay: `${i * 90}ms` }}
                   />
 
                   {isOpen && (

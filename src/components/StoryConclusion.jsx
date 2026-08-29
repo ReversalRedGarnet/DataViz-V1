@@ -146,7 +146,13 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
         <p className="type-eyebrow mb-1 text-accent">{t.whatShowed(storm.name)}</p>
         <h2 className="type-h2 mb-3">{t.heading}</h2>
 
-        <div className="md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8">
+        {/* Staggered a beat behind the heading, so the finding is read before
+            its evidence -- the diagram's own lines then draw in over 1.1s
+            once this frame has arrived (see ConvergeDiverge's inView gate). */}
+        <div
+          className="animate-pop-in md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8"
+          style={{ animationDelay: '110ms' }}
+        >
           <p className="prose-column prose-wide text-sm leading-snug opacity-85">
             {t.intro(
               storm.name,
@@ -163,6 +169,10 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
 
         <div className="mt-8">
           <p className="type-eyebrow mb-3 text-accent">{t.lookAgain}</p>
+        {/* The closing offer, last in the sequence: what it showed, then what
+            to do next. */}
+        <div className="animate-pop-in mt-8" style={{ animationDelay: '220ms' }}>
+          <p className="type-eyebrow mb-3 text-accent">Look again</p>
           <button
             type="button"
             onClick={onReset}

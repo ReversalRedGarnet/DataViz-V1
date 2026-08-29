@@ -333,6 +333,15 @@
     height: 15rem;
   }
 
+  /* The stop's text, remounted per stop and given the same short lift the
+     ripple chain's accordion panel uses below (chain-panel-open) -- reused
+     rather than redeclared, since both are "new content arriving in a fixed
+     box" and a drag on the scrubber can retrigger this several times a
+     second. */
+  .journey-stop-content {
+    animation: chain-panel-open 180ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
+  }
+
 
   /*
     THE STORM SCRUBBER
@@ -815,8 +824,10 @@
       animation: none;
     }
 
-    /* The panel still opens; it just arrives. */
-    .chain-panel {
+    /* The panel still opens; it just arrives. Same for the journey's stop
+       text, which reuses this animation -- see .journey-stop-content above. */
+    .chain-panel,
+    .journey-stop-content {
       animation: none;
     }
   }

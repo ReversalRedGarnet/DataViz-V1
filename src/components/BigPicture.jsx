@@ -8,6 +8,9 @@ import { useTooltip } from '../hooks/useTooltip.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { NATION_NAMES, NATION_COUNT, nationLabel } from '../content/nations.js'
 import { CHAIN_METRICS, metricLabel } from '../utils/metrics.js'
+import { useCountUp } from '../hooks/useCountUp.js'
+import { NATION_NAMES, NATION_COUNT } from '../content/nations.js'
+import { CHAIN_METRICS } from '../utils/metrics.js'
 import { formatNationList } from '../utils/formatNationList.js'
 import { missingNations, snapshotRowsByMetric, shareOfPopulationRows } from '../utils/rows.js'
 
@@ -165,6 +168,22 @@ export default function BigPicture({ data, dataError, storm, style }) {
             index={2}
             label={t.hardestVsLeast}
             value={stats.ratio ? `${stats.ratio.toLocaleString(language === 'fr' ? 'fr' : 'en')}\u00d7` : t.notApplicable}
+            label={`People affected, ${storm.year}`}
+            value={stats.totalAffected == null ? 'Not reported' : undefined}
+            countTo={stats.totalAffected}
+            format={(v) => Math.round(v).toLocaleString()}
+            detail={
+              stats.totalAffected == null
+                ? `No national figure was filed for ${storm.year}`
+                : 'Across all four nations combined'
+            }
+          />
+          <StatTile
+            index={2}
+            label="Hardest- vs. least-hit"
+            value={stats.ratio ? undefined : 'n/a'}
+            countTo={stats.ratio}
+            format={(v) => `${(v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString())}×`}
             detail={
               stats.maxNation
                 ? t.vsDetail(
@@ -308,14 +327,24 @@ function PerCapitaToggle({ value, onChange, language }) {
   )
 }
 
-function StatTile({ index, label, value, detail }) {
+// `countTo` + `format` animate the figure between storms rather than swapping
+// it outright -- the same eased tween ComparisonView's deltas use (see
+// hooks/useCountUp.js), so a jump from Harold's toll to Pam's reads as
+// movement rather than a flicker. Tiles with no meaningful count (nation
+// totals of at most four, or no figure at all) fall back to a plain `value`
+// string and keep only their entrance stagger.
+function StatTile({ index, label, value, detail, countTo, format }) {
+  const hasCount = typeof countTo === 'number' && Number.isFinite(countTo)
+  const [animated] = useCountUp([hasCount ? countTo : 0])
+  const display = hasCount ? format(animated) : value
+
   return (
     <div
       className="animate-pop-in rounded-xl border border-ink/10 bg-surface/60 p-4"
       style={{ animationDelay: `${index * 90}ms` }}
     >
       <p className="type-eyebrow text-accent">{label}</p>
-      <p className="mt-1.5 text-2xl font-semibold leading-none tabular-nums">{value}</p>
+      <p className="mt-1.5 text-2xl font-semibold leading-none tabular-nums">{display}</p>
       <p className="mt-1.5 text-xs opacity-70">{detail}</p>
     </div>
   )
