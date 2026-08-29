@@ -1,4 +1,5 @@
 import scope from './nations.json'
+import { formatNationList } from '../utils/formatNationList.js'
 
 // THE FOUR IN-SCOPE NATIONS, IN ONE PLACE.
 //
@@ -84,4 +85,30 @@ const SHORT_NAMES_FR = {
 export function nationLabel(name, language = 'en') {
   if (language === 'fr') return NAME_FR[name] ?? name
   return name
+}
+
+// Whether a nation, or list of nations, takes plural grammatical agreement in
+// French prose: true for two or more nations, and also for Solomon Islands
+// alone, since "Îles Salomon" is a grammatically plural country name in
+// French (like "les Pays-Bas") even when it is the only one named.
+export function nationListIsPlural(names) {
+  return names.length > 1 || names.includes('Solomon Islands')
+}
+
+// A nation, or list of nations, as it belongs in running prose -- the object
+// of "a touché ..." or "pour ...", rather than a bare label (a chip, a table
+// cell, a legend entry, a chart tick -- those stay on nationLabel()/
+// formatNationList() above, unchanged). A plural French country name still
+// needs its article there, the way "les Pays-Bas" or "les Philippines" would
+// -- so unlike the label form, this prepends "les" for Solomon Islands. Fidji,
+// Vanuatu and Tonga take no article either way, so this only ever changes
+// output when Solomon Islands is in `names`, and is a no-op in English.
+//
+// Takes canonical (English) names, same as nationLabel -- not already-
+// resolved display strings -- so it can tell Solomon Islands apart from its
+// French label.
+export function nationListInProse(names, language = 'en') {
+  const list = formatNationList(names.map((n) => nationLabel(n, language)), language)
+  if (language === 'fr' && names.includes('Solomon Islands')) return `les ${list}`
+  return list
 }

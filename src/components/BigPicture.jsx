@@ -6,12 +6,9 @@ import Tooltip from './Tooltip.jsx'
 import MetricSnapshotChart from './MetricSnapshotChart.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
-import { NATION_NAMES, NATION_COUNT, nationLabel } from '../content/nations.js'
+import { NATION_NAMES, NATION_COUNT, nationLabel, nationListInProse, nationListIsPlural } from '../content/nations.js'
 import { CHAIN_METRICS, metricLabel } from '../utils/metrics.js'
 import { useCountUp } from '../hooks/useCountUp.js'
-import { NATION_NAMES, NATION_COUNT } from '../content/nations.js'
-import { CHAIN_METRICS } from '../utils/metrics.js'
-import { formatNationList } from '../utils/formatNationList.js'
 import { missingNations, snapshotRowsByMetric, shareOfPopulationRows } from '../utils/rows.js'
 
 // The one metric in the chain that is a count of people, and so the only one a
@@ -161,29 +158,23 @@ export default function BigPicture({ data, dataError, storm, style }) {
           <StatTile
             index={1}
             label={t.peopleAffected(storm.year)}
-            value={stats.totalAffected == null ? t.notReported : stats.totalAffected.toLocaleString(language === 'fr' ? 'fr' : 'en')}
+            value={stats.totalAffected == null ? t.notReported : undefined}
+            countTo={stats.totalAffected}
+            format={(v) => Math.round(v).toLocaleString(language === 'fr' ? 'fr' : 'en')}
             detail={stats.totalAffected == null ? t.noFigureFiled(storm.year) : t.acrossAllFour}
           />
           <StatTile
             index={2}
             label={t.hardestVsLeast}
-            value={stats.ratio ? `${stats.ratio.toLocaleString(language === 'fr' ? 'fr' : 'en')}\u00d7` : t.notApplicable}
-            label={`People affected, ${storm.year}`}
-            value={stats.totalAffected == null ? 'Not reported' : undefined}
-            countTo={stats.totalAffected}
-            format={(v) => Math.round(v).toLocaleString()}
-            detail={
-              stats.totalAffected == null
-                ? `No national figure was filed for ${storm.year}`
-                : 'Across all four nations combined'
-            }
-          />
-          <StatTile
-            index={2}
-            label="Hardest- vs. least-hit"
-            value={stats.ratio ? undefined : 'n/a'}
+            value={stats.ratio ? undefined : t.notApplicable}
             countTo={stats.ratio}
-            format={(v) => `${(v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString())}×`}
+            format={(v) =>
+              `${
+                v < 10
+                  ? v.toLocaleString(language === 'fr' ? 'fr' : 'en', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+                  : Math.round(v).toLocaleString(language === 'fr' ? 'fr' : 'en')
+              }×`
+            }
             detail={
               stats.maxNation
                 ? t.vsDetail(
@@ -244,13 +235,13 @@ export default function BigPicture({ data, dataError, storm, style }) {
                 const notReported = nationsMissing.filter((n) => !noDenominator.includes(n))
                 const missingNote = [
                   notReported.length > 0
-                    ? t.noDataAvailable(storm.year, formatNationList(notReported.map((n) => nationLabel(n, language)), language))
+                    ? t.noDataAvailable(storm.year, nationListInProse(notReported, language))
                     : '',
                   noDenominator.length > 0
                     ? t.noPopFigure(
                         storm.year,
-                        formatNationList(noDenominator.map((n) => nationLabel(n, language)), language),
-                        noDenominator.length > 1
+                        nationListInProse(noDenominator, language),
+                        nationListIsPlural(noDenominator)
                       )
                     : '',
                 ]

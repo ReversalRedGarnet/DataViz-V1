@@ -33,18 +33,22 @@ import roster from './roster.json'
 //     journey and category-versus-deaths sections, which have nothing to draw.
 //   sources -- the two supplementary citations for that storm's profile
 //
-// FRENCH TRANSLATION. `note`, `categoryLabel`, `fact`, `lead` and `deathsNote`
-// each carry an *Fr sibling (noteFr, categoryLabelFr, factFr, leadFr,
-// deathsNoteFr) rather than becoming { en, fr } objects outright -- this data
-// flows through half a dozen components (MapView, StormJourney, StormProfile,
-// StormTimeline, RippleChain's insights) that all read .fact/.categoryLabel/
-// etc. directly, and reshaping the field itself would mean touching every one
-// of those read sites individually. Instead, localizeStorm()/localizeRow()
-// below swap in the *Fr sibling once, at the point each storm object is first
-// obtained (App.jsx's pageSections(), StormTimeline.jsx's STORMS lookup), and
-// every existing .fact/.categoryLabel/.lead/.deathsNote/.note read downstream
-// keeps working unchanged. `name` (the nation), `date`, `category`, `deaths`,
-// `deathsKind` and `dodge` are data, not prose, and are never localized.
+// FRENCH TRANSLATION. `note`, `categoryLabel`, `fact`, `lead`, `deathsNote` and
+// `date` each carry an *Fr sibling (noteFr, categoryLabelFr, factFr, leadFr,
+// deathsNoteFr, dateFr) rather than becoming { en, fr } objects outright --
+// this data flows through half a dozen components (MapView, StormJourney,
+// StormProfile, StormTimeline, RippleChain's insights) that all read
+// .fact/.categoryLabel/.date etc. directly, and reshaping the field itself
+// would mean touching every one of those read sites individually. Instead,
+// localizeStorm()/localizeRow() below swap in the *Fr sibling once, at the
+// point each storm object is first obtained (App.jsx's pageSections(),
+// StormTimeline.jsx's STORMS lookup), and every existing
+// .fact/.categoryLabel/.lead/.deathsNote/.note/.date read downstream keeps
+// working unchanged. `date` needed one by hand rather than an
+// Intl.DateTimeFormat call at read time because a handful of entries are not
+// a single calendar date to format -- see Judy & Kevin's below, two dates and
+// a parenthetical. `name` (the nation), `category`, `deaths`, `deathsKind` and
+// `dodge` are still data, not prose, and are never localized.
 // `sources[].label` is now { en, fr } too, resolved via sourceLabel() from
 // utils/metrics.js -- descriptive terms (assessment names, report types)
 // translate; organisation and agency names (UN OCHA, ReliefWeb, IFRC, World
@@ -56,6 +60,7 @@ const STORM_DETAIL = {
       {
         name: 'Solomon Islands',
         date: '10\u201311 March 2015',
+        dateFr: '10\u201311 mars 2015',
         category: 1,
         categoryLabel: 'Category 1 while intensifying; passed offshore, no landfall',
         categoryLabelFr: "Catégorie 1 en cours d'intensification ; passé au large, sans atterrissage",
@@ -74,6 +79,7 @@ const STORM_DETAIL = {
       {
         name: 'Vanuatu',
         date: '13 March 2015',
+        dateFr: '13 mars 2015',
         category: 5,
         categoryLabel: 'Category 5 (landfall, Shefa and Tafea Provinces)',
         categoryLabelFr: 'Catégorie 5 (atterrissage, provinces de Shefa et Tafea)',
@@ -108,6 +114,7 @@ const STORM_DETAIL = {
       {
         name: 'Tonga',
         date: '16 February 2016',
+        dateFr: '16 février 2016',
         category: 1,
         // The two figures in this label are both true of different moments, and
         // the number above is the national met service's own. This is exactly
@@ -127,6 +134,7 @@ const STORM_DETAIL = {
       {
         name: 'Fiji',
         date: '20 February 2016',
+        dateFr: '20 février 2016',
         category: 5,
         categoryLabel: 'Category 5 (landfall, Koro Island then Viti Levu)',
         categoryLabelFr: 'Catégorie 5 (atterrissage, île de Koro puis Viti Levu)',
@@ -162,6 +170,7 @@ const STORM_DETAIL = {
       {
         name: 'Tonga',
         date: '12 February 2018',
+        dateFr: '12 février 2018',
         category: 4,
         categoryLabel: "Category 4 (landfall, Tongatapu and 'Eua)",
         categoryLabelFr: "Catégorie 4 (atterrissage, Tongatapu et 'Eua)",
@@ -178,6 +187,7 @@ const STORM_DETAIL = {
       {
         name: 'Fiji',
         date: '13 February 2018',
+        dateFr: '13 février 2018',
         category: 4,
         categoryLabel:
           'Category 4 passing the southern Lau group; peaked at Category 5 about 205 km south of Kadavu \u2014 no landfall',
@@ -217,6 +227,7 @@ const STORM_DETAIL = {
       {
         name: 'Solomon Islands',
         date: '3 April 2020',
+        dateFr: '3 avril 2020',
         category: 1,
         categoryLabel: 'Tropical low / Category 1 at time of impact',
         categoryLabelFr: "Dépression tropicale / Catégorie 1 au moment de l'impact",
@@ -231,6 +242,7 @@ const STORM_DETAIL = {
       {
         name: 'Vanuatu',
         date: '6 April 2020',
+        dateFr: '6 avril 2020',
         category: 5,
         categoryLabel: 'Category 5 (landfall, Espiritu Santo)',
         categoryLabelFr: 'Catégorie 5 (atterrissage, Espiritu Santo)',
@@ -245,6 +257,7 @@ const STORM_DETAIL = {
       {
         name: 'Fiji',
         date: '8 April 2020',
+        dateFr: '8 avril 2020',
         category: 4,
         categoryLabel: 'Category 4 (landfall, Kadavu)',
         categoryLabelFr: 'Catégorie 4 (atterrissage, Kadavu)',
@@ -258,6 +271,7 @@ const STORM_DETAIL = {
       {
         name: 'Tonga',
         date: '9 April 2020',
+        dateFr: '9 avril 2020',
         category: 4,
         categoryLabel: 'Category 4 (passed offshore, no landfall)',
         categoryLabelFr: 'Catégorie 4 (passé au large, sans atterrissage)',
@@ -295,6 +309,7 @@ const STORM_DETAIL = {
       {
         name: 'Solomon Islands',
         date: '27 February 2023',
+        dateFr: '27 février 2023',
         category: 1,
         categoryLabel:
           'Category 1 (Judy tracked over the southern islands; Kevin followed offshore \u2014 no landfall)',
@@ -315,6 +330,7 @@ const STORM_DETAIL = {
       {
         name: 'Vanuatu',
         date: '1 and 3 March 2023 (Judy, then Kevin)',
+        dateFr: '1er et 3 mars 2023 (Judy, puis Kevin)',
         category: 4,
         categoryLabel:
           'Category 4 at both landfalls \u2014 Judy on Efate and Tanna, Kevin on Erromango (combined entry for two cyclones)',
@@ -356,6 +372,7 @@ const STORM_DETAIL = {
       {
         name: 'Solomon Islands',
         date: '22 October 2023',
+        dateFr: '22 octobre 2023',
         category: 3,
         categoryLabel: 'Category 3 (landfall, Tikopia Island, Temotu Province)',
         categoryLabelFr: 'Catégorie 3 (atterrissage, île de Tikopia, province de Temotu)',
@@ -378,6 +395,7 @@ const STORM_DETAIL = {
       {
         name: 'Vanuatu',
         date: '25 October 2023',
+        dateFr: '25 octobre 2023',
         category: 4,
         categoryLabel: 'Category 4 at landfall on Maewo and Pentecost; had peaked at Category 5 on 24 October',
         categoryLabelFr: "Catégorie 4 à l'atterrissage sur Maewo et Pentecost\u00A0; avait culminé en catégorie 5 le 24 octobre",
@@ -437,6 +455,7 @@ export function localizeStormRow(row, language = 'en') {
   if (!row || language !== 'fr') return row
   return {
     ...row,
+    date: row.dateFr ?? row.date,
     categoryLabel: row.categoryLabelFr ?? row.categoryLabel,
     fact: row.factFr ?? row.fact,
     lead: row.leadFr ?? row.lead,

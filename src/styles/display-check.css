@@ -17,12 +17,26 @@
   z-index 30 puts it over the sticky footer (20) and under the header (40). Over
   the footer because a notice hidden behind the chrome is not a notice; under the
   header because the header is navigation and this is not.
+
+  THE FLOOR BELOW --header-height IS NOT DECORATIVE. On the two chromeless
+  bookends (the opening poem, the sources slide -- see `chromeless` in App.jsx)
+  the site header is faded out and --header-height is set to 0, so `top` would
+  otherwise land this flush against the viewport's own top edge. Those two
+  slides each carry their own language/theme toggle pair in that exact corner
+  (IslanderPoem.jsx, CitationPanel.jsx), because with the header gone neither
+  control is reachable any other way. Without the floor the notice landed on
+  top of them, and a fixed-position box with a solid background and no
+  pointer-events:none genuinely blocks the click -- which is precisely what
+  the module comment above promises this component never does. 4.75rem clears
+  that row (two 2.25rem/36px buttons plus the section's own top padding) with
+  room to spare; on every slide that has a real header this floor is far
+  below --header-height and never binds.
 */
 
 @layer components {
   .display-check {
     position: fixed;
-    top: calc(var(--header-height) + 0.75rem);
+    top: max(calc(var(--header-height) + 0.75rem), 4.75rem);
     right: 0.75rem;
     z-index: 30;
 
@@ -117,7 +131,11 @@
   */
   @media (max-height: 560px) {
     .display-check {
-      top: calc(var(--header-height) + 0.5rem);
+      /* Same floor as the base rule, and for the same reason -- see the note
+         at the top of this file. This is the breakpoint where a chromeless
+         bookend's own toggle row is most likely to be sharing the screen with
+         this notice, not the one to drop the floor on. */
+      top: max(calc(var(--header-height) + 0.5rem), 4.75rem);
       padding: 0.5rem 0.625rem;
     }
 

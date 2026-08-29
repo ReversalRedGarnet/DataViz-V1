@@ -1,5 +1,11 @@
 import { useTheme } from '../hooks/useTheme.jsx'
+import { useLanguage } from '../hooks/useLanguage.jsx'
 import { runRippleTransition } from '../utils/rippleTransition.js'
+
+const LABEL = {
+  en: { toLight: 'Switch to light mode', toDark: 'Switch to dark mode' },
+  fr: { toLight: 'Passer au mode clair', toDark: 'Passer au mode sombre' },
+}
 
 // Same stroke convention as MapControlIcon.jsx. Shows the mode a click
 // switches TO -- answering "what does this do" rather than "what state am I
@@ -48,6 +54,8 @@ function MoonIcon() {
 //     needing to know its own placement
 export default function ThemeToggle({ className = '' }) {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
+  const t = LABEL[language]
 
   // The whole page repaints on a theme change, so the switch is either an
   // abrupt flash or something deliberate. It goes through the same
@@ -63,7 +71,7 @@ export default function ThemeToggle({ className = '' }) {
     <button
       type="button"
       onClick={handleClick}
-      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={theme === 'dark' ? t.toLight : t.toDark}
       className={`press-target flex h-9 w-9 items-center justify-center rounded-md text-ink hover:bg-ink/5 ${className}`}
     >
       {theme === 'dark' ? <SunIcon /> : <MoonIcon />}

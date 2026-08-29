@@ -108,9 +108,9 @@ const LABEL_MARGIN = 6
 // never reached says so, because a marker with nothing under it reads as
 // missing data rather than as a country that was spared.
 //
-// `entry.date`/`entry.categoryLabel` come straight from content/storms.js,
-// which is still English-only -- see the note in that file. Only the
-// surrounding grammar translates until that content itself does.
+// `entry.date`/`entry.categoryLabel` come from content/storms.js, already
+// localized by localizeStorm() before `storm` reaches this component -- see
+// the note in that file. `entry.deaths` stays a number either way.
 function stormBlurb(nationName, storm, language = 'en') {
   const t = STRINGS[language]
   if (!storm) return null

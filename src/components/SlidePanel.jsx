@@ -3,6 +3,9 @@ import { ScrollRootProvider } from '../hooks/useScrollRoot.jsx'
 import SlideFooter from './SlideFooter.jsx'
 import SlideEdgeNav from './SlideEdgeNav.jsx'
 import { usePanelFit, usePanelProgress } from '../hooks/usePanelMetrics.js'
+import { useLanguage } from '../hooks/useLanguage.jsx'
+
+const BACK_LABEL = { en: 'Back', fr: 'Retour' }
 
 // One slide: a bounded scroll region with the deck's footer pinned beneath it.
 //
@@ -33,6 +36,7 @@ export default function SlidePanel({
   // inside it binds to the right root. A ref would still be null on the render
   // that matters.
   const [node, setNode] = useState(null)
+  const { language } = useLanguage()
 
   const fits = usePanelFit(node, isActive)
   usePanelProgress(node, isActive, onProgress, onOverflow)
@@ -85,7 +89,7 @@ export default function SlidePanel({
           {section.chromeless ? (
             <SlideEdgeNav
               direction={index === 0 ? 'forward' : 'back'}
-              label={index === 0 ? nextLabel : 'Back'}
+              label={index === 0 ? nextLabel : BACK_LABEL[language]}
               index={index}
               onNavigate={onNavigate}
             />

@@ -3,8 +3,7 @@ import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { buildDivergenceChart, DIVERGENCE_HEIGHT } from '../utils/charts/index.js'
 import { motionDuration } from '../utils/motion.js'
-import { nationLabel } from '../content/nations.js'
-import { formatNationList } from '../utils/formatNationList.js'
+import { nationLabel, nationListInProse } from '../content/nations.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 import FigureCaption from './FigureCaption.jsx'
 
@@ -231,7 +230,7 @@ export default function DivergenceChart({
       {note && <p className="mt-2 text-xs italic opacity-70">{note}</p>}
       {missing.length > 0 && (
         <p className="mt-1 text-xs italic opacity-70">
-          {t.noRecord(formatNationList(missing.map((n) => nationLabel(n, language)), language))}
+          {t.noRecord(nationListInProse(missing, language))}
         </p>
       )}
       <VisuallyHidden>{table}</VisuallyHidden>

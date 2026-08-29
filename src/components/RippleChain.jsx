@@ -49,10 +49,6 @@ const STRINGS = {
       `n\u2019${plural ? 'ont' : 'a'} pas été touché${plural ? 's' : ''} par ${stormName}, et ${
         plural ? 'sont' : 'est'
       } affiché${plural ? 's' : ''} en estompé plutôt que retiré${plural ? 's' : ''}\u00A0: ce qui se rapproche le plus d\u2019une comparaison pour ces indicateurs.`,
-    was: '',
-    were: '',
-    is: '',
-    are: '',
     chooseCountry: 'Choisissez un pays dans la section carte pour voir sa chaîne de répercussions.',
     footnote: (caveat) =>
       `Les pertes économiques directes ne sont délibérément pas un maillon ici. ${caveat} Un graphique de ces pertes serait en grande partie vide, et un graphique vide laisserait croire que peu a été perdu.`,
@@ -91,8 +87,6 @@ function ChainLink({ metric, stage, total, isHeld, expanded, onToggle, hoverHand
       aria-expanded={isAccordion ? expanded : undefined}
       aria-pressed={isAccordion ? undefined : isHeld}
       aria-label={t.linkAria(stage, total, label, action)}
-      className={`press-target chain-link ${isHeld ? 'is-held' : ''}`}
-      aria-label={`Link ${stage} of ${total}: ${metric.label}. ${action}`}
       className={`animate-pop-in press-target chain-link ${isHeld ? 'is-held' : ''}`}
       style={style}
       {...hoverHandlers}

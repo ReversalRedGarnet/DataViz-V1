@@ -66,8 +66,8 @@ const STRINGS = {
         {rankingList}
         {'. L\u2019un compte les stations de surveillance, inchangées chaque année sur la période\u00A0; '}
         {'l\u2019autre compte la part de la chaîne de répercussions que chaque nation a effectivement pu déclarer.'}{' '}
-        <NationRef nation="Solomon Islands" />
-        {' arrive dernier dans les deux cas \u2014 c\u2019est le pays avec le moins de stations, et aucune arrivée touristique n\u2019y a jamais été déclarée.'}
+        <NationRef nation="Solomon Islands">les Îles Salomon</NationRef>
+        {' arrivent derniers dans les deux cas — c’est le pays avec le moins de stations, et aucune arrivée touristique n’y a jamais été déclarée.'}
       </>
     ),
     dataNotAvailable: 'Données non disponibles.',

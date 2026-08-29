@@ -5,8 +5,7 @@ import { useTheme } from '../hooks/useTheme.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { useInView } from '../hooks/useInView.js'
 import { chartColorsFor } from '../utils/theme.js'
-import { NATION_COUNT, NATION_NAMES, nationLabel } from '../content/nations.js'
-import { formatNationList } from '../utils/formatNationList.js'
+import { NATION_COUNT, NATION_NAMES, nationListInProse } from '../content/nations.js'
 
 // THE END OF THE ARGUMENT, NOT THE END OF THE PAGE.
 //
@@ -55,7 +54,7 @@ const STRINGS = {
     intro: (name, reachedList, year, missedClause, comparedClause) =>
       `${name} reached ${reachedList} in ${year}${missedClause}. Indexed to their own figures in that year, the four national trajectories start from one point and do not stay together: the harvest, the herds, the power supply and the visitors move by different amounts, for different lengths of time, and the record of them is least complete where the capacity to record was thinnest.${comparedClause} None of that ranks these countries, and this site does not: no trajectory here is a score, and the ones with the largest movements are not the ones that coped worst.`,
     missedClause: (list) => ` and missed ${list}`,
-    comparedClause: (a, b) => ` You compared ${a} and ${b}; the same storm, and two different afterwards.`,
+    comparedClause: (list) => ` You compared ${list}; the same storm, and two different afterwards.`,
     lookAgain: 'Look again',
     startAgain: 'Start again with another storm',
     footnote:
@@ -69,8 +68,8 @@ const STRINGS = {
     intro: (name, reachedList, year, missedClause, comparedClause) =>
       `${name} a touché ${reachedList} en ${year}${missedClause}. Indexées à leur propre chiffre de cette année-là, les quatre trajectoires nationales partent d\u2019un même point et ne restent pas ensemble\u00A0: la récolte, le cheptel, l\u2019approvisionnement électrique et les visiteurs évoluent d\u2019amplitudes différentes, sur des durées différentes, et leur suivi est le moins complet là où la capacité à l\u2019assurer était la plus faible.${comparedClause} Rien de tout cela ne classe ces pays, et ce site ne le fait pas\u00A0: aucune trajectoire ici n\u2019est un score, et celles aux mouvements les plus marqués ne sont pas celles qui s\u2019en sont le moins bien sorties.`,
     missedClause: (list) => ` et n\u2019a pas touché ${list}`,
-    comparedClause: (a, b) =>
-      ` Vous avez comparé ${a} et ${b}\u00A0: le même cyclone, et deux suites différentes.`,
+    comparedClause: (list) =>
+      ` Vous avez comparé ${list}\u00A0: le même cyclone, et deux suites différentes.`,
     lookAgain: 'Regarder à nouveau',
     startAgain: 'Recommencer avec un autre cyclone',
     footnote:
@@ -129,16 +128,13 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const missedClause =
     storm.nations.length < NATION_COUNT
       ? t.missedClause(
-          formatNationList(
-            NATION_NAMES.filter((n) => !storm.nations.includes(n)).map((n) => nationLabel(n, language)),
+          nationListInProse(
+            NATION_NAMES.filter((n) => !storm.nations.includes(n)),
             language
           )
         )
       : ''
-  const comparedClause =
-    pair.length === 2
-      ? t.comparedClause(nationLabel(pair[0], language), nationLabel(pair[1], language))
-      : ''
+  const comparedClause = pair.length === 2 ? t.comparedClause(nationListInProse(pair, language)) : ''
 
   return (
     <Section width="narrow" style={style} backdrop={scatterBackdrop('conclusion')}>
@@ -156,7 +152,7 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
           <p className="prose-column prose-wide text-sm leading-snug opacity-85">
             {t.intro(
               storm.name,
-              formatNationList(storm.nations.map((n) => nationLabel(n, language)), language),
+              nationListInProse(storm.nations, language),
               storm.year,
               missedClause,
               comparedClause
@@ -167,12 +163,10 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
           </div>
         </div>
 
-        <div className="mt-8">
-          <p className="type-eyebrow mb-3 text-accent">{t.lookAgain}</p>
         {/* The closing offer, last in the sequence: what it showed, then what
             to do next. */}
         <div className="animate-pop-in mt-8" style={{ animationDelay: '220ms' }}>
-          <p className="type-eyebrow mb-3 text-accent">Look again</p>
+          <p className="type-eyebrow mb-3 text-accent">{t.lookAgain}</p>
           <button
             type="button"
             onClick={onReset}

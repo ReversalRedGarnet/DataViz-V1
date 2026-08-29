@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
-import { NATION_NAMES, nationLabel } from '../content/nations.js'
+import { NATION_NAMES, nationListInProse } from '../content/nations.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { STORMS, ROSTER_START, ROSTER_END, strikeCounts, localizeStorm } from '../content/storms.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
-import { formatNationList } from '../utils/formatNationList.js'
 import { useOverflowFade } from '../hooks/useOverflowFade.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 
@@ -189,7 +188,7 @@ function StormPreview({ storm, selected, t, language }) {
           </div>
           <p className="mt-1 text-xs opacity-70">
             {t.reachedNote(
-              formatNationList(storm.nations.map((n) => nationLabel(n, language)), language),
+              nationListInProse(storm.nations, language),
               storm.nations.length,
               numberWord(NATION_NAMES.length, { language, gender: 'f' })
             )}
@@ -256,7 +255,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
             key={nation}
             tabIndex={0}
             role="note"
-            aria-label={t.countAria(count, nationLabel(nation, language), ROSTER_START, ROSTER_END)}
+            aria-label={t.countAria(count, nationListInProse([nation], language), ROSTER_START, ROSTER_END)}
             className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 short:p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
             {...highlightHandlers(nation, setHighlight)}
           >
@@ -264,7 +263,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
               {count}
             </p>
             <p aria-hidden="true" className="mt-1 text-xs leading-snug opacity-70">
-              {t.strucRow(nationLabel(nation, language))}
+              {t.strucRow(nationListInProse([nation], language))}
             </p>
           </li>
         ))}

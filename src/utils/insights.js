@@ -1,6 +1,6 @@
 import { CHAIN_METRICS, metricLabel } from './metrics.js'
 import { pctChange } from './rows.js'
-import { nationLabel } from '../content/nations.js'
+import { nationLabel, nationListInProse, nationListIsPlural } from '../content/nations.js'
 
 // One bullet per metric, comparing the two selected nations from the event year
 // to the latest on record. Deliberately not a ranking of "most interesting"
@@ -44,7 +44,7 @@ const STRINGS = {
       `${label}: reported for ${present} but not for ${missing} -- a gap in reporting capacity, not necessarily in impact.`,
     neitherHasData: (label, a, b, year) =>
       `${label}: neither ${a} nor ${b} has data beyond ${year} in the official dataset.`,
-    stalledVsTracked: (label, stalled, year, tracked, from, to, toYear) =>
+    stalledVsTracked: (label, stalled, stalledPlural, year, tracked, trackedPlural, from, to, toYear) =>
       `${label}: ${stalled} has no data beyond ${year}, while ${tracked} went from ${from} to ${to} by ${toYear}.`,
     comparisonWord: {
       opposite: 'opposite directions',
@@ -66,8 +66,8 @@ const STRINGS = {
       `${label}\u00A0: déclaré pour ${present} mais pas pour ${missing} \u2014 un écart de capacité de déclaration, pas nécessairement d\u2019impact.`,
     neitherHasData: (label, a, b, year) =>
       `${label}\u00A0: ni ${a} ni ${b} n\u2019ont de données au-delà de ${year} dans le jeu de données officiel.`,
-    stalledVsTracked: (label, stalled, year, tracked, from, to, toYear) =>
-      `${label}\u00A0: ${stalled} n\u2019a pas de données au-delà de ${year}, tandis que ${tracked} est passé de ${from} à ${to} d\u2019ici ${toYear}.`,
+    stalledVsTracked: (label, stalled, stalledPlural, year, tracked, trackedPlural, from, to, toYear) =>
+      `${label}\u00A0: ${stalled} ${stalledPlural ? 'n’ont' : 'n’a'} pas de données au-delà de ${year}, tandis que ${tracked} ${trackedPlural ? 'sont passées' : 'est passé'} de ${from} à ${to} d’ici ${toYear}.`,
     comparisonWord: {
       opposite: 'directions opposées',
       sameDirNoWindow: 'la même direction',
@@ -90,6 +90,12 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear, lang
 
   const nameA = nationLabel(nationA, language)
   const nameB = nationLabel(nationB, language)
+  // Prose forms -- see nationListInProse: unlike nameA/nameB above (the bare
+  // label form used everywhere below as a value's neighbour, e.g.
+  // "Fidji +12%"), a nation named as the object of a verb or preposition in a
+  // full sentence ("pour Fidji ni pour...") needs this instead.
+  const proseA = nationListInProse([nationA], language)
+  const proseB = nationListInProse([nationB], language)
 
   const items = CHAIN_METRICS.map((m) => {
     const label = metricLabel(m, language)
@@ -104,11 +110,11 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear, lang
     const hasB = Boolean(eventB && latestB)
 
     if (!hasA && !hasB) {
-      return { key: m.key, text: t.notReportedEither(label, nameA, nameB) }
+      return { key: m.key, text: t.notReportedEither(label, proseA, proseB) }
     }
     if (!hasA || !hasB) {
-      const missing = hasA ? nameB : nameA
-      const present = hasA ? nameA : nameB
+      const missing = hasA ? proseB : proseA
+      const present = hasA ? proseA : proseB
       return { key: m.key, text: t.gapReporting(label, present, missing) }
     }
 
@@ -117,20 +123,22 @@ export function buildComparativeInsights(data, nationA, nationB, eventYear, lang
     const noNewDataA = latestA.year === eventYear
     const noNewDataB = latestB.year === eventYear
     if (noNewDataA && noNewDataB) {
-      return { key: m.key, text: t.neitherHasData(label, nameA, nameB, eventYear) }
+      return { key: m.key, text: t.neitherHasData(label, proseA, proseB, eventYear) }
     }
     if (noNewDataA || noNewDataB) {
-      const stalled = noNewDataA ? nameA : nameB
-      const tracked = noNewDataA ? nameB : nameA
+      const stalledNation = noNewDataA ? nationA : nationB
+      const trackedNation = noNewDataA ? nationB : nationA
       const trackedRow = noNewDataA ? latestB : latestA
       const trackedEvent = noNewDataA ? eventB : eventA
       return {
         key: m.key,
         text: t.stalledVsTracked(
           label,
-          stalled,
+          nationListInProse([stalledNation], language),
+          nationListIsPlural([stalledNation]),
           eventYear,
-          tracked,
+          nationListInProse([trackedNation], language),
+          nationListIsPlural([trackedNation]),
           m.format(trackedEvent[m.field], language),
           m.format(trackedRow[m.field], language),
           trackedRow.year

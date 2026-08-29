@@ -8,8 +8,7 @@ import { chartTheme } from '../utils/theme.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 import FigureCaption from './FigureCaption.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
-import { nationLabel } from '../content/nations.js'
-import { formatNationList } from '../utils/formatNationList.js'
+import { nationLabel, nationListInProse } from '../content/nations.js'
 
 const STRINGS = {
   en: {
@@ -204,7 +203,7 @@ export default function TrendChart({
           hideTooltip={hideTooltip}
           className="mt-1 inline-block text-xs italic opacity-70"
         >
-          {t.noDataFor(formatNationList(nationsMissing.map((n) => nationLabel(n, language)), language))}
+          {t.noDataFor(nationListInProse(nationsMissing, language))}
         </NoDataNote>
       )}
       {hasReportedZero && (

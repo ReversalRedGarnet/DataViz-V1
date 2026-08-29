@@ -8,8 +8,7 @@ import { useLanguage } from '../hooks/useLanguage.jsx'
 import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/charts/index.js'
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
-import { formatNationList } from '../utils/formatNationList.js'
-import { nationLabel } from '../content/nations.js'
+import { nationLabel, nationListInProse, nationListIsPlural } from '../content/nations.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 
 // Per-nation storm facts live in src/content/storms.js, in the order each storm
@@ -38,10 +37,10 @@ const STRINGS = {
       'Below: category at closest approach against reported deaths. The two do not reliably move together.',
     chartAria: (name) =>
       `Scatter chart comparing ${name}'s category at closest approach against deaths, for each nation it struck`,
-    unreportedNote: (list) =>
-      `${list} sits in the band above the chart rather than on it: no national fatality figure was ever published for that impact. That is not a toll of zero, and it is not drawn as one. Every unreported stop on this roster is the secondary nation in its storm \u2014 the smaller impact, on the more remote islands, in the country least able to run an assessment.`,
-    indirectNote: (list) =>
-      `${list} is drawn as a hollow marker: those deaths were indirect, following the storm rather than caused by it in the moment. They are counted here because they are real, and marked apart because they are not the same kind of fact as a drowning during the storm.`,
+    unreportedNote: (list, plural) =>
+      `${list} ${plural ? 'sit' : 'sits'} in the band above the chart rather than on it: no national fatality figure was ever published for that impact. That is not a toll of zero, and it is not drawn as one. Every unreported stop on this roster is the secondary nation in its storm \u2014 the smaller impact, on the more remote islands, in the country least able to run an assessment.`,
+    indirectNote: (list, plural) =>
+      `${list} ${plural ? 'are' : 'is'} drawn as a hollow marker: those deaths were indirect, following the storm rather than caused by it in the moment. They are counted here because they are real, and marked apart because they are not the same kind of fact as a drowning during the storm.`,
     tableCaption: (name) => `${name}: category at closest approach and deaths, by nation`,
     thCountry: 'Country',
     thCategory: 'Category at closest approach',
@@ -62,10 +61,10 @@ const STRINGS = {
       'Ci-dessous\u00A0: la catégorie à l\u2019approche la plus proche comparée aux décès recensés. Les deux n\u2019évoluent pas de façon fiable ensemble.',
     chartAria: (name) =>
       `Nuage de points comparant la catégorie de ${name} à l\u2019approche la plus proche aux décès, pour chaque nation touchée`,
-    unreportedNote: (list) =>
-      `${list} figure dans la bande au-dessus du graphique plutôt que dessus\u00A0: aucun bilan national n\u2019a jamais été publié pour cet impact. Ce n\u2019est pas un bilan de zéro, et ce n\u2019est pas représenté comme tel. Chaque étape non recensée de cette liste est la nation secondaire de son cyclone \u2014 l\u2019impact le plus faible, sur les îles les plus isolées, dans le pays le moins en mesure de mener une évaluation.`,
-    indirectNote: (list) =>
-      `${list} est représenté par un marqueur creux\u00A0: ces décès étaient indirects, survenus à la suite du cyclone plutôt que causés par lui sur le moment. Ils sont comptabilisés ici parce qu\u2019ils sont réels, et distingués parce qu\u2019ils ne sont pas de la même nature qu\u2019une noyade pendant le cyclone.`,
+    unreportedNote: (list, plural) =>
+      `${list} ${plural ? 'figurent' : 'figure'} dans la bande au-dessus du graphique plutôt que dessus\u00A0: aucun bilan national n’a jamais été publié pour cet impact. Ce n’est pas un bilan de zéro, et ce n’est pas représenté comme tel. Chaque étape non recensée de cette liste est la nation secondaire de son cyclone — l’impact le plus faible, sur les îles les plus isolées, dans le pays le moins en mesure de mener une évaluation.`,
+    indirectNote: (list, plural) =>
+      `${list} ${plural ? 'sont représenté' : 'est représenté'}${plural ? 's' : ''} par un marqueur creux\u00A0: ces décès étaient indirects, survenus à la suite du cyclone plutôt que causés par lui sur le moment. Ils sont comptabilisés ici parce qu’ils sont réels, et distingués parce qu’ils ne sont pas de la même nature qu’une noyade pendant le cyclone.`,
     tableCaption: (name) => `${name}\u00A0: catégorie à l\u2019approche la plus proche et décès, par nation`,
     thCountry: 'Pays',
     thCategory: 'Catégorie à l\u2019approche la plus proche',
@@ -78,6 +77,14 @@ const STRINGS = {
     guardSubject: 'Profil du cyclone',
     guardPrompt: 'voir comment il s\u2019est comparé',
   },
+}
+
+// unreportedNote/indirectNote below open their own sentence with a nation
+// list -- unlike every other prose call site on the site, where the list sits
+// mid-sentence. nationListInProse's "les" (for Solomon Islands) is otherwise
+// always lowercase, so this is what keeps that sentence starting capitalised.
+function capitalize(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
 // Props:
@@ -177,7 +184,7 @@ export default function StormProfile({ storm, style }) {
         <h2 className="type-h2 mb-2">{t.atAGlance(storm.name)}</h2>
 
         <div className="prose-column figure-prose space-y-3 text-sm opacity-80">
-          <p>{t.struckIntro(storm.name, formatNationList(storm.nations, language), storm.year)}</p>
+          <p>{t.struckIntro(storm.name, nationListInProse(storm.nations, language), storm.year)}</p>
 
           {storm.note && <p>{storm.note}</p>}
 
@@ -202,10 +209,20 @@ export default function StormProfile({ storm, style }) {
         {(unreported.length > 0 || indirect.length > 0) && (
           <div className="mt-3 figure-prose space-y-2 border-l-2 border-ink/15 pl-3 text-xs italic opacity-75">
             {unreported.length > 0 && (
-              <p>{t.unreportedNote(formatNationList(unreported.map((r) => r.name), language))}</p>
+              <p>
+                {t.unreportedNote(
+                  capitalize(nationListInProse(unreported.map((r) => r.name), language)),
+                  nationListIsPlural(unreported.map((r) => r.name))
+                )}
+              </p>
             )}
             {indirect.length > 0 && (
-              <p>{t.indirectNote(formatNationList(indirect.map((r) => r.name), language))}</p>
+              <p>
+                {t.indirectNote(
+                  capitalize(nationListInProse(indirect.map((r) => r.name), language)),
+                  nationListIsPlural(indirect.map((r) => r.name))
+                )}
+              </p>
             )}
           </div>
         )}
