@@ -83,7 +83,7 @@ const STRINGS = {
     techP3: 'All source material and data-processing scripts are included in the project repository.',
     ackHeading: 'Acknowledgements',
     ackP1:
-      'Special thanks to Eljevisima Gani, Terah Maitoo Manenau, and Cynthia Oatasia for their creative input, and to Gregory Malaii, Gabriel Salini, and Aleetza Mahli for helping test the site.',
+      'Special thanks to Eljevisima Gani, Terah Maitoo Manenau, and Cynthia Oatasia for their creative input; to Gregory Malaii, Gabriel Salini, and Aleetza Mahli for helping test the site; and to Marama Taura for helping finalize the French translations.',
   },
   fr: {
     appendix: 'Annexe',
@@ -126,7 +126,7 @@ const STRINGS = {
       'Tout le matériel source et les scripts de traitement des données sont inclus dans le dépôt du projet.',
     ackHeading: 'Remerciements',
     ackP1:
-      'Merci en particulier à Eljevisima Gani, Terah Maitoo Manenau et Cynthia Oatasia pour leur contribution créative, ainsi qu\u2019à Gregory Malaii, Gabriel Salini et Aleetza Mahli pour avoir aidé à tester le site.',
+      'Merci en particulier à Eljevisima Gani, Terah Maitoo Manenau et Cynthia Oatasia pour leur contribution créative\u00A0; à Gregory Malaii, Gabriel Salini et Aleetza Mahli pour avoir aidé à tester le site\u00A0; et à Marama Taura pour son aide à la finalisation des traductions françaises.',
   },
 }
 
