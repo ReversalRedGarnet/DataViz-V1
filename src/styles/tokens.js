@@ -23,13 +23,13 @@
 export const THEME_TOKENS = {
   light: {
     ink: '#24333A',
-    sand: '#FAF7F0',
-    panel: '#F1EADC',
+    sand: '#EAF3F7',
+    panel: '#DCEAF0',
     surface: '#FFFFFF',
     // A darkened ocean, for the one accent that has to carry small text: the
     // eyebrow line above each headline. The decorative ocean (#5B8FA3, used
-    // for the wave and the map markers) only reaches ~2.9:1 on sand and cannot
-    // hold text. This reaches 5.4:1, and 8.1:1 for its dark counterpart.
+    // for the wave and the map markers) only reaches ~3.2:1 on sand and cannot
+    // hold text. This reaches 5.2:1, and 8.1:1 for its dark counterpart.
     accent: '#3D6B7D',
   },
   dark: {
@@ -45,7 +45,7 @@ export const THEME_TOKENS = {
 //
 // De-emphasis on this site is element opacity over the theme's own ground, and
 // the two themes are not symmetrical about it. Dark ink on sand loses contrast
-// far faster than light ink on a dark panel: at 0.60 the same text reads 3.55:1
+// far faster than light ink on a dark panel: at 0.60 the same text reads 3.50:1
 // in light and 5.45:1 in dark. The scale was tuned while looking at the dark
 // theme, so one flat set of numbers left the light theme's small text below
 // WCAG AA in 67 places -- the timeline's gap years at 2.18:1, the deck counter
@@ -57,7 +57,7 @@ export const THEME_TOKENS = {
 // theme answers with a value that still clears 4.5:1 on its own ground.
 //
 // THE FLOORS, MEASURED AGAINST THE DARKEST GROUND EACH THEME PAINTS. Light ink
-// (#24333A) over panel (#F1EADC) needs 0.69 to reach 4.5:1; dark ink (#F0ECE3)
+// (#24333A) over panel (#DCEAF0) needs 0.70 to reach 4.5:1; dark ink (#F0ECE3)
 // over surface (#293236) needs 0.55. Everything below sits above its floor with
 // room to spare, so a future panel a shade darker does not silently drop a
 // level under the line.

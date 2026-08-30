@@ -59,7 +59,7 @@ const CHART_SURFACE = { light: LIGHT.surface, dark: DARK.surface }
 // embedded Google Map does -- at full brightness it overwhelmed a dark page.
 // Marker and selection colours are unchanged; both read fine on either.
 export const MAP_COLORS = {
-  light: { ocean: '#7FBFD9', land: '#FAF7F0', coastline: '#C9DCE2' },
+  light: { ocean: '#7FBFD9', land: '#EAF3F7', coastline: '#C9DCE2' },
   dark: { ocean: '#2E4A57', land: '#293236', coastline: '#3E4B50' },
 }
 

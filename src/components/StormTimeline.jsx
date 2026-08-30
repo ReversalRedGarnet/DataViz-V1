@@ -122,7 +122,7 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
       } ${
         active
           ? 'is-active border-accent bg-accent/10 font-semibold'
-          : 'border-ink/20 bg-surface/70 hover:border-accent/60 hover:bg-surface'
+          : 'border-ink/20 bg-surface/70 hover:border-accent/60 hover:bg-surface/90'
       } ${awaiting ? 'awaiting-press' : ''} ${
         row ? 'flex w-full items-center justify-between gap-3' : ''
       }`}
