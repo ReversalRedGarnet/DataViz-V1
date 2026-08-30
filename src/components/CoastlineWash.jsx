@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import { pacificProjection, fitToPoints } from '../utils/map.js'
-import { loadLandTopology } from '../utils/loadLand.js'
+import { loadLandTopology, loadWideLandTopology } from '../utils/loadLand.js'
 import { NATION_COORDS } from '../content/nations.js'
 import { STORMS } from '../content/storms.js'
 
@@ -78,7 +78,14 @@ const VIEW_H = 640
 //     land alone; see the note above.
 //   className -- extra classes on the layer, for a caller that needs its own
 //     mask or opacity. See .coast-wash-tall in styles/story.css.
-export default function CoastlineWash({ padding = 150, showTracks = true, className = '' }) {
+//   wide -- fetch the larger land-50m-wide.json instead of land-50m.json.
+//     Only the opening poem's padding={270} crops wide enough to reach New
+//     Zealand's South Island and Tasmania (see scripts/build-land.mjs); every
+//     other caller stays on the smaller file MapView and StormJourney also
+//     share, so this defaults to false and today's only other consumer of
+//     this component -- there is none; IslanderPoem is the sole caller -- is
+//     unaffected either way.
+export default function CoastlineWash({ padding = 150, showTracks = true, className = '', wide = false }) {
   const ref = useRef(null)
   const [land, setLand] = useState(null)
 
@@ -88,7 +95,8 @@ export default function CoastlineWash({ padding = 150, showTracks = true, classN
   // an error state, because there is no error a reader could act on.
   useEffect(() => {
     let live = true
-    loadLandTopology()
+    const load = wide ? loadWideLandTopology : loadLandTopology
+    load()
       .then((topo) => {
         if (live) setLand(topo)
       })
@@ -96,7 +104,7 @@ export default function CoastlineWash({ padding = 150, showTracks = true, classN
     return () => {
       live = false
     }
-  }, [])
+  }, [wide])
 
   useEffect(() => {
     const svg = d3.select(ref.current)

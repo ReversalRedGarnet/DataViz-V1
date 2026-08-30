@@ -98,7 +98,12 @@ export default function IslanderPoem() {
       //
       // .coast-wash-tall replaces the base mask and opacity, both of which
       // assume a container exactly one viewport tall. See styles/story.css.
-      wash={<CoastlineWash padding={270} showTracks={false} className="coast-wash-tall" />}
+      //
+      // wide: this padding crops wide enough to reach New Zealand's South
+      // Island and Tasmania, which land-50m.json (MapView and StormJourney's
+      // file, cropped for their much tighter padding of 150) doesn't carry --
+      // see utils/loadLand.js and scripts/build-land.mjs.
+      wash={<CoastlineWash padding={270} showTracks={false} className="coast-wash-tall" wide />}
     >
       {/* Every other panel's arrival focus (see useFocusOnArrival in
           SlidePanel.jsx) looks for an h1/h2 to move to. A visible heading

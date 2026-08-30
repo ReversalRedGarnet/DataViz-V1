@@ -30,3 +30,33 @@ export function loadLandTopology() {
   }
   return pending
 }
+
+// A second, separately-cached fetch for the wider window: same pattern, same
+// module-scope promise, same clear-on-failure, just a different URL and a
+// different variable so the two never share -- or block on -- each other.
+//
+// Why a second file at all, rather than widening land-50m.json itself: that
+// file's window is sized to what MapView and StormJourney actually draw, at
+// their fixed padding of 150. Only the opening poem asks for a much larger
+// padding of 270 (see CoastlineWash.jsx's `wide` prop), and its wider crop is
+// what pulls in New Zealand's South Island, Tasmania, and a large connected
+// Africa-Eurasia ring -- geometry MapView and StormJourney would otherwise
+// ship and, for StormJourney, re-walk on every storm selection, without ever
+// rendering a pixel of it. See scripts/build-land.mjs for where the two boxes
+// are derived.
+let pendingWide = null
+
+export function loadWideLandTopology() {
+  if (!pendingWide) {
+    pendingWide = fetch('/land-50m-wide.json')
+      .then((res) => {
+        if (!res.ok) throw new Error(`land-50m-wide.json responded ${res.status}`)
+        return res.json()
+      })
+      .catch((error) => {
+        pendingWide = null
+        throw error
+      })
+  }
+  return pendingWide
+}
