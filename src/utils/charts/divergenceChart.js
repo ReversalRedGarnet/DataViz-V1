@@ -10,7 +10,7 @@ import {
   POINT_R,
   POINT_R_HOVER,
 } from './constants.js'
-import { shortName, spreadLabels } from './labels.js'
+import { shortName, spreadLabels, yearTickCount } from './labels.js'
 import { indexAtYear } from './scales.js'
 import { drawXAxis, drawYAxis } from './axes.js'
 import { divergenceTooltip } from './tooltips.jsx'
@@ -80,7 +80,7 @@ export function buildDivergenceChart(
     .range([height - margin.bottom, margin.top])
 
   drawYAxis(svg, y, { ink, width, margin, tickFormat: (v) => `${v}` })
-  drawXAxis(svg, d3.axisBottom(x).ticks(Math.min(years[1] - years[0], 6)).tickFormat(INT_FORMAT), {
+  drawXAxis(svg, d3.axisBottom(x).ticks(yearTickCount(width)).tickFormat(INT_FORMAT), {
     ink,
     height,
     margin,

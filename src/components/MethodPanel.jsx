@@ -1,7 +1,4 @@
 import Section from './Section.jsx'
-import { EXCLUDED, STORMS, ROSTER_START, ROSTER_END, localizeExcluded } from '../content/storms.js'
-import { NATION_COUNT } from '../content/nations.js'
-import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
 import { scatterBackdrop } from '../content/patterns.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 
@@ -48,20 +45,10 @@ const STRINGS = {
     appendix: 'Appendix',
     title: 'Method, Data and Limitations',
     methodHeading: 'Method',
-    methodP1: (nationWord, rosterStart, rosterEnd, stormWord, excludedWord, yasaName, yasaYear, yasaCost) => (
-      <>
-        The analysis covers severe tropical cyclones affecting at least two of these {nationWord}{' '}
-        nations: Solomon Islands, Vanuatu, Fiji and Tonga, between {rosterStart} and {rosterEnd}. The
-        resulting roster contains {stormWord} storms. {excludedWord}{' '}
-        additional storms did not meet that bar: Cyclones Ana (2021) and Cody (2022) affected Fiji
-        alone, and Cyclone Rae (2022) did not reach severe intensity. The exclusion that costs the
-        analysis something is {yasaName} ({yasaYear}) — {yasaCost} It is excluded anyway, because
-        the rule was fixed before the roster was drawn. Storm dates, classifications and reported
-        deaths were verified against national meteorological services and UN OCHA sources.
-      </>
-    ),
+    methodP1:
+      'The analysis covers every severe tropical cyclone that struck at least two of these four nations — Solomon Islands, Vanuatu, Fiji and Tonga — between 2015 and 2024, a rule that yields six storms. Three others fell just short of it: Cyclones Ana (2021) and Cody (2022) reached Fiji alone, and Cyclone Rae (2022) never reached severe intensity. The harder case is a fourth, Cyclone Yasa (2020) — also Fiji alone, but severe enough that including it would have made that year look considerably worse. It’s left out anyway, because the rule was fixed before the roster was drawn, and a rule that bends for its most inconvenient case isn’t a rule. Storm dates, classifications and reported deaths were checked against national meteorological services and UN OCHA situation reports.',
     methodP2:
-      'Indicator data for 2013\u20132024 comes from the Pacific Data Hub and is filtered to the four countries and selected years using Python and pandas. The 2013 baseline provides context for changes occurring during the storm period.',
+      'Indicator data spans 2013\u20132024, drawn from the Pacific Data Hub and filtered with Python and pandas to these four countries and this window. The extra two years before 2015 exist so the storm period has a baseline to be read against.',
     limitationsHeading: 'Limitations',
     limP1:
       'The indicator data is primarily reported as annual national totals rather than storm-specific measurements. This means individual cyclone impacts cannot always be isolated from other events occurring in the same year \u2014 the 2020\u201321 figures, for instance, also carry the effect of the pandemic alongside any storm.',
@@ -89,21 +76,10 @@ const STRINGS = {
     appendix: 'Annexe',
     title: 'Méthode, données et limites',
     methodHeading: 'Méthode',
-    methodP1: (nationWord, rosterStart, rosterEnd, stormWord, excludedWord, yasaName, yasaYear, yasaCost) => (
-      <>
-        L’analyse porte sur les cyclones tropicaux sévères ayant touché au moins deux de ces{' '}
-        {nationWord} nations : Îles Salomon, Vanuatu, Fidji et Tonga, entre {rosterStart} et{' '}
-        {rosterEnd}. La liste qui en résulte compte {stormWord} cyclones. {excludedWord} cyclones
-        supplémentaires n’ont pas atteint ce seuil : les cyclones Ana (2021) et Cody (2022)
-        n’ont touché que Fidji, et le cyclone Rae (2022) n’a pas atteint une intensité sévère.
-        L’exclusion qui coûte le plus à l’analyse est {yasaName} ({yasaYear}) — {yasaCost}{' '}
-        Il est tout de même exclu, car la règle avait été fixée avant l’établissement de la liste.
-        Les dates, classifications et décès recensés des cyclones ont été vérifiés auprès des services
-        météorologiques nationaux et de l’OCHA de l’ONU.
-      </>
-    ),
+    methodP1:
+      'L’analyse porte sur chaque cyclone tropical sévère ayant touché au moins deux de ces quatre nations — Îles Salomon, Vanuatu, Fidji et Tonga — entre 2015 et 2024, une règle qui donne six cyclones. Trois autres sont passés tout juste sous ce seuil : les cyclones Ana (2021) et Cody (2022) n’ont touché que Fidji, et le cyclone Rae (2022) n’a jamais atteint une intensité sévère. Le cas le plus difficile est un quatrième, le cyclone Yasa (2020) — lui aussi limité à Fidji seul, mais assez sévère pour que son inclusion rende cette année-là bien pire en apparence. Il est tout de même exclu, car la règle avait été fixée avant l’établissement de la liste, et une règle qui plie face à son cas le plus gênant n’en est pas une. Les dates, classifications et décès recensés des cyclones ont été vérifiés auprès des services météorologiques nationaux et des rapports de situation de l’OCHA de l’ONU.',
     methodP2:
-      'Les données d\u2019indicateurs pour 2013\u20132024 proviennent du Pacific Data Hub et sont filtrées sur les quatre pays et les années retenues à l\u2019aide de Python et pandas. L\u2019année de référence 2013 donne un contexte aux évolutions survenues pendant la période des cyclones.',
+      'Les données d’indicateurs couvrent la période 2013–2024, tirées du Pacific Data Hub et filtrées avec Python et pandas sur ces quatre pays et cette période. Les deux années supplémentaires avant 2015 existent afin que la période des cyclones dispose d’un point de référence auquel se comparer.',
     limitationsHeading: 'Limites',
     limP1:
       'Les données d\u2019indicateurs sont principalement déclarées sous forme de totaux nationaux annuels plutôt que de mesures propres à un cyclone. Cela signifie que l\u2019impact d\u2019un cyclone donné ne peut pas toujours être isolé d\u2019autres événements survenus la même année \u2014 les chiffres de 2020\u20132021, par exemple, portent aussi l\u2019effet de la pandémie en plus de tout cyclone.',
@@ -133,12 +109,6 @@ const STRINGS = {
 export default function MethodPanel({ style }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
-  // The one exclusion with a `cost` field is the one whose absence weakens
-  // the roster's own case (see EXCLUDED in content/storms.js). Read from
-  // there rather than retyped here, so this sentence cannot drift from the
-  // reasoning it is quoting. localizeExcluded swaps in the French reason/cost
-  // once, here, the same convention localizeStorm uses in App.jsx.
-  const yasa = localizeExcluded(EXCLUDED.find((storm) => storm.cost), language)
 
   return (
     // The same scatter every other slide carries, seeded with this slide's own
@@ -153,18 +123,7 @@ export default function MethodPanel({ style }) {
         <div>
           <h3 className="type-h3 mb-2">{t.methodHeading}</h3>
           <div className="prose-column prose-wide space-y-3 text-sm text-ink">
-            <p>
-              {t.methodP1(
-                numberWord(NATION_COUNT, { language, gender: 'f' }),
-                ROSTER_START,
-                ROSTER_END,
-                numberWord(STORMS.length, { language, gender: 'm' }),
-                numberWordCapitalized(EXCLUDED.length, { language, gender: 'm' }),
-                yasa.name,
-                yasa.year,
-                yasa.cost
-              )}
-            </p>
+            <p>{t.methodP1}</p>
             <p>{t.methodP2}</p>
           </div>
         </div>

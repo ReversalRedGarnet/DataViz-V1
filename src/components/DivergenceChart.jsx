@@ -56,9 +56,10 @@ const STRINGS = {
 //     actually counts up to, and what makes the sweep finish here rather than
 //     at the page-wide max.
 //   playToken -- bumped by the section to replay every panel at once ("Replay
-//     all"). 0 on mount so a fresh page load doesn't auto-play before the
-//     section has scrolled into view; the section itself bumps it once that
-//     happens.
+//     all"), regardless of which are on screen. 0 on mount so a fresh page
+//     load doesn't auto-play on its own; each panel's first play instead comes
+//     from its own scroll-into-view trigger below, so a panel several screens
+//     below the section heading doesn't finish its sweep before anyone sees it.
 //   format -- the metric's own value formatter, for tooltips
 //   figure -- { key, source, title? } | undefined. Prints a numbered caption
 //     under the chart; see content/figures.js for why the number is written
@@ -115,18 +116,31 @@ export default function DivergenceChart({
     frameRef.current = requestAnimationFrame(step)
   }
 
+  // Whether this panel has played at all yet, from either trigger below. Guards
+  // the scroll-into-view trigger from firing a redundant first play when a
+  // "Replay all" press already started this panel's sweep before it was ever
+  // seen -- without it, scrolling to that panel afterwards would restart the
+  // sweep a second time.
+  const autoPlayedRef = useRef(false)
+
   // playToken starts at 0 and this only fires once it has actually been
-  // bumped, so mounting never auto-plays on its own -- the section bumps it
-  // once when it scrolls into view, and again on every "Replay all" press.
+  // bumped, so mounting never auto-plays on its own -- "Replay all" is what
+  // bumps it, for every panel at once regardless of which are on screen.
   useEffect(() => {
-    if (playToken > 0) play()
+    if (playToken > 0) {
+      autoPlayedRef.current = true
+      play()
+    }
     return () => cancelAnimationFrame(frameRef.current)
   }, [playToken])
 
-  // waitForInView is off: the section already gates the first play on its own
-  // visibility (via playToken), so a second visibility check here would only
-  // delay that first frame.
-  const { svgRef } = useChartCanvas({
+  // waitForInView is off for the draw itself -- see below -- but each panel
+  // still gets its own scroll-into-view trigger for its first play, rather
+  // than relying on the section-wide moment its heading appears. On a slide
+  // with four stacked charts that heading can be several screens above a
+  // lower panel, so a single shared trigger fired every sweep before its own
+  // chart was ever on screen.
+  const { svgRef, cardRef, inView } = useChartCanvas({
     height: DIVERGENCE_HEIGHT,
     ready: series.length > 0,
     waitForInView: false,
@@ -154,6 +168,14 @@ export default function DivergenceChart({
     progressRef.current = progress
     if (apiRef.current) apiRef.current.update(progress)
   }, [progress])
+
+  // The per-panel first play. Only runs once per mount, and only if
+  // "Replay all" hasn't already started this panel's sweep in the meantime.
+  useEffect(() => {
+    if (!inView || autoPlayedRef.current) return
+    autoPlayedRef.current = true
+    play()
+  }, [inView])
 
   // MEMOISED BECAUSE OF THE SWEEP. This panel's own clock runs `progress` from
   // 0 to 1 over 3.4 seconds, so the component re-renders on every frame of it
@@ -196,7 +218,7 @@ export default function DivergenceChart({
   const sweepYear = Math.round(sweepYears[0] + (sweepYears[1] - sweepYears[0]) * progress)
 
   return (
-    <div className={`rounded-xl border border-ink/10 bg-surface/60 p-4 ${className}`}>
+    <div ref={cardRef} className={`rounded-xl border border-ink/10 bg-surface/60 p-4 ${className}`}>
       <h3 className="mb-1 text-sm font-semibold">{label}</h3>
       <p className="mb-2 text-xs opacity-soft">{t.indexedTo(years[0])}</p>
       <div className="mb-3 flex items-center gap-3">

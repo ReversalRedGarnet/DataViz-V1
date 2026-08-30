@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import EmptyState from './EmptyState.jsx'
@@ -10,7 +10,6 @@ import { NATION_NAMES } from '../content/nations.js'
 import { useTooltip } from '../hooks/useTooltip.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
-import { useInView } from '../hooks/useInView.js'
 import { useNationHighlight } from '../hooks/useNationHighlight.jsx'
 import { chartColorsFor } from '../utils/theme.js'
 import { seriesStyles } from '../utils/charts/index.js'
@@ -97,14 +96,16 @@ export default function DivergenceView({ data, dataError, storm, style }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
   const palette = chartColorsFor(theme)
-  const [sectionRef, inView] = useInView({ threshold: 0.25 })
   const { pinned, setPinned } = useNationHighlight()
   // Each chart now runs its own sweep clock (see DivergenceChart) and reaches
-  // its own last real year rather than a page-wide max. This token is how the
-  // section still gets every chart moving together: bumping it fans out to
+  // its own last real year rather than a page-wide max. This token is how
+  // "Replay all" gets every chart moving together: bumping it fans out to
   // every panel's own play(), same trigger, four independent clocks. It starts
   // at 0 so mounting never auto-plays before the section is even on screen --
-  // each panel's effect only fires once the token has actually been bumped.
+  // each panel's first play instead comes from that panel's own
+  // scroll-into-view trigger (see DivergenceChart), since this is one tall
+  // slide with four stacked charts and the section heading scrolling into
+  // view says nothing about whether a lower panel is actually on screen yet.
   const [playToken, setPlayToken] = useState(0)
 
   const eventYear = storm?.year ?? null
@@ -118,14 +119,6 @@ export default function DivergenceView({ data, dataError, storm, style }) {
   )
   const notes = useMemo(() => metricNotes(eventYear, language), [eventYear, language])
   const legendStyles = useMemo(() => seriesStyles(NATION_NAMES, palette), [palette])
-
-  // Runs itself once, when the section is actually on screen. The whole point
-  // is the moment the lines separate, and it can't happen four screens above
-  // where the reader is.
-  useEffect(() => {
-    if (!inView || panels.length === 0) return
-    setPlayToken((t) => t + 1)
-  }, [inView, panels.length])
 
   const blocked = sectionGuard({
     data,
@@ -143,65 +136,63 @@ export default function DivergenceView({ data, dataError, storm, style }) {
 
   return (
     <Section style={style} backdrop={scatterBackdrop('divergence')}>
-      <div ref={sectionRef}>
-        <div ref={containerRef} className="relative">
-          <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
-          <h2 className="type-h2 mb-2">{t.heading(storm.name)}</h2>
-          <p className="prose-column prose-wide prose-short mb-6 text-sm opacity-75">
-            {t.intro(storm.year)}
-          </p>
+      <div ref={containerRef} className="relative">
+        <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
+        <h2 className="type-h2 mb-2">{t.heading(storm.name)}</h2>
+        <p className="prose-column prose-wide prose-short mb-6 text-sm opacity-75">
+          {t.intro(storm.year)}
+        </p>
 
-          {/* Buttons, not decorative swatches -- see SeriesLegend. Pointing at
-              one already lifted that nation's line out of the other three on
-              every chart in the deck, but pointing is a gesture a touch screen
-              does not have, so the same chip presses to hold the thread and
-              presses again to release it. */}
-          <SeriesLegend
-            styles={legendStyles}
-            pinned={pinned}
-            onPin={setPinned}
-            className="mb-6 gap-x-5 gap-y-3"
-          />
+        {/* Buttons, not decorative swatches -- see SeriesLegend. Pointing at
+            one already lifted that nation's line out of the other three on
+            every chart in the deck, but pointing is a gesture a touch screen
+            does not have, so the same chip presses to hold the thread and
+            presses again to release it. */}
+        <SeriesLegend
+          styles={legendStyles}
+          pinned={pinned}
+          onPin={setPinned}
+          className="mb-6 gap-x-5 gap-y-3"
+        />
 
-          {/* No year printed beside this button any more: with four
-              independent clocks below, one shared number would be true of at
-              most one of them at any given moment. Each chart's own count is
-              on its own card, next to its own mini play button. */}
-          <div className="mb-5 flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => setPlayToken((t) => t + 1)}
-              className="rounded-full border border-ink/20 px-4 py-2 text-sm font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95"
-            >
-              {t.replayAll}
-            </button>
-          </div>
-
-          <div className="section-bleed grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {panels.map((panel, i) => (
-              <DivergenceChart
-                key={panel.metric.key}
-                label={metricLabel(panel.metric, language)}
-                series={panel.series}
-                years={years}
-                lastYear={panel.lastYear}
-                playToken={playToken}
-                format={panel.metric.format}
-                note={notes[panel.metric.key]}
-                missing={panel.missing}
-                figure={{ key: DIVERGENCE_FIGURES[panel.metric.key], source: panel.metric.source }}
-                showTooltip={showTooltip}
-                hideTooltip={hideTooltip}
-                className={i === panels.length - 1 && panels.length % 2 !== 0 ? 'lg:col-span-2' : ''}
-              />
-            ))}
-          </div>
-
-          <p className="prose-wide mt-6 text-xs italic opacity-70">{t.footnote1}</p>
-          <p className="prose-wide mt-2 text-xs italic opacity-70">{t.footnote2(storm.name)}</p>
-
-          <Tooltip tooltip={tooltip} />
+        {/* No year printed beside this button any more: with four
+            independent clocks below, one shared number would be true of at
+            most one of them at any given moment. Each chart's own count is
+            on its own card, next to its own mini play button. */}
+        <div className="mb-5 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => setPlayToken((t) => t + 1)}
+            className="rounded-full border border-ink/20 px-4 py-2 text-sm font-medium transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:bg-surface/70 active:scale-95"
+          >
+            {t.replayAll}
+          </button>
         </div>
+
+        <div className="section-bleed grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {panels.map((panel, i) => (
+            <DivergenceChart
+              key={panel.metric.key}
+              label={metricLabel(panel.metric, language)}
+              series={panel.series}
+              years={years}
+              lastYear={panel.lastYear}
+              playToken={playToken}
+              format={panel.metric.format}
+              note={notes[panel.metric.key]}
+              missing={panel.missing}
+              figure={{ key: DIVERGENCE_FIGURES[panel.metric.key], source: panel.metric.source }}
+              showTooltip={showTooltip}
+              hideTooltip={hideTooltip}
+              className={i === panels.length - 1 && panels.length % 2 !== 0 ? 'lg:col-span-2' : ''}
+            />
+          ))}
+        </div>
+
+        <p className="prose-wide mt-6 text-xs italic opacity-70">{t.footnote1}</p>
+        <p className="prose-wide mt-2 text-xs italic opacity-70">{t.footnote2(storm.name)}</p>
+
+        <Tooltip tooltip={tooltip} />
       </div>
     </Section>
   )
