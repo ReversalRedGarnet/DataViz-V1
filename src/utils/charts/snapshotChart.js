@@ -9,7 +9,7 @@ import {
   POP_EASE,
   VALUE_FONT,
 } from './constants.js'
-import { labelsFit, shortName, valueLabelsFit } from './labels.js'
+import { labelsFit, shortName, siTickFormat, valueLabelsFit } from './labels.js'
 import { barTopAndHeight, zeroAnchoredDomain } from './scales.js'
 import { drawXAxis, drawYAxis, drawZeroLine } from './axes.js'
 import { snapshotTooltip } from './tooltips.jsx'
@@ -25,7 +25,7 @@ export function renderSnapshotChart(
     format,
     showTooltip,
     hideTooltip,
-    yTickFormat = d3.format('~s'),
+    yTickFormat,
     theme = 'light',
     language = 'en',
   }
@@ -51,7 +51,7 @@ export function renderSnapshotChart(
     .nice()
     .range([height - margin.bottom, margin.top])
 
-  drawYAxis(svg, y, { ink, width, margin, tickFormat: yTickFormat })
+  drawYAxis(svg, y, { ink, width, margin, tickFormat: yTickFormat ?? siTickFormat(language) })
   drawXAxis(svg, d3.axisBottom(x).tickSizeOuter(0).tickFormat((d) => shortName(d, language)), {
     ink,
     height,

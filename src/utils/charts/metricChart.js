@@ -11,7 +11,7 @@ import {
   POINT_R_HOVER,
   POP_EASE,
 } from './constants.js'
-import { bandLabelStep, yearTickCount } from './labels.js'
+import { bandLabelStep, siTickFormat, yearTickCount } from './labels.js'
 import { seriesStyles } from './series.js'
 import { barTopAndHeight, zeroAnchoredDomain } from './scales.js'
 import { drawXAxis, drawYAxis, drawZeroLabels, drawZeroLine } from './axes.js'
@@ -31,7 +31,7 @@ export function renderMetricChart(
     format,
     showTooltip,
     hideTooltip,
-    yTickFormat = d3.format('~s'),
+    yTickFormat,
     theme = 'light',
     language = 'en',
   }
@@ -64,7 +64,7 @@ export function renderMetricChart(
     .nice()
     .range([height - margin.bottom, margin.top])
 
-  drawYAxis(svg, y, { ink, width, margin, tickFormat: yTickFormat })
+  drawYAxis(svg, y, { ink, width, margin, tickFormat: yTickFormat ?? siTickFormat(language) })
 
   const bandStep = isBand ? bandLabelStep(years, x.step()) : 1
   drawXAxis(

@@ -168,7 +168,8 @@ export const CAPACITY_METRICS = [
     field: 'stations',
     label: { en: 'Meteorological monitoring stations', fr: 'Stations de surveillance météorologique' },
     chartType: 'bar',
-    format: (v) => `${Math.round(v)} stations`,
+    format: (v, language = 'en') =>
+      `${Math.round(v).toLocaleString(language === 'fr' ? 'fr' : 'en')} stations`,
     caveat: {
       en: 'Unchanged in every year on record, which is the point: this is a standing difference in observing capacity, not a trend. Counts national network stations only and says nothing about their age, condition or staffing.',
       fr: 'Inchangé pour chaque année sur la période, ce qui est précisément le propos\u00A0: il s\u2019agit d\u2019une différence permanente de capacité d\u2019observation, pas d\u2019une tendance. Ne compte que les stations du réseau national, sans rien dire de leur âge, de leur état ou de leur personnel.',

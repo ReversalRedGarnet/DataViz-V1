@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import Tooltip from './Tooltip.jsx'
+import VisuallyHidden from './VisuallyHidden.jsx'
 import CountryPicker from './CountryPicker.jsx'
 import MapControlButton from './MapControlButton.jsx'
 import { useTooltip } from '../hooks/useTooltip.js'
@@ -45,6 +46,13 @@ const STRINGS = {
     tapToSwap: 'Tap to swap into the comparison.',
     tapToCompare: 'Tap to compare with your first pick.',
     tapToSelect: 'Tap to select.',
+    tableCaption: (stormName) =>
+      stormName ? `Nations on the map, and what ${stormName} did to each` : 'Nations on the map',
+    thCountry: 'Country',
+    thSelected: 'Selected',
+    thStatus: 'Storm impact',
+    yes: 'Yes',
+    no: 'No',
   },
   fr: {
     exploreHeading: 'Explorer le Pacifique',
@@ -72,6 +80,15 @@ const STRINGS = {
     tapToSwap: 'Touchez pour remplacer dans la comparaison.',
     tapToCompare: 'Touchez pour comparer avec votre premier choix.',
     tapToSelect: 'Touchez pour sélectionner.',
+    tableCaption: (stormName) =>
+      stormName
+        ? `Nations sur la carte, et ce que ${stormName} a fait à chacune`
+        : 'Nations sur la carte',
+    thCountry: 'Pays',
+    thSelected: 'Sélectionné',
+    thStatus: 'Impact du cyclone',
+    yes: 'Oui',
+    no: 'Non',
   },
 }
 
@@ -120,6 +137,17 @@ function stormBlurb(nationName, storm, language = 'en') {
 
   const toll = entry.deaths == null ? t.deathsNeverReported : t.deathsReported(entry.deaths)
   return `${entry.date}. ${entry.categoryLabel}. ${toll}`
+}
+
+// The marker's aria-label and, once a storm is selected, whether it was
+// struck. One function so the initial label the setup effect draws at mount
+// and the one the storm-fade effect keeps in sync afterwards can't drift
+// apart -- see the setup effect below for why the initial draw needs its own
+// copy rather than waiting for that later effect to run.
+function markerSelectLabel(nationName, storm, language = 'en') {
+  const t = STRINGS[language]
+  const name = nationLabel(nationName, language)
+  return !storm || storm.nations.includes(nationName) ? t.select(name) : t.selectNotStruck(name, storm.name)
 }
 
 // Built from live selection state so the "tap to select / compare / deselect"
@@ -274,7 +302,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         // this marker is already in the comparison -- information that was
         // otherwise carried only by a fill colour and a digit drawn in SVG.
         .attr('aria-pressed', 'false')
-        .attr('aria-label', (d) => `Select ${d.name}`)
+        .attr('aria-label', (d) => markerSelectLabel(d.name, stormRef.current, languageRef.current))
         .on('click', (event, d) => {
           onToggle(d.name)
           // selectedRef hasn't caught this toggle yet: one beat behind, once.
@@ -349,7 +377,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       inner
         .append('text')
         .attr('class', 'marker-label')
-        .text((d) => d.name)
+        .text((d) => nationLabel(d.name, languageRef.current))
         .attr('x', LABEL_GAP)
         .attr('y', 4)
         .attr('font-size', 11)
@@ -424,7 +452,6 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   // pointer events are untouched, because these markers must stay clickable.
   useEffect(() => {
     if (!gRef.current) return
-    const t = STRINGS[language]
     gRef.current
       .selectAll('g.marker')
       .transition()
@@ -436,12 +463,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
     // two effects cannot fight over the same attribute.
     gRef.current
       .selectAll('g.marker')
-      .attr('aria-label', (d) => {
-        const name = nationLabel(d.name, language)
-        return !storm || storm.nations.includes(d.name)
-          ? t.select(name)
-          : t.selectNotStruck(name, storm.name)
-      })
+      .attr('aria-label', (d) => markerSelectLabel(d.name, storm, language))
   }, [storm, built, language])
 
   // The visible label beside each pin. A separate effect from the storm-fade
@@ -599,6 +621,32 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
           )}
         </div>
       </div>
+
+      {/* Screen-reader-only data table -- same pattern as StormProfile/TrendChart:
+          the map conveys this through pin colour, fade opacity and a 1/2 badge,
+          this gives the same facts as text. Reuses stormBlurb() so the table
+          never says anything the tooltip and summary panel above don't already. */}
+      <VisuallyHidden>
+        <table>
+          <caption>{STRINGS[language].tableCaption(storm?.name)}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{STRINGS[language].thCountry}</th>
+              <th scope="col">{STRINGS[language].thSelected}</th>
+              {storm && <th scope="col">{STRINGS[language].thStatus}</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {nations.map((n) => (
+              <tr key={n.name}>
+                <td>{nationLabel(n.name, language)}</td>
+                <td>{selected.includes(n.name) ? STRINGS[language].yes : STRINGS[language].no}</td>
+                {storm && <td>{stormBlurb(n.name, storm, language)}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </VisuallyHidden>
     </Section>
   )
 }

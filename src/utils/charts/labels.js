@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import { AXIS_FONT, VALUE_FONT } from './constants.js'
 import { shortName } from '../../content/nations.js'
 
@@ -27,6 +28,17 @@ export function yearTickCount(width) {
   if (width < 360) return 3
   if (width < 560) return 5
   return 7
+}
+
+// SI-prefixed axis ticks ("1.5M", "200k"), with a French decimal comma rather
+// than d3.format's fixed English period. Built once per locale rather than
+// per tick -- formatLocale is the setup step, .format('~s') the per-value one.
+const SI_FORMAT_EN = d3.format('~s')
+const SI_FORMAT_FR = d3
+  .formatLocale({ decimal: ',', thousands: ' ', grouping: [3], currency: ['', ' $'] })
+  .format('~s')
+export function siTickFormat(language) {
+  return language === 'fr' ? SI_FORMAT_FR : SI_FORMAT_EN
 }
 
 // For a band scale, whether every year can be labelled is a question about the
