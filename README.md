@@ -146,7 +146,3 @@ And a shared link only reopens the right slide, not the right state: deep-linkin
 ## Author
 
 **Aziel Douglas Orihao**
-
-Information Systems | Climate Justice | Data Storytelling | Pacific Technology
-
-*"The most important stories in data aren't the numbers themselves—they're the people whose lives those numbers represent."*
