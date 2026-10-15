@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 import ScrollProgress from './ScrollProgress.jsx'
 import SectionNav from './SectionNav.jsx'
-import ThemeToggle from './ThemeToggle.jsx'
 import LanguageToggle from './LanguageToggle.jsx'
 import StoryStateBar from './StoryStateBar.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
@@ -108,7 +107,6 @@ export default function Header({
           <div className="flex shrink-0 items-center gap-1">
             <SectionNav availableIds={availableIds} onNavigate={onNavigate} />
             <LanguageToggle />
-            <ThemeToggle />
           </div>
         </div>
         {/* The reader's current selection, carried across every slide. See

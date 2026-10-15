@@ -1,20 +1,21 @@
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { runRippleTransition } from '../utils/rippleTransition.js'
 
-// Same convention as ThemeToggle.jsx, deliberately: a language flip repaints
-// the whole page the same way a theme flip does, so it goes through the same
-// ripple-droplet transition and lands the reader in the same place they
-// pressed. Two toggles that behave identically read as one family of control
-// rather than two different mechanisms bolted on at different times.
+// A language flip repaints the whole page the same way moving between slides
+// does, so it goes through the same ripple-droplet transition (see
+// utils/rippleTransition.js) and lands the reader in the same place they
+// pressed.
 //
-// Text rather than an icon, unlike Sun/MoonIcon above it: there is no widely
-// legible glyph for "the other language" the way a sun and moon stand for
-// light and dark, and a flag risks reading as a claim about which country the
+// Text rather than an icon: there is no widely legible glyph for "the other
+// language", and a flag risks reading as a claim about which country the
 // language belongs to rather than which language the page is in. The label
-// shows the language a click switches TO, matching ThemeToggle's rule.
+// shows the language a click switches TO -- answering "what does this do"
+// rather than "what state am I in", which the rest of the page already answers.
 //
 // Props:
-//   className -- forwarded to the <button>, same reason as ThemeToggle
+//   className -- forwarded to the <button>, so Header.jsx and the two
+//     chromeless slides can position it without this component needing to
+//     know its own placement
 export default function LanguageToggle({ className = '' }) {
   const { language, toggleLanguage } = useLanguage()
 

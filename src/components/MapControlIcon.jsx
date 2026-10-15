@@ -8,8 +8,8 @@
 // currentColor, not a hex. These were hardcoded to #24333A -- the LIGHT
 // theme's --color-ink -- so in dark mode three near-black glyphs were drawn on
 // a translucent dark surface over the dark ocean fill, and zoom and reset
-// simply were not there. ThemeToggle.jsx solves the same problem the same way
-// one file over; this one was the last hardcoded theme colour in a component.
+// simply were not there. This was the last hardcoded theme colour in a
+// component.
 //
 // Props:
 //   kind -- 'zoomIn' | 'zoomOut' | 'reset'

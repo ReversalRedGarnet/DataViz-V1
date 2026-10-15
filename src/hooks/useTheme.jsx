@@ -1,9 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-// Site-wide light/dark state. Context rather than props because both ends of
-// the site need it: Header's toggle sets it, and every D3-drawing component on
-// every page reads it (axis text and the wave divider need a real colour
-// string, not a Tailwind class -- see theme.js).
+// Site-wide light/dark state. Context rather than props because every
+// D3-drawing component on every page reads it (axis text and the wave divider
+// need a real colour string, not a Tailwind class -- see theme.js).
 const ThemeContext = createContext(null)
 
 // Also read by the inline script in index.html, which applies the same choice
@@ -49,18 +48,14 @@ function getInitialTheme() {
 }
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(getInitialTheme)
+  const [theme] = useState(getInitialTheme)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
     writeStoredTheme(theme)
   }, [theme])
 
-  function toggleTheme() {
-    setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
-  }
-
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
+  return <ThemeContext.Provider value={{ theme }}>{children}</ThemeContext.Provider>
 }
 
 // Throws rather than defaulting: a chart quietly rendering in the wrong

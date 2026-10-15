@@ -22,13 +22,13 @@
   bookends (the opening poem, the sources slide -- see `chromeless` in App.jsx)
   the site header is faded out and --header-height is set to 0, so `top` would
   otherwise land this flush against the viewport's own top edge. Those two
-  slides each carry their own language/theme toggle pair in that exact corner
-  (IslanderPoem.jsx, CitationPanel.jsx), because with the header gone neither
-  control is reachable any other way. Without the floor the notice landed on
-  top of them, and a fixed-position box with a solid background and no
+  slides each carry their own language toggle in that exact corner
+  (IslanderPoem.jsx, CitationPanel.jsx), because with the header gone it is
+  not reachable any other way. Without the floor the notice landed on top of
+  it, and a fixed-position box with a solid background and no
   pointer-events:none genuinely blocks the click -- which is precisely what
   the module comment above promises this component never does. 4.75rem clears
-  that row (two 2.25rem/36px buttons plus the section's own top padding) with
+  that row (a 2.25rem/36px button plus the section's own top padding) with
   room to spare; on every slide that has a real header this floor is far
   below --header-height and never binds.
 */

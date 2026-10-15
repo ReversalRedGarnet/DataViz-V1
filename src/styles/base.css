@@ -97,14 +97,6 @@
       color 200ms ease-out;
   }
 
-  /*
-    The theme toggle used to wipe the new theme in with the View Transitions
-    API. It now shares the ripple-droplet transition every page change also
-    uses -- see utils/rippleTransition.js -- which is plain WAAPI on a
-    throwaway overlay rather than a browser API, so there is no root
-    pseudo-element here to style.
-  */
-
   @media (prefers-reduced-motion: reduce) {
     body {
       transition: none;
