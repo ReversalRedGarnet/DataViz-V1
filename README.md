@@ -132,7 +132,7 @@ What the URL does carry is a deep link to whichever slide is on screen, written 
 - React 18 (via Vite) — app shell and rendering. No router: this is one page, and the header's section menu moves within it
 - D3.js — every chart, the ripple chain, and the map. No Plotly, no Observable Plot
 - topojson-client — decodes the pre-built land TopoJSON (`public/land-50m.json`) for the map
-- Tailwind CSS — all styling, with class-based dark mode
+- Tailwind CSS — all styling. Dark mode follows the visitor's system setting (`prefers-color-scheme`), including changes while the page is open; there is no manual toggle. The `dark` class Tailwind keys on is set from that setting alone
 - Newsreader (Google Fonts) — headings and the wordmark only; body and UI text stay on the system sans
 
 **Tools**
