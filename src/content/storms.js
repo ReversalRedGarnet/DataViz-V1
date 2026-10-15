@@ -164,9 +164,9 @@ const STORM_DETAIL = {
         fact: "Average winds of 233 km/h with gusts to 306 km/h \u2014 the strongest landfalling cyclone in Fiji's records and the most intense on record in the Southern Hemisphere. 540,400 people affected, 62% of the population, over 30,000 buildings damaged or destroyed, and 88 of 214 health facilities damaged.",
         factFr:
           "Vents moyens de 233 km/h avec des rafales à 306 km/h \u2014 le cyclone le plus fort à avoir touché terre dans les annales de Fidji et le plus intense jamais enregistré dans l'hémisphère Sud. 540\u00A0400 personnes touchées, soit 62\u00A0% de la population, plus de 30\u00A0000 bâtiments endommagés ou détruits, et 88 des 214 établissements de santé endommagés.",
-        lead: "Fiji's deadliest storm on record, and the only stop on this roster where the death toll matches the category.",
+        lead: 'Forty-four deaths, and the only stop on this roster where the death toll matches the category.',
         leadFr:
-          "Le cyclone le plus meurtrier jamais enregistré à Fidji, et la seule étape de cette liste où le bilan humain correspond à la catégorie.",
+          "44 morts, et la seule étape de cette liste où le bilan humain correspond à la catégorie.",
       },
     ],
     sources: [
