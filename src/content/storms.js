@@ -527,12 +527,11 @@ const STORM_DETAIL = {
         leadFr: "Le troisième cyclone sévère à frapper Vanuatu en huit mois est arrivé avant même le début de la saison.",
       },
     ],
-    // More than the usual pair, one per figure the Vanuatu stop states, because
-    // no single assessment carries them all: deaths, houses and schools are
-    // NDMO's; the peak is RSMC Nadi's; the affected count is NDMO's as reported
-    // by OCHA and the IFRC; the range of other death counts needs its own
-    // citation to be checkable. The last two cover the Solomon Islands stop and
-    // the season-opening date.
+    // One per figure the Vanuatu stop states, because no single assessment
+    // carries them all: deaths, houses and schools are NDMO's; the peak is RSMC
+    // Nadi's; the affected count is NDMO's as reported by OCHA and the IFRC; the
+    // range of other death counts needs its own citation to be checkable. The
+    // last four cover the season-opening date and the Solomon Islands stop.
     sources: [
       {
         label: {
@@ -590,6 +589,20 @@ const STORM_DETAIL = {
           fr: 'Cyclone tropical Lola \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
         },
         url: 'https://reliefweb.int/disaster/tc-2023-000207-vut',
+      },
+      {
+        label: {
+          en: 'Cyclone Lola batters remote Tikopia in Solomon Islands, disaster office confirms \u2014 RNZ (28 October 2023)',
+          fr: 'Le cyclone Lola frappe l’île isolée de Tikopia, aux Îles Salomon, confirme l’office de gestion des catastrophes \u2014 RNZ (28 octobre 2023)',
+        },
+        url: 'https://www.rnz.co.nz/international/pacific-news/501115/cyclone-lola-batters-remote-tikopia-in-solomon-islands-disaster-office-confirms',
+      },
+      {
+        label: {
+          en: 'SBD$2.7 million for Cyclone Lola\u2019s emergency response in Temotu \u2014 SIBC (4 November 2023)',
+          fr: '2,7 millions de SBD pour la réponse d’urgence au cyclone Lola à Temotu \u2014 SIBC (4 novembre 2023)',
+        },
+        url: 'https://www.sibconline.com.sb/sbd2-7-million-for-cyclone-lolas-emergency-response-in-temotu/',
       },
     ],
   },
