@@ -32,7 +32,8 @@ import roster from './roster.json'
 //     histories and UN OCHA situation reports. Null until researched. A storm
 //     without a profile still gets a full ripple chain; it just doesn't get the
 //     journey and category-versus-deaths sections, which have nothing to draw.
-//   sources -- the two supplementary citations for that storm's profile
+//   sources -- the supplementary citations for that storm's profile: usually
+//     a pair, more where one stop draws on several primary records (see Lola)
 //
 // FRENCH TRANSLATION. `note`, `categoryLabel`, `fact`, `lead`, `deathsNote` and
 // `date` each carry an *Fr sibling (noteFr, categoryLabelFr, factFr, leadFr,
@@ -418,7 +419,55 @@ const STORM_DETAIL = {
         leadFr: "Le troisième cyclone sévère à frapper Vanuatu en huit mois est arrivé avant même le début de la saison.",
       },
     ],
+    // More than the usual pair, one per figure the Vanuatu stop states, because
+    // no single assessment carries them all: deaths, houses and schools are
+    // NDMO's; the peak is RSMC Nadi's; the affected count is NDMO's as reported
+    // by OCHA and the IFRC; the range of other death counts needs its own
+    // citation to be checkable. The last two cover the Solomon Islands stop and
+    // the season-opening date.
     sources: [
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 NEOC Situation Report 13 (13 November 2023), NDMO, Government of Vanuatu',
+          fr: 'Cyclone tropical Lola \u2014 rapport de situation n°\u00A013 du NEOC (13 novembre 2023), NDMO, gouvernement du Vanuatu',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-national-disaster-management-office-neoc-situation-report-13-tc-lola-13-november-2023',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 NEOC Situation Report 14 (15 November 2023), NDMO, Government of Vanuatu',
+          fr: 'Cyclone tropical Lola \u2014 rapport de situation n°\u00A014 du NEOC (15 novembre 2023), NDMO, gouvernement du Vanuatu',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-national-disaster-management-office-neoc-situation-report-14-tc-lola-15-november-2023',
+      },
+      {
+        label: {
+          en: 'Report on Severe Tropical Cyclone Lola \u2014 Fiji Meteorological Service (RSMC Nadi)',
+          fr: 'Rapport sur le cyclone tropical sévère Lola \u2014 Service météorologique des Fidji (RSMC Nadi)',
+        },
+        url: 'https://www.met.gov.fj/media/tropical_cyclone_files/TC_Lola_October_2023TC_Report2024.02.26_10.56.23.pdf',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 internationally deployed assets (2 November 2023), UN OCHA / ReliefWeb',
+          fr: 'Cyclone tropical Lola \u2014 moyens déployés à l’international (2 novembre 2023), OCHA de l’ONU / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-tropical-cyclone-lola-internationally-deployed-assets-2-november-2023',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 emergency appeal final report (MDRVU011), IFRC',
+          fr: 'Cyclone tropical Lola \u2014 rapport final de l’appel d’urgence (MDRVU011), IFRC',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-asia-pacific-tropical-cyclone-lola-final-report-mdrvu011',
+      },
+      {
+        label: {
+          en: 'Cyclone Lola deaths caused by inaccessibility to urgent medical care \u2014 Save the Children, via Pacific Media Network (2 November 2023)',
+          fr: 'Décès dus au cyclone Lola faute d’accès à des soins urgents \u2014 Save the Children, via Pacific Media Network (2 novembre 2023)',
+        },
+        url: 'https://pmn.co.nz/read/pacific-region/cyclone-lola-deaths-caused-by-inaccessibility-to-urgent-medical-care',
+      },
       {
         label:
           {
