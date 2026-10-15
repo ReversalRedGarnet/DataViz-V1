@@ -101,7 +101,7 @@ export function useDeck(sections) {
   const goToIdRef = useLatest(goToId)
   const goToIdOrHeroRef = useLatest(goToIdOrHero)
 
-  // The deck grows from two sections to twelve when a storm is chosen, and
+  // The deck grows from three sections to fifteen when a storm is chosen, and
   // collapses again when it is cleared. Clearing while deep in the deck would
   // leave `active` pointing past the end of the array at a section that no
   // longer exists, so it is clamped whenever the shape changes.
