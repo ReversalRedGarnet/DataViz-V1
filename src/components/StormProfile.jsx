@@ -32,8 +32,8 @@ import VisuallyHidden from './VisuallyHidden.jsx'
 const STRINGS = {
   en: {
     atAGlance: (name) => `${name} at a glance`,
-    struckIntro: (name, list, year) =>
-      `${name} struck ${list} in ${year}. The same weather system throughout, but a different encounter in each country.`,
+    struckIntro: (name, list, year, plural) =>
+      `${name} struck ${list} in ${year}. ${plural ? 'Two cyclones in quick succession, and' : 'The same weather system throughout, but'} a different encounter in each country.`,
     belowNote:
       'Below: category at closest approach against reported deaths. The two do not reliably move together.',
     chartAria: (name) =>
@@ -57,7 +57,7 @@ const STRINGS = {
   fr: {
     atAGlance: (name) => `${name} en un coup d\u2019\u0153il`,
     struckIntro: (name, list, year, plural) =>
-      `${name} ${plural ? 'ont touché' : 'a touché'} ${list} en ${year}. Le même système météorologique tout du long, mais une rencontre différente dans chaque pays.`,
+      `${name} ${plural ? 'ont touché' : 'a touché'} ${list} en ${year}. ${plural ? 'Deux cyclones coup sur coup, et' : 'Le même système météorologique tout du long, mais'} une rencontre différente dans chaque pays.`,
     belowNote:
       'Ci-dessous\u00A0: la catégorie à l\u2019approche la plus proche comparée aux décès recensés. Les deux n\u2019évoluent pas de façon fiable ensemble.',
     chartAria: (name) =>
@@ -185,8 +185,10 @@ export default function StormProfile({ storm, style }) {
         <h2 className="type-h2 mb-2">{t.atAGlance(storm.name)}</h2>
 
         <div className="prose-column figure-prose space-y-3 text-sm opacity-80">
-          {/* The fourth argument is for French, where "Cyclones Judy & Kevin"
-              takes a plural verb ("ont touché"); English uses "struck" either way. */}
+          {/* The fourth argument marks the roster's one two-cyclone entry,
+              "Cyclones Judy & Kevin": it takes a plural verb in French ("ont
+              touché"), and in both languages its second sentence speaks of two
+              cyclones rather than one weather system. */}
           <p>
             {t.struckIntro(
               storm.name,
