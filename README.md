@@ -135,7 +135,7 @@ What the URL does carry is a deep link to whichever slide is on screen, written 
 
 The live site is at [data-viz-v1.vercel.app](https://data-viz-v1.vercel.app/).
 
-To run it locally you need Node.js 18 or later (it is built and tested on Node 24) and npm. The cleaned data is committed in `public/data/`, so nothing else is needed to run the site:
+To run it locally you need Node.js 18.18 or later (it is built and tested on Node 24) and npm. The cleaned data is committed in `public/data/`, so nothing else is needed to run the site:
 
 ```sh
 npm install
