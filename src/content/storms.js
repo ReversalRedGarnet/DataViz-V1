@@ -499,8 +499,8 @@ const STORM_DETAIL = {
         fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources damaged and four people injured. Around 22,319 people were exposed across Temotu.',
         factFr:
           "116 maisons, 114 cuisines et une église détruites à Tikopia, avec des points d'eau endommagés et quatre personnes blessées. Environ 22\u00A0319 personnes ont été exposées dans l'ensemble de Temotu.",
-        lead: 'Lola made landfall here first, and the deaths came weeks later.',
-        leadFr: "Lola a d'abord touché terre ici, et les décès sont survenus des semaines plus tard.",
+        lead: 'Lola made landfall here first, and the deaths were reported nearly two weeks later.',
+        leadFr: "Lola a d'abord touché terre ici, et les décès ont été signalés près de deux semaines plus tard.",
       },
       {
         name: 'Vanuatu',
