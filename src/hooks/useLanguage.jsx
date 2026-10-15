@@ -5,19 +5,18 @@ import { createContext, useContext, useEffect, useState } from 'react'
 // content/UI-string component on every page reads it.
 const LanguageContext = createContext(null)
 
-// Deliberately simpler than ThemeContext. Two decisions made this so:
+// Two decisions keep this simple:
 //
 // 1. No persistence. Every fresh load starts English regardless of what a
 //    reader picked last visit -- there is no localStorage read here and
-//    nothing in index.html duplicating one, unlike 'ripple-theme'. A toggle
-//    lasts for the session (it survives paging through the deck, since this
-//    Provider sits above PageSections), not across a reload.
+//    nothing in index.html duplicating one. A toggle lasts for the session
+//    (it survives paging through the deck, since this Provider sits above
+//    PageSections), not across a reload.
 // 2. No first-visit browser-locale detection. English is the default for
-//    every reader, not only the ones with no stored choice.
+//    every reader.
 //
-// Both mean this file skips the try/catch-guarded storage read/write that
-// useTheme.jsx needs -- there is no early, before-paint read that a hardened
-// browser profile could throw on, because there is nothing to read.
+// So there is no early, before-paint read that a hardened browser profile
+// could throw on, because there is nothing to read.
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('en')
 

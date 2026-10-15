@@ -1,59 +1,78 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
+import { withoutMotion } from '../utils/motion.js'
 
 // Site-wide light/dark state. Context rather than props because every
 // D3-drawing component on every page reads it (axis text and the wave divider
 // need a real colour string, not a Tailwind class -- see theme.js).
+//
+// The visitor's system setting is the only source. There is no toggle and no
+// stored choice: a 'ripple-theme' value left in localStorage by the old toggle
+// is never read, so it cannot override the system. The inline script in
+// index.html applies the same query to <html> before first paint; keep the two
+// in step.
 const ThemeContext = createContext(null)
 
-// Also read by the inline script in index.html, which applies the same choice
-// before first paint. Renaming it here means renaming it there.
-const STORAGE_KEY = 'ripple-theme'
+const DARK_QUERY = '(prefers-color-scheme: dark)'
 
-// STORAGE CAN THROW, AND THIS RUNS BEFORE ANYTHING IS ON SCREEN.
-//
-// In a browser with storage disabled -- Safari in certain private-mode states,
-// a hardened profile, an enterprise policy -- touching localStorage raises a
-// SecurityError rather than returning null. getInitialTheme() is a useState
-// initialiser inside ThemeProvider, which wraps the whole application, so an
-// unguarded read there does not degrade the theme: it throws during the first
-// render and the site is a blank page.
-//
-// The inline script in index.html has always wrapped the identical read in a
-// try/catch, with a comment saying to keep the two in step. This is the half
-// that was not kept in step.
-function readStoredTheme() {
-  try {
-    return window.localStorage.getItem(STORAGE_KEY)
-  } catch {
-    return null
-  }
+// Synchronous, so the first render -- and with it every chart's first draw --
+// already has the theme the inline script painted, rather than drawing light
+// and redrawing dark a frame later.
+function systemTheme() {
+  if (typeof window === 'undefined' || !window.matchMedia) return 'light'
+  return window.matchMedia(DARK_QUERY).matches ? 'dark' : 'light'
 }
 
-function writeStoredTheme(theme) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, theme)
-  } catch {
-    // Storage unavailable. The class on <html> below is what actually themes
-    // the page, so the only thing lost is the choice surviving a reload.
-  }
+function applyThemeClass(theme) {
+  document.documentElement.classList.toggle('dark', theme === 'dark')
 }
 
-function getInitialTheme() {
-  if (typeof window === 'undefined') return 'light'
-  const stored = readStoredTheme()
-  if (stored === 'light' || stored === 'dark') return stored
-  // No explicit choice in this browser yet, so follow the OS. Read once: a
-  // later manual toggle is written to localStorage and wins from then on.
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+// A LIVE CHANGE SWITCHES INSTANTLY. Nobody pressed anything, so there is
+// nothing for a transition to answer, and a page easing between palettes
+// reads as a glitch. Two kinds of motion would otherwise play:
+//
+// - CSS transitions on colour (every `transition-colors` control). A style
+//   element turns them off for the one frame of the swap; reading computed
+//   style forces the new colours to apply while it is in place.
+// - D3 transitions. Charts redraw and the map recolours when `theme` changes,
+//   and their entrance animations would replay. flushSync commits the new
+//   theme -- render and effects -- before it returns, so every draw it causes
+//   runs inside withoutMotion and lands on its final state.
+function switchTheme(theme, setTheme) {
+  const style = document.createElement('style')
+  style.textContent = '*,*::before,*::after{transition:none!important}'
+  document.head.appendChild(style)
+  applyThemeClass(theme)
+  withoutMotion(() => flushSync(() => setTheme(theme)))
+  void window.getComputedStyle(document.body).backgroundColor
+  // Removed on the next frame, after the new colours are painted, so hover
+  // and other transitions work as before.
+  requestAnimationFrame(() => style.remove())
 }
 
 export function ThemeProvider({ children }) {
-  const [theme] = useState(getInitialTheme)
+  const [theme, setTheme] = useState(systemTheme)
+
+  // Normally a no-op: the inline script has already set the class.
+  useLayoutEffect(() => {
+    applyThemeClass(theme)
+  }, [theme])
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-    writeStoredTheme(theme)
-  }, [theme])
+    if (!window.matchMedia) return
+    const list = window.matchMedia(DARK_QUERY)
+    const onChange = (event) => switchTheme(event.matches ? 'dark' : 'light', setTheme)
+    // addListener is the Safari <14 spelling, as in useMediaQuery.js.
+    if (list.addEventListener) list.addEventListener('change', onChange)
+    else list.addListener(onChange)
+    // Catches a change in the moment between the first render and this
+    // listener existing; a no-op otherwise.
+    setTheme(systemTheme())
+    return () => {
+      if (list.removeEventListener) list.removeEventListener('change', onChange)
+      else list.removeListener(onChange)
+    }
+  }, [])
 
   return <ThemeContext.Provider value={{ theme }}>{children}</ThemeContext.Provider>
 }

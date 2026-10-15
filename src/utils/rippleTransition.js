@@ -8,7 +8,8 @@ import { prefersReducedMotion } from './motion.js'
 // reader's press changes the whole page for -- the deck moving between slides
 // (useDeck.js) and the language flipping (LanguageToggle.jsx) -- so a reader
 // sees the same motion mean the same thing everywhere, rather than a
-// page-slide here and a wipe there.
+// page-slide here and a wipe there. A system theme change is not one of them:
+// nobody pressed anything, and it switches instantly (see hooks/useTheme.jsx).
 //
 // Built on plain WAAPI (opacity + transform), not the View Transitions API.
 // That API would have done the old/new crossfade for free, but only in

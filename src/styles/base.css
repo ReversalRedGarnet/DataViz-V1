@@ -91,16 +91,8 @@
     /* Prevent accidental horizontal scrolling. */
     overflow-x: hidden;
 
-    /* Smooth theme transitions. */
-    transition:
-      background-color 200ms ease-out,
-      color 200ms ease-out;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    body {
-      transition: none;
-    }
+    /* No colour transition: a system theme change switches instantly (see
+       hooks/useTheme.jsx). */
   }
 
   /*
