@@ -32,7 +32,8 @@ import roster from './roster.json'
 //     histories and UN OCHA situation reports. Null until researched. A storm
 //     without a profile still gets a full ripple chain; it just doesn't get the
 //     journey and category-versus-deaths sections, which have nothing to draw.
-//   sources -- the two supplementary citations for that storm's profile
+//   sources -- the supplementary citations for that storm's profile: usually
+//     a pair, more where one stop draws on several primary records (see Lola)
 //
 // FRENCH TRANSLATION. `note`, `categoryLabel`, `fact`, `lead`, `deathsNote` and
 // `date` each carry an *Fr sibling (noteFr, categoryLabelFr, factFr, leadFr,
@@ -400,16 +401,73 @@ const STORM_DETAIL = {
         category: 4,
         categoryLabel: 'Category 4 at landfall on Maewo and Pentecost; had peaked at Category 5 on 24 October',
         categoryLabelFr: "Catégorie 4 à l'atterrissage sur Maewo et Pentecost\u00A0; avait culminé en catégorie 5 le 24 octobre",
-        deaths: 2,
+        deaths: 1,
+        // NDMO's own count, and only deaths it calls directly attributable to
+        // the cyclone (NEOC Situation Report 13). Other counts run from 2 to 4,
+        // so the note says so rather than the chart quietly picking one. It
+        // mirrors the Solomon Islands stop above, whose note says its four
+        // deaths were indirect, so the two markers can be read side by side.
+        deathsNote:
+          'Direct deaths: NDMO\u2019s count of deaths directly attributable to the cyclone (NEOC Situation Report 13, 13 November 2023). Other agencies report up to four.',
+        deathsNoteFr:
+          "Décès directs\u00A0: décompte du NDMO des décès directement imputables au cyclone (rapport de situation n°\u00A013 du NEOC, 13 novembre 2023). D'autres organismes en signalent jusqu'à quatre.",
         dodge: 0,
-        fact: 'Landfall on the eastern shores of Maewo and Pentecost with winds of 205 km/h, after peaking at Category 5 with 230 km/h \u2014 the earliest Category 5 cyclone ever recorded in the Southern Hemisphere, a week before Vanuatu\u2019s cyclone season officially opened. Around 110,750 people affected across five provinces, some 10,000 homes damaged, and over 100 schools hit, 70 of them destroyed or needing major repair.',
+        fact: 'Landfall on the eastern shores of Maewo and Pentecost at Category 4, after peaking at Category 5 with ten-minute sustained winds of 215 km/h \u2014 the earliest Category 5 cyclone ever recorded in the Southern Hemisphere, a week before Vanuatu\u2019s cyclone season officially opened. About 91,000 people affected across five provinces. In Malampa alone, 220 houses were destroyed and 492 significantly damaged (Vanuatu Red Cross data, via NDMO), and three schools were completely destroyed: Ranon, Ranvetlam and Makam.',
         factFr:
-          "Atterrissage sur les côtes orientales de Maewo et Pentecost avec des vents de 205 km/h, après avoir culminé en catégorie 5 à 230 km/h \u2014 le cyclone de catégorie 5 le plus précoce jamais enregistré dans l'hémisphère Sud, une semaine avant l'ouverture officielle de la saison cyclonique de Vanuatu. Environ 110\u00A0750 personnes touchées dans cinq provinces, quelque 10\u00A0000 habitations endommagées, et plus de 100 écoles touchées, dont 70 détruites ou nécessitant des réparations majeures.",
+          "Atterrissage sur les côtes orientales de Maewo et Pentecost en catégorie 4, après avoir culminé en catégorie 5 avec des vents moyens sur dix minutes de 215 km/h \u2014 le cyclone de catégorie 5 le plus précoce jamais enregistré dans l'hémisphère Sud, une semaine avant l'ouverture officielle de la saison cyclonique de Vanuatu. Environ 91\u00A0000 personnes touchées dans cinq provinces. Rien qu'à Malampa, 220 maisons ont été détruites et 492 fortement endommagées (données de la Croix-Rouge de Vanuatu, via le NDMO), et trois écoles ont été entièrement détruites\u00A0: Ranon, Ranvetlam et Makam.",
         lead: 'The third severe cyclone to hit Vanuatu in eight months arrived before the season had started.',
         leadFr: "Le troisième cyclone sévère à frapper Vanuatu en huit mois est arrivé avant même le début de la saison.",
       },
     ],
+    // More than the usual pair, one per figure the Vanuatu stop states, because
+    // no single assessment carries them all: deaths, houses and schools are
+    // NDMO's; the peak is RSMC Nadi's; the affected count is NDMO's as reported
+    // by OCHA and the IFRC; the range of other death counts needs its own
+    // citation to be checkable. The last two cover the Solomon Islands stop and
+    // the season-opening date.
     sources: [
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 NEOC Situation Report 13 (13 November 2023), NDMO, Government of Vanuatu',
+          fr: 'Cyclone tropical Lola \u2014 rapport de situation n°\u00A013 du NEOC (13 novembre 2023), NDMO, gouvernement du Vanuatu',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-national-disaster-management-office-neoc-situation-report-13-tc-lola-13-november-2023',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 NEOC Situation Report 14 (15 November 2023), NDMO, Government of Vanuatu',
+          fr: 'Cyclone tropical Lola \u2014 rapport de situation n°\u00A014 du NEOC (15 novembre 2023), NDMO, gouvernement du Vanuatu',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-national-disaster-management-office-neoc-situation-report-14-tc-lola-15-november-2023',
+      },
+      {
+        label: {
+          en: 'Report on Severe Tropical Cyclone Lola \u2014 Fiji Meteorological Service (RSMC Nadi)',
+          fr: 'Rapport sur le cyclone tropical sévère Lola \u2014 Service météorologique des Fidji (RSMC Nadi)',
+        },
+        url: 'https://www.met.gov.fj/media/tropical_cyclone_files/TC_Lola_October_2023TC_Report2024.02.26_10.56.23.pdf',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 internationally deployed assets (2 November 2023), UN OCHA / ReliefWeb',
+          fr: 'Cyclone tropical Lola \u2014 moyens déployés à l’international (2 novembre 2023), OCHA de l’ONU / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-tropical-cyclone-lola-internationally-deployed-assets-2-november-2023',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Lola \u2014 emergency appeal final report (MDRVU011), IFRC',
+          fr: 'Cyclone tropical Lola \u2014 rapport final de l’appel d’urgence (MDRVU011), IFRC',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-asia-pacific-tropical-cyclone-lola-final-report-mdrvu011',
+      },
+      {
+        label: {
+          en: 'Cyclone Lola deaths caused by inaccessibility to urgent medical care \u2014 Save the Children, via Pacific Media Network (2 November 2023)',
+          fr: 'Décès dus au cyclone Lola faute d’accès à des soins urgents \u2014 Save the Children, via Pacific Media Network (2 novembre 2023)',
+        },
+        url: 'https://pmn.co.nz/read/pacific-region/cyclone-lola-deaths-caused-by-inaccessibility-to-urgent-medical-care',
+      },
       {
         label:
           {

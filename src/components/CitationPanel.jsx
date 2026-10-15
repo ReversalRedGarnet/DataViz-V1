@@ -128,7 +128,7 @@ export default function CitationPanel({ sources = [], aboutTitle, children, styl
                     target="_blank"
                     rel="noopener noreferrer"
                     // THE SAME RING EVERY OTHER CONTROL ON THE SITE USES. These
-                    // eighteen links were the one place that fell through to
+                    // twenty-four links were the one place that fell through to
                     // the browser's default outline -- focusable and visible,
                     // but a different shape and colour from the ring a keyboard
                     // reader had been following for fourteen slides. rounded-sm
