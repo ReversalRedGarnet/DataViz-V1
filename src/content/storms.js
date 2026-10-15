@@ -400,7 +400,16 @@ const STORM_DETAIL = {
         category: 4,
         categoryLabel: 'Category 4 at landfall on Maewo and Pentecost; had peaked at Category 5 on 24 October',
         categoryLabelFr: "Catégorie 4 à l'atterrissage sur Maewo et Pentecost\u00A0; avait culminé en catégorie 5 le 24 octobre",
-        deaths: 2,
+        deaths: 1,
+        // NDMO's own count, and only deaths it calls directly attributable to
+        // the cyclone (NEOC Situation Report 13). Other counts run from 2 to 4,
+        // so the note says so rather than the chart quietly picking one. It
+        // mirrors the Solomon Islands stop above, whose note says its four
+        // deaths were indirect, so the two markers can be read side by side.
+        deathsNote:
+          'Direct deaths: NDMO\u2019s count of deaths directly attributable to the cyclone (NEOC Situation Report 13, 13 November 2023). Other agencies report up to four.',
+        deathsNoteFr:
+          "Décès directs\u00A0: décompte du NDMO des décès directement imputables au cyclone (rapport de situation n°\u00A013 du NEOC, 13 novembre 2023). D'autres organismes en signalent jusqu'à quatre.",
         dodge: 0,
         fact: 'Landfall on the eastern shores of Maewo and Pentecost with winds of 205 km/h, after peaking at Category 5 with 230 km/h \u2014 the earliest Category 5 cyclone ever recorded in the Southern Hemisphere, a week before Vanuatu\u2019s cyclone season officially opened. Around 110,750 people affected across five provinces, some 10,000 homes damaged, and over 100 schools hit, 70 of them destroyed or needing major repair.',
         factFr:
