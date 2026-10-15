@@ -209,15 +209,13 @@ const STORM_DETAIL = {
         category: 4,
         categoryLabel: "Category 4 (landfall, Tongatapu and 'Eua)",
         categoryLabelFr: "Catégorie 4 (atterrissage, Tongatapu et 'Eua)",
-        // Reported as 1 in the first OCHA/ECHO flashes and settled at 2 in later
-        // reporting; the final figure is used.
-        deaths: 2,
+        deaths: 1,
         dodge: -0.35,
         fact: "Average winds of 130 km/h crossing Tongatapu and 'Eua \u2014 the strongest cyclone to hit those islands since Isaac in 1982. The 100-year-old Parliament House was flattened. NEMO recorded 4,708 houses damaged or destroyed and about 4,500 people in evacuation centres; damage reached US$164 million, 37.8% of GDP.",
         factFr:
           "Vents moyens de 130 km/h traversant Tongatapu et 'Eua \u2014 le cyclone le plus fort à avoir touché ces îles depuis Isaac en 1982. Le Parlement, vieux de 100 ans, a été rasé. Le NEMO a recensé 4\u00A0708 maisons endommagées ou détruites et environ 4\u00A0500 personnes dans des centres d'évacuation\u00A0; les dégâts ont atteint 164 millions de dollars US, soit 37,8\u00A0% du PIB.",
-        lead: 'The strongest storm to cross Tongatapu in 36 years killed two people.',
-        leadFr: 'Le cyclone le plus fort à traverser Tongatapu en 36 ans a fait deux morts.',
+        lead: 'The strongest storm to cross Tongatapu in 36 years killed one person.',
+        leadFr: 'Le cyclone le plus fort à traverser Tongatapu en 36 ans a fait un mort.',
       },
       {
         name: 'Fiji',
@@ -230,9 +228,9 @@ const STORM_DETAIL = {
           'Catégorie 4 en passant au sud du groupe des Lau\u00A0; a culminé en catégorie 5 à environ 205\u00A0km au sud de Kadavu \u2014 sans atterrissage',
         deaths: 0,
         dodge: 0.35,
-        fact: '1,579 people affected in the southern Lau group, with Ono-i-Lau and Vatoa worst hit \u2014 three homes destroyed, gusts to 190 km/h, no injuries reported. The entire population of Ono-i-Lau, about 470 people, had been moved into evacuation centres before the storm arrived.',
+        fact: '1,579 people affected in the southern Lau group, with Ono-i-Lau and Vatoa worst hit \u2014 three homes destroyed, gusts of 84 knots (about 155 km/h) at Ono-i-Lau, no injuries reported. The entire population of Ono-i-Lau, about 470 people, had been moved into evacuation centres before the storm arrived.',
         factFr:
-          "1\u00A0579 personnes touchées dans le sud du groupe des Lau, Ono-i-Lau et Vatoa étant les plus durement touchées \u2014 trois maisons détruites, rafales à 190 km/h, aucun blessé signalé. L'ensemble de la population d'Ono-i-Lau, environ 470 personnes, avait été déplacée vers des centres d'évacuation avant l'arrivée du cyclone.",
+          "1\u00A0579 personnes touchées dans le sud du groupe des Lau, Ono-i-Lau et Vatoa étant les plus durement touchées \u2014 trois maisons détruites, rafales de 84 nœuds (environ 155 km/h) à Ono-i-Lau, aucun blessé signalé. L'ensemble de la population d'Ono-i-Lau, environ 470 personnes, avait été déplacée vers des centres d'évacuation avant l'arrivée du cyclone.",
         lead: 'A stronger storm than the one that hit Tonga, and nobody was hurt, because everyone had already moved.',
         leadFr: "Un cyclone plus fort que celui qui a frappé Tonga, et personne n'a été blessé, parce que tout le monde s'était déjà déplacé.",
       },
