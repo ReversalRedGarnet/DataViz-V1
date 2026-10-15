@@ -32,8 +32,9 @@ import roster from './roster.json'
 //     histories and UN OCHA situation reports. Null until researched. A storm
 //     without a profile still gets a full ripple chain; it just doesn't get the
 //     journey and category-versus-deaths sections, which have nothing to draw.
-//   sources -- the supplementary citations for that storm's profile: usually
-//     a pair, more where one stop draws on several primary records (see Lola)
+//   sources -- the supplementary citations for that storm's profile: an
+//     assessment and a situation report or met record, plus the record behind
+//     any figure those two do not state
 //
 // FRENCH TRANSLATION. `note`, `categoryLabel`, `fact`, `lead`, `deathsNote` and
 // `date` each carry an *Fr sibling (noteFr, categoryLabelFr, factFr, leadFr,
@@ -61,22 +62,27 @@ const STORM_DETAIL = {
     profile: [
       {
         name: 'Solomon Islands',
-        date: '10\u201311 March 2015',
-        dateFr: '10\u201311 mars 2015',
-        category: 1,
-        categoryLabel: 'Category 1 while intensifying; passed offshore, no landfall',
-        categoryLabelFr: "Catégorie 1 en cours d'intensification ; passé au large, sans atterrissage",
+        // Local date (UTC+11) of the closest pass: 15:00 UTC on 11 March in
+        // RSMC Nadi's best track is 02:00 on 12 March in Solomon Islands.
+        date: '12 March 2015',
+        dateFr: '12 mars 2015',
+        category: 4,
+        // RSMC Nadi's best track (IBTrACS 2015066S08170): Category 4, 90 kt, at
+        // the closest pass, about 20 km from Anuta at 15:00 UTC on 11 March. Pam
+        // was Category 1 only on 9 March, while still far north of Temotu.
+        categoryLabel: 'Category 4 at closest approach, about 20 km from Anuta; passed offshore, no landfall',
+        categoryLabelFr: "Catégorie 4 à l'approche la plus proche, à environ 20\u00A0km d'Anuta\u00A0; passé au large, sans atterrissage",
         deaths: null,
         deathsNote:
           'IFRC, OCHA and government response documents record affected populations and damage for Solomon Islands but publish no separate fatality figure. Not zero \u2014 never reported.',
         deathsNoteFr:
           "Les documents de réponse de la FICR, de l'OCHA et du gouvernement recensent les populations touchées et les dégâts pour les Îles Salomon, mais ne publient aucun bilan distinct de décès. Pas zéro \u2014 jamais déclaré.",
         dodge: 0,
-        fact: "Storm surge, swells and heavy rain struck Temotu and Malaita provinces while Pam was still intensifying offshore. 83 of 260 houses were damaged across Temotu's outer islands; more than half of garden crops were lost, and NDMO assessments found 2,344 families \u2014 11,780 people needing support across 19 wards of Malaita Province.",
+        fact: "Storm surge, swells and heavy rain struck Temotu and Malaita provinces while Pam was still intensifying offshore. 83 of 260 houses were damaged across Temotu's outer islands; more than half of garden crops were damaged, and NDMO assessments found 2,344 families \u2014 11,780 people needing support across 19 wards of Malaita Province.",
         factFr:
-          "Une onde de tempête, une forte houle et de fortes pluies ont frappé les provinces de Temotu et de Malaita alors que Pam s'intensifiait encore au large. 83 des 260 maisons ont été endommagées sur les îles périphériques de Temotu\u00A0; plus de la moitié des cultures vivrières ont été perdues, et les évaluations du NDMO ont recensé 2\u00A0344 familles \u2014 11\u00A0780 personnes ayant besoin d'aide dans 19 circonscriptions de la province de Malaita.",
-        lead: 'Two days before it reached Vanuatu, Pam was already flooding coastlines it never made landfall on.',
-        leadFr: "Deux jours avant d'atteindre Vanuatu, Pam inondait déjà des côtes sur lesquelles il n'a jamais touché terre.",
+          "Une onde de tempête, une forte houle et de fortes pluies ont frappé les provinces de Temotu et de Malaita alors que Pam s'intensifiait encore au large. 83 des 260 maisons ont été endommagées sur les îles périphériques de Temotu\u00A0; plus de la moitié des cultures vivrières ont été endommagées, et les évaluations du NDMO ont recensé 2\u00A0344 familles \u2014 11\u00A0780 personnes ayant besoin d'aide dans 19 circonscriptions de la province de Malaita.",
+        lead: 'Nearly two days before it reached Vanuatu, Pam was already flooding coastlines it never made landfall on.',
+        leadFr: "Près de deux jours avant d'atteindre Vanuatu, Pam inondait déjà des côtes sur lesquelles il n'a jamais touché terre.",
       },
       {
         name: 'Vanuatu',
@@ -109,6 +115,20 @@ const STORM_DETAIL = {
         },
         url: 'https://reliefweb.int/disaster/tc-2015-000020-vut',
       },
+      {
+        label: {
+          en: 'Pacific: Tropical Cyclone Pam \u2014 international appeal MDR55001, operations update 2 (15 May 2015), IFRC',
+          fr: 'Pacifique\u00A0: cyclone tropical Pam \u2014 appel international MDR55001, point sur les opérations n°\u00A02 (15 mai 2015), IFRC',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/pacific-tropical-cyclone-pam-international-appeal-n-mdr55001-operations-update-n-2',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Pam \u2014 RSMC Nadi best track, IBTrACS v04r01 (2015066S08170)',
+          fr: 'Cyclone tropical Pam \u2014 trajectoire de référence du RSMC Nadi, IBTrACS v04r01 (2015066S08170)',
+        },
+        url: 'https://ncics.org/ibtracs/index.php?name=v04r01-2015066S08170',
+      },
     ],
   },
   winston: {
@@ -127,9 +147,9 @@ const STORM_DETAIL = {
           "Catégorie 1 à l'approche la plus proche de Vava'u (sans atterrissage)\u00A0; revenu en catégorie 4 en passant au nord de Vava'u le 19 février",
         deaths: 0,
         dodge: 0,
-        fact: "Ten houses destroyed and about 200 damaged in Vava'u, with over 80% of homes sustaining some rain damage and flash flooding forcing nine patients to be moved inside Prince Ngu hospital. Deputy Prime Minister Siaosi Sovaleni told Parliament no lives were lost anywhere in Tonga.",
+        fact: "Ten houses destroyed and about 200 damaged in Tonga, as of 19 February. In Vava'u, over 80% of homes sustained some rain damage, and flash flooding forced nine patients to be moved inside Prince Ngu hospital. Deputy Prime Minister Siaosi Sovaleni told Parliament no lives were lost anywhere in Tonga.",
         factFr:
-          "Dix maisons détruites et environ 200 endommagées à Vava'u, plus de 80\u00A0% des habitations ayant subi des dégâts liés à la pluie, et des inondations soudaines ayant forcé le déplacement de neuf patients à l'intérieur de l'hôpital Prince Ngu. Le vice-Premier ministre Siaosi Sovaleni a déclaré au Parlement qu'aucune vie n'avait été perdue nulle part à Tonga.",
+          "Dix maisons détruites et environ 200 endommagées à Tonga, au 19 février. À Vava'u, plus de 80\u00A0% des habitations ont subi des dégâts liés à la pluie, et des inondations soudaines ont forcé le déplacement de neuf patients à l'intérieur de l'hôpital Prince Ngu. Le vice-Premier ministre Siaosi Sovaleni a déclaré au Parlement qu'aucune vie n'avait été perdue nulle part à Tonga.",
         lead: 'Tonga met Winston twice and lost no one, four days before Fiji lost 44.',
         leadFr: "Tonga a affronté Winston deux fois sans perdre personne, quatre jours avant que Fidji n'en perde 44.",
       },
@@ -142,12 +162,12 @@ const STORM_DETAIL = {
         categoryLabelFr: 'Catégorie 5 (atterrissage, île de Koro puis Viti Levu)',
         deaths: 44,
         dodge: 0,
-        fact: "Average winds of 233 km/h with gusts to 306 km/h \u2014 the strongest landfalling cyclone in Fiji's records and the most intense on record in the Southern Hemisphere. 540,400 people affected, 62% of the population, over 30,000 buildings damaged or destroyed, and 88 of 214 health facilities damaged.",
+        fact: "Average winds of 233 km/h with gusts to 306 km/h \u2014 the strongest landfalling cyclone in Fiji's records and one of the most powerful cyclones ever recorded in the Southern Hemisphere. 540,400 people affected, 62% of the population, over 30,000 buildings damaged or destroyed, and 88 of 214 health facilities damaged.",
         factFr:
-          "Vents moyens de 233 km/h avec des rafales à 306 km/h \u2014 le cyclone le plus fort à avoir touché terre dans les annales de Fidji et le plus intense jamais enregistré dans l'hémisphère Sud. 540\u00A0400 personnes touchées, soit 62\u00A0% de la population, plus de 30\u00A0000 bâtiments endommagés ou détruits, et 88 des 214 établissements de santé endommagés.",
-        lead: "Fiji's deadliest storm on record, and the only stop on this roster where the death toll matches the category.",
+          "Vents moyens de 233 km/h avec des rafales à 306 km/h \u2014 le cyclone le plus fort à avoir touché terre dans les annales de Fidji et l'un des cyclones les plus puissants jamais enregistrés dans l'hémisphère Sud. 540\u00A0400 personnes touchées, soit 62\u00A0% de la population, plus de 30\u00A0000 bâtiments endommagés ou détruits, et 88 des 214 établissements de santé endommagés.",
+        lead: "Forty-four deaths, and the only stop that is both Category 5 and the roster's deadliest.",
         leadFr:
-          "Le cyclone le plus meurtrier jamais enregistré à Fidji, et la seule étape de cette liste où le bilan humain correspond à la catégorie.",
+          "44 morts, et la seule étape de la liste à être à la fois de catégorie 5 et la plus meurtrière.",
       },
     ],
     sources: [
@@ -165,6 +185,20 @@ const STORM_DETAIL = {
         },
         url: 'https://www.met.gov.to/index_files/TC_list_update.pdf',
       },
+      {
+        label: {
+          en: 'Tonga, Fiji \u2014 Tropical Cyclone Winston (ECHO Daily Flash, 19 February 2016), ECHO / ReliefWeb',
+          fr: 'Tonga, Fidji \u2014 cyclone tropical Winston (ECHO Daily Flash, 19 février 2016), ECHO / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/tonga/tonga-fiji-tropical-cyclone-winston-gdacs-jtwc-nasa-vanuatu-met-services-fiji-met',
+      },
+      {
+        label: {
+          en: "More than 100 families in Vava'u and Ha'apai evacuated \u2014 Radio & TV Tonga News, via PINA (17 February 2016)",
+          fr: "Plus de 100 familles évacuées à Vava'u et Ha'apai \u2014 Radio & TV Tonga News, via PINA (17 février 2016)",
+        },
+        url: 'https://reliefweb.int/report/tonga/more-100-families-vavau-and-haapai-evacuated-tonga-s-agriculture-sector-suffers-major',
+      },
     ],
   },
   gita: {
@@ -176,15 +210,13 @@ const STORM_DETAIL = {
         category: 4,
         categoryLabel: "Category 4 (landfall, Tongatapu and 'Eua)",
         categoryLabelFr: "Catégorie 4 (atterrissage, Tongatapu et 'Eua)",
-        // Reported as 1 in the first OCHA/ECHO flashes and settled at 2 in later
-        // reporting; the final figure is used.
-        deaths: 2,
+        deaths: 1,
         dodge: -0.35,
         fact: "Average winds of 130 km/h crossing Tongatapu and 'Eua \u2014 the strongest cyclone to hit those islands since Isaac in 1982. The 100-year-old Parliament House was flattened. NEMO recorded 4,708 houses damaged or destroyed and about 4,500 people in evacuation centres; damage reached US$164 million, 37.8% of GDP.",
         factFr:
           "Vents moyens de 130 km/h traversant Tongatapu et 'Eua \u2014 le cyclone le plus fort à avoir touché ces îles depuis Isaac en 1982. Le Parlement, vieux de 100 ans, a été rasé. Le NEMO a recensé 4\u00A0708 maisons endommagées ou détruites et environ 4\u00A0500 personnes dans des centres d'évacuation\u00A0; les dégâts ont atteint 164 millions de dollars US, soit 37,8\u00A0% du PIB.",
-        lead: 'The strongest storm to cross Tongatapu in 36 years killed two people.',
-        leadFr: 'Le cyclone le plus fort à traverser Tongatapu en 36 ans a fait deux morts.',
+        lead: 'The strongest storm to cross Tongatapu in 36 years killed one person.',
+        leadFr: 'Le cyclone le plus fort à traverser Tongatapu en 36 ans a fait un mort.',
       },
       {
         name: 'Fiji',
@@ -197,11 +229,11 @@ const STORM_DETAIL = {
           'Catégorie 4 en passant au sud du groupe des Lau\u00A0; a culminé en catégorie 5 à environ 205\u00A0km au sud de Kadavu \u2014 sans atterrissage',
         deaths: 0,
         dodge: 0.35,
-        fact: '1,579 people affected in the southern Lau group, with Ono-i-Lau and Vatoa worst hit \u2014 three homes destroyed, gusts to 190 km/h, no injuries reported. The entire population of Ono-i-Lau, about 470 people, had been moved into evacuation centres before the storm arrived.',
+        fact: '1,579 people affected in the southern Lau group, with Ono-i-Lau and Vatoa worst hit \u2014 three buildings destroyed, gusts of 84 knots (about 155 km/h) at Ono-i-Lau, no injuries reported.',
         factFr:
-          "1\u00A0579 personnes touchées dans le sud du groupe des Lau, Ono-i-Lau et Vatoa étant les plus durement touchées \u2014 trois maisons détruites, rafales à 190 km/h, aucun blessé signalé. L'ensemble de la population d'Ono-i-Lau, environ 470 personnes, avait été déplacée vers des centres d'évacuation avant l'arrivée du cyclone.",
-        lead: 'A stronger storm than the one that hit Tonga, and nobody was hurt, because everyone had already moved.',
-        leadFr: "Un cyclone plus fort que celui qui a frappé Tonga, et personne n'a été blessé, parce que tout le monde s'était déjà déplacé.",
+          "1\u00A0579 personnes touchées dans le sud du groupe des Lau, Ono-i-Lau et Vatoa étant les plus durement touchées \u2014 trois bâtiments détruits, rafales de 84 nœuds (environ 155 km/h) à Ono-i-Lau, aucun blessé signalé.",
+        lead: 'Still Category 4 \u2014 105 knots at closest approach, the same as Tonga \u2014 and nobody was hurt.',
+        leadFr: "Toujours en catégorie 4 \u2014 105 nœuds à l'approche la plus proche, comme à Tonga \u2014 et personne n'a été blessé.",
       },
     ],
     sources: [
@@ -219,6 +251,41 @@ const STORM_DETAIL = {
           fr: 'Cyclone tropical Gita \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
         },
         url: 'https://reliefweb.int/disaster/tc-2018-000102-ton',
+      },
+      {
+        label: {
+          en: 'Pacific Islands Cyclone Gita \u2014 humanitarian situation report 2 (16 February 2018), UNICEF',
+          fr: 'Cyclone Gita, îles du Pacifique \u2014 rapport de situation humanitaire n°\u00A02 (16 février 2018), UNICEF',
+        },
+        url: 'https://reliefweb.int/report/tonga/pacific-islands-cyclone-gita-humanitarian-situation-report-2-16-february-2018',
+      },
+      {
+        label: {
+          en: 'One death, 3 seriously injured in Tongatapu during TC Gita \u2014 Matangi Tonga (14 February 2018)',
+          fr: 'Un mort et trois blessés graves à Tongatapu pendant le cyclone Gita \u2014 Matangi Tonga (14 février 2018)',
+        },
+        url: 'https://matangitonga.to/2018/02/14/one-death-3-seriously-injured-tongatapu-tc-gita',
+      },
+      {
+        label: {
+          en: 'Cyclone Gita in Tonga \u2014 activation 566, International Charter Space and Major Disasters',
+          fr: 'Cyclone Gita aux Tonga \u2014 activation 566, Charte internationale «\u00A0Espace et catastrophes majeures\u00A0»',
+        },
+        url: 'https://disasterscharter.org/web/guest/activations/-/article/cyclone-in-tonga-activation-566-',
+      },
+      {
+        label: {
+          en: 'Severe TC Gita (Category 4) passes just south of Ono-i-Lau \u2014 media release 35 (13 February 2018), Fiji Meteorological Service',
+          fr: "Le cyclone tropical sévère Gita (catégorie 4) passe juste au sud d'Ono-i-Lau \u2014 communiqué n°\u00A035 (13 février 2018), Service météorologique des Fidji",
+        },
+        url: 'https://reliefweb.int/report/fiji/fiji-meteorological-services-severe-tc-gita-cat4-passes-just-south-ono-5pm-13-february',
+      },
+      {
+        label: {
+          en: 'Fiji, Tonga, Niue, American Samoa, Samoa \u2014 Tropical Cyclone Gita (ECHO Daily Flash, 14 February 2018), ECHO / ReliefWeb',
+          fr: 'Fidji, Tonga, Niue, Samoa américaines, Samoa \u2014 cyclone tropical Gita (ECHO Daily Flash, 14 février 2018), ECHO / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/fiji/fiji-tonga-niue-american-samoa-samoa-tropical-cyclone-gita-update-gdacs-jtwc-meteo-0',
       },
     ],
   },
@@ -265,8 +332,8 @@ const STORM_DETAIL = {
         categoryLabelFr: 'Catégorie 4 (atterrissage, Kadavu)',
         deaths: 1,
         dodge: -0.35,
-        fact: '1,919 buildings damaged; 103mm of rain recorded at Sigatoka in a single day.',
-        factFr: '1\u00A0919 bâtiments endommagés\u00A0; 103\u00A0mm de pluie enregistrés à Sigatoka en une seule journée.',
+        fact: '1,919 buildings damaged.',
+        factFr: '1\u00A0919 bâtiments endommagés.',
         lead: 'Still a severe storm, over a country with more to absorb it.',
         leadFr: "Toujours un cyclone sévère, mais sur un pays davantage en mesure de l'absorber.",
       },
@@ -279,10 +346,10 @@ const STORM_DETAIL = {
         categoryLabelFr: 'Catégorie 4 (passé au large, sans atterrissage)',
         deaths: 0,
         dodge: 0.35,
-        fact: '428 homes damaged or destroyed by flooding and storm surge, without a direct hit.',
-        factFr: "428 habitations endommagées ou détruites par les inondations et l'onde de tempête, sans impact direct.",
-        lead: 'A near miss, and the shortest recovery of the four.',
-        leadFr: 'Un coup évité de justesse, et le redressement le plus rapide des quatre.',
+        fact: "428 homes damaged or destroyed, without a direct hit. Storm surge and high tide flooded coastal areas of Tongatapu, 'Eua and Ha'apai.",
+        factFr: "428 habitations endommagées ou détruites, sans impact direct. L'onde de tempête, combinée à la marée haute, a inondé les zones côtières de Tongatapu, 'Eua et Ha'apai.",
+        lead: 'A near miss, and no dip in its annual crop, livestock or power figures.',
+        leadFr: "Un coup évité de justesse, et aucun recul de ses chiffres annuels de cultures, d'élevage ou de production électrique.",
       },
     ],
     sources: [
@@ -301,6 +368,20 @@ const STORM_DETAIL = {
         },
         url: 'https://reliefweb.int/disaster/tc-2020-000049-vut',
       },
+      {
+        label: {
+          en: 'Tropical Cyclone Harold \u2014 situation report 6 (13 April 2020), Pacific Humanitarian Team / UN OCHA',
+          fr: 'Cyclone tropical Harold \u2014 rapport de situation n°\u00A06 (13 avril 2020), Équipe humanitaire pour le Pacifique / OCHA de l’ONU',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/pacific-humanitarian-team-tropical-cyclone-harold-situation-report-6-13-april-2020',
+      },
+      {
+        label: {
+          en: 'Pacific Islands \u2014 Tropical Cyclone Harold (ECHO Daily Flash, 14 April 2020), ECHO / ReliefWeb',
+          fr: 'Îles du Pacifique \u2014 cyclone tropical Harold (ECHO Daily Flash, 14 avril 2020), ECHO / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/pacific-islands-tropical-cyclone-harold-dg-echo-unicef-echo-daily-flash-14-april-2020',
+      },
     ],
   },
   'judy-kevin': {
@@ -314,20 +395,20 @@ const STORM_DETAIL = {
         dateFr: '27 février 2023',
         category: 1,
         categoryLabel:
-          'Category 1 (Judy tracked over the southern islands; Kevin followed offshore \u2014 no landfall)',
+          'Category 1 (Judy passed close to the southern islands; Kevin followed offshore \u2014 no landfall)',
         categoryLabelFr:
-          'Catégorie 1 (Judy a traversé les îles du sud\u00A0; Kevin a suivi au large \u2014 sans atterrissage)',
+          'Catégorie 1 (Judy est passé près des îles du sud\u00A0; Kevin a suivi au large \u2014 sans atterrissage)',
         deaths: null,
         deathsNote:
           'The Solomon Islands NDMO and National Emergency Operation Centre published response plans and assessment deployments but no fatality figure. Not zero \u2014 never reported.',
         deathsNoteFr:
           "Le NDMO des Îles Salomon et le Centre national des opérations d'urgence ont publié des plans de réponse et des déploiements d'évaluation, mais aucun bilan de décès. Pas zéro \u2014 jamais déclaré.",
         dodge: 0,
-        fact: "Judy crossed the small islands of southern Temotu Province as a Category 1 system on the day it was named. Tikopia and Anuta, the province's two most remote islands, were assessed as worst affected, with damage to fruit trees and other livelihood sources. Reaching them took until 9 March, when a patrol boat carried assessment teams and relief from Lata.",
+        fact: "Judy passed close to the small islands of southern Temotu Province as a Category 1 system on the day it was named. Tikopia and Anuta, the province's two most remote islands, were assessed as worst affected, with damage to fruit trees and other livelihood sources. The assessment team, carried by patrol boat via Lata, reached Tikopia on 13 March, 14 days after the storm.",
         factFr:
-          "Judy a traversé les petites îles du sud de la province de Temotu en tant que système de catégorie 1 le jour même où il a été nommé. Tikopia et Anuta, les deux îles les plus isolées de la province, ont été évaluées comme les plus touchées, avec des dégâts aux arbres fruitiers et à d'autres sources de subsistance. Il a fallu attendre le 9 mars pour les atteindre, quand un patrouilleur a transporté les équipes d'évaluation et l'aide depuis Lata.",
-        lead: "The storm's first landfall was on the islands it would take ten days to reach.",
-        leadFr: "Le premier atterrissage du cyclone a eu lieu sur les îles qu'il faudrait dix jours pour atteindre.",
+          "Judy est passé près des petites îles du sud de la province de Temotu en tant que système de catégorie 1 le jour même où il a été nommé. Tikopia et Anuta, les deux îles les plus isolées de la province, ont été évaluées comme les plus touchées, avec des dégâts aux arbres fruitiers et à d'autres sources de subsistance. L'équipe d'évaluation, transportée par un patrouilleur via Lata, a atteint Tikopia le 13 mars, 14 jours après le cyclone.",
+        lead: 'The storm first passed close to the islands it would take 14 days to reach.',
+        leadFr: "Le cyclone est d'abord passé près des îles qu'il faudrait 14 jours pour atteindre.",
       },
       {
         name: 'Vanuatu',
@@ -335,19 +416,19 @@ const STORM_DETAIL = {
         dateFr: '1er et 3 mars 2023 (Judy, puis Kevin)',
         category: 4,
         categoryLabel:
-          'Category 4 at both landfalls \u2014 Judy on Efate and Tanna, Kevin on Erromango (combined entry for two cyclones)',
+          'Category 4 at both landfalls, on 1 and 3 March; Judy made landfall on Efate (combined entry for two cyclones)',
         categoryLabelFr:
-          'Catégorie 4 aux deux atterrissages \u2014 Judy sur Efate et Tanna, Kevin sur Erromango (entrée combinée pour deux cyclones)',
+          'Catégorie 4 aux deux atterrissages, les 1er et 3 mars\u00A0; Judy a touché terre sur Efate (entrée combinée pour deux cyclones)',
         // A stated zero, not an absent one: the government's own PDNA records
         // no casualties in terms. The most load-bearing zero on the roster.
         deaths: 0,
         dodge: 0,
-        fact: 'Combined figures for both cyclones. The Government of Vanuatu\u2019s Post-Disaster Needs Assessment reports no casualties. 197,388 people (43,623 households) were assessed as affected, around 66% of the population, with roughly 90% of houses in Shefa and Tafea destroyed or severely damaged. A separate figure of 251,346 circulates and measures something else \u2014 people exposed to Category 2\u20133 winds, not people assessed as affected. Two earthquakes, magnitudes 6.5 and 5.4, struck off Espiritu Santo on 3 March in the middle of it.',
+        fact: 'Combined figures for both cyclones. The Government of Vanuatu\u2019s Post-Disaster Needs Assessment reports no casualties. 197,388 people (43,623 households) were assessed as affected, around 66% of the population, with roughly 90% of houses in Shefa and Tafea destroyed or severely damaged (NDMO via OCHA). A separate figure of 251,346 circulates and measures something else \u2014 people exposed to Category 2\u20133 winds, not people assessed as affected. Two earthquakes, magnitudes 6.5 and 5.4, struck off Espiritu Santo on 3 March in the middle of it.',
         factFr:
-          "Chiffres combinés pour les deux cyclones. L'évaluation des besoins post-catastrophe du gouvernement de Vanuatu ne recense aucune victime. 197\u00A0388 personnes (43\u00A0623 foyers) ont été évaluées comme touchées, soit environ 66\u00A0% de la population, avec environ 90\u00A0% des maisons de Shefa et Tafea détruites ou gravement endommagées. Un autre chiffre de 251\u00A0346 circule et mesure autre chose \u2014 les personnes exposées à des vents de catégorie 2 à 3, non les personnes évaluées comme touchées. Deux séismes, de magnitude 6,5 et 5,4, ont frappé au large d'Espiritu Santo le 3 mars, en plein milieu de l'épisode.",
-        lead: 'Two Category 4 landfalls in 48 hours, nine tenths of the housing in two provinces gone, and not one person killed.',
+          "Chiffres combinés pour les deux cyclones. L'évaluation des besoins post-catastrophe du gouvernement de Vanuatu ne recense aucune victime. 197\u00A0388 personnes (43\u00A0623 foyers) ont été évaluées comme touchées, soit environ 66\u00A0% de la population, avec environ 90\u00A0% des maisons de Shefa et Tafea détruites ou gravement endommagées (NDMO, via l'OCHA). Un autre chiffre de 251\u00A0346 circule et mesure autre chose \u2014 les personnes exposées à des vents de catégorie 2 à 3, non les personnes évaluées comme touchées. Deux séismes, de magnitude 6,5 et 5,4, ont frappé au large d'Espiritu Santo le 3 mars, en plein milieu de l'épisode.",
+        lead: 'Two Category 4 landfalls in 48 hours, nine tenths of the housing in two provinces destroyed or severely damaged, and not one person killed.',
         leadFr:
-          "Deux atterrissages de catégorie 4 en 48 heures, neuf dixièmes des habitations de deux provinces disparues, et pas une seule personne tuée.",
+          "Deux atterrissages de catégorie 4 en 48 heures, neuf dixièmes des habitations de deux provinces détruites ou gravement endommagées, et pas une seule personne tuée.",
       },
     ],
     sources: [
@@ -367,6 +448,34 @@ const STORM_DETAIL = {
           },
         url: 'https://reliefweb.int/report/vanuatu/vanuatu-tropical-cyclones-judy-kevin-situation-report-no1-10-march-2023',
       },
+      {
+        label: {
+          en: 'Tropical Cyclones Judy and Kevin \u2014 situation report 4 (22 March 2023), UN OCHA / ReliefWeb',
+          fr: 'Cyclones tropicaux Judy et Kevin \u2014 rapport de situation n°\u00A04 (22 mars 2023), OCHA de l’ONU / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-tropical-cyclone-judy-and-tropical-cyclone-kevin-situation-report-no-4-22-march-2023',
+      },
+      {
+        label: {
+          en: 'NDC and N-DOC deploy assessment team to support Temotu P-DOC \u2014 Government of Solomon Islands (10 March 2023)',
+          fr: 'Le NDC et le N-DOC déploient une équipe d’évaluation en appui au P-DOC de Temotu \u2014 gouvernement des Îles Salomon (10 mars 2023)',
+        },
+        url: 'https://reliefweb.int/report/solomon-islands/ndc-and-n-doc-deploys-assessment-team-support-temotu-p-doc',
+      },
+      {
+        label: {
+          en: 'Multi-sectoral assessment for Tikopia and Anuta completed \u2014 Government of Solomon Islands (20 March 2023)',
+          fr: 'Évaluation multisectorielle achevée à Tikopia et Anuta \u2014 gouvernement des Îles Salomon (20 mars 2023)',
+        },
+        url: 'https://reliefweb.int/report/solomon-islands/multi-sectoral-assessment-tikopia-and-anuta-completed',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Judy \u2014 RSMC Nadi best track, IBTrACS v04r01 (2023055S14184)',
+          fr: 'Cyclone tropical Judy \u2014 trajectoire de référence du RSMC Nadi, IBTrACS v04r01 (2023055S14184)',
+        },
+        url: 'https://ncics.org/ibtracs/index.php?name=v04r01-2023055S14184',
+      },
     ],
   },
   lola: {
@@ -379,20 +488,22 @@ const STORM_DETAIL = {
         categoryLabel: 'Category 3 (landfall, Tikopia Island, Temotu Province)',
         categoryLabelFr: 'Catégorie 3 (atterrissage, île de Tikopia, province de Temotu)',
         deaths: 4,
-        // These four are INDIRECT -- a post-storm disease outbreak, weeks
-        // later. Harold's 27 are direct drownings. Plotting the two on one axis
-        // without saying so claims an equivalence the sources do not support.
-        deathsKind: 'indirect',
+        // These four are NOT ATTRIBUTED -- deaths in a disease outbreak on
+        // Vanikoro, reported nearly two weeks after landfall, that none of the
+        // sources found link to the cyclone. Harold's 27 are direct drownings.
+        // Plotting the two on one axis without saying so claims an equivalence
+        // the sources do not support.
+        deathsKind: 'unattributed',
         deathsNote:
-          'Indirect deaths: a dysentery and diarrhoea outbreak on Vanikoro declared by health officials after the storm damaged water supplies, weeks after landfall. Not deaths during the cyclone itself.',
+          'Reported deaths, not attributed: four deaths from a dysentery and diarrhoea outbreak on Vanikoro, reported nearly two weeks after landfall. None of the sources we found link them to the cyclone; UNICEF reported them alongside Lola\u2019s damage to desalination plants and food crops in Temotu. Not deaths during the cyclone itself.',
         deathsNoteFr:
-          "Décès indirects\u00A0: une épidémie de dysenterie et de diarrhée sur Vanikoro, déclarée par les autorités sanitaires après que le cyclone a endommagé les points d'eau, des semaines après l'atterrissage. Pas des décès survenus pendant le cyclone lui-même.",
+          "Décès signalés, non attribués\u00A0: quatre décès dus à une épidémie de dysenterie et de diarrhée sur Vanikoro, signalés près de deux semaines après l'atterrissage. Aucune des sources consultées ne les relie au cyclone\u00A0; l'UNICEF les a signalés en même temps que les dégâts causés par Lola aux installations de dessalement et aux cultures vivrières de Temotu. Pas des décès survenus pendant le cyclone lui-même.",
         dodge: 0,
-        fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources and desalination plants damaged and four people injured. Around 22,319 people were exposed across Temotu.',
+        fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources damaged and four people injured, and desalination plants damaged across Temotu (UNICEF). Around 22,319 people were exposed across Temotu.',
         factFr:
-          "116 maisons, 114 cuisines et une église détruites à Tikopia, avec des points d'eau et des installations de dessalement endommagés et quatre personnes blessées. Environ 22\u00A0319 personnes ont été exposées dans l'ensemble de Temotu.",
-        lead: 'Lola made landfall here first, and the deaths came weeks later, out of the water supply.',
-        leadFr: "Lola a d'abord touché terre ici, et les décès sont survenus des semaines plus tard, à cause de l'approvisionnement en eau.",
+          "116 maisons, 114 cuisines et une église détruites à Tikopia, avec des points d'eau endommagés et quatre personnes blessées, ainsi que des installations de dessalement endommagées dans l'ensemble de Temotu (UNICEF). Environ 22\u00A0319 personnes ont été exposées dans l'ensemble de Temotu.",
+        lead: 'Lola made landfall here first, and the deaths were reported nearly two weeks later.',
+        leadFr: "Lola a d'abord touché terre ici, et les décès ont été signalés près de deux semaines plus tard.",
       },
       {
         name: 'Vanuatu',
@@ -406,7 +517,8 @@ const STORM_DETAIL = {
         // the cyclone (NEOC Situation Report 13). Other counts run from 2 to 4,
         // so the note says so rather than the chart quietly picking one. It
         // mirrors the Solomon Islands stop above, whose note says its four
-        // deaths were indirect, so the two markers can be read side by side.
+        // deaths are not attributed to the cyclone, so the two markers can be
+        // read side by side.
         deathsNote:
           'Direct deaths: NDMO\u2019s count of deaths directly attributable to the cyclone (NEOC Situation Report 13, 13 November 2023). Other agencies report up to four.',
         deathsNoteFr:
@@ -419,12 +531,11 @@ const STORM_DETAIL = {
         leadFr: "Le troisième cyclone sévère à frapper Vanuatu en huit mois est arrivé avant même le début de la saison.",
       },
     ],
-    // More than the usual pair, one per figure the Vanuatu stop states, because
-    // no single assessment carries them all: deaths, houses and schools are
-    // NDMO's; the peak is RSMC Nadi's; the affected count is NDMO's as reported
-    // by OCHA and the IFRC; the range of other death counts needs its own
-    // citation to be checkable. The last two cover the Solomon Islands stop and
-    // the season-opening date.
+    // One per figure the Vanuatu stop states, because no single assessment
+    // carries them all: deaths, houses and schools are NDMO's; the peak is RSMC
+    // Nadi's; the affected count is NDMO's as reported by OCHA and the IFRC; the
+    // range of other death counts needs its own citation to be checkable. The
+    // last five cover the season-opening date and the Solomon Islands stop.
     sources: [
       {
         label: {
@@ -482,6 +593,27 @@ const STORM_DETAIL = {
           fr: 'Cyclone tropical Lola \u2014 rapports de situation humanitaire, OCHA de l’ONU / ReliefWeb',
         },
         url: 'https://reliefweb.int/disaster/tc-2023-000207-vut',
+      },
+      {
+        label: {
+          en: 'Cyclone Lola batters remote Tikopia in Solomon Islands, disaster office confirms \u2014 RNZ (28 October 2023)',
+          fr: 'Le cyclone Lola frappe l’île isolée de Tikopia, aux Îles Salomon, confirme l’office de gestion des catastrophes \u2014 RNZ (28 octobre 2023)',
+        },
+        url: 'https://www.rnz.co.nz/international/pacific-news/501115/cyclone-lola-batters-remote-tikopia-in-solomon-islands-disaster-office-confirms',
+      },
+      {
+        label: {
+          en: 'SBD$2.7 million for Cyclone Lola\u2019s emergency response in Temotu \u2014 SIBC (4 November 2023)',
+          fr: '2,7 millions de SBD pour la réponse d’urgence au cyclone Lola à Temotu \u2014 SIBC (4 novembre 2023)',
+        },
+        url: 'https://www.sibconline.com.sb/sbd2-7-million-for-cyclone-lolas-emergency-response-in-temotu/',
+      },
+      {
+        label: {
+          en: 'Cyclone Lola \u2014 Vanuatu humanitarian situation report 2 (10 November 2023), UNICEF',
+          fr: 'Cyclone Lola \u2014 rapport de situation humanitaire n°\u00A02, Vanuatu (10 novembre 2023), UNICEF',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/unicef-vanuatu-humanitarian-situation-report-no-2-cyclone-lola-10-november-2023',
       },
     ],
   },

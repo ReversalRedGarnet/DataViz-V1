@@ -72,7 +72,10 @@ export function renderStormProfileChart(
     width,
     margin,
     tickFormat: INT_FORMAT,
-    tickValues: d3.ticks(0, maxDeaths * 1.2, 4).filter((t) => t >= 0),
+    // Whole numbers only. A count of deaths has no fractional ticks, and with
+    // a maximum of 1 or 2 d3 steps by 0.2 or 0.5, which INT_FORMAT then rounds
+    // into repeated labels ("0, 0, 0, 1, 1, 1, 1").
+    tickValues: d3.ticks(0, maxDeaths * 1.2, 4).filter((t) => t >= 0 && Number.isInteger(t)),
   })
 
   // The band, drawn before the points so nothing sits on top of a marker.
@@ -131,7 +134,7 @@ export function renderStormProfileChart(
   // during the storm. Both belong on this chart -- they are both real tolls --
   // but a filled dot at 4 beside a filled dot at 27 asserts a like-for-like
   // comparison the sources do not support.
-  const isIndirect = (d) => d.deathsKind === 'indirect'
+  const isUnattributed = (d) => d.deathsKind === 'unattributed'
   const markY = (d) => (d.deaths == null ? bandY : y(d.deaths))
 
   const points = svg
@@ -142,10 +145,10 @@ export function renderStormProfileChart(
     .attr('cx', (d) => x(d.category + (d.dodge ?? 0)))
     .attr('cy', markY)
     .attr('r', 0)
-    .attr('fill', (d) => (isIndirect(d) || d.deaths == null ? surface : palette.single))
+    .attr('fill', (d) => (isUnattributed(d) || d.deaths == null ? surface : palette.single))
     .attr('fill-opacity', 0.9)
-    .attr('stroke', (d) => (isIndirect(d) || d.deaths == null ? palette.single : surface))
-    .attr('stroke-width', (d) => (isIndirect(d) || d.deaths == null ? 2 : 1.5))
+    .attr('stroke', (d) => (isUnattributed(d) || d.deaths == null ? palette.single : surface))
+    .attr('stroke-width', (d) => (isUnattributed(d) || d.deaths == null ? 2 : 1.5))
     .attr('stroke-dasharray', (d) => (d.deaths == null ? '3 2' : null))
     .on('pointerenter pointermove', function (event, d) {
       showTooltip(event, stormPointTooltip(d, nationLabel(d.name, language), language))

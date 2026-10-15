@@ -19,7 +19,7 @@ const STRINGS = {
     deathsNotReported: 'Deaths not reported',
     death: 'death',
     deaths: 'deaths',
-    indirect: ', indirect',
+    unattributed: ', not attributed',
     levelWith: (year) => `level with ${year}`,
     vs: (year) => `vs ${year}`,
   },
@@ -27,7 +27,7 @@ const STRINGS = {
     deathsNotReported: 'Décès non recensés',
     death: 'décès',
     deaths: 'décès',
-    indirect: ', indirects',
+    unattributed: ', non attribués',
     levelWith: (year) => `au niveau de ${year}`,
     vs: (year) => `vs ${year}`,
   },
@@ -57,14 +57,14 @@ function categoryHeadline(label) {
 // convention as the other tooltips here; stormProfileChart.js passes
 // nationLabel(row.name, language). `language` drives the deaths sentence
 // itself: singular/plural selection (French treats zero as singular; see
-// utils/pluralize.js) and the "not reported" / "indirect" wording.
+// utils/pluralize.js) and the "not reported" / "not attributed" wording.
 export function stormPointTooltip(row, nation, language = 'en') {
   const t = STRINGS[language]
   const deaths =
     row.deaths == null
       ? t.deathsNotReported
       : `${row.deaths} ${pluralize(row.deaths, { one: t.death, other: t.deaths }, language)}${
-          row.deathsKind === 'indirect' ? t.indirect : ''
+          row.deathsKind === 'unattributed' ? t.unattributed : ''
         }`
 
   // The researched `fact` and `deathsNote` used to be appended here, which is

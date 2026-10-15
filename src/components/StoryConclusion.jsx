@@ -6,6 +6,7 @@ import { useLanguage } from '../hooks/useLanguage.jsx'
 import { useInView } from '../hooks/useInView.js'
 import { chartColorsFor } from '../utils/theme.js'
 import { NATION_COUNT, NATION_NAMES, nationListInProse } from '../content/nations.js'
+import { isPluralStormName } from '../utils/pluralize.js'
 
 // THE END OF THE ARGUMENT, NOT THE END OF THE PAGE.
 //
@@ -53,7 +54,7 @@ const STRINGS = {
     heading: 'A shared storm is not a shared recovery.',
     intro: (name, reachedList, year, missedClause, comparedClause) =>
       `${name} reached ${reachedList} in ${year}${missedClause}. Indexed to their own figures in that year, the four national trajectories start from one point and do not stay together: the harvest, the herds, the power supply and the visitors move by different amounts, for different lengths of time, and the record of them is least complete where the capacity to record was thinnest.${comparedClause} None of that ranks these countries, and this site does not: no trajectory here is a score, and the ones with the largest movements are not the ones that coped worst.`,
-    missedClause: (list) => ` and missed ${list}`,
+    missedClause: (names) => ` and missed ${nationListInProse(names, 'en')}`,
     comparedClause: (list) => ` You compared ${list}; the same storm, and two different afterwards.`,
     lookAgain: 'Look again',
     startAgain: 'Start again with another storm',
@@ -65,9 +66,14 @@ const STRINGS = {
   fr: {
     whatShowed: (name) => `Ce qu\u2019a montré ${name}`,
     heading: 'Un cyclone partagé n\u2019est pas un redressement partagé.',
-    intro: (name, reachedList, year, missedClause, comparedClause) =>
-      `${name} a touché ${reachedList} en ${year}${missedClause}. Indexées à leur propre chiffre de cette année-là, les quatre trajectoires nationales partent d\u2019un même point et ne restent pas ensemble\u00A0: la récolte, le cheptel, l\u2019approvisionnement électrique et les visiteurs évoluent d\u2019amplitudes différentes, sur des durées différentes, et leur suivi est le moins complet là où la capacité à l\u2019assurer était la plus faible.${comparedClause} Rien de tout cela ne classe ces pays, et ce site ne le fait pas\u00A0: aucune trajectoire ici n\u2019est un score, et celles aux mouvements les plus marqués ne sont pas celles qui s\u2019en sont le moins bien sorties.`,
-    missedClause: (list) => ` et n\u2019a pas touché ${list}`,
+    intro: (name, reachedList, year, missedClause, comparedClause, plural) =>
+      `${name} ${plural ? 'ont touché' : 'a touché'} ${reachedList} en ${year}${missedClause}. Indexées à leur propre chiffre de cette année-là, les quatre trajectoires nationales partent d\u2019un même point et ne restent pas ensemble\u00A0: la récolte, le cheptel, l\u2019approvisionnement électrique et les visiteurs évoluent d\u2019amplitudes différentes, sur des durées différentes, et leur suivi est le moins complet là où la capacité à l\u2019assurer était la plus faible.${comparedClause} Rien de tout cela ne classe ces pays, et ce site ne le fait pas\u00A0: aucune trajectoire ici n\u2019est un score, et celles aux mouvements les plus marqués ne sont pas celles qui s\u2019en sont le moins bien sorties.`,
+    // Two or more missed nations take "ni" before each ("n'a touché ni Fidji
+    // ni Tonga"); a single one takes "pas".
+    missedClause: (names, plural) =>
+      names.length > 1
+        ? ` et n\u2019${plural ? 'ont' : 'a'} touché ${names.map((n) => `ni ${nationListInProse([n], 'fr')}`).join(' ')}`
+        : ` et n\u2019${plural ? 'ont' : 'a'} pas touché ${nationListInProse(names, 'fr')}`,
     comparedClause: (list) =>
       ` Vous avez comparé ${list}\u00A0: le même cyclone, et deux suites différentes.`,
     lookAgain: 'Regarder à nouveau',
@@ -128,10 +134,8 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const missedClause =
     storm.nations.length < NATION_COUNT
       ? t.missedClause(
-          nationListInProse(
-            NATION_NAMES.filter((n) => !storm.nations.includes(n)),
-            language
-          )
+          NATION_NAMES.filter((n) => !storm.nations.includes(n)),
+          isPluralStormName(storm.name)
         )
       : ''
   const comparedClause = pair.length === 2 ? t.comparedClause(nationListInProse(pair, language)) : ''
@@ -155,7 +159,8 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
               nationListInProse(storm.nations, language),
               storm.year,
               missedClause,
-              comparedClause
+              comparedClause,
+              isPluralStormName(storm.name)
             )}
           </p>
           <div className="mt-5 w-full max-w-[320px] md:mt-0 md:w-[300px]">

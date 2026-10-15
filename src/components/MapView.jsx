@@ -14,7 +14,7 @@ import { useViewBoxScale } from '../hooks/useViewBoxScale.js'
 import { chartColorsFor } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
-import { pluralize } from '../utils/pluralize.js'
+import { isPluralStormName, pluralize } from '../utils/pluralize.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 import { drawBasemap, fitToPoints, pacificProjection, recolourBasemap } from '../utils/map.js'
 import { NATIONS, nationLabel } from '../content/nations.js'
@@ -58,8 +58,8 @@ const STRINGS = {
     exploreHeading: 'Explorer le Pacifique',
     exploreBody:
       "Chaque pays sur cette carte est sélectionnable. Touchez un repère pour le sélectionner, touchez-en un deuxième pour comparer : la chaîne de répercussions, la divergence et la comparaison suivent votre choix. Faites glisser pour vous déplacer, pincez pour zoomer, ou utilisez les boutons.",
-    mapAriaWithStorm: (nationCount, stormName, hitCount) =>
-      `Carte du Pacifique avec ${nationCount} nations sélectionnables. ${stormName} en a touché ${hitCount}.`,
+    mapAriaWithStorm: (nationCount, stormName, hitCount, plural) =>
+      `Carte du Pacifique avec ${nationCount} nations sélectionnables. ${stormName} en ${plural ? 'ont' : 'a'} touché ${hitCount}.`,
     mapAriaNoStorm: (nationCount) => `Carte du Pacifique avec ${nationCount} nations sélectionnables`,
     zoomIn: 'Zoomer',
     zoomOut: 'Dézoomer',
@@ -558,7 +558,12 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
           role="group"
           aria-label={
             storm
-              ? STRINGS[language].mapAriaWithStorm(nations.length, storm.name, storm.nations.length)
+              ? STRINGS[language].mapAriaWithStorm(
+                  nations.length,
+                  storm.name,
+                  storm.nations.length,
+                  isPluralStormName(storm.name)
+                )
               : STRINGS[language].mapAriaNoStorm(nations.length)
           }
           className="h-auto w-full overflow-hidden rounded-2xl border-2 border-ink/15 shadow-sm"
