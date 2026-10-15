@@ -3,6 +3,18 @@ dist/
 .DS_Store
 *.local
 .env
+.env.*
+!.env.example
+*.log
+
+# Editor settings
+.vscode/
+.idea/
+
+# Python, for the data pipeline (see README.md -> "Rebuilding the data")
+__pycache__/
+*.pyc
+.venv/
 
 # Raw Pacific Data Hub exports -- regenerate any time with the commands in
 # README.md -> "Rebuilding the data". A few MB each and whole-dataflow
