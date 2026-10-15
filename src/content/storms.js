@@ -114,6 +114,20 @@ const STORM_DETAIL = {
         },
         url: 'https://reliefweb.int/disaster/tc-2015-000020-vut',
       },
+      {
+        label: {
+          en: 'Pacific: Tropical Cyclone Pam \u2014 international appeal MDR55001, operations update 2 (15 May 2015), IFRC',
+          fr: 'Pacifique\u00A0: cyclone tropical Pam \u2014 appel international MDR55001, point sur les opérations n°\u00A02 (15 mai 2015), IFRC',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/pacific-tropical-cyclone-pam-international-appeal-n-mdr55001-operations-update-n-2',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Pam \u2014 RSMC Nadi best track, IBTrACS v04r01 (2015066S08170)',
+          fr: 'Cyclone tropical Pam \u2014 trajectoire de référence du RSMC Nadi, IBTrACS v04r01 (2015066S08170)',
+        },
+        url: 'https://ncics.org/ibtracs/index.php?name=v04r01-2015066S08170',
+      },
     ],
   },
   winston: {
