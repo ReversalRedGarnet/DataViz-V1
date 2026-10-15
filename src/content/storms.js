@@ -498,9 +498,9 @@ const STORM_DETAIL = {
         deathsNoteFr:
           "Décès signalés, non attribués\u00A0: quatre décès dus à une épidémie de dysenterie et de diarrhée sur Vanikoro, signalés près de deux semaines après l'atterrissage. Aucune des sources consultées ne les relie au cyclone\u00A0; l'UNICEF les a signalés en même temps que les dégâts causés par Lola aux installations de dessalement et aux cultures vivrières de Temotu. Pas des décès survenus pendant le cyclone lui-même.",
         dodge: 0,
-        fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources damaged and four people injured. Around 22,319 people were exposed across Temotu.',
+        fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources damaged and four people injured, and desalination plants damaged across Temotu (UNICEF). Around 22,319 people were exposed across Temotu.',
         factFr:
-          "116 maisons, 114 cuisines et une église détruites à Tikopia, avec des points d'eau endommagés et quatre personnes blessées. Environ 22\u00A0319 personnes ont été exposées dans l'ensemble de Temotu.",
+          "116 maisons, 114 cuisines et une église détruites à Tikopia, avec des points d'eau endommagés et quatre personnes blessées, ainsi que des installations de dessalement endommagées dans l'ensemble de Temotu (UNICEF). Environ 22\u00A0319 personnes ont été exposées dans l'ensemble de Temotu.",
         lead: 'Lola made landfall here first, and the deaths were reported nearly two weeks later.',
         leadFr: "Lola a d'abord touché terre ici, et les décès ont été signalés près de deux semaines plus tard.",
       },
