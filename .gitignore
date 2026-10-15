@@ -7,9 +7,10 @@ dist/
 !.env.example
 *.log
 
-# Editor settings
+# Editor settings, and per-machine assistant/tool config (MCP servers)
 .vscode/
 .idea/
+.mcp.json
 
 # Python, for the data pipeline (see README.md -> "Rebuilding the data")
 __pycache__/
