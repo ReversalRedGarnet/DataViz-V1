@@ -61,8 +61,10 @@ const STORM_DETAIL = {
     profile: [
       {
         name: 'Solomon Islands',
-        date: '10\u201311 March 2015',
-        dateFr: '10\u201311 mars 2015',
+        // Local date (UTC+11) of the closest pass: 15:00 UTC on 11 March in
+        // RSMC Nadi's best track is 02:00 on 12 March in Solomon Islands.
+        date: '12 March 2015',
+        dateFr: '12 mars 2015',
         category: 4,
         // RSMC Nadi's best track (IBTrACS 2015066S08170): Category 4, 90 kt, at
         // the closest pass, about 20 km from Anuta at 15:00 UTC on 11 March. Pam
