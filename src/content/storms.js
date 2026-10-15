@@ -146,9 +146,9 @@ const STORM_DETAIL = {
           "Catégorie 1 à l'approche la plus proche de Vava'u (sans atterrissage)\u00A0; revenu en catégorie 4 en passant au nord de Vava'u le 19 février",
         deaths: 0,
         dodge: 0,
-        fact: "Ten houses destroyed and about 200 damaged in Vava'u, with over 80% of homes sustaining some rain damage and flash flooding forcing nine patients to be moved inside Prince Ngu hospital. Deputy Prime Minister Siaosi Sovaleni told Parliament no lives were lost anywhere in Tonga.",
+        fact: "Ten houses destroyed and about 200 damaged in Tonga, as of 19 February. In Vava'u, over 80% of homes sustained some rain damage, and flash flooding forced nine patients to be moved inside Prince Ngu hospital. Deputy Prime Minister Siaosi Sovaleni told Parliament no lives were lost anywhere in Tonga.",
         factFr:
-          "Dix maisons détruites et environ 200 endommagées à Vava'u, plus de 80\u00A0% des habitations ayant subi des dégâts liés à la pluie, et des inondations soudaines ayant forcé le déplacement de neuf patients à l'intérieur de l'hôpital Prince Ngu. Le vice-Premier ministre Siaosi Sovaleni a déclaré au Parlement qu'aucune vie n'avait été perdue nulle part à Tonga.",
+          "Dix maisons détruites et environ 200 endommagées à Tonga, au 19 février. À Vava'u, plus de 80\u00A0% des habitations ont subi des dégâts liés à la pluie, et des inondations soudaines ont forcé le déplacement de neuf patients à l'intérieur de l'hôpital Prince Ngu. Le vice-Premier ministre Siaosi Sovaleni a déclaré au Parlement qu'aucune vie n'avait été perdue nulle part à Tonga.",
         lead: 'Tonga met Winston twice and lost no one, four days before Fiji lost 44.',
         leadFr: "Tonga a affronté Winston deux fois sans perdre personne, quatre jours avant que Fidji n'en perde 44.",
       },
@@ -161,9 +161,9 @@ const STORM_DETAIL = {
         categoryLabelFr: 'Catégorie 5 (atterrissage, île de Koro puis Viti Levu)',
         deaths: 44,
         dodge: 0,
-        fact: "Average winds of 233 km/h with gusts to 306 km/h \u2014 the strongest landfalling cyclone in Fiji's records and the most intense on record in the Southern Hemisphere. 540,400 people affected, 62% of the population, over 30,000 buildings damaged or destroyed, and 88 of 214 health facilities damaged.",
+        fact: "Average winds of 233 km/h with gusts to 306 km/h \u2014 the strongest landfalling cyclone in Fiji's records and one of the most powerful cyclones ever recorded in the Southern Hemisphere. 540,400 people affected, 62% of the population, over 30,000 buildings damaged or destroyed, and 88 of 214 health facilities damaged.",
         factFr:
-          "Vents moyens de 233 km/h avec des rafales à 306 km/h \u2014 le cyclone le plus fort à avoir touché terre dans les annales de Fidji et le plus intense jamais enregistré dans l'hémisphère Sud. 540\u00A0400 personnes touchées, soit 62\u00A0% de la population, plus de 30\u00A0000 bâtiments endommagés ou détruits, et 88 des 214 établissements de santé endommagés.",
+          "Vents moyens de 233 km/h avec des rafales à 306 km/h \u2014 le cyclone le plus fort à avoir touché terre dans les annales de Fidji et l'un des cyclones les plus puissants jamais enregistrés dans l'hémisphère Sud. 540\u00A0400 personnes touchées, soit 62\u00A0% de la population, plus de 30\u00A0000 bâtiments endommagés ou détruits, et 88 des 214 établissements de santé endommagés.",
         lead: 'Forty-four deaths, and the only stop on this roster where the death toll matches the category.',
         leadFr:
           "44 morts, et la seule étape de cette liste où le bilan humain correspond à la catégorie.",
