@@ -4,9 +4,9 @@ dist/
 *.local
 .env
 
-# Raw .Stat Explorer exports -- regenerate any time via the links in
-# README.md -> "Data Sources". A few MB each and several are byte-
-# identical whole-dataflow dumps, not worth carrying in git history.
+# Raw Pacific Data Hub exports -- regenerate any time with the commands in
+# README.md -> "Rebuilding the data". A few MB each and whole-dataflow
+# dumps, not worth carrying in git history.
 data-pipeline/raw/*.csv
 
 # Generated from src/styles/tokens.js by scripts/build-tokens.mjs, and

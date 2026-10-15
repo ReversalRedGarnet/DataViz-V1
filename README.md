@@ -131,6 +131,46 @@ What the URL does carry is a deep link to whichever slide is on screen, written 
 - ESLint, with `eslint-plugin-react-hooks` and `eslint-plugin-jsx-a11y` — not just the default rule set
 - Deployed on Vercel
 
+## Running It
+
+The live site is at [data-viz-v1.vercel.app](https://data-viz-v1.vercel.app/).
+
+To run it locally you need Node.js 18 or later (it is built and tested on Node 24) and npm. The cleaned data is committed in `public/data/`, so nothing else is needed to run the site:
+
+```sh
+npm install
+npm run dev       # development server
+npm run build     # production build into dist/
+npm run preview   # serve the production build
+npm run lint      # ESLint
+```
+
+### Rebuilding the data
+
+Only needed to re-run the cleaning from source. The raw exports are not committed (see `.gitignore`); they come from the Pacific Data Hub's public SDMX API, one file per dataflow. You need Python 3 and the pipeline's one dependency:
+
+```sh
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r data-pipeline/requirements.txt
+```
+
+Then download the three dataflows into `data-pipeline/raw/` under the filenames the scripts look for (on Windows PowerShell, type `curl.exe` rather than `curl`):
+
+```sh
+cd data-pipeline/raw
+H="Accept: application/vnd.sdmx.data+csv;version=1.0.0"
+API="https://stats-sdmx-disseminate.pacificdata.org/rest/data"
+curl -H "$H" -o climate_change_indicators.csv "$API/SPC,DF_CLIMATE_CHANGE,1.0/all?startPeriod=2013&endPeriod=2024"
+curl -H "$H" -o sdg_11.csv                    "$API/SPC,DF_SDG_11,3.0/all?startPeriod=2013&endPeriod=2024"
+curl -H "$H" -o population.csv                "$API/SPC,DF_POP_PROJ,3.0/all?startPeriod=2013&endPeriod=2024"
+cd ..
+python clean_data.py
+python clean_population_data.py
+```
+
+Both scripts write into `public/data/` and rebuild `metrics.json`. Run against the API on 15 October 2026, they reproduced every committed value exactly. The API serves the current release, though, so if the Pacific Data Hub revises a figure, a later run will pick up the revision.
+
 ## Known Limitations
 
 Four of the ten indicators — `livestock_yield`, `meteo_stations`, `sst_anomaly` and `ghg_per_capita` — were charted and caveated, but their filtered .Stat Explorer query URLs were never saved anywhere in this repository. The code names this as exactly what it is, a real gap rather than a design decision, and their captions currently show a figure number and title with no link rather than a fabricated one.
