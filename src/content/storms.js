@@ -492,15 +492,15 @@ const STORM_DETAIL = {
         // without saying so claims an equivalence the sources do not support.
         deathsKind: 'indirect',
         deathsNote:
-          'Indirect deaths: a dysentery and diarrhoea outbreak on Vanikoro declared by health officials after the storm damaged water supplies, weeks after landfall. Not deaths during the cyclone itself.',
+          'Indirect deaths: from a dysentery and diarrhoea outbreak on Vanikoro declared by health officials, weeks after landfall. Not deaths during the cyclone itself.',
         deathsNoteFr:
-          "Décès indirects\u00A0: une épidémie de dysenterie et de diarrhée sur Vanikoro, déclarée par les autorités sanitaires après que le cyclone a endommagé les points d'eau, des semaines après l'atterrissage. Pas des décès survenus pendant le cyclone lui-même.",
+          "Décès indirects\u00A0: dus à une épidémie de dysenterie et de diarrhée sur Vanikoro, déclarée par les autorités sanitaires, des semaines après l'atterrissage. Pas des décès survenus pendant le cyclone lui-même.",
         dodge: 0,
-        fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources and desalination plants damaged and four people injured. Around 22,319 people were exposed across Temotu.',
+        fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources damaged and four people injured. Around 22,319 people were exposed across Temotu.',
         factFr:
-          "116 maisons, 114 cuisines et une église détruites à Tikopia, avec des points d'eau et des installations de dessalement endommagés et quatre personnes blessées. Environ 22\u00A0319 personnes ont été exposées dans l'ensemble de Temotu.",
-        lead: 'Lola made landfall here first, and the deaths came weeks later, out of the water supply.',
-        leadFr: "Lola a d'abord touché terre ici, et les décès sont survenus des semaines plus tard, à cause de l'approvisionnement en eau.",
+          "116 maisons, 114 cuisines et une église détruites à Tikopia, avec des points d'eau endommagés et quatre personnes blessées. Environ 22\u00A0319 personnes ont été exposées dans l'ensemble de Temotu.",
+        lead: 'Lola made landfall here first, and the deaths came weeks later.',
+        leadFr: "Lola a d'abord touché terre ici, et les décès sont survenus des semaines plus tard.",
       },
       {
         name: 'Vanuatu',
