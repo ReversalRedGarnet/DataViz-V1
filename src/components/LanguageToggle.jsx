@@ -24,11 +24,16 @@ export default function LanguageToggle({ className = '' }) {
 
   const target = language === 'en' ? 'fr' : 'en'
 
+  // The accessible name starts with the visible "FR"/"EN" (WCAG 2.5.3, label
+  // in name): a speech-input user says what they can see, and "click FR" has
+  // to match. It is written in the target language, so `lang` says so --
+  // otherwise an English voice reads "Passer au français" as English.
   return (
     <button
       type="button"
       onClick={handleClick}
-      aria-label={target === 'fr' ? 'Passer au français' : 'Switch to English'}
+      lang={target}
+      aria-label={target === 'fr' ? 'FR — Passer au français' : 'EN — Switch to English'}
       className={`press-target flex h-9 w-9 items-center justify-center rounded-md text-[13px] font-semibold tracking-wide text-ink hover:bg-ink/5 ${className}`}
     >
       {target.toUpperCase()}

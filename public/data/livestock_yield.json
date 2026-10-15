@@ -1,5 +1,65 @@
 [
   {
+    "nation": "Fiji",
+    "year": 2013,
+    "livestock_yield_kg": 5509.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "livestock_yield_kg": 5459.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "livestock_yield_kg": 8029.7
+  },
+  {
+    "nation": "Fiji",
+    "year": 2016,
+    "livestock_yield_kg": 6110.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2017,
+    "livestock_yield_kg": 6512.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2018,
+    "livestock_yield_kg": 6846.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2019,
+    "livestock_yield_kg": 6680.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2020,
+    "livestock_yield_kg": 6859.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2021,
+    "livestock_yield_kg": 7196.2
+  },
+  {
+    "nation": "Fiji",
+    "year": 2022,
+    "livestock_yield_kg": 7822.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2023,
+    "livestock_yield_kg": 7555.2
+  },
+  {
+    "nation": "Fiji",
+    "year": 2024,
+    "livestock_yield_kg": 4317.0
+  },
+  {
     "nation": "Solomon Islands",
     "year": 2013,
     "livestock_yield_kg": 3328.1
@@ -118,66 +178,6 @@
     "nation": "Vanuatu",
     "year": 2024,
     "livestock_yield_kg": 3306.6
-  },
-  {
-    "nation": "Fiji",
-    "year": 2013,
-    "livestock_yield_kg": 5509.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2014,
-    "livestock_yield_kg": 5459.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2015,
-    "livestock_yield_kg": 8029.7
-  },
-  {
-    "nation": "Fiji",
-    "year": 2016,
-    "livestock_yield_kg": 6110.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2017,
-    "livestock_yield_kg": 6512.5
-  },
-  {
-    "nation": "Fiji",
-    "year": 2018,
-    "livestock_yield_kg": 6846.4
-  },
-  {
-    "nation": "Fiji",
-    "year": 2019,
-    "livestock_yield_kg": 6680.4
-  },
-  {
-    "nation": "Fiji",
-    "year": 2020,
-    "livestock_yield_kg": 6859.4
-  },
-  {
-    "nation": "Fiji",
-    "year": 2021,
-    "livestock_yield_kg": 7196.2
-  },
-  {
-    "nation": "Fiji",
-    "year": 2022,
-    "livestock_yield_kg": 7822.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2023,
-    "livestock_yield_kg": 7555.2
-  },
-  {
-    "nation": "Fiji",
-    "year": 2024,
-    "livestock_yield_kg": 4317.0
   },
   {
     "nation": "Tonga",

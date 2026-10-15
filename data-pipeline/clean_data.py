@@ -246,6 +246,26 @@ def clean_one(path, config: dict) -> list:
         zero_is_missing=config.get("zero_is_missing", False),
     )
 
+    # One row per nation-year, or nothing is written. The indicator filter
+    # above is the only one applied, which is enough for the exports in use
+    # today -- but SDG 11 carries sex, age, urbanisation and other breakdown
+    # columns, and an export that came back with breakdown rows would put the
+    # same nation-year in the JSON several times, and every chart built on it
+    # would be wrong without looking wrong. clean_population_data.py guards
+    # against the same thing; this is the general form of that check. Not
+    # fixed by filtering each column to "_T", because COMPOSITE_BREAKDOWN is
+    # "_Z" (not applicable) on every row and that filter would drop them all.
+    seen = set()
+    for row in rows:
+        key = (row["nation"], row["year"])
+        if key in seen:
+            raise ValueError(
+                f"{key} appears more than once for {indicator_code}. The export "
+                "carries a breakdown dimension; filter it to its total in this "
+                "dataset's config before cleaning."
+            )
+        seen.add(key)
+
     for nation, matched_count, in_range_count in report["per_nation"]:
         print(
             f"  {nation}: {matched_count} rows matched, "
@@ -339,7 +359,7 @@ def main() -> None:
 
         try:
             cleaned[csv_name] = clean_one(path, config)
-        except KeyError as e:
+        except (KeyError, ValueError) as e:
             print(f"  PROBLEM in {csv_name}: {e}")
             problems.append(csv_name)
 

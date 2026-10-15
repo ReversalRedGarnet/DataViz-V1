@@ -1,5 +1,65 @@
 [
   {
+    "nation": "Fiji",
+    "year": 2013,
+    "ghg_tonnes_per_capita": 3.0
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "ghg_tonnes_per_capita": 2.7
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "ghg_tonnes_per_capita": 2.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2016,
+    "ghg_tonnes_per_capita": 2.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2017,
+    "ghg_tonnes_per_capita": 2.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2018,
+    "ghg_tonnes_per_capita": 2.9
+  },
+  {
+    "nation": "Fiji",
+    "year": 2019,
+    "ghg_tonnes_per_capita": 3.0
+  },
+  {
+    "nation": "Fiji",
+    "year": 2020,
+    "ghg_tonnes_per_capita": 2.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2021,
+    "ghg_tonnes_per_capita": 2.6
+  },
+  {
+    "nation": "Fiji",
+    "year": 2022,
+    "ghg_tonnes_per_capita": 2.7
+  },
+  {
+    "nation": "Fiji",
+    "year": 2023,
+    "ghg_tonnes_per_capita": 2.9
+  },
+  {
+    "nation": "Fiji",
+    "year": 2024,
+    "ghg_tonnes_per_capita": 3.0
+  },
+  {
     "nation": "Solomon Islands",
     "year": 2013,
     "ghg_tonnes_per_capita": 1.1
@@ -118,66 +178,6 @@
     "nation": "Vanuatu",
     "year": 2024,
     "ghg_tonnes_per_capita": 1.9
-  },
-  {
-    "nation": "Fiji",
-    "year": 2013,
-    "ghg_tonnes_per_capita": 3.0
-  },
-  {
-    "nation": "Fiji",
-    "year": 2014,
-    "ghg_tonnes_per_capita": 2.7
-  },
-  {
-    "nation": "Fiji",
-    "year": 2015,
-    "ghg_tonnes_per_capita": 2.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2016,
-    "ghg_tonnes_per_capita": 2.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2017,
-    "ghg_tonnes_per_capita": 2.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2018,
-    "ghg_tonnes_per_capita": 2.9
-  },
-  {
-    "nation": "Fiji",
-    "year": 2019,
-    "ghg_tonnes_per_capita": 3.0
-  },
-  {
-    "nation": "Fiji",
-    "year": 2020,
-    "ghg_tonnes_per_capita": 2.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2021,
-    "ghg_tonnes_per_capita": 2.6
-  },
-  {
-    "nation": "Fiji",
-    "year": 2022,
-    "ghg_tonnes_per_capita": 2.7
-  },
-  {
-    "nation": "Fiji",
-    "year": 2023,
-    "ghg_tonnes_per_capita": 2.9
-  },
-  {
-    "nation": "Fiji",
-    "year": 2024,
-    "ghg_tonnes_per_capita": 3.0
   },
   {
     "nation": "Tonga",

@@ -25,28 +25,30 @@ export default function SelectionLegend({ selected }) {
 
   if (!selected || selected.length === 0) return null
 
-  // role="note" plus an explicit name on each chip below: a focusable <li> with
-  // neither announces as an unlabelled list item, and the digit that tells the
-  // two picks apart is drawn in an aria-hidden swatch.
+  // role="note" plus an explicit name on each chip below: a focusable element
+  // with neither announces as unlabelled, and the digit that tells the two
+  // picks apart is drawn in an aria-hidden swatch. The chip is a div inside
+  // the <li> rather than the <li> itself, so the list stays a valid list.
   return (
     <ul className="mb-4 flex flex-wrap gap-4 text-sm">
       {selected.map((name, i) => (
-        <li
-          key={name}
-          tabIndex={0}
-          role="note"
-          aria-label={STRINGS[language](i + 1, nationLabel(name, language))}
-          className="flex cursor-help items-center gap-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          {...highlightHandlers(name, setHighlight)}
-        >
-          <span
-            className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full text-[11px] font-bold leading-none"
-            style={{ backgroundColor: palette.selection[i], color: palette.onMark }}
-            aria-hidden="true"
+        <li key={name}>
+          <div
+            tabIndex={0}
+            role="note"
+            aria-label={STRINGS[language](i + 1, nationLabel(name, language))}
+            className="flex cursor-help items-center gap-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            {...highlightHandlers(name, setHighlight)}
           >
-            {i + 1}
-          </span>
-          {nationLabel(name, language)}
+            <span
+              className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full text-[11px] font-bold leading-none"
+              style={{ backgroundColor: palette.selection[i], color: palette.onMark }}
+              aria-hidden="true"
+            >
+              {i + 1}
+            </span>
+            {nationLabel(name, language)}
+          </div>
         </li>
       ))}
     </ul>

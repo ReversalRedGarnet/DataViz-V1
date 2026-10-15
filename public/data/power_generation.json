@@ -1,5 +1,60 @@
 [
   {
+    "nation": "Fiji",
+    "year": 2013,
+    "power_generation_index": 969.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "power_generation_index": 995.0
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "power_generation_index": 1019.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2016,
+    "power_generation_index": 1030.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2017,
+    "power_generation_index": 1112.6
+  },
+  {
+    "nation": "Fiji",
+    "year": 2018,
+    "power_generation_index": 1140.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2019,
+    "power_generation_index": 1227.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2020,
+    "power_generation_index": 1141.9
+  },
+  {
+    "nation": "Fiji",
+    "year": 2021,
+    "power_generation_index": 1094.9
+  },
+  {
+    "nation": "Fiji",
+    "year": 2022,
+    "power_generation_index": 1245.6
+  },
+  {
+    "nation": "Fiji",
+    "year": 2023,
+    "power_generation_index": 1284.5
+  },
+  {
     "nation": "Solomon Islands",
     "year": 2013,
     "power_generation_index": 85.6
@@ -108,61 +163,6 @@
     "nation": "Vanuatu",
     "year": 2023,
     "power_generation_index": 83.2
-  },
-  {
-    "nation": "Fiji",
-    "year": 2013,
-    "power_generation_index": 969.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2014,
-    "power_generation_index": 995.0
-  },
-  {
-    "nation": "Fiji",
-    "year": 2015,
-    "power_generation_index": 1019.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2016,
-    "power_generation_index": 1030.5
-  },
-  {
-    "nation": "Fiji",
-    "year": 2017,
-    "power_generation_index": 1112.6
-  },
-  {
-    "nation": "Fiji",
-    "year": 2018,
-    "power_generation_index": 1140.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2019,
-    "power_generation_index": 1227.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2020,
-    "power_generation_index": 1141.9
-  },
-  {
-    "nation": "Fiji",
-    "year": 2021,
-    "power_generation_index": 1094.9
-  },
-  {
-    "nation": "Fiji",
-    "year": 2022,
-    "power_generation_index": 1245.6
-  },
-  {
-    "nation": "Fiji",
-    "year": 2023,
-    "power_generation_index": 1284.5
   },
   {
     "nation": "Tonga",

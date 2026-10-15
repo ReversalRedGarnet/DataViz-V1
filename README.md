@@ -101,13 +101,22 @@ The source gives the unit only as "tonnes," without stating whether it counts CO
 
 Used only for the per-storm facts in the profile and journey sections, never for a chain metric — the chain always cites its own filtered Pacific Data Hub query. Each storm carries its own pair of supplementary citations in `src/content/storms.js`: a government post-disaster needs assessment (or equivalent national/regional assessment), and a UN OCHA / ReliefWeb situation report or national meteorological service record. Where no figure was ever published for a nation a storm reached, the site shows "not reported" rather than zero.
 
+### Data licences
+
+The MIT licence in `LICENSE` covers the code. It does not cover the data, which keeps its publishers' terms:
+
+- **Pacific Data Hub indicators.** These are published by the Pacific Community (SPC), Statistics for Development Division. The Pacific Data Hub catalogue gives the licence of each of the three dataflows used as "Other (Open)", without naming a specific licence: [Climate Change indicators](https://pacificdata.org/data/dataset/climate-change-indicators-df-climate-change), [Sustainable Development Goal 11](https://pacificdata.org/data/dataset/sustainable-development-goal-11-sustainable-cities-and-communities-df-sdg-11) and [Population projections](https://pacificdata.org/data/dataset/population-projections-df-pop-proj). The Hub's [Terms of Use](https://pacificdata.org/terms-use) say datasets are hosted "under a range of different licences" and that users agree "to comply with the terms of the specific licence applicable to each dataset … This includes attributing the data custodian in the manner specified in the relevant licence". Ripple credits SPC / Pacific Data Hub in its figure captions and on the Sources slide. Four captions still have no source line; see Known Limitations.
+- **Disaster and population figures.** These reach SPC from other publishers. SPC's export credits the people-affected and economic-loss series to the United Nations Office for Disaster Risk Reduction (UNDRR), from the Sendai Framework Monitor, with UNDRR's disclaimer that "Some of the data has not followed an official validation process and may be subject to revision at a later date." It describes the population series as "SPC elaboration on UN data source" and "UN World Population Prospect".
+- **Coastlines.** `public/land-50m.json` and `public/land-50m-wide.json` are derived from [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/), via the [world-atlas](https://github.com/topojson/world-atlas) package (ISC licence, © Michael Bostock). Natural Earth states: "All versions of Natural Earth raster + vector map data found on this website are in the public domain."
+- **Storm facts.** Individual figures are quoted from, and cited to, each storm's own sources in `src/content/storms.js`. None of those documents is redistributed here.
+
 ## Architecture & State
 
 Ripple is one continuous page (`src/hooks/useDeck.js`) — there is no separate "Explore" mode or alternate way to move through it. `active` is a single index into a live list of sections that grows once a storm is picked and shrinks again if it's cleared, moved by Next/Previous, the section menu, or the keyboard (arrows and Page Up/Down page the deck; Home/End jump to the ends). Two sections carry a `requires` gate — the timeline holds the reader until a storm is picked, and the map holds them until a country pair is — enforced on every path forward, including the keyboard, but never backward: a gate asks for something before the reader goes on, not before they look again.
 
 One hook holds everything the reader has chosen: `src/hooks/useStory.js` — the selected storm, the country pair (via `useSelection`), the position along the storm's own path, and which ripple-chain link is currently open. Every section reads these as props rather than keeping a copy, so nothing downstream of a pick can go stale relative to it. Picking a new storm atomically resets the path position, closes the open link, and clears the country pair, since a pair chosen against one storm's damage isn't a pair chosen against another's.
 
-What the URL does carry is a deep link to whichever slide is on screen, written with `history.replaceState` on every move rather than a new history entry per slide, and read on load and on every `hashchange` so an incoming link resolves to that section (falling back to the opening slide if it doesn't match any current one). What it doesn't carry is the storm, the country pair, or the position on the storm's path — a shared link reopens the piece at the right slide, not at the exact state a previous reader had reached.
+What the URL does carry is a deep link to whichever slide is on screen, written with `history.replaceState` on every move rather than a new history entry per slide, and read on load and on every `hashchange` so an incoming link resolves to that section. A link that doesn't match any current section falls back to the title slide, not the opening poem. That includes every slide after the timeline on a cold load: those sections only exist once a storm has been picked, so a shared `#map` or `#sources` link opens on the title slide, one press from the timeline. What it doesn't carry is the storm, the country pair, or the position on the storm's path — a shared link reopens the piece at the right slide, not at the exact state a previous reader had reached.
 
 ## Technical Stack
 
@@ -130,6 +139,46 @@ What the URL does carry is a deep link to whichever slide is on screen, written 
 - Node.js + npm, Vite for dev/build/preview
 - ESLint, with `eslint-plugin-react-hooks` and `eslint-plugin-jsx-a11y` — not just the default rule set
 - Deployed on Vercel
+
+## Running It
+
+The live site is at [data-viz-v1.vercel.app](https://data-viz-v1.vercel.app/).
+
+To run it locally you need Node.js 18.18 or later (it is built and tested on Node 24) and npm. The cleaned data is committed in `public/data/`, so nothing else is needed to run the site:
+
+```sh
+npm install
+npm run dev       # development server
+npm run build     # production build into dist/
+npm run preview   # serve the production build
+npm run lint      # ESLint
+```
+
+### Rebuilding the data
+
+Only needed to re-run the cleaning from source. The raw exports are not committed (see `.gitignore`); they come from the Pacific Data Hub's public SDMX API, one file per dataflow. You need Python 3 and the pipeline's one dependency:
+
+```sh
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r data-pipeline/requirements.txt
+```
+
+Then download the three dataflows into `data-pipeline/raw/` under the filenames the scripts look for (on Windows PowerShell, type `curl.exe` rather than `curl`):
+
+```sh
+cd data-pipeline/raw
+H="Accept: application/vnd.sdmx.data+csv;version=1.0.0"
+API="https://stats-sdmx-disseminate.pacificdata.org/rest/data"
+curl -H "$H" -o climate_change_indicators.csv "$API/SPC,DF_CLIMATE_CHANGE,1.0/all?startPeriod=2013&endPeriod=2024"
+curl -H "$H" -o sdg_11.csv                    "$API/SPC,DF_SDG_11,3.0/all?startPeriod=2013&endPeriod=2024"
+curl -H "$H" -o population.csv                "$API/SPC,DF_POP_PROJ,3.0/all?startPeriod=2013&endPeriod=2024"
+cd ..
+python clean_data.py
+python clean_population_data.py
+```
+
+Both scripts write into `public/data/` and rebuild `metrics.json`. Run against the API on 15 October 2026, they reproduced every committed value exactly. The API serves the current release, though, so if the Pacific Data Hub revises a figure, a later run will pick up the revision.
 
 ## Known Limitations
 

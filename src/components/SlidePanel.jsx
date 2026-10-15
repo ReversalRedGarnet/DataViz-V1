@@ -112,15 +112,27 @@ export default function SlidePanel({
 
 // Arriving at a panel puts you at its top and moves focus to its heading --
 // otherwise a keyboard or screen-reader user pages the deck and nothing they
-// can perceive has changed. Skipped on the first activation so the page does
-// not steal focus on load.
+// can perceive has changed. Skipped only for the panel that is already on
+// stage when it mounts, so the page does not steal focus on load.
+//
+// That used to be "skipped on this panel's first activation", which is not
+// the same thing: every panel has a first activation, and nine of them do not
+// even mount until a storm is picked. So the first visit to every slide left
+// focus behind on the control that moved the deck, inside a panel that had
+// just gone inert -- the browser logs it as aria-hidden on a focused element.
+// Whether a panel was active on its own first render is the thing that
+// actually tells page load apart from arrival.
 function useFocusOnArrival(node, isActive) {
-  const hasActivated = useRef(false)
+  const activeOnMount = useRef(isActive)
 
   useEffect(() => {
-    if (!isActive || !node) return
-    if (!hasActivated.current) {
-      hasActivated.current = true
+    if (!isActive) {
+      activeOnMount.current = false
+      return
+    }
+    if (!node) return
+    if (activeOnMount.current) {
+      activeOnMount.current = false
       return
     }
     // Guarded: Element.scrollTo is absent in some environments, and the reset
