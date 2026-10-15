@@ -550,10 +550,12 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
         {/* overflow-hidden is load-bearing: the ocean rect is drawn far past
             the viewBox so panning never reveals empty space, and without a clip
             its laid-out width pushed the whole page into horizontal overflow.
-            Also what makes rounded-2xl round the contents, not just the border. */}
+            Also what makes rounded-2xl round the contents, not just the border.
+            role="group", not "img": an img's children are presentational, which
+            hid the focusable marker buttons inside it from screen readers. */}
         <svg
           ref={svgRef}
-          role="img"
+          role="group"
           aria-label={
             storm
               ? STRINGS[language].mapAriaWithStorm(nations.length, storm.name, storm.nations.length)
