@@ -403,11 +403,11 @@ const STORM_DETAIL = {
         deathsNoteFr:
           "Le NDMO des Îles Salomon et le Centre national des opérations d'urgence ont publié des plans de réponse et des déploiements d'évaluation, mais aucun bilan de décès. Pas zéro \u2014 jamais déclaré.",
         dodge: 0,
-        fact: "Judy crossed the small islands of southern Temotu Province as a Category 1 system on the day it was named. Tikopia and Anuta, the province's two most remote islands, were assessed as worst affected, with damage to fruit trees and other livelihood sources. Reaching them took until 9 March, when a patrol boat carried assessment teams and relief from Lata.",
+        fact: "Judy crossed the small islands of southern Temotu Province as a Category 1 system on the day it was named. Tikopia and Anuta, the province's two most remote islands, were assessed as worst affected, with damage to fruit trees and other livelihood sources. The assessment team, carried by patrol boat via Lata, reached Tikopia on 13 March, 14 days after the storm.",
         factFr:
-          "Judy a traversé les petites îles du sud de la province de Temotu en tant que système de catégorie 1 le jour même où il a été nommé. Tikopia et Anuta, les deux îles les plus isolées de la province, ont été évaluées comme les plus touchées, avec des dégâts aux arbres fruitiers et à d'autres sources de subsistance. Il a fallu attendre le 9 mars pour les atteindre, quand un patrouilleur a transporté les équipes d'évaluation et l'aide depuis Lata.",
-        lead: "The storm's first landfall was on the islands it would take ten days to reach.",
-        leadFr: "Le premier atterrissage du cyclone a eu lieu sur les îles qu'il faudrait dix jours pour atteindre.",
+          "Judy a traversé les petites îles du sud de la province de Temotu en tant que système de catégorie 1 le jour même où il a été nommé. Tikopia et Anuta, les deux îles les plus isolées de la province, ont été évaluées comme les plus touchées, avec des dégâts aux arbres fruitiers et à d'autres sources de subsistance. L'équipe d'évaluation, transportée par un patrouilleur via Lata, a atteint Tikopia le 13 mars, 14 jours après le cyclone.",
+        lead: "The storm's first landfall was on the islands it would take 14 days to reach.",
+        leadFr: "Le premier atterrissage du cyclone a eu lieu sur les îles qu'il faudrait 14 jours pour atteindre.",
       },
       {
         name: 'Vanuatu',
@@ -415,9 +415,9 @@ const STORM_DETAIL = {
         dateFr: '1er et 3 mars 2023 (Judy, puis Kevin)',
         category: 4,
         categoryLabel:
-          'Category 4 at both landfalls \u2014 Judy on Efate and Tanna, Kevin on Erromango (combined entry for two cyclones)',
+          'Category 4 at both landfalls, on 1 and 3 March; Judy made landfall on Efate (combined entry for two cyclones)',
         categoryLabelFr:
-          'Catégorie 4 aux deux atterrissages \u2014 Judy sur Efate et Tanna, Kevin sur Erromango (entrée combinée pour deux cyclones)',
+          'Catégorie 4 aux deux atterrissages, les 1er et 3 mars\u00A0; Judy a touché terre sur Efate (entrée combinée pour deux cyclones)',
         // A stated zero, not an absent one: the government's own PDNA records
         // no casualties in terms. The most load-bearing zero on the roster.
         deaths: 0,
