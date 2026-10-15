@@ -367,6 +367,20 @@ const STORM_DETAIL = {
         },
         url: 'https://reliefweb.int/disaster/tc-2020-000049-vut',
       },
+      {
+        label: {
+          en: 'Tropical Cyclone Harold \u2014 situation report 6 (13 April 2020), Pacific Humanitarian Team / UN OCHA',
+          fr: 'Cyclone tropical Harold \u2014 rapport de situation n°\u00A06 (13 avril 2020), Équipe humanitaire pour le Pacifique / OCHA de l’ONU',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/pacific-humanitarian-team-tropical-cyclone-harold-situation-report-6-13-april-2020',
+      },
+      {
+        label: {
+          en: 'Pacific Islands \u2014 Tropical Cyclone Harold (ECHO Daily Flash, 14 April 2020), ECHO / ReliefWeb',
+          fr: 'Îles du Pacifique \u2014 cyclone tropical Harold (ECHO Daily Flash, 14 avril 2020), ECHO / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/pacific-islands-tropical-cyclone-harold-dg-echo-unicef-echo-daily-flash-14-april-2020',
+      },
     ],
   },
   'judy-kevin': {
