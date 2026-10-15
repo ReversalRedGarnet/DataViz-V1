@@ -127,8 +127,13 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
         row ? 'flex w-full items-center justify-between gap-3' : ''
       }`}
     >
+      {/* Ink, not accent, on the selected card in light mode: accent text on
+          the card's own accent tint is 4.18:1 there, under AA. Dark mode keeps
+          the accent, which clears 5.7:1 on its tint. */}
       {strip && (
-        <span className="type-eyebrow block text-accent">{storm.year}</span>
+        <span className={`type-eyebrow block ${active ? 'text-ink dark:text-accent' : 'text-accent'}`}>
+          {storm.year}
+        </span>
       )}
       <span
         className={`flex items-center gap-1.5 leading-tight ${

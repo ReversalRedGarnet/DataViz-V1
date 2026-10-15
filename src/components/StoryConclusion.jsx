@@ -164,13 +164,15 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
         </div>
 
         {/* The closing offer, last in the sequence: what it showed, then what
-            to do next. */}
+            to do next. The button's label is ink in light mode because accent
+            on its own accent tint reads 4.18:1 there, under AA; dark mode
+            keeps the accent. */}
         <div className="animate-pop-in mt-8" style={{ animationDelay: '220ms' }}>
           <p className="type-eyebrow mb-3 text-accent">{t.lookAgain}</p>
           <button
             type="button"
             onClick={onReset}
-            className="press-target min-h-[44px] rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="press-target min-h-[44px] rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-ink dark:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             {t.startAgain}
           </button>
