@@ -492,7 +492,7 @@ const STORM_DETAIL = {
         // nearly two weeks after landfall. Harold's 27 are direct drownings.
         // Plotting the two on one axis without saying so claims an equivalence
         // the sources do not support.
-        deathsKind: 'indirect',
+        deathsKind: 'unattributed',
         deathsNote:
           'Reported deaths, not attributed: four deaths from a dysentery and diarrhoea outbreak on Vanikoro, reported nearly two weeks after landfall. None of the sources we found link them to the cyclone; UNICEF reported them alongside Lola\u2019s damage to desalination plants and food crops in Temotu. Not deaths during the cyclone itself.',
         deathsNoteFr:

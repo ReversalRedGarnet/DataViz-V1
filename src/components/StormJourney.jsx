@@ -46,7 +46,7 @@ const STRINGS = {
     scrubberLabel: (name) => `${name}: move between documented impact points`,
     deathsNotReported: 'deaths not reported',
     deaths: (n) => `${n} ${pluralize(n, { one: 'death', other: 'deaths' }, 'en')}`,
-    indirect: ', indirect',
+    unattributed: ', indirect',
     catLabel: (category, date) => `Cat ${category} \u00b7 ${date}`,
     notCompiled: (name) => `${name}\u2019s stop-by-stop record has not been compiled yet.`,
     guardSubject: 'Storm journey',
@@ -63,7 +63,7 @@ const STRINGS = {
     scrubberLabel: (name) => `${name}\u00A0: se déplacer entre les points d\u2019impact documentés`,
     deathsNotReported: 'décès non recensés',
     deaths: (n) => `${n} ${pluralize(n, { one: 'décès', other: 'décès' }, 'fr')}`,
-    indirect: ', indirects',
+    unattributed: ', indirects',
     catLabel: (category, date) => `Catég. ${category} \u00b7 ${date}`,
     notCompiled: (name) => `Le parcours de ${name} n\u2019a pas encore été compilé.`,
     guardSubject: 'Trajectoire du cyclone',
@@ -594,7 +594,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
               {step.categoryLabel} &middot;{' '}
               {step.deaths == null
                 ? t.deathsNotReported
-                : `${t.deaths(step.deaths)}${step.deathsKind === 'indirect' ? t.indirect : ''}`}
+                : `${t.deaths(step.deaths)}${step.deathsKind === 'unattributed' ? t.unattributed : ''}`}
             </p>
             {step.deathsNote && (
               <p className="mt-2 border-l-2 border-ink/15 pl-3 text-xs italic leading-snug opacity-70">

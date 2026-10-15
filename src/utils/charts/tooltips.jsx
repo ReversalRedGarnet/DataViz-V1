@@ -19,7 +19,7 @@ const STRINGS = {
     deathsNotReported: 'Deaths not reported',
     death: 'death',
     deaths: 'deaths',
-    indirect: ', indirect',
+    unattributed: ', indirect',
     levelWith: (year) => `level with ${year}`,
     vs: (year) => `vs ${year}`,
   },
@@ -27,7 +27,7 @@ const STRINGS = {
     deathsNotReported: 'Décès non recensés',
     death: 'décès',
     deaths: 'décès',
-    indirect: ', indirects',
+    unattributed: ', indirects',
     levelWith: (year) => `au niveau de ${year}`,
     vs: (year) => `vs ${year}`,
   },
@@ -64,7 +64,7 @@ export function stormPointTooltip(row, nation, language = 'en') {
     row.deaths == null
       ? t.deathsNotReported
       : `${row.deaths} ${pluralize(row.deaths, { one: t.death, other: t.deaths }, language)}${
-          row.deathsKind === 'indirect' ? t.indirect : ''
+          row.deathsKind === 'unattributed' ? t.unattributed : ''
         }`
 
   // The researched `fact` and `deathsNote` used to be appended here, which is

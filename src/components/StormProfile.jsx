@@ -39,7 +39,7 @@ const STRINGS = {
       `Scatter chart comparing ${name}'s category at closest approach against deaths, for each nation it struck`,
     unreportedNote: (list, plural) =>
       `${list} ${plural ? 'sit' : 'sits'} in the band above the chart rather than on it: no national fatality figure was ever published for that impact. That is not a toll of zero, and it is not drawn as one. Every unreported stop on this roster is the secondary nation in its storm \u2014 the smaller impact, on the more remote islands, in the country least able to run an assessment.`,
-    indirectNote: (list, plural) =>
+    unattributedNote: (list, plural) =>
       `${list} ${plural ? 'are' : 'is'} drawn as a hollow marker: those deaths were indirect, following the storm rather than caused by it in the moment. They are counted here because they are real, and marked apart because they are not the same kind of fact as a drowning during the storm.`,
     tableCaption: (name) => `${name}: category at closest approach and deaths, by nation`,
     thCountry: 'Country',
@@ -47,7 +47,7 @@ const STRINGS = {
     thDeaths: 'Deaths',
     thLocalDetail: 'Local detail',
     notReported: 'Not reported',
-    indirectSuffix: ' (indirect)',
+    unattributedSuffix: ' (indirect)',
     notCompiled: (name) =>
       `${name} has a full ripple chain, but its per-nation impact record has not been compiled yet.`,
     guardSubject: 'Storm profile',
@@ -63,7 +63,7 @@ const STRINGS = {
       `Nuage de points comparant la catégorie de ${name} à l\u2019approche la plus proche aux décès, pour chaque nation touchée`,
     unreportedNote: (list, plural) =>
       `${list} ${plural ? 'figurent' : 'figure'} dans la bande au-dessus du graphique plutôt que dessus\u00A0: aucun bilan national n’a jamais été publié pour cet impact. Ce n’est pas un bilan de zéro, et ce n’est pas représenté comme tel. Chaque étape non recensée de cette liste est la nation secondaire de son cyclone — l’impact le plus faible, sur les îles les plus isolées, dans le pays le moins en mesure de mener une évaluation.`,
-    indirectNote: (list, plural) =>
+    unattributedNote: (list, plural) =>
       `${list} ${plural ? 'sont représenté' : 'est représenté'}${plural ? 's' : ''} par un marqueur creux\u00A0: ces décès étaient indirects, survenus à la suite du cyclone plutôt que causés par lui sur le moment. Ils sont comptabilisés ici parce qu’ils sont réels, et distingués parce qu’ils ne sont pas de la même nature qu’une noyade pendant le cyclone.`,
     tableCaption: (name) => `${name}\u00A0: catégorie à l\u2019approche la plus proche et décès, par nation`,
     thCountry: 'Pays',
@@ -71,7 +71,7 @@ const STRINGS = {
     thDeaths: 'Décès',
     thLocalDetail: 'Détail local',
     notReported: 'Non recensé',
-    indirectSuffix: ' (indirect)',
+    unattributedSuffix: ' (indirect)',
     notCompiled: (name) =>
       `${name} a une chaîne de répercussions complète, mais son bilan par nation n\u2019a pas encore été compilé.`,
     guardSubject: 'Profil du cyclone',
@@ -79,7 +79,7 @@ const STRINGS = {
   },
 }
 
-// unreportedNote/indirectNote below open their own sentence with a nation
+// unreportedNote/unattributedNote below open their own sentence with a nation
 // list -- unlike every other prose call site on the site, where the list sits
 // mid-sentence. nationListInProse's "les" (for Solomon Islands) is otherwise
 // always lowercase, so this is what keeps that sentence starting capitalised.
@@ -176,7 +176,7 @@ export default function StormProfile({ storm, style }) {
   }
 
   const unreported = rows.filter((r) => r.deaths == null)
-  const indirect = rows.filter((r) => r.deathsKind === 'indirect')
+  const unattributed = rows.filter((r) => r.deathsKind === 'unattributed')
 
   return (
     <Section lock width="narrow" style={style} backdrop={scatterBackdrop('storm-profile')}>
@@ -215,7 +215,7 @@ export default function StormProfile({ storm, style }) {
           />
         </div>
 
-        {(unreported.length > 0 || indirect.length > 0) && (
+        {(unreported.length > 0 || unattributed.length > 0) && (
           <div className="mt-3 figure-prose space-y-2 border-l-2 border-ink/15 pl-3 text-xs italic opacity-75">
             {unreported.length > 0 && (
               <p>
@@ -225,11 +225,11 @@ export default function StormProfile({ storm, style }) {
                 )}
               </p>
             )}
-            {indirect.length > 0 && (
+            {unattributed.length > 0 && (
               <p>
-                {t.indirectNote(
-                  capitalize(nationListInProse(indirect.map((r) => r.name), language)),
-                  nationListIsPlural(indirect.map((r) => r.name))
+                {t.unattributedNote(
+                  capitalize(nationListInProse(unattributed.map((r) => r.name), language)),
+                  nationListIsPlural(unattributed.map((r) => r.name))
                 )}
               </p>
             )}
@@ -264,7 +264,7 @@ export default function StormProfile({ storm, style }) {
                   <td>
                     {row.deaths == null
                       ? t.notReported
-                      : `${row.deaths}${row.deathsKind === 'indirect' ? t.indirectSuffix : ''}`}
+                      : `${row.deaths}${row.deathsKind === 'unattributed' ? t.unattributedSuffix : ''}`}
                   </td>
                   <td>
                     {row.fact}
