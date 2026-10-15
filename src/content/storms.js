@@ -494,9 +494,9 @@ const STORM_DETAIL = {
         // the sources do not support.
         deathsKind: 'indirect',
         deathsNote:
-          'Indirect deaths: from a dysentery and diarrhoea outbreak on Vanikoro declared by health officials, nearly two weeks after landfall. Not deaths during the cyclone itself.',
+          'Reported deaths, not attributed: four deaths from a dysentery and diarrhoea outbreak on Vanikoro, reported nearly two weeks after landfall. None of the sources we found link them to the cyclone; UNICEF reported them alongside Lola\u2019s damage to desalination plants and food crops in Temotu. Not deaths during the cyclone itself.',
         deathsNoteFr:
-          "Décès indirects\u00A0: dus à une épidémie de dysenterie et de diarrhée sur Vanikoro, déclarée par les autorités sanitaires, près de deux semaines après l'atterrissage. Pas des décès survenus pendant le cyclone lui-même.",
+          "Décès signalés, non attribués\u00A0: quatre décès dus à une épidémie de dysenterie et de diarrhée sur Vanikoro, signalés près de deux semaines après l'atterrissage. Aucune des sources consultées ne les relie au cyclone\u00A0; l'UNICEF les a signalés en même temps que les dégâts causés par Lola aux installations de dessalement et aux cultures vivrières de Temotu. Pas des décès survenus pendant le cyclone lui-même.",
         dodge: 0,
         fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources damaged and four people injured. Around 22,319 people were exposed across Temotu.',
         factFr:
@@ -533,7 +533,7 @@ const STORM_DETAIL = {
     // carries them all: deaths, houses and schools are NDMO's; the peak is RSMC
     // Nadi's; the affected count is NDMO's as reported by OCHA and the IFRC; the
     // range of other death counts needs its own citation to be checkable. The
-    // last four cover the season-opening date and the Solomon Islands stop.
+    // last five cover the season-opening date and the Solomon Islands stop.
     sources: [
       {
         label: {
@@ -605,6 +605,13 @@ const STORM_DETAIL = {
           fr: '2,7 millions de SBD pour la réponse d’urgence au cyclone Lola à Temotu \u2014 SIBC (4 novembre 2023)',
         },
         url: 'https://www.sibconline.com.sb/sbd2-7-million-for-cyclone-lolas-emergency-response-in-temotu/',
+      },
+      {
+        label: {
+          en: 'Cyclone Lola \u2014 Vanuatu humanitarian situation report 2 (10 November 2023), UNICEF',
+          fr: 'Cyclone Lola \u2014 rapport de situation humanitaire n°\u00A02, Vanuatu (10 novembre 2023), UNICEF',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/unicef-vanuatu-humanitarian-situation-report-no-2-cyclone-lola-10-november-2023',
       },
     ],
   },
