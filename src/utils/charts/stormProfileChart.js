@@ -72,7 +72,10 @@ export function renderStormProfileChart(
     width,
     margin,
     tickFormat: INT_FORMAT,
-    tickValues: d3.ticks(0, maxDeaths * 1.2, 4).filter((t) => t >= 0),
+    // Whole numbers only. A count of deaths has no fractional ticks, and with
+    // a maximum of 1 or 2 d3 steps by 0.2 or 0.5, which INT_FORMAT then rounds
+    // into repeated labels ("0, 0, 0, 1, 1, 1, 1").
+    tickValues: d3.ticks(0, maxDeaths * 1.2, 4).filter((t) => t >= 0 && Number.isInteger(t)),
   })
 
   // The band, drawn before the points so nothing sits on top of a marker.
