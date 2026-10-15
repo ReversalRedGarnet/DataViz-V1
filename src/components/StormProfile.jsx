@@ -55,8 +55,8 @@ const STRINGS = {
   },
   fr: {
     atAGlance: (name) => `${name} en un coup d\u2019\u0153il`,
-    struckIntro: (name, list, year) =>
-      `${name} a touché ${list} en ${year}. Le même système météorologique tout du long, mais une rencontre différente dans chaque pays.`,
+    struckIntro: (name, list, year, plural) =>
+      `${name} ${plural ? 'ont touché' : 'a touché'} ${list} en ${year}. Le même système météorologique tout du long, mais une rencontre différente dans chaque pays.`,
     belowNote:
       'Ci-dessous\u00A0: la catégorie à l\u2019approche la plus proche comparée aux décès recensés. Les deux n\u2019évoluent pas de façon fiable ensemble.',
     chartAria: (name) =>
@@ -184,7 +184,16 @@ export default function StormProfile({ storm, style }) {
         <h2 className="type-h2 mb-2">{t.atAGlance(storm.name)}</h2>
 
         <div className="prose-column figure-prose space-y-3 text-sm opacity-80">
-          <p>{t.struckIntro(storm.name, nationListInProse(storm.nations, language), storm.year)}</p>
+          {/* The fourth argument is for French, where "Cyclones Judy & Kevin"
+              takes a plural verb ("ont touché"); English uses "struck" either way. */}
+          <p>
+            {t.struckIntro(
+              storm.name,
+              nationListInProse(storm.nations, language),
+              storm.year,
+              storm.name.startsWith('Cyclones ')
+            )}
+          </p>
 
           {storm.note && <p>{storm.note}</p>}
 
