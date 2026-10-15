@@ -32,8 +32,9 @@ import roster from './roster.json'
 //     histories and UN OCHA situation reports. Null until researched. A storm
 //     without a profile still gets a full ripple chain; it just doesn't get the
 //     journey and category-versus-deaths sections, which have nothing to draw.
-//   sources -- the supplementary citations for that storm's profile: usually
-//     a pair, more where one stop draws on several primary records (see Lola)
+//   sources -- the supplementary citations for that storm's profile: an
+//     assessment and a situation report or met record, plus the record behind
+//     any figure those two do not state
 //
 // FRENCH TRANSLATION. `note`, `categoryLabel`, `fact`, `lead`, `deathsNote` and
 // `date` each carry an *Fr sibling (noteFr, categoryLabelFr, factFr, leadFr,

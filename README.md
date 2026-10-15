@@ -99,7 +99,7 @@ The source gives the unit only as "tonnes," without stating whether it counts CO
 
 ### Supplementary sources
 
-Used only for the per-storm facts in the profile and journey sections, never for a chain metric — the chain always cites its own filtered Pacific Data Hub query. Each storm carries its own supplementary citations in `src/content/storms.js`: usually a pair, a government post-disaster needs assessment (or equivalent national/regional assessment) and a UN OCHA / ReliefWeb situation report or national meteorological service record. Lola carries more, one per figure its Vanuatu stop states, because no single assessment covers them all. Where no figure was ever published for a nation a storm reached, the site shows "not reported" rather than zero.
+Used only for the per-storm facts in the profile and journey sections, never for a chain metric — the chain always cites its own filtered Pacific Data Hub query. Each storm carries its own supplementary citations in `src/content/storms.js`: a government post-disaster needs assessment (or equivalent national/regional assessment) and a UN OCHA / ReliefWeb situation report or national meteorological service record, plus the record behind any figure those two don't state: a later situation report, a met service release or best track, or a news report quoting an official. Where no figure was ever published for a nation a storm reached, the site shows "not reported" rather than zero.
 
 ### Data licences
 
