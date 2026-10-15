@@ -63,9 +63,12 @@ const STORM_DETAIL = {
         name: 'Solomon Islands',
         date: '10\u201311 March 2015',
         dateFr: '10\u201311 mars 2015',
-        category: 1,
-        categoryLabel: 'Category 1 while intensifying; passed offshore, no landfall',
-        categoryLabelFr: "Catégorie 1 en cours d'intensification ; passé au large, sans atterrissage",
+        category: 4,
+        // RSMC Nadi's best track (IBTrACS 2015066S08170): Category 4, 90 kt, at
+        // the closest pass, about 20 km from Anuta at 15:00 UTC on 11 March. Pam
+        // was Category 1 only on 9 March, while still far north of Temotu.
+        categoryLabel: 'Category 4 at closest approach, about 20 km from Anuta; passed offshore, no landfall',
+        categoryLabelFr: "Catégorie 4 à l'approche la plus proche, à environ 20\u00A0km d'Anuta\u00A0; passé au large, sans atterrissage",
         deaths: null,
         deathsNote:
           'IFRC, OCHA and government response documents record affected populations and damage for Solomon Islands but publish no separate fatality figure. Not zero \u2014 never reported.',
