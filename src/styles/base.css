@@ -63,6 +63,12 @@
   html {
     --header-height: 96px;
     scroll-padding-top: calc(var(--header-height) + 16px);
+
+    /* Native controls, form fields and any scrollbar a browser still draws
+       follow the system setting, the same source the .dark class comes from
+       (hooks/useTheme.jsx). Paired with the color-scheme meta in index.html,
+       which applies before this stylesheet loads. */
+    color-scheme: light dark;
   }
 
   @media (prefers-reduced-motion: no-preference) {
