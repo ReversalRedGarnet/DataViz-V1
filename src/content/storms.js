@@ -251,6 +251,41 @@ const STORM_DETAIL = {
         },
         url: 'https://reliefweb.int/disaster/tc-2018-000102-ton',
       },
+      {
+        label: {
+          en: 'Pacific Islands Cyclone Gita \u2014 humanitarian situation report 2 (16 February 2018), UNICEF',
+          fr: 'Cyclone Gita, îles du Pacifique \u2014 rapport de situation humanitaire n°\u00A02 (16 février 2018), UNICEF',
+        },
+        url: 'https://reliefweb.int/report/tonga/pacific-islands-cyclone-gita-humanitarian-situation-report-2-16-february-2018',
+      },
+      {
+        label: {
+          en: 'One death, 3 seriously injured in Tongatapu during TC Gita \u2014 Matangi Tonga (14 February 2018)',
+          fr: 'Un mort et trois blessés graves à Tongatapu pendant le cyclone Gita \u2014 Matangi Tonga (14 février 2018)',
+        },
+        url: 'https://matangitonga.to/2018/02/14/one-death-3-seriously-injured-tongatapu-tc-gita',
+      },
+      {
+        label: {
+          en: 'Cyclone Gita in Tonga \u2014 activation 566, International Charter Space and Major Disasters',
+          fr: 'Cyclone Gita aux Tonga \u2014 activation 566, Charte internationale «\u00A0Espace et catastrophes majeures\u00A0»',
+        },
+        url: 'https://disasterscharter.org/web/guest/activations/-/article/cyclone-in-tonga-activation-566-',
+      },
+      {
+        label: {
+          en: 'Severe TC Gita (Category 4) passes just south of Ono-i-Lau \u2014 media release 35 (13 February 2018), Fiji Meteorological Service',
+          fr: "Le cyclone tropical sévère Gita (catégorie 4) passe juste au sud d'Ono-i-Lau \u2014 communiqué n°\u00A035 (13 février 2018), Service météorologique des Fidji",
+        },
+        url: 'https://reliefweb.int/report/fiji/fiji-meteorological-services-severe-tc-gita-cat4-passes-just-south-ono-5pm-13-february',
+      },
+      {
+        label: {
+          en: 'Fiji, Tonga, Niue, American Samoa, Samoa \u2014 Tropical Cyclone Gita (ECHO Daily Flash, 14 February 2018), ECHO / ReliefWeb',
+          fr: 'Fidji, Tonga, Niue, Samoa américaines, Samoa \u2014 cyclone tropical Gita (ECHO Daily Flash, 14 février 2018), ECHO / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/fiji/fiji-tonga-niue-american-samoa-samoa-tropical-cyclone-gita-update-gdacs-jtwc-meteo-0',
+      },
     ],
   },
   harold: {
