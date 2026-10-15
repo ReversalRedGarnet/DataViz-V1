@@ -291,7 +291,7 @@ const STORM_DETAIL = {
             en: 'Severe Tropical Cyclone Harold \u2014 official cyclone history, Australian Bureau of Meteorology',
             fr: 'Cyclone tropical sévère Harold \u2014 historique officiel du cyclone, Bureau de météorologie australien',
           },
-        url: 'http://www.bom.gov.au/cyclone/history/Harold.shtml',
+        url: 'https://www.bom.gov.au/cyclone/history/Harold.shtml',
       },
       {
         label: {
