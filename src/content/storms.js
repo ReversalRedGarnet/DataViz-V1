@@ -324,8 +324,8 @@ const STORM_DETAIL = {
         fact: "Judy crossed the small islands of southern Temotu Province as a Category 1 system on the day it was named. Tikopia and Anuta, the province's two most remote islands, were assessed as worst affected, with damage to fruit trees and other livelihood sources. Reaching them took until 9 March, when a patrol boat carried assessment teams and relief from Lata.",
         factFr:
           "Judy a traversé les petites îles du sud de la province de Temotu en tant que système de catégorie 1 le jour même où il a été nommé. Tikopia et Anuta, les deux îles les plus isolées de la province, ont été évaluées comme les plus touchées, avec des dégâts aux arbres fruitiers et à d'autres sources de subsistance. Il a fallu attendre le 9 mars pour les atteindre, quand un patrouilleur a transporté les équipes d'évaluation et l'aide depuis Lata.",
-        lead: "The storm's first landfall was on the islands it would take twelve days to reach.",
-        leadFr: "Le premier atterrissage du cyclone a eu lieu sur les îles qu'il faudrait douze jours pour atteindre.",
+        lead: "The storm's first landfall was on the islands it would take ten days to reach.",
+        leadFr: "Le premier atterrissage du cyclone a eu lieu sur les îles qu'il faudrait dix jours pour atteindre.",
       },
       {
         name: 'Vanuatu',
