@@ -40,14 +40,14 @@ const STRINGS = {
     unreportedNote: (list, plural) =>
       `${list} ${plural ? 'sit' : 'sits'} in the band above the chart rather than on it: no national fatality figure was ever published for that impact. That is not a toll of zero, and it is not drawn as one. Every unreported stop on this roster is the secondary nation in its storm \u2014 the smaller impact, on the more remote islands, in the country least able to run an assessment.`,
     unattributedNote: (list, plural) =>
-      `${list} ${plural ? 'are' : 'is'} drawn as a hollow marker: those deaths were indirect, following the storm rather than caused by it in the moment. They are counted here because they are real, and marked apart because they are not the same kind of fact as a drowning during the storm.`,
+      `${list} ${plural ? 'are' : 'is'} drawn as a hollow marker: those deaths were reported after the storm, and none of the sources we found link them to it. They are counted here because they were reported, and marked apart because they are not the same kind of fact as a drowning during the storm.`,
     tableCaption: (name) => `${name}: category at closest approach and deaths, by nation`,
     thCountry: 'Country',
     thCategory: 'Category at closest approach',
     thDeaths: 'Deaths',
     thLocalDetail: 'Local detail',
     notReported: 'Not reported',
-    unattributedSuffix: ' (indirect)',
+    unattributedSuffix: ' (not attributed)',
     notCompiled: (name) =>
       `${name} has a full ripple chain, but its per-nation impact record has not been compiled yet.`,
     guardSubject: 'Storm profile',
@@ -64,14 +64,14 @@ const STRINGS = {
     unreportedNote: (list, plural) =>
       `${list} ${plural ? 'figurent' : 'figure'} dans la bande au-dessus du graphique plutôt que dessus\u00A0: aucun bilan national n’a jamais été publié pour cet impact. Ce n’est pas un bilan de zéro, et ce n’est pas représenté comme tel. Chaque étape non recensée de cette liste est la nation secondaire de son cyclone — l’impact le plus faible, sur les îles les plus isolées, dans le pays le moins en mesure de mener une évaluation.`,
     unattributedNote: (list, plural) =>
-      `${list} ${plural ? 'sont représenté' : 'est représenté'}${plural ? 's' : ''} par un marqueur creux\u00A0: ces décès étaient indirects, survenus à la suite du cyclone plutôt que causés par lui sur le moment. Ils sont comptabilisés ici parce qu’ils sont réels, et distingués parce qu’ils ne sont pas de la même nature qu’une noyade pendant le cyclone.`,
+      `${list} ${plural ? 'sont représentées' : 'est représenté'} par un marqueur creux\u00A0: ces décès ont été signalés après le cyclone, et aucune des sources consultées ne les relie à celui-ci. Ils sont comptabilisés ici parce qu’ils ont été signalés, et distingués parce qu’ils ne sont pas de la même nature qu’une noyade pendant le cyclone.`,
     tableCaption: (name) => `${name}\u00A0: catégorie à l\u2019approche la plus proche et décès, par nation`,
     thCountry: 'Pays',
     thCategory: 'Catégorie à l\u2019approche la plus proche',
     thDeaths: 'Décès',
     thLocalDetail: 'Détail local',
     notReported: 'Non recensé',
-    unattributedSuffix: ' (indirect)',
+    unattributedSuffix: ' (non attribués)',
     notCompiled: (name) =>
       `${name} a une chaîne de répercussions complète, mais son bilan par nation n\u2019a pas encore été compilé.`,
     guardSubject: 'Profil du cyclone',

@@ -488,8 +488,9 @@ const STORM_DETAIL = {
         categoryLabel: 'Category 3 (landfall, Tikopia Island, Temotu Province)',
         categoryLabelFr: 'Catégorie 3 (atterrissage, île de Tikopia, province de Temotu)',
         deaths: 4,
-        // These four are INDIRECT -- a post-storm disease outbreak, reported
-        // nearly two weeks after landfall. Harold's 27 are direct drownings.
+        // These four are NOT ATTRIBUTED -- deaths in a disease outbreak on
+        // Vanikoro, reported nearly two weeks after landfall, that none of the
+        // sources found link to the cyclone. Harold's 27 are direct drownings.
         // Plotting the two on one axis without saying so claims an equivalence
         // the sources do not support.
         deathsKind: 'unattributed',
@@ -516,7 +517,8 @@ const STORM_DETAIL = {
         // the cyclone (NEOC Situation Report 13). Other counts run from 2 to 4,
         // so the note says so rather than the chart quietly picking one. It
         // mirrors the Solomon Islands stop above, whose note says its four
-        // deaths were indirect, so the two markers can be read side by side.
+        // deaths are not attributed to the cyclone, so the two markers can be
+        // read side by side.
         deathsNote:
           'Direct deaths: NDMO\u2019s count of deaths directly attributable to the cyclone (NEOC Situation Report 13, 13 November 2023). Other agencies report up to four.',
         deathsNoteFr:
