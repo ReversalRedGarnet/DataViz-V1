@@ -488,14 +488,15 @@ const STORM_DETAIL = {
         categoryLabel: 'Category 3 (landfall, Tikopia Island, Temotu Province)',
         categoryLabelFr: 'Catégorie 3 (atterrissage, île de Tikopia, province de Temotu)',
         deaths: 4,
-        // These four are INDIRECT -- a post-storm disease outbreak, weeks
-        // later. Harold's 27 are direct drownings. Plotting the two on one axis
-        // without saying so claims an equivalence the sources do not support.
+        // These four are INDIRECT -- a post-storm disease outbreak, reported
+        // nearly two weeks after landfall. Harold's 27 are direct drownings.
+        // Plotting the two on one axis without saying so claims an equivalence
+        // the sources do not support.
         deathsKind: 'indirect',
         deathsNote:
-          'Indirect deaths: from a dysentery and diarrhoea outbreak on Vanikoro declared by health officials, weeks after landfall. Not deaths during the cyclone itself.',
+          'Indirect deaths: from a dysentery and diarrhoea outbreak on Vanikoro declared by health officials, nearly two weeks after landfall. Not deaths during the cyclone itself.',
         deathsNoteFr:
-          "Décès indirects\u00A0: dus à une épidémie de dysenterie et de diarrhée sur Vanikoro, déclarée par les autorités sanitaires, des semaines après l'atterrissage. Pas des décès survenus pendant le cyclone lui-même.",
+          "Décès indirects\u00A0: dus à une épidémie de dysenterie et de diarrhée sur Vanikoro, déclarée par les autorités sanitaires, près de deux semaines après l'atterrissage. Pas des décès survenus pendant le cyclone lui-même.",
         dodge: 0,
         fact: '116 houses, 114 kitchens and one church destroyed on Tikopia, with water sources damaged and four people injured. Around 22,319 people were exposed across Temotu.',
         factFr:
