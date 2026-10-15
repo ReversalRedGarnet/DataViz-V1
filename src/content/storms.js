@@ -251,8 +251,8 @@ const STORM_DETAIL = {
         fact: '230 km/h sustained winds, gusts to 325 km/h -- the strongest storm to hit Vanuatu since Cyclone Pam in 2015. Up to 90% of homes lost in the worst-hit areas.',
         factFr:
           "Vents soutenus de 230 km/h, rafales à 325 km/h \u2014 le cyclone le plus fort à avoir frappé Vanuatu depuis le cyclone Pam en 2015. Jusqu'à 90\u00A0% des habitations perdues dans les zones les plus touchées.",
-        lead: 'Four days later, the same system made landfall at full strength.',
-        leadFr: 'Quatre jours plus tard, le même système a touché terre à pleine puissance.',
+        lead: 'Three days later, the same system made landfall at full strength.',
+        leadFr: 'Trois jours plus tard, le même système a touché terre à pleine puissance.',
       },
       {
         name: 'Fiji',
