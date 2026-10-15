@@ -228,9 +228,9 @@ const STORM_DETAIL = {
           'Catégorie 4 en passant au sud du groupe des Lau\u00A0; a culminé en catégorie 5 à environ 205\u00A0km au sud de Kadavu \u2014 sans atterrissage',
         deaths: 0,
         dodge: 0.35,
-        fact: '1,579 people affected in the southern Lau group, with Ono-i-Lau and Vatoa worst hit \u2014 three homes destroyed, gusts of 84 knots (about 155 km/h) at Ono-i-Lau, no injuries reported.',
+        fact: '1,579 people affected in the southern Lau group, with Ono-i-Lau and Vatoa worst hit \u2014 three buildings destroyed, gusts of 84 knots (about 155 km/h) at Ono-i-Lau, no injuries reported.',
         factFr:
-          "1\u00A0579 personnes touchées dans le sud du groupe des Lau, Ono-i-Lau et Vatoa étant les plus durement touchées \u2014 trois maisons détruites, rafales de 84 nœuds (environ 155 km/h) à Ono-i-Lau, aucun blessé signalé.",
+          "1\u00A0579 personnes touchées dans le sud du groupe des Lau, Ono-i-Lau et Vatoa étant les plus durement touchées \u2014 trois bâtiments détruits, rafales de 84 nœuds (environ 155 km/h) à Ono-i-Lau, aucun blessé signalé.",
         lead: 'A stronger storm than the one that hit Tonga, and nobody was hurt.',
         leadFr: "Un cyclone plus fort que celui qui a frappé Tonga, et personne n'a été blessé.",
       },
