@@ -6,10 +6,33 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Loaded without blocking first paint. A plain <link rel="stylesheet">
+      held rendering for about a second on a throttled mobile connection
+      while the font CSS came back from a second origin. media="print" lets
+      the browser fetch it at low cost without waiting on it, and onload
+      switches it on; display=swap already meant text paints in the fallback
+      serif first, so the reader sees the same swap they always did, only
+      sooner. The <noscript> copy keeps the font for anyone without
+      JavaScript -- though the page itself needs JavaScript to render at all.
+    -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <title>Ripple — Six cyclones, four Pacific nations, four different recoveries</title>
     <meta
       name="description"
