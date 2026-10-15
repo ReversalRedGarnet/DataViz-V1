@@ -14,7 +14,7 @@ import { useOverflowFade } from '../hooks/useOverflowFade.js'
 import { chartTheme, MAP_COLORS } from '../utils/theme.js'
 import { resetSvg } from '../utils/d3helpers.js'
 import { motionDuration } from '../utils/motion.js'
-import { pluralize } from '../utils/pluralize.js'
+import { isPluralStormName, pluralize } from '../utils/pluralize.js'
 import { loadLandTopology } from '../utils/loadLand.js'
 import { drawBasemap, fitToPoints, pacificProjection } from '../utils/map.js'
 import { shortName, nationLabel } from '../content/nations.js'
@@ -41,8 +41,8 @@ const STRINGS = {
     trackNoteSuffix:
       'The line joins documented impact points; it is not the official track. ',
     follow: (name) => `Follow ${name}`,
-    reachedCountries: (stormName, count, total) =>
-      `${stormName} reached ${count} of these ${total} countries. Drag the control beside the map, or use the arrow keys, to travel with it.`,
+    reachedCountries: (stormName, count, total, plural) =>
+      `${stormName} reached ${count} of these ${total} countries. Drag the control beside the map, or use the arrow keys, to travel with ${plural ? 'them' : 'it'}.`,
     scrubberLabel: (name) => `${name}: move between documented impact points`,
     deathsNotReported: 'deaths not reported',
     deaths: (n) => `${n} ${pluralize(n, { one: 'death', other: 'deaths' }, 'en')}`,
@@ -58,8 +58,8 @@ const STRINGS = {
     trackNoteSuffix:
       'La ligne relie les points d\u2019impact documentés\u00A0; ce n\u2019est pas la trajectoire officielle. ',
     follow: (name) => `Suivre ${name}`,
-    reachedCountries: (stormName, count, total) =>
-      `${stormName} a touché ${count} de ces ${total} pays. Faites glisser le curseur près de la carte, ou utilisez les flèches du clavier, pour le suivre.`,
+    reachedCountries: (stormName, count, total, plural) =>
+      `${stormName} ${plural ? 'ont touché' : 'a touché'} ${count} de ces ${total} pays. Faites glisser le curseur près de la carte, ou utilisez les flèches du clavier, pour ${plural ? 'les' : 'le'} suivre.`,
     scrubberLabel: (name) => `${name}\u00A0: se déplacer entre les points d\u2019impact documentés`,
     deathsNotReported: 'décès non recensés',
     deaths: (n) => `${n} ${pluralize(n, { one: 'décès', other: 'décès' }, 'fr')}`,
@@ -529,7 +529,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
             the scope of this project is four countries today and the number is
             written down in one place, so this sentence should read it rather
             than repeat it. */}
-        {t.reachedCountries(storm.name, STEPS.length, NATION_COUNT)}
+        {t.reachedCountries(storm.name, STEPS.length, NATION_COUNT, isPluralStormName(storm.name))}
       </p>
 
       <div className="journey-split mt-6 md:grid md:grid-cols-2 md:items-start md:gap-10">

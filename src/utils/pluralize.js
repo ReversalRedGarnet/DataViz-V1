@@ -22,6 +22,14 @@ function rulesFor(language) {
   return pluralRules[locale]
 }
 
+// "Cyclones Judy & Kevin" is the roster's one plural storm name; French
+// verbs and pronouns that take the name as their subject have to agree with
+// it ("ont touché", "les suivre"), and so does the English "travel with
+// them".
+export function isPluralStormName(name) {
+  return name.startsWith('Cyclones ')
+}
+
 export function pluralize(n, forms, language = 'en') {
   const category = rulesFor(language).select(n)
   return forms[category] ?? forms.other

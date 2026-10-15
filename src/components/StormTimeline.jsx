@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { NATION_NAMES, nationListInProse } from '../content/nations.js'
+import { isPluralStormName } from '../utils/pluralize.js'
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { STORMS, ROSTER_START, ROSTER_END, strikeCounts, localizeStorm } from '../content/storms.js'
 import { numberWord, numberWordCapitalized } from '../utils/numberWords.js'
@@ -37,7 +38,8 @@ const STRINGS = {
     of: 'of',
   },
   fr: {
-    cardAria: (name, year, count, total) => `${name}, ${year}. ${name} a touché ${count} des ${total} nations.`,
+    cardAria: (name, year, count, total, plural) =>
+      `${name}, ${year}. ${name} ${plural ? 'ont touché' : 'a touché'} ${count} des ${total} nations.`,
     selected: 'Sélectionné',
     reachedNote: (list, count, total) =>
       `Cyclone ayant touché ${list} \u2014 ${count} des ${total} nations concernées.`,
@@ -115,7 +117,13 @@ function StormCard({ storm, active, awaiting, onSelect, onPreview, delay = 0, ro
       onFocus={() => onPreview(storm.id)}
       onBlur={() => onPreview(null)}
       aria-pressed={active}
-      aria-label={t.cardAria(storm.name, storm.year, storm.nations.length, NATION_NAMES.length)}
+      aria-label={t.cardAria(
+        storm.name,
+        storm.year,
+        storm.nations.length,
+        NATION_NAMES.length,
+        isPluralStormName(storm.name)
+      )}
       style={awaiting ? { animationDelay: `${delay}ms` } : undefined}
       className={`press-target storm-card relative cursor-pointer rounded-lg border text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel ${
         strip ? 'h-full w-full rounded-xl px-4 py-3.5' : 'min-h-[44px] px-2.5 py-2'

@@ -9,6 +9,7 @@ import { renderStormProfileChart, STORM_CHART_HEIGHT } from '../utils/charts/ind
 import EmptyState from './EmptyState.jsx'
 import { sectionGuard } from './sectionGuard.jsx'
 import { nationLabel, nationListInProse, nationListIsPlural } from '../content/nations.js'
+import { isPluralStormName } from '../utils/pluralize.js'
 import VisuallyHidden from './VisuallyHidden.jsx'
 
 // Per-nation storm facts live in src/content/storms.js, in the order each storm
@@ -191,7 +192,7 @@ export default function StormProfile({ storm, style }) {
               storm.name,
               nationListInProse(storm.nations, language),
               storm.year,
-              storm.name.startsWith('Cyclones ')
+              isPluralStormName(storm.name)
             )}
           </p>
 
