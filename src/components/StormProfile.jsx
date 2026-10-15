@@ -32,7 +32,7 @@ const STRINGS = {
   en: {
     atAGlance: (name) => `${name} at a glance`,
     struckIntro: (name, list, year) =>
-      `${name} struck ${list} in ${year}. The same weather system throughout, and a different storm on arrival: a direct landfall at full strength in one country, a weakened system or only rough seas and coastal flooding in another.`,
+      `${name} struck ${list} in ${year}. The same weather system throughout, but a different encounter in each country.`,
     belowNote:
       'Below: category at closest approach against reported deaths. The two do not reliably move together.',
     chartAria: (name) =>
@@ -56,7 +56,7 @@ const STRINGS = {
   fr: {
     atAGlance: (name) => `${name} en un coup d\u2019\u0153il`,
     struckIntro: (name, list, year) =>
-      `${name} a touché ${list} en ${year}. Le même système météorologique tout du long, et un cyclone différent à l\u2019arrivée\u00A0: un atterrissage direct à pleine puissance dans un pays, un système affaibli ou seulement une mer agitée et des inondations côtières dans un autre.`,
+      `${name} a touché ${list} en ${year}. Le même système météorologique tout du long, mais une rencontre différente dans chaque pays.`,
     belowNote:
       'Ci-dessous\u00A0: la catégorie à l\u2019approche la plus proche comparée aux décès recensés. Les deux n\u2019évoluent pas de façon fiable ensemble.',
     chartAria: (name) =>
