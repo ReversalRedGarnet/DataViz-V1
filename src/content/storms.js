@@ -348,8 +348,8 @@ const STORM_DETAIL = {
         dodge: 0.35,
         fact: "428 homes damaged or destroyed, without a direct hit. Storm surge and high tide flooded coastal areas of Tongatapu, 'Eua and Ha'apai.",
         factFr: "428 habitations endommagées ou détruites, sans impact direct. L'onde de tempête, combinée à la marée haute, a inondé les zones côtières de Tongatapu, 'Eua et Ha'apai.",
-        lead: 'A near miss, and the shortest recovery of the four.',
-        leadFr: 'Un coup évité de justesse, et le redressement le plus rapide des quatre.',
+        lead: 'A near miss, and no dip in its annual crop, livestock or power figures.',
+        leadFr: "Un coup évité de justesse, et aucun recul de ses chiffres annuels de cultures, d'élevage ou de production électrique.",
       },
     ],
     sources: [
