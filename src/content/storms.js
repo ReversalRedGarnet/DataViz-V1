@@ -184,6 +184,20 @@ const STORM_DETAIL = {
         },
         url: 'https://www.met.gov.to/index_files/TC_list_update.pdf',
       },
+      {
+        label: {
+          en: 'Tonga, Fiji \u2014 Tropical Cyclone Winston (ECHO Daily Flash, 19 February 2016), ECHO / ReliefWeb',
+          fr: 'Tonga, Fidji \u2014 cyclone tropical Winston (ECHO Daily Flash, 19 février 2016), ECHO / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/tonga/tonga-fiji-tropical-cyclone-winston-gdacs-jtwc-nasa-vanuatu-met-services-fiji-met',
+      },
+      {
+        label: {
+          en: "More than 100 families in Vava'u and Ha'apai evacuated \u2014 Radio & TV Tonga News, via PINA (17 February 2016)",
+          fr: "Plus de 100 familles évacuées à Vava'u et Ha'apai \u2014 Radio & TV Tonga News, via PINA (17 février 2016)",
+        },
+        url: 'https://reliefweb.int/report/tonga/more-100-families-vavau-and-haapai-evacuated-tonga-s-agriculture-sector-suffers-major',
+      },
     ],
   },
   gita: {
