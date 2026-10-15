@@ -81,8 +81,8 @@ const STORM_DETAIL = {
         fact: "Storm surge, swells and heavy rain struck Temotu and Malaita provinces while Pam was still intensifying offshore. 83 of 260 houses were damaged across Temotu's outer islands; more than half of garden crops were damaged, and NDMO assessments found 2,344 families \u2014 11,780 people needing support across 19 wards of Malaita Province.",
         factFr:
           "Une onde de tempête, une forte houle et de fortes pluies ont frappé les provinces de Temotu et de Malaita alors que Pam s'intensifiait encore au large. 83 des 260 maisons ont été endommagées sur les îles périphériques de Temotu\u00A0; plus de la moitié des cultures vivrières ont été endommagées, et les évaluations du NDMO ont recensé 2\u00A0344 familles \u2014 11\u00A0780 personnes ayant besoin d'aide dans 19 circonscriptions de la province de Malaita.",
-        lead: 'Two days before it reached Vanuatu, Pam was already flooding coastlines it never made landfall on.',
-        leadFr: "Deux jours avant d'atteindre Vanuatu, Pam inondait déjà des côtes sur lesquelles il n'a jamais touché terre.",
+        lead: 'Nearly two days before it reached Vanuatu, Pam was already flooding coastlines it never made landfall on.',
+        leadFr: "Près de deux jours avant d'atteindre Vanuatu, Pam inondait déjà des côtes sur lesquelles il n'a jamais touché terre.",
       },
       {
         name: 'Vanuatu',
