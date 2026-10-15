@@ -394,20 +394,20 @@ const STORM_DETAIL = {
         dateFr: '27 février 2023',
         category: 1,
         categoryLabel:
-          'Category 1 (Judy tracked over the southern islands; Kevin followed offshore \u2014 no landfall)',
+          'Category 1 (Judy passed close to the southern islands; Kevin followed offshore \u2014 no landfall)',
         categoryLabelFr:
-          'Catégorie 1 (Judy a traversé les îles du sud\u00A0; Kevin a suivi au large \u2014 sans atterrissage)',
+          'Catégorie 1 (Judy est passé près des îles du sud\u00A0; Kevin a suivi au large \u2014 sans atterrissage)',
         deaths: null,
         deathsNote:
           'The Solomon Islands NDMO and National Emergency Operation Centre published response plans and assessment deployments but no fatality figure. Not zero \u2014 never reported.',
         deathsNoteFr:
           "Le NDMO des Îles Salomon et le Centre national des opérations d'urgence ont publié des plans de réponse et des déploiements d'évaluation, mais aucun bilan de décès. Pas zéro \u2014 jamais déclaré.",
         dodge: 0,
-        fact: "Judy crossed the small islands of southern Temotu Province as a Category 1 system on the day it was named. Tikopia and Anuta, the province's two most remote islands, were assessed as worst affected, with damage to fruit trees and other livelihood sources. The assessment team, carried by patrol boat via Lata, reached Tikopia on 13 March, 14 days after the storm.",
+        fact: "Judy passed close to the small islands of southern Temotu Province as a Category 1 system on the day it was named. Tikopia and Anuta, the province's two most remote islands, were assessed as worst affected, with damage to fruit trees and other livelihood sources. The assessment team, carried by patrol boat via Lata, reached Tikopia on 13 March, 14 days after the storm.",
         factFr:
-          "Judy a traversé les petites îles du sud de la province de Temotu en tant que système de catégorie 1 le jour même où il a été nommé. Tikopia et Anuta, les deux îles les plus isolées de la province, ont été évaluées comme les plus touchées, avec des dégâts aux arbres fruitiers et à d'autres sources de subsistance. L'équipe d'évaluation, transportée par un patrouilleur via Lata, a atteint Tikopia le 13 mars, 14 jours après le cyclone.",
-        lead: "The storm's first landfall was on the islands it would take 14 days to reach.",
-        leadFr: "Le premier atterrissage du cyclone a eu lieu sur les îles qu'il faudrait 14 jours pour atteindre.",
+          "Judy est passé près des petites îles du sud de la province de Temotu en tant que système de catégorie 1 le jour même où il a été nommé. Tikopia et Anuta, les deux îles les plus isolées de la province, ont été évaluées comme les plus touchées, avec des dégâts aux arbres fruitiers et à d'autres sources de subsistance. L'équipe d'évaluation, transportée par un patrouilleur via Lata, a atteint Tikopia le 13 mars, 14 jours après le cyclone.",
+        lead: 'The storm first passed close to the islands it would take 14 days to reach.',
+        leadFr: "Le cyclone est d'abord passé près des îles qu'il faudrait 14 jours pour atteindre.",
       },
       {
         name: 'Vanuatu',
@@ -422,12 +422,12 @@ const STORM_DETAIL = {
         // no casualties in terms. The most load-bearing zero on the roster.
         deaths: 0,
         dodge: 0,
-        fact: 'Combined figures for both cyclones. The Government of Vanuatu\u2019s Post-Disaster Needs Assessment reports no casualties. 197,388 people (43,623 households) were assessed as affected, around 66% of the population, with roughly 90% of houses in Shefa and Tafea destroyed or severely damaged. A separate figure of 251,346 circulates and measures something else \u2014 people exposed to Category 2\u20133 winds, not people assessed as affected. Two earthquakes, magnitudes 6.5 and 5.4, struck off Espiritu Santo on 3 March in the middle of it.',
+        fact: 'Combined figures for both cyclones. The Government of Vanuatu\u2019s Post-Disaster Needs Assessment reports no casualties. 197,388 people (43,623 households) were assessed as affected, around 66% of the population, with roughly 90% of houses in Shefa and Tafea destroyed or severely damaged (NDMO via OCHA). A separate figure of 251,346 circulates and measures something else \u2014 people exposed to Category 2\u20133 winds, not people assessed as affected. Two earthquakes, magnitudes 6.5 and 5.4, struck off Espiritu Santo on 3 March in the middle of it.',
         factFr:
-          "Chiffres combinés pour les deux cyclones. L'évaluation des besoins post-catastrophe du gouvernement de Vanuatu ne recense aucune victime. 197\u00A0388 personnes (43\u00A0623 foyers) ont été évaluées comme touchées, soit environ 66\u00A0% de la population, avec environ 90\u00A0% des maisons de Shefa et Tafea détruites ou gravement endommagées. Un autre chiffre de 251\u00A0346 circule et mesure autre chose \u2014 les personnes exposées à des vents de catégorie 2 à 3, non les personnes évaluées comme touchées. Deux séismes, de magnitude 6,5 et 5,4, ont frappé au large d'Espiritu Santo le 3 mars, en plein milieu de l'épisode.",
-        lead: 'Two Category 4 landfalls in 48 hours, nine tenths of the housing in two provinces gone, and not one person killed.',
+          "Chiffres combinés pour les deux cyclones. L'évaluation des besoins post-catastrophe du gouvernement de Vanuatu ne recense aucune victime. 197\u00A0388 personnes (43\u00A0623 foyers) ont été évaluées comme touchées, soit environ 66\u00A0% de la population, avec environ 90\u00A0% des maisons de Shefa et Tafea détruites ou gravement endommagées (NDMO, via l'OCHA). Un autre chiffre de 251\u00A0346 circule et mesure autre chose \u2014 les personnes exposées à des vents de catégorie 2 à 3, non les personnes évaluées comme touchées. Deux séismes, de magnitude 6,5 et 5,4, ont frappé au large d'Espiritu Santo le 3 mars, en plein milieu de l'épisode.",
+        lead: 'Two Category 4 landfalls in 48 hours, nine tenths of the housing in two provinces destroyed or severely damaged, and not one person killed.',
         leadFr:
-          "Deux atterrissages de catégorie 4 en 48 heures, neuf dixièmes des habitations de deux provinces disparues, et pas une seule personne tuée.",
+          "Deux atterrissages de catégorie 4 en 48 heures, neuf dixièmes des habitations de deux provinces détruites ou gravement endommagées, et pas une seule personne tuée.",
       },
     ],
     sources: [
