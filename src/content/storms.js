@@ -447,6 +447,34 @@ const STORM_DETAIL = {
           },
         url: 'https://reliefweb.int/report/vanuatu/vanuatu-tropical-cyclones-judy-kevin-situation-report-no1-10-march-2023',
       },
+      {
+        label: {
+          en: 'Tropical Cyclones Judy and Kevin \u2014 situation report 4 (22 March 2023), UN OCHA / ReliefWeb',
+          fr: 'Cyclones tropicaux Judy et Kevin \u2014 rapport de situation n°\u00A04 (22 mars 2023), OCHA de l’ONU / ReliefWeb',
+        },
+        url: 'https://reliefweb.int/report/vanuatu/vanuatu-tropical-cyclone-judy-and-tropical-cyclone-kevin-situation-report-no-4-22-march-2023',
+      },
+      {
+        label: {
+          en: 'NDC and N-DOC deploy assessment team to support Temotu P-DOC \u2014 Government of Solomon Islands (10 March 2023)',
+          fr: 'Le NDC et le N-DOC déploient une équipe d’évaluation en appui au P-DOC de Temotu \u2014 gouvernement des Îles Salomon (10 mars 2023)',
+        },
+        url: 'https://reliefweb.int/report/solomon-islands/ndc-and-n-doc-deploys-assessment-team-support-temotu-p-doc',
+      },
+      {
+        label: {
+          en: 'Multi-sectoral assessment for Tikopia and Anuta completed \u2014 Government of Solomon Islands (20 March 2023)',
+          fr: 'Évaluation multisectorielle achevée à Tikopia et Anuta \u2014 gouvernement des Îles Salomon (20 mars 2023)',
+        },
+        url: 'https://reliefweb.int/report/solomon-islands/multi-sectoral-assessment-tikopia-and-anuta-completed',
+      },
+      {
+        label: {
+          en: 'Tropical Cyclone Judy \u2014 RSMC Nadi best track, IBTrACS v04r01 (2023055S14184)',
+          fr: 'Cyclone tropical Judy \u2014 trajectoire de référence du RSMC Nadi, IBTrACS v04r01 (2023055S14184)',
+        },
+        url: 'https://ncics.org/ibtracs/index.php?name=v04r01-2023055S14184',
+      },
     ],
   },
   lola: {
