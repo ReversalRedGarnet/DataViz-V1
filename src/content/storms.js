@@ -7,9 +7,10 @@ import roster from './roster.json'
 //
 // Applied evenly, which is the whole point. A roster picked for the story it
 // tells is not evidence of anything; a roster picked by a stated rule can be
-// checked by a reader who disagrees with it. That is why EXCLUDED below is
-// rendered on the page rather than kept in a comment -- the storms the rule
-// throws out are what make the ones it keeps mean something.
+// checked by a reader who disagrees with it. That is why the storms the rule
+// throws out are named on the page, in the Method section's prose
+// (components/MethodPanel.jsx), rather than kept in a comment -- they are what
+// make the ones it keeps mean something.
 //
 // WHERE THE SPLIT FALLS, AND WHY THERE IS ONE. The facts the rule determines --
 // id, name, year, label, and which in-scope nations each storm struck -- live in
@@ -21,7 +22,7 @@ import roster from './roster.json'
 //
 // The two halves are merged by id below, and the merge THROWS AT IMPORT TIME if
 // either side has an entry the other does not. A roster that disagrees with
-// itself is precisely what the exclusions section exists to rule out, so this
+// itself is precisely what naming the exclusions exists to rule out, so this
 // fails the build rather than the reader.
 //
 // Each entry in STORM_DETAIL is keyed by its id in roster.json:
@@ -469,52 +470,6 @@ export function localizeStorm(storm, language = 'en') {
     ...storm,
     note: storm.noteFr ?? storm.note,
     profile: storm.profile?.map((row) => localizeStormRow(row, language)),
-  }
-}
-
-// Storms the rule throws out. Shown on the page, because a roster is only
-// defensible if the near-misses are visible: a reader who suspects the list was
-// picked to suit the argument can check these and see that at least one
-// exclusion cost the argument something.
-//
-// `reason`/`cost` carry *Fr siblings, same convention as STORM_DETAIL above;
-// localizeExcluded() resolves them.
-export const EXCLUDED = [
-  {
-    name: 'Cyclone Yasa',
-    year: 2020,
-    reason: 'Severe, but within these four nations it struck Fiji alone.',
-    reasonFr: "Sévère, mais parmi ces quatre nations, il n'a touché que Fidji.",
-    cost: 'Excluding it weakens the case: a second severe cyclone in 2020 would have made that year look far worse. The rule is applied anyway, or it is not a rule.',
-    costFr:
-      "L'exclure affaiblit la démonstration\u00A0: un second cyclone sévère en 2020 aurait rendu cette année bien pire en apparence. La règle est appliquée malgré tout, sans quoi ce n'en serait pas une.",
-  },
-  {
-    name: 'Cyclone Ana',
-    year: 2021,
-    reason: 'Fiji only.',
-    reasonFr: 'Fidji uniquement.',
-  },
-  {
-    name: 'Cyclone Cody',
-    year: 2022,
-    reason: 'Fiji only.',
-    reasonFr: 'Fidji uniquement.',
-  },
-  {
-    name: 'Cyclone Rae',
-    year: 2022,
-    reason: 'Did not reach severe intensity, and caused no reported deaths.',
-    reasonFr: "N'a pas atteint une intensité sévère, et n'a causé aucun décès signalé.",
-  },
-]
-
-export function localizeExcluded(entry, language = 'en') {
-  if (!entry || language !== 'fr') return entry
-  return {
-    ...entry,
-    reason: entry.reasonFr ?? entry.reason,
-    cost: entry.costFr ?? entry.cost,
   }
 }
 
