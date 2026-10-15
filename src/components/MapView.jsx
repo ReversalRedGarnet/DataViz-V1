@@ -75,7 +75,7 @@ const STRINGS = {
       `Sélectionner ${name}. Non touché par ${stormName}\u00A0; affiché à des fins de comparaison.`,
     didNotReach: (stormName, name) => `${stormName} n\u2019a pas touché ${name}.`,
     deathsNeverReported: 'Décès jamais recensés.',
-    deathsReported: (n) => `${n} ${pluralize(n, { one: 'décès', other: 'décès' }, 'fr')} recensés.`,
+    deathsReported: (n) => `${n} ${pluralize(n, { one: 'décès recensé', other: 'décès recensés' }, 'fr')}.`,
     selectedTapDeselect: 'Sélectionné — touchez à nouveau pour désélectionner.',
     tapToSwap: 'Touchez pour remplacer dans la comparaison.',
     tapToCompare: 'Touchez pour comparer avec votre premier choix.',
