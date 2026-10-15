@@ -82,20 +82,22 @@ export default function SeriesLegend({ styles, pinned, onPin, className = '' }) 
           )
         }
 
-        // role="note" plus an explicit name: a focusable <li> with neither
-        // announces as an unlabelled list item, and the line preview that
-        // tells the series apart is drawn in an aria-hidden swatch.
+        // role="note" plus an explicit name: a focusable element with neither
+        // announces as unlabelled, and the line preview that tells the series
+        // apart is drawn in an aria-hidden swatch. The note is a div inside
+        // the <li> rather than the <li> itself, so the list stays a valid list.
         return (
-          <li
-            key={nation}
-            tabIndex={0}
-            role="note"
-            aria-label={t.focusNote(displayName)}
-            className="flex cursor-help items-center gap-2 rounded text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            {...highlightHandlers(nation, setHighlight)}
-          >
-            {swatch}
-            {displayName}
+          <li key={nation}>
+            <div
+              tabIndex={0}
+              role="note"
+              aria-label={t.focusNote(displayName)}
+              className="flex cursor-help items-center gap-2 rounded text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              {...highlightHandlers(nation, setHighlight)}
+            >
+              {swatch}
+              {displayName}
+            </div>
           </li>
         )
       })}

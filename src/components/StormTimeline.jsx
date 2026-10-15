@@ -253,23 +253,27 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
       {/* The cards take focus so a keyboard user can reach the cross-chart
           highlight, which is otherwise pointer-only. Each carries its own full
           sentence, because a focusable element with no accessible name is worse
-          than one that cannot be focused at all. */}
+          than one that cannot be focused at all. The role and focus sit on a
+          div inside the <li>, not on the <li> itself: a list item given
+          another role stops being a list item, and the <ul> around it stops
+          being a valid list. */}
       <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 short:mt-4 short:gap-2.5">
         {counts.map(({ nation, count }) => (
-          <li
-            key={nation}
-            tabIndex={0}
-            role="note"
-            aria-label={t.countAria(count, nationListInProse([nation], language), ROSTER_START, ROSTER_END)}
-            className="cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 short:p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
-            {...highlightHandlers(nation, setHighlight)}
-          >
-            <p aria-hidden="true" className="type-figure text-2xl leading-none">
-              {count}
-            </p>
-            <p aria-hidden="true" className="mt-1 text-xs leading-snug opacity-70">
-              {t.strucRow(nationListInProse([nation], language))}
-            </p>
+          <li key={nation}>
+            <div
+              tabIndex={0}
+              role="note"
+              aria-label={t.countAria(count, nationListInProse([nation], language), ROSTER_START, ROSTER_END)}
+              className="h-full cursor-help rounded-xl border border-ink/10 bg-surface/60 p-3 short:p-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
+              {...highlightHandlers(nation, setHighlight)}
+            >
+              <p aria-hidden="true" className="type-figure text-2xl leading-none">
+                {count}
+              </p>
+              <p aria-hidden="true" className="mt-1 text-xs leading-snug opacity-70">
+                {t.strucRow(nationListInProse([nation], language))}
+              </p>
+            </div>
           </li>
         ))}
       </ul>
