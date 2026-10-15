@@ -1,50 +1,5 @@
 [
   {
-    "nation": "Vanuatu",
-    "year": 2013,
-    "tourist_arrivals_index": 357000.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2014,
-    "tourist_arrivals_index": 329000.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2015,
-    "tourist_arrivals_index": 287000.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2016,
-    "tourist_arrivals_index": 351600.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2017,
-    "tourist_arrivals_index": 332700.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2018,
-    "tourist_arrivals_index": 350200.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2019,
-    "tourist_arrivals_index": 256000.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2020,
-    "tourist_arrivals_index": 82400.0
-  },
-  {
-    "nation": "Vanuatu",
-    "year": 2022,
-    "tourist_arrivals_index": 65000.0
-  },
-  {
     "nation": "Fiji",
     "year": 2013,
     "tourist_arrivals_index": 769000.0
@@ -103,6 +58,51 @@
     "nation": "Fiji",
     "year": 2024,
     "tourist_arrivals_index": 928938.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2013,
+    "tourist_arrivals_index": 357000.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2014,
+    "tourist_arrivals_index": 329000.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2015,
+    "tourist_arrivals_index": 287000.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2016,
+    "tourist_arrivals_index": 351600.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2017,
+    "tourist_arrivals_index": 332700.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2018,
+    "tourist_arrivals_index": 350200.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2019,
+    "tourist_arrivals_index": 256000.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2020,
+    "tourist_arrivals_index": 82400.0
+  },
+  {
+    "nation": "Vanuatu",
+    "year": 2022,
+    "tourist_arrivals_index": 65000.0
   },
   {
     "nation": "Tonga",

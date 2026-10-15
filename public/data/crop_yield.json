@@ -1,5 +1,65 @@
 [
   {
+    "nation": "Fiji",
+    "year": 2013,
+    "crop_yield_index": 30994.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2014,
+    "crop_yield_index": 33982.4
+  },
+  {
+    "nation": "Fiji",
+    "year": 2015,
+    "crop_yield_index": 38954.8
+  },
+  {
+    "nation": "Fiji",
+    "year": 2016,
+    "crop_yield_index": 32766.6
+  },
+  {
+    "nation": "Fiji",
+    "year": 2017,
+    "crop_yield_index": 37019.1
+  },
+  {
+    "nation": "Fiji",
+    "year": 2018,
+    "crop_yield_index": 38894.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2019,
+    "crop_yield_index": 39657.2
+  },
+  {
+    "nation": "Fiji",
+    "year": 2020,
+    "crop_yield_index": 33526.1
+  },
+  {
+    "nation": "Fiji",
+    "year": 2021,
+    "crop_yield_index": 30787.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2022,
+    "crop_yield_index": 32757.3
+  },
+  {
+    "nation": "Fiji",
+    "year": 2023,
+    "crop_yield_index": 36765.5
+  },
+  {
+    "nation": "Fiji",
+    "year": 2024,
+    "crop_yield_index": 26793.8
+  },
+  {
     "nation": "Solomon Islands",
     "year": 2013,
     "crop_yield_index": 7479.8
@@ -118,66 +178,6 @@
     "nation": "Vanuatu",
     "year": 2024,
     "crop_yield_index": 5962.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2013,
-    "crop_yield_index": 30994.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2014,
-    "crop_yield_index": 33982.4
-  },
-  {
-    "nation": "Fiji",
-    "year": 2015,
-    "crop_yield_index": 38954.8
-  },
-  {
-    "nation": "Fiji",
-    "year": 2016,
-    "crop_yield_index": 32766.6
-  },
-  {
-    "nation": "Fiji",
-    "year": 2017,
-    "crop_yield_index": 37019.1
-  },
-  {
-    "nation": "Fiji",
-    "year": 2018,
-    "crop_yield_index": 38894.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2019,
-    "crop_yield_index": 39657.2
-  },
-  {
-    "nation": "Fiji",
-    "year": 2020,
-    "crop_yield_index": 33526.1
-  },
-  {
-    "nation": "Fiji",
-    "year": 2021,
-    "crop_yield_index": 30787.5
-  },
-  {
-    "nation": "Fiji",
-    "year": 2022,
-    "crop_yield_index": 32757.3
-  },
-  {
-    "nation": "Fiji",
-    "year": 2023,
-    "crop_yield_index": 36765.5
-  },
-  {
-    "nation": "Fiji",
-    "year": 2024,
-    "crop_yield_index": 26793.8
   },
   {
     "nation": "Tonga",
