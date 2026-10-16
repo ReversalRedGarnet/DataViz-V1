@@ -220,9 +220,9 @@
   }
 
   /*
-    THE POEM'S THEME TOGGLE, CARRIED OUT TO THE PANEL EDGE.
+    THE POEM'S LANGUAGE TOGGLE, CARRIED OUT TO THE PANEL EDGE.
 
-    With the header faded out the poem hosts the only theme control on that
+    With the header faded out the poem hosts the only language control on that
     slide, and it has to read as a page-level control rather than as the first
     line of the poem's layout. Right-aligning it inside .section-content is not
     enough: that column is `narrow` (48rem), so the button lands well inside
@@ -535,7 +535,7 @@
     Used to be two motions here: the track sliding sideways, and the entering
     panel's contents settling in a beat later along the same axis. Both are
     gone, replaced by the ripple-droplet transition every page change and
-    theme switch now shares -- see utils/rippleTransition.js.
+    language switch now shares -- see utils/rippleTransition.js.
 
     The `direction` state and its data-dir attribute went with them. They
     outlived the animation they were computed for by some time, threaded from

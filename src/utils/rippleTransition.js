@@ -4,11 +4,12 @@ import { prefersReducedMotion } from './motion.js'
 // The one page-change animation for the whole site: a droplet landing at the
 // point the reader pressed, rings rippling outward from it, and the incoming
 // page fading into view *through* those rings as they dissolve, rather than
-// only appearing once the ripple has finished playing. Used for both jobs
-// that change what is on screen -- the deck moving between slides
-// (useDeck.js) and the theme flipping (ThemeToggle.jsx) -- so a reader sees
-// the same motion mean the same thing everywhere, rather than a page-slide
-// here and a colour-wipe there.
+// only appearing once the ripple has finished playing. Used for both jobs a
+// reader's press changes the whole page for -- the deck moving between slides
+// (useDeck.js) and the language flipping (LanguageToggle.jsx) -- so a reader
+// sees the same motion mean the same thing everywhere, rather than a
+// page-slide here and a wipe there. A system theme change is not one of them:
+// nobody pressed anything, and it switches instantly (see hooks/useTheme.jsx).
 //
 // Built on plain WAAPI (opacity + transform), not the View Transitions API.
 // That API would have done the old/new crossfade for free, but only in

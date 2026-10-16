@@ -30,7 +30,6 @@
 //     can say so accurately. Cyclones passes no children.
 //   style -- forwarded onto the <footer>
 import BackgroundPattern from './BackgroundPattern.jsx'
-import ThemeToggle from './ThemeToggle.jsx'
 import LanguageToggle from './LanguageToggle.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
@@ -91,16 +90,15 @@ export default function CitationPanel({ sources = [], aboutTitle, children, styl
           content and centre that". An explicit width keeps the column the same
           measure in both layouts. */}
       <div className="section-content relative space-y-8 text-sm">
-        {/* THE SAME PAIR THE POEM CARRIES, AND FOR THE SAME REASON: with the
-            header faded out on this bookend too (see `chromeless` in App.jsx),
-            neither control is reachable any other way from here. See the note
-            in IslanderPoem.jsx -- a reader who set French on slide one still
-            wants French here without it having silently reverted, which is
-            why this pair exists even though the theme toggle alone was judged
-            unnecessary before French existed. */}
+        {/* THE SAME CONTROL THE POEM CARRIES, AND FOR THE SAME REASON: with
+            the header faded out on this bookend too (see `chromeless` in
+            App.jsx), the language toggle is not reachable any other way from
+            here. See the note in IslanderPoem.jsx -- a reader who set French on
+            slide one still wants French here without it having silently
+            reverted. There is no theme control: the site follows the system
+            setting (hooks/useTheme.jsx). */}
         <div className="flex items-center justify-end gap-1">
           <LanguageToggle />
-          <ThemeToggle />
         </div>
 
         <div>

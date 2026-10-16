@@ -82,6 +82,7 @@
       content="Six severe cyclones, four Pacific nations, and four different recoveries."
     />
     <meta name="twitter:image" content="https://data-viz-v1.vercel.app/og-image.png" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#EAF3F7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1B2226" media="(prefers-color-scheme: dark)" />
   </head>
@@ -89,18 +90,16 @@
     <!--
       Runs before React mounts, and before first paint, so a dark-mode visitor
       doesn't get a frame of the light palette. Deliberately duplicates
-      getInitialTheme() in src/hooks/useTheme.jsx (same 'ripple-theme' key,
-      same stored-choice-beats-OS-preference order) -- an import couldn't run
-      early enough. Keep the two in step.
+      systemTheme() in src/hooks/useTheme.jsx (the system setting is the only
+      source; no stored choice is read) -- an import couldn't run early enough.
+      Keep the two in step. Live changes after load are handled there.
     -->
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem('ripple-theme')
-          var dark = stored === 'dark' || (!stored && matchMedia('(prefers-color-scheme: dark)').matches)
-          if (dark) document.documentElement.classList.add('dark')
+          if (matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.classList.add('dark')
         } catch (e) {
-          /* private mode, storage disabled -- fall through to light */
+          /* no matchMedia -- fall through to light */
         }
       })()
     </script>

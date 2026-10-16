@@ -36,13 +36,11 @@
 @tailwind utilities;
 
 /*
-  The theme toggle and the deck's page changes used to each animate the root
-  differently -- a View Transitions crossfade for one, left alone for the
-  other. Both now go through the same ripple-droplet transition
-  (utils/rippleTransition.js), which is plain WAAPI rather than the View
-  Transitions API, so there is nothing left here to scope to a sweep class or
-  to opt out of under reduced motion: rippleTransition.js checks that itself,
-  once, before it creates anything.
+  The deck's page changes and the language toggle go through one
+  ripple-droplet transition (utils/rippleTransition.js), which is plain WAAPI
+  rather than the View Transitions API, so there is nothing left here to scope
+  to a sweep class or to opt out of under reduced motion: rippleTransition.js
+  checks that itself, once, before it creates anything.
 */
 
 /*

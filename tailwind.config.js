@@ -1,8 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 
 export default {
-  // Use class-based dark mode so users can override and persist
-  // their preferred theme independently of the OS setting.
+  // Class-based, but the class only ever mirrors the system setting: the
+  // inline script in index.html sets it before first paint and
+  // hooks/useTheme.jsx keeps it in step with live changes. Kept as a class
+  // rather than 'media' because the generated token block
+  // (scripts/build-tokens.mjs) and a few rules in styles/ select on `.dark`.
   darkMode: 'class',
 
   content: [

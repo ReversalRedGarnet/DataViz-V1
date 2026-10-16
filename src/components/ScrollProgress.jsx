@@ -86,7 +86,7 @@ export default function ScrollProgress({ progress = 0 }) {
   // Chase the true position rather than jumping to it, and do it WITHOUT React.
   //
   // This used to call setDrawn() on every frame, which re-rendered the whole
-  // Header subtree -- SectionNav, StoryStateBar and ThemeToggle included --
+  // Header subtree -- SectionNav, StoryStateBar and the toggles included --
   // sixty times a second for the length of every deck movement, to move one
   // canoe a few pixels. The eased position is not application state; it is an
   // attribute on three SVG nodes. Writing it straight to them through refs is
