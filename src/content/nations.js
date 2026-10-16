@@ -33,8 +33,9 @@ export const NATION_COORDS = Object.fromEntries(scope.nations.map((n) => [n.name
 // "Federated", so long names get a real short form and anything not listed is
 // left alone.
 //
-// The in-scope four come from nations.json; the rest are here so a future
-// hazard page covering more of the region gets the same treatment for free.
+// The in-scope four come from nations.json; the rest are here so that if the
+// scope ever widens to more of the region, those names get the same
+// treatment for free.
 const SHORT_NAMES = {
   'Federated States of Micronesia': 'Micronesia',
   'Papua New Guinea': 'PNG',

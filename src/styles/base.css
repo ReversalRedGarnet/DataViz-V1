@@ -48,9 +48,9 @@
   }
 
   /*
-    The --color-* variables are NOT declared here any more. They live in
+    The --color-* variables are NOT declared here. They live in
     styles/tokens.css, which is generated from styles/tokens.js -- the one place
-    a theme colour is now typed. utils/theme.js reads the same module, so the
+    a theme colour is typed. utils/theme.js reads the same module, so the
     hex the chart renderers use and the RGB triples Tailwind's <alpha-value>
     syntax needs cannot drift apart. See the note at the top of tokens.js.
   */

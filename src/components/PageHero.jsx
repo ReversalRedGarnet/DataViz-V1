@@ -1,7 +1,8 @@
 import Section from './Section.jsx'
 
-// The site's one hero pattern, shared by every page. Hero.jsx is this with
-// any one storm's copy hardcoded.
+// The title card's layout: eyebrow, the one <h1>, a lead paragraph, and
+// whatever goes under it. Hero.jsx is its only caller and supplies the words,
+// the nation nodes and the storm dots; this file only arranges them.
 //
 // Props:
 //   kicker -- short uppercase framing line above the headline
@@ -10,16 +11,11 @@ import Section from './Section.jsx'
 //   className -- forwarded to Section, appended to the centring class. The
 //     interactive hero uses it to become a positioned, clipping box for the
 //     atmosphere it draws behind itself.
-//   children -- anything the page wants under the lead paragraph: Hero.jsx puts
-//     its nation nodes, its storm dots and its call to action here. Passed as
-//     children rather than as more named props because what goes there is one
-//     page's composition, not a shape every hero shares.
+//   children -- anything to show under the lead paragraph: Hero.jsx puts its
+//     nation nodes, its storm dots and its call to action here. Passed as
+//     children rather than as more named props because what goes there is
+//     one slide's composition.
 //   backdrop -- forwarded to Section; see content/patterns.js
-// THREE PROPS WENT WITH THE CLEANUP, and all three were unreachable. `cta` was
-// never passed. `headlineClassName` was never passed either, and its comment
-// pointed at a Home.jsx this repository does not contain. The eyebrow branched
-// on an 'ink' background that Section had already stopped offering, so it could
-// only ever take the one path.
 export default function PageHero({
   kicker,
   headline,

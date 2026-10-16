@@ -59,7 +59,9 @@ export default {
       },
 
       colors: {
-        // Theme-aware colors defined in index.css.
+        // Theme-aware colours. The values are defined in src/styles/tokens.js,
+        // which scripts/build-tokens.mjs turns into the --color-* custom
+        // properties (light on :root, dark on .dark).
         // <alpha-value> lets Tailwind's opacity modifiers (e.g. text-ink/70)
         // substitute the real opacity value in place of this placeholder --
         // without it, every /NN utility built on these four colors silently
@@ -68,8 +70,9 @@ export default {
         sand: 'rgb(var(--color-sand) / <alpha-value>)',
         panel: 'rgb(var(--color-panel) / <alpha-value>)',
         surface: 'rgb(var(--color-surface) / <alpha-value>)',
-        // Text-safe ocean, for eyebrows. Not interchangeable with `ocean`,
-        // which is decorative only -- see the note in index.css.
+        // Text-safe ocean, for eyebrows and other small text. The decorative
+        // ocean (#5B8FA3) cannot carry text -- see the note on `accent` in
+        // src/styles/tokens.js.
         accent: 'rgb(var(--color-accent) / <alpha-value>)',
       },
     },

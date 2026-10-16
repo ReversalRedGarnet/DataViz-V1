@@ -1,5 +1,6 @@
-// The bordered "here's what changed" panel below a hazard's trend charts. Each
-// hazard supplies its own comparison logic; the card is the same.
+// The bordered "here's what changed" panel under the ripple chain's charts.
+// The comparison itself is worked out in utils/insights.js; this component
+// only lays the card out.
 //
 // Props:
 //   title -- panel heading

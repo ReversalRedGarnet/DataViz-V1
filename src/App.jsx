@@ -95,7 +95,7 @@ const DATA_SOURCES = [
 // filtered from one, so where the story opens out is a structural fact of this
 // file rather than an index somebody has to keep in step.
 // Resolved per-language rather than a module constant, since 'islander-poem'
-// (and every PAGE_SECTIONS label) now carries both languages -- see
+// (and every PAGE_SECTIONS label) carries both languages -- see
 // sectionLabel() in content/pageSections.js.
 function sectionLabels(language) {
   const t = APP_STRINGS[language]

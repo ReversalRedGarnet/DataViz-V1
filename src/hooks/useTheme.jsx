@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom'
 import { withoutMotion } from '../utils/motion.js'
 
 // Site-wide light/dark state. Context rather than props because every
-// D3-drawing component on every page reads it (axis text and the wave divider
+// D3-drawing component on every slide reads it (axis text and the wave divider
 // need a real colour string, not a Tailwind class -- see theme.js).
 //
 // The visitor's system setting is the only source. There is no toggle and no

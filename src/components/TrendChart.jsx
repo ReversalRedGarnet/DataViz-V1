@@ -76,10 +76,9 @@ const STRINGS = {
 //     keeps the grid's column spans on the element that has them.
 //   className -- layout hook (e.g. sm:col-span-2 for an odd one out)
 //
-// The chart holds its draw until the card is on screen. These sit several
-// screens below the fold on every page that uses them, and drawing at mount
-// meant the entrance animation had always finished by the time anyone scrolled
-// down to it.
+// The chart holds its draw until the card is on screen. These can sit below
+// the fold of their slide, and drawn at mount, the entrance animation would
+// have finished before anyone scrolled down to it.
 export default function TrendChart({
   label,
   allRows,
