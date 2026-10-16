@@ -79,7 +79,6 @@ const STRINGS = {
 //
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
-//   style -- forwarded to Section (entrance stagger)
 // People affected and economic loss are deliberately absent from this view --
 // see the note under the grid -- so this map covers the four metrics that do
 // appear, and a fifth appearing later would be added here rather than counted.
@@ -90,7 +89,7 @@ const DIVERGENCE_FIGURES = {
   tourist_arrivals: 'divergence-tourism',
 }
 
-export default function DivergenceView({ data, dataError, storm, style }) {
+export default function DivergenceView({ data, dataError, storm }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
   const { language } = useLanguage()
@@ -124,18 +123,17 @@ export default function DivergenceView({ data, dataError, storm, style }) {
     data,
     error: dataError,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
   })
   if (blocked) return blocked
   if (panels.length === 0) {
-    return <EmptyState style={style}>{t.notEnoughData(storm.year)}</EmptyState>
+    return <EmptyState>{t.notEnoughData(storm.year)}</EmptyState>
   }
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('divergence')}>
+    <Section backdrop={scatterBackdrop('divergence')}>
       <div ref={containerRef} className="relative">
         <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
         <h2 className="type-h2 mb-2">{t.heading(storm.name)}</h2>

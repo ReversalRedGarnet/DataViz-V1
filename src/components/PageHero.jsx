@@ -14,7 +14,6 @@ import Section from './Section.jsx'
 //     its nation nodes, its storm dots and its call to action here. Passed as
 //     children rather than as more named props because what goes there is one
 //     page's composition, not a shape every hero shares.
-//   style -- forwarded to Section
 //   backdrop -- forwarded to Section; see content/patterns.js
 // THREE PROPS WENT WITH THE CLEANUP, and all three were unreachable. `cta` was
 // never passed. `headlineClassName` was never passed either, and its comment
@@ -28,13 +27,11 @@ export default function PageHero({
   className = '',
   backdrop,
   children,
-  style,
 }) {
   return (
     <Section
       backdrop={backdrop}
       className={`text-center ${className}`}
-      style={style}
     >
       <p className="type-eyebrow mx-auto max-w-2xl text-accent">{kicker}</p>
       <h1 className="mx-auto mt-4 max-w-3xl font-serif text-3xl font-semibold tracking-tight md:text-5xl">

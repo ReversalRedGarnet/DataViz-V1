@@ -114,7 +114,7 @@ function ConvergeDiverge({ inView }) {
   )
 }
 
-export default function StoryConclusion({ storm, selectedNations, onReset, style }) {
+export default function StoryConclusion({ storm, selectedNations, onReset }) {
   const [sectionRef, inView] = useInView({ threshold: 0.3 })
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -122,7 +122,6 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const blocked = sectionGuard({
     data: true,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -141,7 +140,7 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const comparedClause = pair.length === 2 ? t.comparedClause(nationListInProse(pair, language)) : ''
 
   return (
-    <Section width="narrow" style={style} backdrop={scatterBackdrop('conclusion')}>
+    <Section width="narrow" backdrop={scatterBackdrop('conclusion')}>
       <div ref={sectionRef}>
         <p className="type-eyebrow mb-1 text-accent">{t.whatShowed(storm.name)}</p>
         <h2 className="type-h2 mb-3">{t.heading}</h2>

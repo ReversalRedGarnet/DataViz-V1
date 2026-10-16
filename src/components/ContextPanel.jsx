@@ -103,13 +103,12 @@ const STRINGS = {
 //
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
-//   style -- forwarded to Section (entrance stagger)
 const CONTEXT_FIGURES = {
   sst_anomaly: 'context-sst',
   ghg_per_capita: 'context-ghg',
 }
 
-export default function ContextPanel({ data, dataError, style }) {
+export default function ContextPanel({ data, dataError }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -160,11 +159,11 @@ export default function ContextPanel({ data, dataError, style }) {
   // The error and loading branches used to be written out here by hand for
   // want of that, and had already drifted from the wording every other section
   // uses.
-  const blocked = sectionGuard({ data, error: dataError, style, subject: t.guardSubject, language })
+  const blocked = sectionGuard({ data, error: dataError, subject: t.guardSubject, language })
   if (blocked) return blocked
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('context')}>
+    <Section backdrop={scatterBackdrop('context')}>
       <div ref={containerRef} className="relative">
         <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
         <h2 className="type-h2 mb-2">{t.heading}</h2>

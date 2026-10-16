@@ -181,8 +181,7 @@ function markerTooltipContent(nation, selected, storm, language = 'en') {
 //   selected -- array of up to two nation names, in the order picked
 //   onToggle -- (name) => void, called on marker click / Enter / Space
 //   onClear -- () => void, clears the current selection
-//   style -- forwarded to the underlying Section
-export default function MapView({ storm, selected, onToggle, onClear, style }) {
+export default function MapView({ storm, selected, onToggle, onClear }) {
   const svgRef = useRef(null)
   const gRef = useRef(null)
   const zoomRef = useRef(null)
@@ -536,7 +535,7 @@ export default function MapView({ storm, selected, onToggle, onClear, style }) {
   const summaryFor = preview ?? selected[selected.length - 1] ?? null
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('map')}>
+    <Section backdrop={scatterBackdrop('map')}>
       <h2 className="type-h2 mb-2">{STRINGS[language].exploreHeading}</h2>
       <p className="prose-column prose-wide prose-short mb-3 text-sm opacity-70">
         {STRINGS[language].exploreBody}

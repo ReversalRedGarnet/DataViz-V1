@@ -105,7 +105,7 @@ const STRINGS = {
   },
 }
 
-export default function BigPicture({ data, dataError, storm, style }) {
+export default function BigPicture({ data, dataError, storm }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
   const eventYear = storm?.year ?? null
@@ -129,7 +129,6 @@ export default function BigPicture({ data, dataError, storm, style }) {
     data,
     error: dataError,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -137,7 +136,7 @@ export default function BigPicture({ data, dataError, storm, style }) {
   if (blocked) return blocked
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('big-picture')}>
+    <Section backdrop={scatterBackdrop('big-picture')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">{t.heading}</h2>
 

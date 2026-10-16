@@ -71,7 +71,7 @@ const STRINGS = {
 // decade strip below. That is the whole interaction: the point is that the
 // reader touches something before the first argument arrives, and finds out
 // that the marks under the headline mean something.
-export default function Hero({ style }) {
+export default function Hero() {
   const { setHighlight } = useNationHighlight()
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -142,7 +142,6 @@ export default function Hero({ style }) {
       // property of this slide having something to touch, not of which
       // atmosphere variant is running. It works the same against one ring.
       className={`hero-atmos relative overflow-hidden ${stirred ? 'is-stirred' : ''}`}
-      style={style}
     >
 
       {/* The thesis, on mobile only. It is in the header at every width from

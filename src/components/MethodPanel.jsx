@@ -106,7 +106,7 @@ const STRINGS = {
   },
 }
 
-export default function MethodPanel({ style }) {
+export default function MethodPanel() {
   const { language } = useLanguage()
   const t = STRINGS[language]
 
@@ -115,7 +115,7 @@ export default function MethodPanel({ style }) {
     // id -- kept even though the content inside is now deliberately plainer,
     // so this page still reads as part of the same site at a glance rather
     // than a pasted-in document.
-    <Section backdrop={scatterBackdrop('method')} style={style}>
+    <Section backdrop={scatterBackdrop('method')}>
       <p className="type-eyebrow mb-1 text-accent">{t.appendix}</p>
       <h2 className="type-h2 mb-6">{t.title}</h2>
 

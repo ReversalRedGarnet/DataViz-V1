@@ -158,7 +158,7 @@ const STRINGS = {
   },
 }
 
-export default function DataDetective({ storm, style }) {
+export default function DataDetective({ storm }) {
   const [picked, setPicked] = useState(null)
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -167,7 +167,6 @@ export default function DataDetective({ storm, style }) {
   const blocked = sectionGuard({
     data: true,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -177,7 +176,7 @@ export default function DataDetective({ storm, style }) {
   const factor = factors.find((f) => f.id === picked) ?? null
 
   return (
-    <Section width="narrow" style={style} backdrop={scatterBackdrop('detective')}>
+    <Section width="narrow" backdrop={scatterBackdrop('detective')}>
       <div>
         <p className="type-eyebrow mb-1 text-accent">{t.beforeConclusion}</p>
         <h2 className="type-h2 mb-2">{t.heading(storm.name)}</h2>

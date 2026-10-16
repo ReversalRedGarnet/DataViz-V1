@@ -75,7 +75,6 @@ const STRINGS = {
 // Props:
 //   selectedId -- id of the chosen storm, or null
 //   onSelect -- (id) => void, toggles selection
-//   style -- forwarded to Section (entrance stagger)
 
 // How much of the region a storm covered, as four pips rather than a fraction.
 // The one comparison worth having pre-attentive when scanning the timeline.
@@ -218,7 +217,7 @@ function StormPreview({ storm, selected, t, language }) {
   )
 }
 
-export default function StormTimeline({ selectedId, onSelect, style }) {
+export default function StormTimeline({ selectedId, onSelect }) {
   const { setHighlight } = useNationHighlight()
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -240,7 +239,7 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
   const delayOf = (id) => STORMS.findIndex((s) => s.id === id) * 260
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('timeline')}>
+    <Section backdrop={scatterBackdrop('timeline')}>
       {/*
         One column, full width. This slide used to be split -- prose left,
         evidence right -- because the prose ran long enough that stacking cost

@@ -273,8 +273,7 @@ function applyScale(g, scale) {
 //   storm -- the selected storm
 //   index -- which documented stop is on the map, from the story state
 //   onIndex -- (i) => void, the only way that position changes
-//   style -- forwarded to the underlying Section (entrance stagger)
-export default function StormJourney({ storm, index = 0, onIndex, style }) {
+export default function StormJourney({ storm, index = 0, onIndex }) {
   // Memoised so it can be a real dependency of the build effect below rather
   // than something that effect closes over and hopes stays in step. `storm`
   // comes from stormById(), a .find() over a module constant, so the same id
@@ -498,7 +497,6 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   const blocked = sectionGuard({
     data: true,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -506,7 +504,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   if (blocked) return blocked
   if (!hasSteps) {
     return (
-      <EmptyState style={style}>
+      <EmptyState>
         {t.notCompiled(storm.name)}
       </EmptyState>
     )
@@ -515,7 +513,6 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   return (
     <Section
       className="journey-section"
-      style={style}
       backdrop={scatterBackdrop('storm-journey')}
     >
       <p className="type-eyebrow mb-1 text-accent">

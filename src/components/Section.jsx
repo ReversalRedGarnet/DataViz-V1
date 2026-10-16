@@ -114,7 +114,6 @@ export default function Section({
   backdrop = null,
   wash = null,
   className = '',
-  style,
   children,
   ...rest
 }) {
@@ -123,7 +122,7 @@ export default function Section({
       className={`animate-pop-in section-frame relative bg-panel px-6 py-14 sm:px-8 md:py-20 ${
         lock ? 'section-lock' : ''
       } ${className}`}
-      style={{ '--content-max': WIDTHS[width] ?? WIDTHS.wide, ...style }}
+      style={{ '--content-max': WIDTHS[width] ?? WIDTHS.wide }}
       {...rest}
     >
       {/* Wash first, then backdrop, then atmosphere: all three sit below

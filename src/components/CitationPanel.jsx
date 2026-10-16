@@ -22,7 +22,6 @@
 //
 // Props:
 //   sources -- array of { label, url }
-//   style -- forwarded onto the <footer>
 import BackgroundPattern from './BackgroundPattern.jsx'
 import LanguageToggle from './LanguageToggle.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -58,7 +57,7 @@ const STRINGS = {
   },
 }
 
-export default function CitationPanel({ sources = [], style }) {
+export default function CitationPanel({ sources = [] }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
   const title = ABOUT_TITLE[language]
@@ -66,7 +65,6 @@ export default function CitationPanel({ sources = [], style }) {
   return (
     <footer
       className="animate-pop-in relative overflow-hidden bg-panel px-6 py-10 text-ink md:py-14"
-      style={style}
     >
       {/* Seeded 'sources', matching this slide's id in App.jsx -- the same
           convention every Section on the site follows, so the scatter here is

@@ -128,7 +128,6 @@ export default function RippleChain({
   selectedNations,
   activeMetric,
   onActiveMetric,
-  style,
 }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { language } = useLanguage()
@@ -181,14 +180,13 @@ export default function RippleChain({
     data,
     error: dataError,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
   })
   if (blocked) return blocked
   if (!selectedNations || selectedNations.length === 0) {
-    return <EmptyState style={style}>{t.chooseCountry}</EmptyState>
+    return <EmptyState>{t.chooseCountry}</EmptyState>
   }
 
   // The thirteen props every chain chart takes, in one place. Both layouts drew
@@ -214,7 +212,7 @@ export default function RippleChain({
   })
 
   return (
-    <Section width="narrow" style={style} backdrop={scatterBackdrop('ripple-chain')}>
+    <Section width="narrow" backdrop={scatterBackdrop('ripple-chain')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">{t.after(storm.name, storm.year)}</h2>
         {/* "2020 in particular carries the pandemic alongside the storm" read
