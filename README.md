@@ -103,7 +103,7 @@ Used only for the per-storm facts in the profile and journey sections, never for
 
 ### Data licences
 
-The MIT licence in `LICENSE` covers the code. It does not cover the data, which keeps its publishers' terms:
+The MIT licence in `LICENSE` covers the code. It does not cover the data. **The data belongs to its original publishers, not to this project**, and keeps their terms: the Pacific Community (SPC) and its Pacific Data Hub, the UN agencies whose figures reach SPC (UNDRR, UN World Population Prospects), Natural Earth for the coastlines, and the governments, UN agencies, met services and news outlets cited for each storm (listed with their exact wording in [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md)). If you reuse any of it, credit them as described below.
 
 - **Pacific Data Hub indicators.** These are published by the Pacific Community (SPC), Statistics for Development Division. The Pacific Data Hub catalogue gives the licence of each of the three dataflows used as "Other (Open)", without naming a specific licence: [Climate Change indicators](https://pacificdata.org/data/dataset/climate-change-indicators-df-climate-change), [Sustainable Development Goal 11](https://pacificdata.org/data/dataset/sustainable-development-goal-11-sustainable-cities-and-communities-df-sdg-11) and [Population projections](https://pacificdata.org/data/dataset/population-projections-df-pop-proj). The Hub's [Terms of Use](https://pacificdata.org/terms-use) say datasets are hosted "under a range of different licences" and that users agree "to comply with the terms of the specific licence applicable to each dataset … This includes attributing the data custodian in the manner specified in the relevant licence". Ripple credits SPC / Pacific Data Hub in its figure captions and on the Sources slide. Four captions still have no source line; see Known Limitations.
 - **Disaster and population figures.** These reach SPC from other publishers. SPC's export credits the people-affected and economic-loss series to the United Nations Office for Disaster Risk Reduction (UNDRR), from the Sendai Framework Monitor, with UNDRR's disclaimer that "Some of the data has not followed an official validation process and may be subject to revision at a later date." It describes the population series as "SPC elaboration on UN data source" and "UN World Population Prospect".
@@ -117,6 +117,38 @@ Ripple is one continuous page (`src/hooks/useDeck.js`) — there is no separate 
 One hook holds everything the reader has chosen: `src/hooks/useStory.js` — the selected storm, the country pair (via `useSelection`), the position along the storm's own path, and which ripple-chain link is currently open. Every section reads these as props rather than keeping a copy, so nothing downstream of a pick can go stale relative to it. Picking a new storm atomically resets the path position, closes the open link, and clears the country pair, since a pair chosen against one storm's damage isn't a pair chosen against another's.
 
 What the URL does carry is a deep link to whichever slide is on screen, written with `history.replaceState` on every move rather than a new history entry per slide, and read on load and on every `hashchange` so an incoming link resolves to that section. A link that doesn't match any current section falls back to the title slide, not the opening poem. That includes every slide after the timeline on a cold load: those sections only exist once a storm has been picked, so a shared `#map` or `#sources` link opens on the title slide, one press from the timeline. What it doesn't carry is the storm, the country pair, or the position on the storm's path — a shared link reopens the piece at the right slide, not at the exact state a previous reader had reached.
+
+## How the code is organised
+
+The site is a single page built with React (which builds the page out of reusable pieces called components) and D3 (which draws the charts and maps). The folders:
+
+```
+index.html              the page shell; loads src/main.jsx, and sets light/dark before first paint
+src/
+  main.jsx              starts React
+  App.jsx               loads the data, holds the reader's choices, lists the slides in order
+  components/           one file per slide (StormTimeline, MapView, RippleChain, ...) and per
+                        piece of interface (Header, SlideFooter, TrendChart, Tooltip, ...)
+  content/              the words and facts: storms.js (the six storms), nations.js,
+                        roster.json and nations.json (scope shared with the pipeline),
+                        pageSections.js (slide names), figures.js (figure numbers), patterns.js
+  hooks/                reusable logic (React "hooks"): which slide is showing (useDeck), the
+                        reader's choices (useStory), the language (useLanguage), the theme
+                        (useTheme), and how a chart gets drawn (useChartCanvas)
+  utils/                plain JavaScript helpers: loading data, the metric list (metrics.js),
+                        colours for D3 (theme.js), the map (map.js)
+    charts/             the D3 code that draws each kind of chart
+  styles/               CSS: the colour tokens (tokens.js), layout, typography, the deck
+public/
+  data/                 the cleaned data the site downloads (metrics.json, plus one file per dataset)
+  land-50m*.json        coastlines for the maps
+data-pipeline/          Python scripts that turn the Pacific Data Hub's CSV exports into public/data/
+scripts/                small Node scripts: build-tokens.mjs (theme colours to CSS), build-land.mjs
+                        (clips the world's coastlines to the Pacific)
+docs/DATA-SOURCES.md    every correction to the storm facts, with its source and exact quote
+```
+
+Good places to start reading: `src/App.jsx` for the overall shape, `src/content/storms.js` for how a storm's facts are stored, `src/hooks/useChartCanvas.js` for how a D3 chart is set up, and `src/hooks/useTheme.jsx` for how light and dark mode work. Every file opens with a short note on what it does.
 
 ## Technical Stack
 
@@ -140,18 +172,57 @@ What the URL does carry is a deep link to whichever slide is on screen, written 
 - ESLint, with `eslint-plugin-react-hooks` and `eslint-plugin-jsx-a11y` — not just the default rule set
 - Deployed on Vercel
 
-## Running It
+## How to run it
 
 The live site is at [data-viz-v1.vercel.app](https://data-viz-v1.vercel.app/).
 
-To run it locally you need Node.js 18.18 or later (it is built and tested on Node 24) and npm. The cleaned data is committed in `public/data/`, so nothing else is needed to run the site:
+### First time, step by step
+
+1. **Install Node.js.** Download the LTS version from [nodejs.org](https://nodejs.org/). Any version from 18.18 works (the site is built and tested on Node 24). Installing Node also installs npm, the tool that downloads the site's libraries. Check both are there by typing these into a terminal:
+
+   ```sh
+   node --version
+   npm --version
+   ```
+
+2. **Get the code**, with [Git](https://git-scm.com/) or by downloading the ZIP from the repository page:
+
+   ```sh
+   git clone https://github.com/Aziel-Orihao/Ripple.git
+   cd Ripple
+   ```
+
+3. **Install the libraries** the site uses (React, D3, Vite and so on). This creates a `node_modules/` folder; it only needs doing once, and again if `package.json` changes:
+
+   ```sh
+   npm install
+   ```
+
+4. **Start the development server:**
+
+   ```sh
+   npm run dev
+   ```
+
+   Open the address it prints (usually <http://localhost:5173/>). The page reloads by itself when you save a change. Press `Ctrl+C` in the terminal to stop it.
+
+5. **Build the finished site** when you want the version a web host would serve. This writes plain HTML, CSS and JavaScript into `dist/`, and `npm run preview` serves that folder so you can check it:
+
+   ```sh
+   npm run build
+   npm run preview
+   ```
+
+You don't need Python or any data downloads for this: the cleaned data is already in `public/data/`.
+
+### All the commands
 
 ```sh
 npm install
 npm run dev       # development server
 npm run build     # production build into dist/
 npm run preview   # serve the production build
-npm run lint      # ESLint
+npm run lint      # check the code with ESLint
 ```
 
 ### Rebuilding the data
