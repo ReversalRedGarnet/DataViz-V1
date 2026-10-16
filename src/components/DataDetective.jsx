@@ -1,3 +1,6 @@
+// The "what do you think explains it?" slide: the reader picks a factor and is
+// told which earlier slide holds the evidence. No scoring, no right answer.
+
 import { useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -37,14 +40,11 @@ import { useLanguage } from '../hooks/useLanguage.jsx'
 // Props:
 //   storm -- the selected storm, for the question's wording
 //
-// `section` is the id of the slide each factor's evidence lives on. It used to
-// sit here unused beside a hand-copied `sectionLabel` string, so the name shown
-// to the reader was a second copy of PAGE_SECTIONS' label with nothing keeping
-// the two in step. The id is looked up below instead: the dead field turned out
-// to be the fix for the duplication.
-//
-// Renamed to `whereToLook` to avoid colliding with pageSections.js's own
-// exported `sectionLabel(section, language)`, which this now calls directly.
+// `section` is the id of the slide each factor's evidence lives on. The name
+// shown to the reader is looked up from that id by whereToLook() below, which
+// calls pageSections.js's sectionLabel(), so it cannot drift from the label
+// the section menu shows. (The helper is called whereToLook so it does not
+// collide with that exported sectionLabel.)
 function whereToLook(id, language) {
   const section = PAGE_SECTIONS.find((s) => s.id === id)
   return section ? resolveSectionLabel(section, language) : id
@@ -158,7 +158,7 @@ const STRINGS = {
   },
 }
 
-export default function DataDetective({ storm, style }) {
+export default function DataDetective({ storm }) {
   const [picked, setPicked] = useState(null)
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -167,7 +167,6 @@ export default function DataDetective({ storm, style }) {
   const blocked = sectionGuard({
     data: true,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -177,7 +176,7 @@ export default function DataDetective({ storm, style }) {
   const factor = factors.find((f) => f.id === picked) ?? null
 
   return (
-    <Section width="narrow" style={style} backdrop={scatterBackdrop('detective')}>
+    <Section width="narrow" backdrop={scatterBackdrop('detective')}>
       <div>
         <p className="type-eyebrow mb-1 text-accent">{t.beforeConclusion}</p>
         <h2 className="type-h2 mb-2">{t.heading(storm.name)}</h2>

@@ -1,3 +1,6 @@
+// A country name inside a sentence that works as a control: pointing at it
+// highlights that country on every chart (via hooks/useNationHighlight.jsx).
+
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { nationLabel } from '../content/nations.js'
@@ -36,7 +39,7 @@ import { nationLabel } from '../content/nations.js'
 // in); the default display falls back to nationLabel(nation, language) rather
 // than the raw nation prop, so an un-overridden reference still shows the
 // right language.
-export default function NationRef({ nation, children, className = '' }) {
+export default function NationRef({ nation, children }) {
   const { setHighlight, pinned, setPinned } = useNationHighlight()
   const { language } = useLanguage()
   const isPinned = pinned === nation
@@ -47,7 +50,7 @@ export default function NationRef({ nation, children, className = '' }) {
       aria-pressed={isPinned}
       onClick={() => setPinned((p) => (p === nation ? null : nation))}
       {...highlightHandlers(nation, setHighlight)}
-      className={`nation-ref ${isPinned ? 'is-pinned' : ''} ${className}`}
+      className={`nation-ref ${isPinned ? 'is-pinned' : ''}`}
     >
       {children ?? nationLabel(nation, language)}
     </button>

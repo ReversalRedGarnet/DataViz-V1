@@ -1,3 +1,7 @@
+// One chart on the divergence slide: each nation's line indexed to 100 in the
+// storm year, swept in from left to right. Drawn by
+// utils/charts/divergenceChart.js through hooks/useChartCanvas.js.
+
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
@@ -40,12 +44,10 @@ const STRINGS = {
   },
 }
 
-// One panel of the divergence section. Each panel now owns its own sweep
-// clock and its own mini play button, rather than being driven by a single
-// section-wide clock: a metric whose record stops in 2022 used to idle,
-// frozen, until a 2024 metric caught up, because both were painted from one
-// shared progress value. Independent clocks mean this chart finishes when its
-// own data does, and says so.
+// One panel of the divergence section. Each panel owns its own sweep clock
+// and its own mini play button rather than sharing one section-wide clock, so
+// a metric whose record stops in 2022 finishes when its own data does instead
+// of sitting frozen until a 2024 metric catches up.
 //
 // Props:
 //   label -- heading and svg aria-label stem

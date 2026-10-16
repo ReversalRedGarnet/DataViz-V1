@@ -1,3 +1,6 @@
+// Measures whether a slide's content fits its panel (so it can be centred) and
+// how far it has been scrolled (for the "more below" hint).
+
 import { useEffect, useLayoutEffect, useState } from 'react'
 
 // How much overflow a panel is allowed before it stops counting as fitting.
@@ -6,10 +9,10 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 // invitation to the exact drift the constant exists to prevent.
 //
 // ONE NUMBER, read by both hooks below, because they are two halves of the
-// same question and they used to disagree. Centring called a panel fitted at
-// 1px of overflow; the "more in this section" hint appeared only past 24px.
-// Between the two a slide was top-aligned -- visibly off-centre, with dead
-// space under it -- AND silently scrollable with nothing on screen saying so.
+// same question and must agree. If centring treated a panel as fitted at 1px
+// of overflow while the "more in this section" hint waited for 24px, a slide
+// in between would be top-aligned -- visibly off-centre, with dead space under
+// it -- AND silently scrollable with nothing on screen saying so.
 //
 // That band is exactly where a wording pass sends every slide: cutting copy
 // walks a section down through its own height, and on the way past it lands in

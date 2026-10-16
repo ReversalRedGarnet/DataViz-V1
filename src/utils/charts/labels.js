@@ -1,3 +1,6 @@
+// Helpers for fitting text on charts: measuring label widths, choosing how
+// many year ticks fit, and spreading labels so they do not overlap.
+
 import * as d3 from 'd3'
 import { AXIS_FONT, VALUE_FONT } from './constants.js'
 import { shortName } from '../../content/nations.js'

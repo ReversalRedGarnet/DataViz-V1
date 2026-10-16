@@ -1,3 +1,7 @@
+// A helper every storm-driven slide calls first: if the data has not loaded, or
+// no storm is chosen yet, it returns the right EmptyState message to show
+// instead of the slide.
+
 import EmptyState from './EmptyState.jsx'
 
 // Every storm-driven section opens with the same two checks in the same order:
@@ -9,7 +13,7 @@ import EmptyState from './EmptyState.jsx'
 //
 // Returns an element to render instead of the section, or null to carry on.
 //
-//   const blocked = sectionGuard({ data, storm, style, prompt: '...', language })
+//   const blocked = sectionGuard({ data, storm, prompt: '...', language })
 //   if (blocked) return blocked
 //
 // `prompt` completes the sentence "Pick a storm from the timeline to ..." so
@@ -42,21 +46,21 @@ const STRINGS = {
   },
 }
 
-export function sectionGuard({ data, error, storm, style, subject, prompt, language = 'en' }) {
+export function sectionGuard({ data, error, storm, subject, prompt, language = 'en' }) {
   const t = STRINGS[language]
 
   if (error) {
-    return <EmptyState style={style}>{t.couldNotLoad(subject)}</EmptyState>
+    return <EmptyState>{t.couldNotLoad(subject)}</EmptyState>
   }
 
   if (!data) {
-    return <EmptyState style={style}>{t.waiting(subject)}</EmptyState>
+    return <EmptyState>{t.waiting(subject)}</EmptyState>
   }
 
   if (storm === undefined) return null
 
   if (!storm) {
-    return <EmptyState style={style}>{t.pickStorm(prompt)}</EmptyState>
+    return <EmptyState>{t.pickStorm(prompt)}</EmptyState>
   }
 
   return null

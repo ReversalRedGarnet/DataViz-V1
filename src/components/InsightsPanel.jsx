@@ -1,5 +1,6 @@
-// The bordered "here's what changed" panel below a hazard's trend charts. Each
-// hazard supplies its own comparison logic; the card is the same.
+// The bordered "here's what changed" panel under the ripple chain's charts.
+// The comparison itself is worked out in utils/insights.js; this component
+// only lays the card out.
 //
 // Props:
 //   title -- panel heading
@@ -8,9 +9,9 @@
 //     don't have a summary (or don't have enough comparable metrics to earn
 //     one) simply omit it.
 //   items -- [{ key, text }]
-//   staggerItems -- bullets pop in one by one. Only RippleChain does this; the
-//     inconsistency predates this component and is kept opt-in rather than
-//     silently unified.
+//   staggerItems -- true makes the bullets pop in one by one rather than all
+//     at once. RippleChain, the only caller, passes it; the default (false)
+//     keeps the panel usable without the animation.
 export default function InsightsPanel({ title, summary, items, staggerItems = false }) {
   return (
     <div

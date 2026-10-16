@@ -1,3 +1,6 @@
+// The strip under the header showing what the reader has chosen so far (the
+// storm and the nation pair), with buttons to clear each choice.
+
 import { formatNationList } from '../utils/formatNationList.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { nationLabel } from '../content/nations.js'

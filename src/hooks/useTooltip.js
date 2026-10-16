@@ -1,3 +1,6 @@
+// Shows and positions the small tooltip box (components/Tooltip.jsx) beside a
+// chart mark, keeping it inside the chart's edges.
+
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { TOOLTIP_GAP, TOOLTIP_MAX_WIDTH } from '../components/Tooltip.jsx'
 

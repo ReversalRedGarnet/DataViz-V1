@@ -78,16 +78,16 @@
 
     Long lines are the cost, and .prose-column pays it down. Pair the two.
 
-    NOTE ON WHAT THIS DOES NOW. Nothing else sets a max-width on these blocks,
+    NOTE ON WHAT THIS DOES. Nothing else sets a max-width on these blocks,
     so this declaration is a no-op that documents intent rather than a rule that
     changes anything -- full width is what a <div> does by default. It is kept
     because the intent is worth stating at the call site, and because a block
     marked .prose-wide is a block someone has already decided should run the
     full measure.
 
-    The case that DOES need a rule is prose whose neighbour is a chart, which
-    used to carry Tailwind's max-w-prose and so stopped short of the figure it
-    was describing. That is .figure-prose in styles/layout.css -- a real 65ch
+    The case that DOES need a rule is prose whose neighbour is a chart, where
+    Tailwind's max-w-prose would stop it short of the figure it describes. That
+    is .figure-prose in styles/layout.css -- a real 65ch
     cap below the desktop breakpoint, released above it. Reach for .figure-prose
     when the text belongs to a visualisation, .prose-wide when it is simply
     body copy that should fill the column.

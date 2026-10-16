@@ -1,3 +1,6 @@
+// One slide's frame inside the deck: a scrollable area for the slide's content
+// with the Back/Next footer (SlideFooter.jsx) pinned underneath.
+
 import { useEffect, useRef, useState } from 'react'
 import { ScrollRootProvider } from '../hooks/useScrollRoot.jsx'
 import SlideFooter from './SlideFooter.jsx'
@@ -115,13 +118,12 @@ export default function SlidePanel({
 // can perceive has changed. Skipped only for the panel that is already on
 // stage when it mounts, so the page does not steal focus on load.
 //
-// That used to be "skipped on this panel's first activation", which is not
-// the same thing: every panel has a first activation, and nine of them do not
-// even mount until a storm is picked. So the first visit to every slide left
-// focus behind on the control that moved the deck, inside a panel that had
-// just gone inert -- the browser logs it as aria-hidden on a focused element.
-// Whether a panel was active on its own first render is the thing that
-// actually tells page load apart from arrival.
+// The test is whether the panel was active on its own first render -- that is
+// what tells page load apart from arrival. "Skip the first activation" would
+// be wrong: every panel has a first activation, and nine of them do not even
+// mount until a storm is picked, so the first visit to each slide would leave
+// focus on the control that moved the deck, inside a panel that has just gone
+// inert (the browser warns about aria-hidden on a focused element).
 function useFocusOnArrival(node, isActive) {
   const activeOnMount = useRef(isActive)
 

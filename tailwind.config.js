@@ -27,12 +27,8 @@ export default {
       // The min-width guard keeps it away from a phone in landscape, which is
       // short by definition and already has its own layout.
       //
-      // There was a `compact` width band here too, declared and documented and
-      // never once used as a variant -- the 1100-1399px rules it described are
-      // written as a plain media query in styles/compact.css instead. Half of
-      // this comment was describing a mechanism that was not in play, which is
-      // the expensive kind of stale comment: confidently wrong about
-      // architecture.
+      // The 1100-1399px width rules are a plain media query in
+      // styles/compact.css, not a Tailwind variant.
       screens: {
         short: { raw: '(min-width: 1024px) and (max-height: 960px)' },
       },
@@ -63,11 +59,9 @@ export default {
       },
 
       colors: {
-        // Fixed brand colors used across both themes.
-        ocean: '#5B8FA3',
-        sun: '#F0C868',
-
-        // Theme-aware colors defined in index.css.
+        // Theme-aware colours. The values are defined in src/styles/tokens.js,
+        // which scripts/build-tokens.mjs turns into the --color-* custom
+        // properties (light on :root, dark on .dark).
         // <alpha-value> lets Tailwind's opacity modifiers (e.g. text-ink/70)
         // substitute the real opacity value in place of this placeholder --
         // without it, every /NN utility built on these four colors silently
@@ -76,8 +70,9 @@ export default {
         sand: 'rgb(var(--color-sand) / <alpha-value>)',
         panel: 'rgb(var(--color-panel) / <alpha-value>)',
         surface: 'rgb(var(--color-surface) / <alpha-value>)',
-        // Text-safe ocean, for eyebrows. Not interchangeable with `ocean`,
-        // which is decorative only -- see the note in index.css.
+        // Text-safe ocean, for eyebrows and other small text. The decorative
+        // ocean (#5B8FA3) cannot carry text -- see the note on `accent` in
+        // src/styles/tokens.js.
         accent: 'rgb(var(--color-accent) / <alpha-value>)',
       },
     },

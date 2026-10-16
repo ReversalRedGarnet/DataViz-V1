@@ -1,3 +1,6 @@
+// Works out how much a fixed-size SVG drawing is being scaled up or down on
+// screen, so map labels and markers can be kept at a readable size.
+
 import { useEffect, useState } from 'react'
 
 // THE FACTOR A FIXED-viewBox SVG IS CURRENTLY BEING DRAWN AT.

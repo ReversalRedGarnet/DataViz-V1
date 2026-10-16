@@ -1,3 +1,7 @@
+// A chart card showing chosen nations over time (one line or bar series per
+// nation), with its heading, legend, caption and a hidden table for screen
+// readers. Drawn by utils/charts/metricChart.js through hooks/useChartCanvas.js.
+
 import { useEffect, useMemo } from 'react'
 import NoDataNote from './NoDataNote.jsx'
 import SeriesLegend from './SeriesLegend.jsx'
@@ -76,10 +80,9 @@ const STRINGS = {
 //     keeps the grid's column spans on the element that has them.
 //   className -- layout hook (e.g. sm:col-span-2 for an odd one out)
 //
-// The chart holds its draw until the card is on screen. These sit several
-// screens below the fold on every page that uses them, and drawing at mount
-// meant the entrance animation had always finished by the time anyone scrolled
-// down to it.
+// The chart holds its draw until the card is on screen. These can sit below
+// the fold of their slide, and drawn at mount, the entrance animation would
+// have finished before anyone scrolled down to it.
 export default function TrendChart({
   label,
   allRows,
@@ -139,10 +142,9 @@ export default function TrendChart({
   // silently drop the dimming. It stands in for "the chart was drawn again",
   // which is not something node identity or dimNations can express.
   //
-  // This effect previously had no dependency array at all, so it ran a
-  // querySelectorAll and a full class-string scan of every mark after every
-  // render. Correct, and on the ripple chain that was five charts' worth of it
-  // per frame of any scroll.
+  // It has a dependency list rather than running after every render: an
+  // unconditional re-dim is a querySelectorAll and a class scan of every mark,
+  // and the ripple chain draws five of these charts.
   useEffect(() => {
     if (!node) return
     const dim = new Set((dimNations ?? []).map(slug))

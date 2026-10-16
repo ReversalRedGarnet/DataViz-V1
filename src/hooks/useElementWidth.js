@@ -1,3 +1,6 @@
+// Measures an element's width in pixels and keeps it current when the window
+// is resized, so charts can be drawn at their real size.
+
 import { useState, useCallback, useEffect } from 'react'
 
 // An element's rendered width in whole CSS pixels, kept current as the layout

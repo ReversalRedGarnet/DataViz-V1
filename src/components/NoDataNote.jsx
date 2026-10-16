@@ -1,3 +1,6 @@
+// The "no data available" note shown where a nation has no figure for a
+// metric, with an explanation for both mouse and screen-reader users.
+
 import { useId } from 'react'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 
@@ -10,20 +13,17 @@ const EXPLANATION = {
 // selected nation. The explanation is worded once, here, and shown through the
 // real tooltip rather than a native `title` (invisible on touch).
 //
-// A REAL BUTTON, AND A REAL DESCRIPTION. This used to be a <span tabIndex={0}>
-// with pointer and click handlers, no role and no keyboard handler. Two things
-// were wrong with that, and the second is the serious one:
+// A REAL BUTTON, AND A REAL DESCRIPTION, for two reasons:
 //
-//   1. A focusable element with no role announces as plain text, and its click
-//      handler was unreachable from a keyboard.
-//   2. The explanation existed only inside a visual tooltip. A screen-reader
-//      user focused this and heard "No data available" and nothing else --
-//      never the sentence about smaller nations having less capacity to report,
-//      which is not incidental copy. It is the site's central argument, and it
-//      was the one place a reader met it first.
-//
-// aria-describedby onto a visually-hidden copy is what fixes (2): the text is
-// in the accessibility tree whether or not the tooltip is on screen.
+//   1. A <button> announces as a button and works from the keyboard. A
+//      focusable <span> with click handlers would announce as plain text and
+//      ignore Enter and Space.
+//   2. The explanation cannot live only inside a visual tooltip. The sentence
+//      about smaller nations having less capacity to report is the site's
+//      central argument, and this note is often where a reader meets it first.
+//      aria-describedby onto a visually-hidden copy puts it in the
+//      accessibility tree whether or not the tooltip is on screen, so a
+//      screen-reader user hears more than "No data available".
 //
 // Props:
 //   showTooltip / hideTooltip -- from the nearest useTooltip() call

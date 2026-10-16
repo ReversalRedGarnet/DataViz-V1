@@ -1,3 +1,8 @@
+// The storm profile slide: a chart of storm category against reported deaths,
+// one dot per nation the storm reached, plus a table of the same facts. The
+// chart is drawn by utils/charts/stormProfileChart.js through
+// hooks/useChartCanvas.js; the facts come from content/storms.js.
+
 import { useEffect, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -88,10 +93,7 @@ function capitalize(text) {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-// Props:
-//   style -- forwarded to the underlying Section, used by App.jsx to
-//     stagger each section's entrance on first load
-export default function StormProfile({ storm, style }) {
+export default function StormProfile({ storm }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
   const rows = storm?.profile ?? null
@@ -166,21 +168,20 @@ export default function StormProfile({ storm, style }) {
   const blocked = sectionGuard({
     data: true,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
   })
   if (blocked) return blocked
   if (!rows) {
-    return <EmptyState style={style}>{t.notCompiled(storm.name)}</EmptyState>
+    return <EmptyState>{t.notCompiled(storm.name)}</EmptyState>
   }
 
   const unreported = rows.filter((r) => r.deaths == null)
   const unattributed = rows.filter((r) => r.deathsKind === 'unattributed')
 
   return (
-    <Section lock width="narrow" style={style} backdrop={scatterBackdrop('storm-profile')}>
+    <Section lock width="narrow" backdrop={scatterBackdrop('storm-profile')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">{t.atAGlance(storm.name)}</h2>
 

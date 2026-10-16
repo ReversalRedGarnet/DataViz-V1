@@ -1,3 +1,7 @@
+// A small dismissible notice shown when the window is smaller than the deck is
+// designed for (see hooks/useViewportFit.js). Everything still works; it only
+// warns that the layout will be cramped.
+
 import { useEffect, useState } from 'react'
 import { useViewportFit, MIN_WIDTH, MIN_HEIGHT } from '../hooks/useViewportFit.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'

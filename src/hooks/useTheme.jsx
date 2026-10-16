@@ -1,9 +1,23 @@
+// THE THEME LOGIC -- light or dark, and how every part of the page follows it.
+//
+//   1. The colour values are written once, in src/styles/tokens.js.
+//   2. scripts/build-tokens.mjs turns them into CSS variables (light ones on
+//      :root, dark ones on .dark) in src/styles/tokens.css; Vite runs it
+//      before every build and every dev-server start.
+//   3. Tailwind classes such as `text-ink` read those variables, so the whole
+//      page changes colour when the `dark` class is on the <html> element.
+//   4. That class follows the visitor's system setting only: a small script in
+//      index.html sets it before the first paint, and this file keeps it in
+//      step if the setting changes while the page is open.
+//   5. D3 charts cannot read CSS classes, so they get real colour strings from
+//      utils/theme.js, picked by the `theme` value this file provides.
+
 import { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { withoutMotion } from '../utils/motion.js'
 
 // Site-wide light/dark state. Context rather than props because every
-// D3-drawing component on every page reads it (axis text and the wave divider
+// D3-drawing component on every slide reads it (axis text and the wave divider
 // need a real colour string, not a Tailwind class -- see theme.js).
 //
 // The visitor's system setting is the only source. There is no toggle and no

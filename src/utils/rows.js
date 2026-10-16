@@ -1,4 +1,4 @@
-// Row-shaping helpers shared by every hazard page's charts. All of
+// Row-shaping helpers shared by the site's charts. All of
 // them work on the same { [metricKey]: rows } object the data hooks
 // return, so the snapshot/trend components differ only in their copy
 // and metric config, not in how they reshape data.

@@ -67,11 +67,10 @@ export function stormPointTooltip(row, nation, language = 'en') {
           row.deathsKind === 'unattributed' ? t.unattributed : ''
         }`
 
-  // The researched `fact` and `deathsNote` used to be appended here, which is
-  // what made this tooltip a wall of text. Neither is lost: both are printed in
-  // full in the table below this chart, which is also what a screen reader
-  // reads, and again in Follow the Storm, where each nation gets its own stop.
-  // Nothing was removed from the dataset -- only from the hover.
+  // The researched `fact` and `deathsNote` are left out of this tooltip to
+  // keep the hover short. Neither is lost: both are printed in full in the
+  // table below this chart, which is also what a screen reader reads, and
+  // again in Follow the Storm, where each nation gets its own stop.
   return (
     <>
       <p className="font-semibold">{nation}</p>

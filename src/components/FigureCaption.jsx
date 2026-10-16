@@ -1,3 +1,6 @@
+// The caption under a chart: its figure number, title and a link to the data
+// source. Numbers come from content/figures.js, sources from utils/metrics.js.
+
 import { figureNumber } from '../content/figures.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { sourceLabel } from '../utils/metrics.js'

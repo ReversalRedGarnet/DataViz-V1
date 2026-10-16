@@ -1,3 +1,7 @@
+// "Follow the storm": a D3 map of the selected storm's documented stops, with
+// a slider (JourneyScrubber.jsx) that moves the storm from one stop to the
+// next. The stops and their text come from content/storms.js.
+
 import { useEffect, useMemo, useRef } from 'react'
 import * as d3 from 'd3'
 import Section from './Section.jsx'
@@ -94,7 +98,7 @@ function buildSteps(storm) {
   return (storm?.profile ?? []).map((row) => ({ ...row, lonLat: NATION_COORDS[row.name] }))
 }
 
-// The connecting sentence for each stop now lives with that stop in
+// The connecting sentence for each stop lives with that stop in
 // src/content/storms.js as `lead`, so a storm's facts and the sentences that
 // join them cannot drift apart across six storms.
 
@@ -104,13 +108,12 @@ function buildSteps(storm) {
 // coordinates are not exactly on it; the curve has to be sampled to find where
 // it passes closest.
 //
-// SAMPLED ONCE, SCANNED MANY TIMES. This used to be a function called per stop,
-// each call walking its own 500 points -- and getPointAtLength() forces layout
-// on every call, so a four-stop storm cost about 2,000 synchronous layout calls
-// in the frame the map is built. The 500 points are identical on every one of
-// those walks; only the target moves. Taking them once and scanning the
-// resulting array in plain JavaScript gives bit-for-bit the same answer for a
-// quarter of the layout work on Harold, and a half on every two-stop storm.
+// SAMPLED ONCE, SCANNED MANY TIMES. The curve is sampled into 500 points
+// once, and each stop scans that array in plain JavaScript. getPointAtLength()
+// forces layout on every call, so sampling separately for each stop would cost
+// about 2,000 synchronous layout calls for a four-stop storm in the frame the
+// map is built -- for 500 points that are identical every time; only the
+// target moves.
 //
 // Deliberately not a coarser sample with a refinement pass. That is faster
 // still, but it finds a local minimum rather than the global one whenever a
@@ -145,17 +148,11 @@ function lengthAtPoint(samples, [px, py]) {
 // The colour-and-progress pass, as a plain function rather than only an effect
 // body, because whoever builds a scene has to be the one who paints it.
 //
-// It used to live only in an effect keyed on a `built` state flag. On the first
-// storm the coastline is fetched over the network, so setBuilt(false) and
-// setBuilt(true) landed in different React batches, `built` transitioned and
-// the effect ran. On every storm after that the topology is cached, the await
-// resolves in a microtask, both updates collapsed into one batch, `built` never
-// changed value and the effect never ran -- leaving the ocean rect and the land
-// path with no fill attribute at all. SVG's default fill is black, which is why
-// the second storm rendered a black rectangle the size of the map.
-//
-// The flag has since been removed entirely (see the scene-reset effect below):
-// once build() paints its own scene, nothing was left for it to do.
+// build() calls this at the end of every build, so a new scene is always
+// painted. An effect keyed on a "built" flag cannot promise that: once the
+// coastline is cached, setting the flag false and then true lands in a single
+// React batch, the value never visibly changes, and the effect never runs --
+// leaving the ocean and the land with no fill at all, which SVG draws black.
 function paintScene(scene, { active, theme }) {
   const mapColors = MAP_COLORS[theme] ?? MAP_COLORS.light
   const { ink, palette } = chartTheme(theme)
@@ -228,10 +225,9 @@ function applyScale(g, scale) {
   // in the same place. Counter-scaling is what makes a label legible and it is
   // also what makes it wide: a stop's name and date occupy `inverse` times the
   // viewBox room they were drawn at, while the projection's padding is a fixed
-  // 58 units chosen when the labels were small. Harold's last stop is Tonga,
-  // which sits nearest the right edge, and "Cat 1 - 9 April 2020" ran straight
-  // off it -- as does every storm with a stop near an edge, which is most of
-  // them.
+  // 58 units. Harold's last stop is Tonga, which sits nearest the right edge,
+  // and "Cat 1 - 9 April 2020" would run straight off it -- as would any stop
+  // near an edge, which most storms have.
   //
   // THIS BELONGS IN THE SCALE PASS RATHER THAN IN build(). The projected
   // positions do not move when the box resizes, but the width these labels
@@ -273,8 +269,7 @@ function applyScale(g, scale) {
 //   storm -- the selected storm
 //   index -- which documented stop is on the map, from the story state
 //   onIndex -- (i) => void, the only way that position changes
-//   style -- forwarded to the underlying Section (entrance stagger)
-export default function StormJourney({ storm, index = 0, onIndex, style }) {
+export default function StormJourney({ storm, index = 0, onIndex }) {
   // Memoised so it can be a real dependency of the build effect below rather
   // than something that effect closes over and hopes stays in step. `storm`
   // comes from stormById(), a .find() over a module constant, so the same id
@@ -286,12 +281,9 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   // Drop the previous storm's scene immediately, so the progress effect below
   // cannot animate a track that belongs to a map no longer on screen.
   //
-  // There used to be a `built` flag alongside this, set false here and true at
-  // the end of build(), and listed in the repaint effect's dependencies. The
-  // note on paintScene explains why it could not be relied on to fire that
-  // effect -- which is why build() paints the scene itself. Once it did,
-  // `built` was carrying nothing: storm?.id already covers every case it would
-  // have, so it was state that existed only to be written.
+  // No separate "built" flag is needed: build() paints its own scene (see the
+  // note on paintScene), and storm?.id already covers every case such a flag
+  // would.
   useEffect(() => {
     sceneRef.current = null
   }, [storm?.id])
@@ -456,14 +448,14 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
     }
     // Keyed to the storm, not built once. With nothing selected on load this
     // component renders an empty state instead of the <svg>, so a mount-only
-    // effect found no node, built nothing, and never ran again -- the map stayed
-    // blank for every storm. It also has to rebuild on a *change* of storm,
+    // effect would find no node, build nothing and never run again -- leaving
+    // the map blank for every storm. It also has to rebuild on a *change* of storm,
     // since the projection is fitted to that storm's stops and the track is
     // drawn through them in order.
     //
-    // STEPS is listed because build() reads it. It was previously closed over
-    // while the effect depended on storm?.id alone -- which worked only because
-    // the two always change together, a coincidence nothing enforced. activeRef
+    // STEPS is listed because build() reads it. It always changes together
+    // with storm?.id today, but listing it means nothing depends on that
+    // coincidence. activeRef
     // and themeRef are stable ref objects; naming them costs nothing and lets
     // the dependency array be honest.
   }, [storm?.id, STEPS, activeRef, themeRef, languageRef])
@@ -498,7 +490,6 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   const blocked = sectionGuard({
     data: true,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -506,7 +497,7 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   if (blocked) return blocked
   if (!hasSteps) {
     return (
-      <EmptyState style={style}>
+      <EmptyState>
         {t.notCompiled(storm.name)}
       </EmptyState>
     )
@@ -515,7 +506,6 @@ export default function StormJourney({ storm, index = 0, onIndex, style }) {
   return (
     <Section
       className="journey-section"
-      style={style}
       backdrop={scatterBackdrop('storm-journey')}
     >
       <p className="type-eyebrow mb-1 text-accent">

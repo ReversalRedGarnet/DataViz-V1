@@ -1,3 +1,6 @@
+// The up-to-two nations the reader has picked, with the functions to add,
+// remove, swap or clear them, and the sentence a screen reader announces.
+
 import { useCallback, useState } from 'react'
 import { nationLabel } from '../content/nations.js'
 
@@ -43,9 +46,9 @@ export function useSelection() {
   return { selected, toggle, clear, setAt, swap }
 }
 
-// Copy for each page's aria-live region -- the charts below it update
+// Copy for a slide's aria-live region -- the charts below it update
 // silently otherwise. `singleNote` is an optional extra sentence for
-// the one-nation case (Cyclones points at its ripple chain). `selected` holds
+// the one-nation case (App.jsx passes one pointing at the ripple chain). `selected` holds
 // the canonical (English) nation names every chart is keyed by; nationLabel()
 // resolves the display form so the announcement itself can still be French.
 export function selectionAnnouncement(selected, singleNote = '', language = 'en') {

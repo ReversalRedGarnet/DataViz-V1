@@ -5,9 +5,8 @@
 // or `image`, your own tiling SVG from /public, plus an `imageDark` companion
 // since a fixed-colour file can't invert itself.
 //
-// THERE WAS A THIRD TILE, 'fish', and nothing on the site was using it. The two
-// left are not really alternatives: 'ripples' is the chrome tile and the weave
-// is the content one. See the note on each below.
+// The two tiles are not really alternatives: 'ripples' is the chrome tile and
+// the weave is the content one. See the note on each below.
 //
 // `opacity` is useful between 0.04 and 0.08: above, it competes with the text
 // on top of it; below, it vanishes on a phone. `scale` multiplies the tile --
@@ -23,22 +22,13 @@ export const HEADER_BACKDROP = {
   scale: 1,
 }
 
-// THE METHOD AND SOURCES SLIDES USED TO HAVE THEIR OWN, AND NO LONGER DO.
-//
-// There were two more exports here: a 'weave' tile for the method slide and a
-// 'fish' tile for the sources slide, on the reasoning that the last two slides
-// are apparatus rather than argument and deserved a texture marking the shift
-// from "here is what the data says" to "here is how we know".
-//
-// The reasoning was sound and the result was not. Those two tiles were the only
-// full-bleed fields on the site, so the last two slides did not read as a
-// different register of the same piece -- they read as two slides from a
-// different piece, arriving after twelve that had agreed on a common texture.
-// A boundary marked by breaking the system is not marked, it is just a break.
-//
-// Both slides now pass scatterBackdrop() like every other section. What marks
-// them as back matter is what always actually marked them: they are the ones
-// that stop arguing and start showing their working.
+// NO SPECIAL TEXTURE FOR THE METHOD AND SOURCES SLIDES. They pass
+// scatterBackdrop() like every other section. A full-bleed tile there would be
+// the only one on the site, so the last two slides would read as slides from a
+// different piece rather than as the back matter of this one. A boundary
+// marked by breaking the system is not marked, it is just a break. What marks
+// them as back matter is their content: they stop arguing and start showing
+// their working.
 
 // With your own artwork:
 //   { image: '/patterns/tapa-light.svg', imageDark: '/patterns/tapa-dark.svg',
@@ -51,18 +41,11 @@ export const HEADER_BACKDROP = {
 // leaves the content column clear, the way a page margin can carry a texture a
 // paragraph never could.
 //
-// EVERY SECTION PASSES THIS, AND THE TITLE CARD USED TO BE THE EXCEPTION.
-// The hero was held out because it has nothing in its margins to be beside --
-// no chart, no table, just a headline on an open field -- and because on an
-// early version the shapes drifted under the lead paragraph.
-//
-// That was true when it was written and stopped being true when the scatter
-// learned to keep out of the way. COLUMN_LEFT/COLUMN_RIGHT in
-// BackgroundPattern.jsx clear the reading column by a fragment's whole reach
-// rather than just its centre, so on the hero at 1440px not one of the eight
-// pieces touches the headline's box. The exception outlived its reason, and
-// the hero now takes the same weave and the same ambient atmosphere as every
-// other slide. See the note in components/Hero.jsx.
+// EVERY SECTION PASSES THIS, the title card included. COLUMN_LEFT/COLUMN_RIGHT
+// in BackgroundPattern.jsx clear the reading column by a fragment's whole
+// reach rather than just its centre, so even on the hero -- a headline on an
+// open field -- none of the pieces touches the headline's box (at 1440px).
+// See the note in components/Hero.jsx.
 //
 // `seed` is any stable string -- the slide's own id reads well and guarantees
 // no two slides draw the same layout. Passing the same seed always draws the
@@ -76,7 +59,7 @@ export const HEADER_BACKDROP = {
 // <clipPath> arrives at the reader as one five- or seven-sided blob, and a
 // margin of those reads as fabric. Kept apart, they read as pieces of a mat.
 //
-// THERE IS NO `scale` HERE ANY MORE, and its absence is the rule. The weave
+// THERE IS NO `scale` HERE, and its absence is the rule. The weave
 // inside the shapes is one fixed size site-wide (WEAVE_UNIT in
 // BackgroundPattern.jsx); what a seed varies is the shapes cut out of it --
 // their size, position, rotation and proportion -- so every section's margins

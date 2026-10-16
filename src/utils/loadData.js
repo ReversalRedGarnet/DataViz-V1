@@ -1,14 +1,13 @@
 // ONE FETCH FOR EVERY METRIC ON THE PAGE.
 //
-// The site used to request all ten datasets separately and wait on Promise.all
-// before rendering anything, so the slowest of ten round trips gated every
-// chart. Together they are about 34 KB -- what was being paid for was the round
-// trips, not the bytes, and on the high-latency mobile connections this project
-// is aimed at that was the dominant cost of the initial load.
+// Fetching all ten datasets separately and waiting on Promise.all would let the
+// slowest of ten round trips gate every chart. Together they are about 34 KB:
+// the cost is the round trips, not the bytes, and on the high-latency mobile
+// connections this project is aimed at, round trips dominate the first load.
 //
 // data-pipeline/common.py's write_bundle() produces the file, keyed by the same
-// filenames the per-metric datasets have on disk. Those files are still written
-// and still committed: they are what the bundler reads, and they remain the
+// filenames the per-metric datasets have on disk. Those per-metric files are
+// written and committed too: they are what the bundler reads, and they remain the
 // readable unit for anyone inspecting the data by hand. Nothing fetches them.
 //
 // The promise is held at module scope for the same reason loadLand.js holds

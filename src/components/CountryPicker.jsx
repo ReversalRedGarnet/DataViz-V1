@@ -1,3 +1,6 @@
+// The row of country buttons under the map: the same choice as clicking a map
+// pin, for readers who would rather not use the map.
+
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { nationLabel } from '../content/nations.js'

@@ -14,15 +14,16 @@ export function zeroAnchoredDomain(values, pad = 1.1) {
 // A bar's top y and height, for a value either side of the baseline. SVG y
 // grows downward, so which of y(0)/y(value) is the top depends on the sign.
 //
-// Nothing measured should be invisible, and bars used to disappear two ways: a
-// reported zero drew at height 0, indistinguishable from a year nobody
+// Nothing measured should be invisible, and a bar can disappear two ways: a
+// reported zero draws at height 0, indistinguishable from a year nobody
 // reported (Tonga reported none affected in 2016-17, which is a measurement);
-// and a small value beside a large one rounded away -- against Fiji's 633,584
-// in 2016, Tonga's 68 in 2020 came out at two hundredths of a pixel.
+// and a small value beside a large one rounds away -- against Fiji's 633,584
+// in 2016, Tonga's 68 in 2020 comes out at two hundredths of a pixel.
 //
 // So any non-zero value gets at least MIN_BAR_HEIGHT, and an exact zero gets a
 // printed "0" on the baseline instead of a bar (see drawZeroLabels). Giving
-// zero a stub was worse: it made a reported nothing taller than a reported 68.
+// zero a stub instead would be worse: a reported nothing would stand taller
+// than a reported 68.
 // Module-private: barTopAndHeight below applies it, and a renderer applying the
 // floor itself would be a second copy of this rule to keep in step.
 const MIN_BAR_HEIGHT = 2

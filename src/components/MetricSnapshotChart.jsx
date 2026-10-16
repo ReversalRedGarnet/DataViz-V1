@@ -1,3 +1,7 @@
+// A chart card showing all four nations in a single year as bars, with its
+// heading, caption and a hidden table for screen readers. Drawn by
+// utils/charts/snapshotChart.js through hooks/useChartCanvas.js.
+
 import NoDataNote from './NoDataNote.jsx'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { renderSnapshotChart, CHART_HEIGHT } from '../utils/charts/index.js'

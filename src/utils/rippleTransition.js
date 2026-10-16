@@ -1,3 +1,6 @@
+// The page-change animation: a ripple spreading from where the reader pressed,
+// used when moving between slides and when switching language.
+
 import { flushSync } from 'react-dom'
 import { prefersReducedMotion } from './motion.js'
 

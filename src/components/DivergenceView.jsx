@@ -1,3 +1,7 @@
+// The divergence slide: each chosen nation's record indexed to 100 in the storm
+// year, so every line starts together and the reader sees them spread apart.
+// Each panel is a DivergenceChart.jsx.
+
 import { useMemo, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -20,11 +24,11 @@ import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.
 // here rather than in metrics.js because they're about what this indexed view
 // implies, not about the underlying figures.
 //
-// A function of the baseline year, not a constant. As a constant it printed the
-// 2020 sentence under every storm, and for a 2015 baseline that sentence is
-// simply false -- arrivals in 2015 were not collapsed by anything. COVID is
-// still relevant to an earlier baseline, because the sweep crosses 2020-21 on
-// its way to the present, so the note changes form rather than disappearing.
+// A function of the baseline year, not a constant: the sentence about 2020
+// arrivals collapsing is only true for a 2020 baseline -- in 2015 nothing
+// collapsed them. COVID is still relevant to an earlier baseline, because the
+// sweep crosses 2020-21 on its way to the present, so the note changes form
+// rather than disappearing.
 function metricNotes(eventYear, language) {
   const baselineIsCollapsed = eventYear === 2020 || eventYear === 2021
   const notes = {
@@ -70,16 +74,13 @@ const STRINGS = {
 }
 
 // The legend's colours and dashes come from seriesStyles(), the same resolver
-// the charts draw with. They used to be a LEGEND_DASH array declared here --
-// a fourth copy of DIVERGENCE_DASH, differing only in spelling solid as
-// 'none' rather than null, with nothing keeping the two in step.
+// the charts draw with, so the legend cannot disagree with the lines it labels.
 
 // Every nation indexed to its own event-year figure, so the four lines start
 // from one point and the chart can only show how far apart they finish.
 //
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
-//   style -- forwarded to Section (entrance stagger)
 // People affected and economic loss are deliberately absent from this view --
 // see the note under the grid -- so this map covers the four metrics that do
 // appear, and a fifth appearing later would be added here rather than counted.
@@ -90,7 +91,7 @@ const DIVERGENCE_FIGURES = {
   tourist_arrivals: 'divergence-tourism',
 }
 
-export default function DivergenceView({ data, dataError, storm, style }) {
+export default function DivergenceView({ data, dataError, storm }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
   const { language } = useLanguage()
@@ -124,18 +125,17 @@ export default function DivergenceView({ data, dataError, storm, style }) {
     data,
     error: dataError,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
   })
   if (blocked) return blocked
   if (panels.length === 0) {
-    return <EmptyState style={style}>{t.notEnoughData(storm.year)}</EmptyState>
+    return <EmptyState>{t.notEnoughData(storm.year)}</EmptyState>
   }
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('divergence')}>
+    <Section backdrop={scatterBackdrop('divergence')}>
       <div ref={containerRef} className="relative">
         <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
         <h2 className="type-h2 mb-2">{t.heading(storm.name)}</h2>

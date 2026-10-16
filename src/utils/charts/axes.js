@@ -1,3 +1,7 @@
+// Draws chart axes (the labelled lines along the bottom and side), the zero
+// line, and the printed "0" used for a reported zero. Used by every chart
+// renderer in this folder.
+
 import * as d3 from 'd3'
 import { AXIS_FONT } from './constants.js'
 

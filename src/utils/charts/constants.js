@@ -1,3 +1,6 @@
+// Shared chart measurements -- heights, margins, dot sizes, fonts, dash
+// patterns -- so every chart on the site looks like part of one set.
+
 import * as d3 from 'd3'
 
 // Every chart is drawn at its container's measured pixel width (see

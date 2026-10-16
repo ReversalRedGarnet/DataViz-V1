@@ -1,3 +1,7 @@
+// Everything the reader has chosen -- the storm, the nation pair, the position
+// on the storm's path, the open ripple-chain link -- held in one place by
+// App.jsx and passed down to the slides.
+
 import { useCallback, useMemo, useState } from 'react'
 import { useSelection } from './useSelection.js'
 import { stormById } from '../content/storms.js'

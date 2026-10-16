@@ -1,3 +1,7 @@
+// The context slide: slower, structural records (weather stations, sea surface
+// temperature, emissions, reporting completeness) that explain the gaps in
+// everything before it.
+
 import { useMemo } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -103,13 +107,12 @@ const STRINGS = {
 //
 // Props:
 //   data -- { [metricKey]: Array<{ nation, year, [field]: number }> }
-//   style -- forwarded to Section (entrance stagger)
 const CONTEXT_FIGURES = {
   sst_anomaly: 'context-sst',
   ghg_per_capita: 'context-ghg',
 }
 
-export default function ContextPanel({ data, dataError, style }) {
+export default function ContextPanel({ data, dataError }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -157,14 +160,13 @@ export default function ContextPanel({ data, dataError, style }) {
 
   // No `storm` key at all, which is what tells sectionGuard this section does
   // not depend on one -- these two records exist with or without a selection.
-  // The error and loading branches used to be written out here by hand for
-  // want of that, and had already drifted from the wording every other section
-  // uses.
-  const blocked = sectionGuard({ data, error: dataError, style, subject: t.guardSubject, language })
+  // sectionGuard then supplies the same error and loading wording every other
+  // section uses.
+  const blocked = sectionGuard({ data, error: dataError, subject: t.guardSubject, language })
   if (blocked) return blocked
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('context')}>
+    <Section backdrop={scatterBackdrop('context')}>
       <div ref={containerRef} className="relative">
         <p className="type-eyebrow mb-1 text-accent">{t.eyebrow}</p>
         <h2 className="type-h2 mb-2">{t.heading}</h2>
@@ -173,12 +175,10 @@ export default function ContextPanel({ data, dataError, style }) {
         {capacity && (
           <div className="mb-10">
             <h3 className="type-subhead mb-1 text-accent">{t.observeHeading}</h3>
-            {/* Opens on the human sentence rather than closing on it -- it used
-                to be the last clause of this paragraph, which a skim reads
-                right past. The ranking claim itself used to be stated in
-                prose alone ("set this ranking beside the gaps..."); it is now
-                also the second chart below, so the paragraph only needs to
-                point at it, not carry the whole argument in words. */}
+            {/* Opens on the human sentence rather than closing on it, because
+                a skim reads right past a paragraph's last clause. The ranking
+                claim is also the second chart below, so the paragraph only
+                needs to point at it, not carry the whole argument in words. */}
             <p className="prose-column prose-wide mb-4 text-sm opacity-80">
               {t.rankingIntro(<NationRefList nations={rankOrder} join=", " last=", " />)}
             </p>

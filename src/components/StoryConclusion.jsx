@@ -1,3 +1,7 @@
+// The conclusion slide: the one sentence everything adds up to, a simple
+// drawing of four lines spreading from one point, and a button to start again
+// with another storm.
+
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { sectionGuard } from './sectionGuard.jsx'
@@ -10,10 +14,10 @@ import { isPluralStormName } from '../utils/pluralize.js'
 
 // THE END OF THE ARGUMENT, NOT THE END OF THE PAGE.
 //
-// The piece used to run out rather than finish: comparison, then method, then
-// sources. Everything the reader had assembled -- a storm, a pair of countries,
-// five records, four trajectories -- was left for them to add up on their own
-// while the site moved on to explaining itself.
+// Without this slide the piece would run out rather than finish: comparison,
+// then method, then sources, leaving everything the reader assembled -- a
+// storm, a pair of countries, five records, four trajectories -- for them to
+// add up on their own while the site moves on to explaining itself.
 //
 // This says the one thing all of it adds up to, in the site's own terms and
 // without a figure that has not already been shown: a shared hazard does not
@@ -34,8 +38,8 @@ import { isPluralStormName } from '../utils/pluralize.js'
 // changing, not a slide jump, which is the distinction the whole deck runs on:
 // the footer's Back and Next are the only things that move a reader.
 //
-// The two other offers that used to sit here -- compare another pair, watch the
-// divergence again -- were slide jumps and are gone. What they pointed at is
+// There are deliberately no "compare another pair" or "watch the divergence
+// again" buttons: they would be slide jumps. What they would point at is
 // named in the line below instead.
 //
 // Props:
@@ -114,7 +118,7 @@ function ConvergeDiverge({ inView }) {
   )
 }
 
-export default function StoryConclusion({ storm, selectedNations, onReset, style }) {
+export default function StoryConclusion({ storm, selectedNations, onReset }) {
   const [sectionRef, inView] = useInView({ threshold: 0.3 })
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -122,7 +126,6 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const blocked = sectionGuard({
     data: true,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -141,7 +144,7 @@ export default function StoryConclusion({ storm, selectedNations, onReset, style
   const comparedClause = pair.length === 2 ? t.comparedClause(nationListInProse(pair, language)) : ''
 
   return (
-    <Section width="narrow" style={style} backdrop={scatterBackdrop('conclusion')}>
+    <Section width="narrow" backdrop={scatterBackdrop('conclusion')}>
       <div ref={sectionRef}>
         <p className="type-eyebrow mb-1 text-accent">{t.whatShowed(storm.name)}</p>
         <h2 className="type-h2 mb-3">{t.heading}</h2>

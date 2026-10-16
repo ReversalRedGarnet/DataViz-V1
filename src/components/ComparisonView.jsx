@@ -1,3 +1,6 @@
+// The comparison slide: the two chosen nations side by side, metric by metric,
+// with pickers to change the pair.
+
 import { CHAIN_METRICS, metricLabel } from '../utils/metrics.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
@@ -66,7 +69,6 @@ const STRINGS = {
 //   nations -- every in-scope nation, for the pickers
 //   onSetNationAt -- (side, name) => void; swaps rather than duplicating
 //   onSwapNations -- () => void
-//   style -- forwarded to Section (entrance stagger)
 export default function ComparisonView({
   data, dataError,
   storm,
@@ -74,7 +76,6 @@ export default function ComparisonView({
   nations,
   onSetNationAt,
   onSwapNations,
-  style,
 }) {
   const { containerRef, tooltip, showTooltip, hideTooltip } = useTooltip()
   const { theme } = useTheme()
@@ -86,18 +87,17 @@ export default function ComparisonView({
     data,
     error: dataError,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
   })
   if (blocked) return blocked
   if (!selectedNations || selectedNations.length < 2) {
-    return <EmptyState style={style}>{t.selectSecond}</EmptyState>
+    return <EmptyState>{t.selectSecond}</EmptyState>
   }
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('compare')}>
+    <Section backdrop={scatterBackdrop('compare')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">{t.heading}</h2>
         <p className="prose-column prose-wide prose-short mb-5 text-sm opacity-70">

@@ -1,3 +1,7 @@
+// The map slide: a D3 map of the Pacific where the reader picks up to two
+// nations to compare. The choice is held by hooks/useSelection.js and drives
+// the ripple chain, divergence and comparison slides that follow.
+
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import Section from './Section.jsx'
@@ -96,11 +100,10 @@ const STRINGS = {
 // to select. Two selections at most, because everything downstream of this
 // slide is a pairwise comparison.
 //
-// The land is real TopoJSON. The markers come from content/nations.js, which
-// this file used to own and export -- so App, BigPicture, ContextPanel,
-// DivergenceView and StormJourney all imported the project's scope from a UI
-// component. It is scope data, not map data, and it now lives with the rest of
-// the content.
+// The land is real TopoJSON. The markers come from content/nations.js: the
+// list of nations is the project's scope, read by the pipeline and by several
+// other components, so it lives with the rest of the content rather than
+// inside this UI component.
 
 const WIDTH = 700
 const HEIGHT = 460
@@ -110,7 +113,7 @@ const HEIGHT = 460
 // see hooks/useViewBoxScale.js for the 4.8px labels this replaces.
 //
 // 22 is the hit radius, so the target is 44px across: the same floor every
-// other control on this site uses, and previously the one place it was missed.
+// other control on this site uses.
 // The markers are at least 146 viewBox units apart at every fit, so they cannot
 // collide at this size.
 const MARKER_HIT_R = 22
@@ -173,9 +176,6 @@ function markerTooltipContent(nation, selected, storm, language = 'en') {
 }
 
 // Props:
-//   nations -- array of { name, lat, lon, blurb }, defaults to the
-//     cyclone-nation set. Other hazard pages pass their own since
-//     which nations have usable data varies by hazard.
 //   storm -- the selected storm, or null. Nations it did not reach are faded
 //     and their aria-labels say so. They stay selectable on purpose: a country
 //     the storm missed is the nearest thing this data has to a control, and the
@@ -184,8 +184,7 @@ function markerTooltipContent(nation, selected, storm, language = 'en') {
 //   selected -- array of up to two nation names, in the order picked
 //   onToggle -- (name) => void, called on marker click / Enter / Space
 //   onClear -- () => void, clears the current selection
-//   style -- forwarded to the underlying Section
-export default function MapView({ nations = NATIONS, storm, selected, onToggle, onClear, style }) {
+export default function MapView({ storm, selected, onToggle, onClear }) {
   const svgRef = useRef(null)
   const gRef = useRef(null)
   const zoomRef = useRef(null)
@@ -243,7 +242,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
       // rotation lives in pacificProjection() -- see utils/map.js.
       const projection = fitToPoints(
         pacificProjection(),
-        nations.map((n) => [n.lon, n.lat]),
+        NATIONS.map((n) => [n.lon, n.lat]),
         { width: WIDTH, height: HEIGHT, padding: 65 }
       )
 
@@ -283,11 +282,11 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 
       // Projected once and kept, because the label-flip pass below needs each
       // pin's x in viewBox units and the projection is not in scope there.
-      const projected = new Map(nations.map((n) => [n.name, projection([n.lon, n.lat])]))
+      const projected = new Map(NATIONS.map((n) => [n.name, projection([n.lon, n.lat])]))
 
       const marker = g
         .selectAll('g.marker')
-        .data(nations)
+        .data(NATIONS)
         .join('g')
         .attr('class', 'marker')
         .attr('transform', (d) => {
@@ -400,8 +399,6 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
     return () => {
       cancelled = true
     }
-    // `nations` is intentionally excluded: every caller passes a fixed array,
-    // and the whole component remounts on a route change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -491,9 +488,8 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
     //
     // Counter-scaling is what makes a label legible, and it is also what makes
     // it wide: at the phone's fit a name occupies more than twice the viewBox
-    // room it used to, while the projection's padding is a fixed 65 units
-    // chosen when the labels were small. Tonga sits nearest the right edge and
-    // ran straight off it.
+    // room it was drawn at, while the projection's padding is a fixed 65 units.
+    // Tonga sits nearest the right edge and would run straight off it.
     //
     // So a name that would overflow is drawn on the other side of its pin,
     // which is what stormProfileChart does with its own clamp for the same
@@ -541,7 +537,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
   const summaryFor = preview ?? selected[selected.length - 1] ?? null
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('map')}>
+    <Section backdrop={scatterBackdrop('map')}>
       <h2 className="type-h2 mb-2">{STRINGS[language].exploreHeading}</h2>
       <p className="prose-column prose-wide prose-short mb-3 text-sm opacity-70">
         {STRINGS[language].exploreBody}
@@ -559,12 +555,12 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
           aria-label={
             storm
               ? STRINGS[language].mapAriaWithStorm(
-                  nations.length,
+                  NATIONS.length,
                   storm.name,
                   storm.nations.length,
                   isPluralStormName(storm.name)
                 )
-              : STRINGS[language].mapAriaNoStorm(nations.length)
+              : STRINGS[language].mapAriaNoStorm(NATIONS.length)
           }
           className="h-auto w-full overflow-hidden rounded-2xl border-2 border-ink/15 shadow-sm"
         />
@@ -606,7 +602,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <CountryPicker
-          nations={nations}
+          nations={NATIONS}
           selected={selected}
           storm={storm}
           onToggle={onToggle}
@@ -644,7 +640,7 @@ export default function MapView({ nations = NATIONS, storm, selected, onToggle, 
             </tr>
           </thead>
           <tbody>
-            {nations.map((n) => (
+            {NATIONS.map((n) => (
               <tr key={n.name}>
                 <td>{nationLabel(n.name, language)}</td>
                 <td>{selected.includes(n.name) ? STRINGS[language].yes : STRINGS[language].no}</td>

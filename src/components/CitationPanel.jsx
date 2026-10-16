@@ -1,34 +1,16 @@
 // Site footer: sources, copyright, and a plain-language data disclaimer.
 //
-// THIS SLIDE USED TO INVERT ITSELF, AND ONLY IN LIGHT MODE. It was
-// bg-ink/text-sand with a dark:bg-panel/dark:text-ink override, on the
-// reasoning that dark small print on a light panel is a common way footnotes
-// drop below WCAG contrast. The effect was that in dark mode it matched every
-// other slide, and in light mode it alone was a black panel -- so the last
-// thing a reader saw was the one thing that did not belong to the design
-// system, and the inconsistency was invisible to anyone reviewing in dark mode.
+// SAME COLOURS AS EVERY OTHER SLIDE: bg-panel and text-ink in both themes, and
+// the same scatter backdrop. Small print on a light panel is a common way to
+// drop below WCAG contrast, so the small print here is text-ink/75 rather than
+// a low opacity, which clears AA against the panel in both themes.
 //
-// Now bg-panel/text-ink in both, which is what every other slide paints. The
-// contrast concern was real but it was answered in the wrong place: the fix is
-// that the small print here is text-ink/75 rather than a low opacity on a dark
-// ground, which clears AA against panel in both themes.
-//
-// What it loses is its distinctiveness as the closing slide. It is not bought
-// back with a texture of its own: this panel once carried the site's only
-// edge-to-edge fish tile for that job, which marked it as different by putting
-// it outside the system every other slide belongs to. It now paints the same
-// scatter backdrop as the twelve slides before it. Being last is what makes it
-// the closing slide.
+// No special texture or inverted colours to mark it as the closing slide:
+// those would make it look like it belonged to a different site. Being last is
+// what makes it the closing slide.
 //
 // Props:
 //   sources -- array of { label, url }
-//   aboutTitle -- heading for the disclaimer block, per-language; default is
-//     the standard {en, fr} pair below. Overridden by whatever page mounts
-//     this with different data, same shape.
-//   children -- optional; replaces the default Cyclone-specific
-//     disclaimer paragraphs so a page with different data gaps/caveats
-//     can say so accurately. Cyclones passes no children.
-//   style -- forwarded onto the <footer>
 import BackgroundPattern from './BackgroundPattern.jsx'
 import LanguageToggle from './LanguageToggle.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -37,7 +19,7 @@ import { sourceLabel } from '../utils/metrics.js'
 
 const YEAR = new Date().getFullYear()
 
-const DEFAULT_ABOUT_TITLE = { en: 'About this data', fr: 'À propos de ces données' }
+const ABOUT_TITLE = { en: 'About this data', fr: 'À propos de ces données' }
 
 const STRINGS = {
   en: {
@@ -64,15 +46,14 @@ const STRINGS = {
   },
 }
 
-export default function CitationPanel({ sources = [], aboutTitle, children, style }) {
+export default function CitationPanel({ sources = [] }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
-  const title = aboutTitle ? (aboutTitle[language] ?? aboutTitle.en) : DEFAULT_ABOUT_TITLE[language]
+  const title = ABOUT_TITLE[language]
 
   return (
     <footer
       className="animate-pop-in relative overflow-hidden bg-panel px-6 py-10 text-ink md:py-14"
-      style={style}
     >
       {/* Seeded 'sources', matching this slide's id in App.jsx -- the same
           convention every Section on the site follows, so the scatter here is
@@ -145,20 +126,14 @@ export default function CitationPanel({ sources = [], aboutTitle, children, styl
 
         <div className="prose-column prose-wide">
           <h2 className="type-eyebrow mb-3 opacity-80">{title}</h2>
-          {children ?? (
-            <>
-              {/* Trimmed to a pointer. The gaps, the zero-as-unreported rule and
-                  the uneven-reporting finding were five paragraphs of caveat
-                  sitting under a list of links; they are the subject of the
-                  method slide before this one, and stating them twice made
-                  neither slide readable. */}
-              <p className="prose-column prose-wide text-ink/85">{t.disclaimer1}</p>
+          {/* Trimmed to a pointer. The gaps, the zero-as-unreported rule and
+              the uneven-reporting finding were five paragraphs of caveat
+              sitting under a list of links; they are the subject of the
+              method slide before this one, and stating them twice made
+              neither slide readable. */}
+          <p className="prose-column prose-wide text-ink/85">{t.disclaimer1}</p>
 
-              <p className="prose-column prose-wide prose-short mt-3 text-ink/85">
-                {t.disclaimer2}
-              </p>
-            </>
-          )}
+          <p className="prose-column prose-wide prose-short mt-3 text-ink/85">{t.disclaimer2}</p>
         </div>
 
         <div className="text-xs text-ink/75">

@@ -1,3 +1,26 @@
+// THE STORM CONTENT: everything the site says about each of the six storms.
+//
+// HOW TO READ THIS FILE, for a newcomer.
+//   - The basic facts about each storm (id, name, year, which nations it
+//     struck) live in roster.json, because the Python pipeline needs them too.
+//     This file adds the researched detail, in STORM_DETAIL, keyed by the same
+//     id ('pam', 'winston', ...). The two are merged into STORMS at the bottom.
+//   - Each storm's `profile` is a list of stops, one per nation, in the order
+//     the storm reached them. A stop has a date, a category (1-5, the
+//     strength scale), a death toll, a one-line `lead` and a longer `fact`.
+//   - Fields ending in Fr (factFr, leadFr, dateFr, ...) are the French
+//     versions of the field without the suffix. localizeStorm() below swaps
+//     them in when the page is in French, so components never have to.
+//   - `deaths: null` means no death toll was ever reported for that stop; it
+//     is shown as "not reported", never as 0. A reported 0 is written as 0.
+//   - `deathsKind: 'unattributed'` marks deaths that were reported after the
+//     storm but that none of the sources found link to it. The chart draws
+//     them as a hollow dot and the text says "not attributed".
+//   - `sources` lists the citations behind a storm's facts; each one appears
+//     on the sources slide.
+// The comments inside each entry record where a figure came from. Keep them:
+// they are how a reader checks the facts.
+
 import roster from './roster.json'
 
 // THE STORM ROSTER'S PROSE HALF.
@@ -15,9 +38,8 @@ import roster from './roster.json'
 // WHERE THE SPLIT FALLS, AND WHY THERE IS ONE. The facts the rule determines --
 // id, name, year, label, and which in-scope nations each storm struck -- live in
 // roster.json, because data-pipeline/clean_data.py needs them too and cannot
-// import a JavaScript module. It used to keep its own copy of all six storms,
-// under a comment asking whoever edited one list to remember the other. This
-// file holds everything the pipeline has no use for: the researched per-nation
+// import a JavaScript module; one shared file means nobody has to remember to
+// edit two lists. This file holds everything the pipeline has no use for: the researched per-nation
 // profiles, the sentences that connect them, and the citations.
 //
 // The two halves are merged by id below, and the merge THROWS AT IMPORT TIME if
@@ -43,7 +65,7 @@ import roster from './roster.json'
 // StormProfile, StormTimeline, RippleChain's insights) that all read
 // .fact/.categoryLabel/.date etc. directly, and reshaping the field itself
 // would mean touching every one of those read sites individually. Instead,
-// localizeStorm()/localizeRow() below swap in the *Fr sibling once, at the
+// localizeStorm()/localizeStormRow() below swap in the *Fr sibling once, at the
 // point each storm object is first obtained (App.jsx's pageSections(),
 // StormTimeline.jsx's STORMS lookup), and every existing
 // .fact/.categoryLabel/.lead/.deathsNote/.note/.date read downstream keeps
@@ -52,7 +74,7 @@ import roster from './roster.json'
 // a single calendar date to format -- see Judy & Kevin's below, two dates and
 // a parenthetical. `name` (the nation), `category`, `deaths`, `deathsKind` and
 // `dodge` are still data, not prose, and are never localized.
-// `sources[].label` is now { en, fr } too, resolved via sourceLabel() from
+// `sources[].label` is { en, fr } too, resolved via sourceLabel() from
 // utils/metrics.js -- descriptive terms (assessment names, report types)
 // translate; organisation and agency names (UN OCHA, ReliefWeb, IFRC, World
 // Bank, VanKIRAP) stay as given, the way an English-language citation isn't
@@ -642,7 +664,7 @@ export const STORMS = roster.storms.map((entry) => ({ ...entry, ...STORM_DETAIL[
 // Swap in the *Fr sibling for every prose field, once, at the point a storm
 // (or a single profile row) is first obtained -- see the note at the top of
 // this file. English is untouched; STORMS itself is never mutated.
-export function localizeStormRow(row, language = 'en') {
+function localizeStormRow(row, language = 'en') {
   if (!row || language !== 'fr') return row
   return {
     ...row,
@@ -681,11 +703,8 @@ export const ROSTER_END = roster.rosterEnd
 // an event-year chart is meaningless without baseline years before it.
 //
 // Both bounds are read by ContextPanel: the max to draw its capacity snapshot
-// against a year the pipeline actually exported, the min (newly re-exported
-// here) to know how many possible country-years its reporting-completeness
-// chart is counting out of. yearMin used to be unexported because nothing on
-// this side read it; that stopped being true the moment a second chart needed
-// the whole window instead of just its edge.
+// against a year the pipeline actually exported, the min to know how many
+// possible country-years its reporting-completeness chart is counting out of.
 export const DATA_YEAR_MIN = roster.yearMin
 export const DATA_YEAR_MAX = roster.yearMax
 

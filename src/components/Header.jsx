@@ -1,3 +1,7 @@
+// The site header at the top of every slide: the wordmark, the section menu
+// (SectionNav), the language toggle, the reader's current choices
+// (StoryStateBar) and the canoe progress bar (ScrollProgress).
+
 import { useLayoutEffect, useRef } from 'react'
 import ScrollProgress from './ScrollProgress.jsx'
 import SectionNav from './SectionNav.jsx'

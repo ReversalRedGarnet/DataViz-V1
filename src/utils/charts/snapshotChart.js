@@ -1,3 +1,7 @@
+// Draws the snapshot charts (MetricSnapshotChart.jsx): one bar per nation for
+// a single year. Called by hooks/useChartCanvas.js; see its header for how the
+// drawing is set up.
+
 import * as d3 from 'd3'
 import { chartTheme } from '../theme.js'
 import { motionDuration } from '../motion.js'

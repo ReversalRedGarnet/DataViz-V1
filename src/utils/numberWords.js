@@ -1,18 +1,15 @@
-// Small counts, set in words. See the original English-only comment below for
-// why this exists at all; the language and gender parameters are the
-// translation-era addition.
+// Small counts, set in words, in English or French.
 //
-// This exists to close a drift, not because spelling numbers is interesting.
-// The roster's two headline figures -- how many storms, how many nations --
-// were typed out in four places (the hero kicker, the hero body, the timeline
-// eyebrow and the method panel's roster paragraph) while being derived from
-// STORMS and NATIONS everywhere else on the site. Two of those four were the
-// same sentence, written twice.
+// This exists so the roster's two headline figures -- how many storms, how
+// many nations -- are derived from STORMS and NATIONS wherever they appear in
+// prose (the hero kicker, the hero body, the timeline eyebrow and the method
+// panel's roster paragraph), rather than typed as words that could fall out of
+// step with the data.
 //
 // The roster is designed to accept a new storm: the rule in content/storms.js
 // is stated so a reader can apply it themselves, and any storm meeting it
-// belongs on the list. That edit is one line in the registry, and it used to
-// leave four sentences quietly asserting six.
+// belongs on the list. That edit is one line in the registry, and because the
+// counts are derived, no sentence is left quietly asserting six.
 //
 // Words rather than digits because every one of these sits in prose, where a
 // numeral reads as data and pulls the eye the way a figure in a chart should.

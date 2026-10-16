@@ -1,3 +1,7 @@
+// Draws the trend charts (TrendChart.jsx): each chosen nation's record over
+// the years, as bars, lines or a filled area. Called by
+// hooks/useChartCanvas.js; see its header for how the drawing is set up.
+
 import * as d3 from 'd3'
 import { chartTheme } from '../theme.js'
 import { motionDuration } from '../motion.js'
@@ -41,7 +45,7 @@ export function renderMetricChart(
 
   // Colour and dash come from one resolver shared with the legend, and it
   // picks a wider palette above two nations -- see utils/charts/series.js for
-  // the two countries that used to be drawn identically here.
+  // why one fixed palette is not enough.
   const styles = seriesStyles(nations, palette)
   const styleOf = (nation) => styles[nations.indexOf(nation)]
   const color = (nation) => styleOf(nation).color

@@ -2,6 +2,9 @@
 Convert a Pacific Data Hub population export into the JSON the frontend would
 need to show impact per head of population.
 
+Part of the data pipeline: see the overview at the top of clean_data.py, and
+the README's "Rebuilding the data" for the commands.
+
 Why this exists
 ---------------
 "People affected" is currently a raw count, and raw counts flatten the thing

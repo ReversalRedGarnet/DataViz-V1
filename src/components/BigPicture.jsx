@@ -1,3 +1,6 @@
+// "The bigger picture" slide: all four nations in the storm's year, side by
+// side, as snapshot bar charts (MetricSnapshotChart.jsx) plus summary tiles.
+
 import { useMemo, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -105,7 +108,7 @@ const STRINGS = {
   },
 }
 
-export default function BigPicture({ data, dataError, storm, style }) {
+export default function BigPicture({ data, dataError, storm }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
   const eventYear = storm?.year ?? null
@@ -129,7 +132,6 @@ export default function BigPicture({ data, dataError, storm, style }) {
     data,
     error: dataError,
     storm,
-    style,
     subject: t.guardSubject,
     prompt: t.guardPrompt,
     language,
@@ -137,7 +139,7 @@ export default function BigPicture({ data, dataError, storm, style }) {
   if (blocked) return blocked
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('big-picture')}>
+    <Section backdrop={scatterBackdrop('big-picture')}>
       <div ref={containerRef} className="relative">
         <h2 className="type-h2 mb-2">{t.heading}</h2>
 
@@ -359,8 +361,8 @@ function roundRatio(value) {
 // The hardest/least-hit ratio is drawn from every nation with a figure that
 // year, not only the ones the storm reached. That is the right population for a
 // regional snapshot, but it means the two named nations were not necessarily
-// both struck -- so the tile no longer says "the same event", which for five of
-// the six storms was not true.
+// both struck -- so the tile does not say "the same event", which for five of
+// the six storms would not be true.
 //
 // The ratio follows the per-capita toggle, and has to: it is a comparison
 // between two nations at one moment, which is precisely the quantity a raw
@@ -370,19 +372,13 @@ function roundRatio(value) {
 // The total affected does not follow the toggle, and must not. It is a sum of
 // people across four nations; shares of four different denominators do not add
 // up to anything, and a "112%" here would be meaningless.
-// ALWAYS RETURNS AN OBJECT once there is data and a storm. It used to return
-// null when `affected_persons` held no rows for the storm's year, and the
-// caller rendered "Loading overview..." on null -- so the two 2023 storms, for
-// which that series simply stops in 2022, sat on a loading message forever.
-// Nothing was loading. The fetch had completed, and the answer was "this year
-// was never reported".
-//
-// The fix is not a better message on null: it is that one empty series should
-// never have blanked the block. Two of the four tiles below -- what happened,
-// and how many nations filed an economic-loss figure -- do not read
-// `affected_persons` at all and were being withheld because a different series
-// was empty. Each field is now independently nullable, and each tile says what
-// it does and does not have.
+// ALWAYS RETURNS AN OBJECT once there is data and a storm, with each field
+// separately nullable. One empty series must not blank the whole block:
+// `affected_persons` stops in 2022, so it has no rows for the two 2023 storms,
+// but two of the four tiles below -- what happened, and how many nations filed
+// an economic-loss figure -- do not read it at all. Returning null would also
+// look like "still loading" to the caller, when the true answer is "this year
+// was never reported". Each tile says what it does and does not have.
 function computeStats(data, eventYear, perCapita) {
   if (!data || !eventYear) return null
   const rows = data.affected_persons ?? []

@@ -1,3 +1,6 @@
+// Marks a scrolling box while more text is hidden past its edge, so the CSS can
+// fade that edge as a "there is more" hint.
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Marks a scrolling box with data-overflowing="true" while there is content

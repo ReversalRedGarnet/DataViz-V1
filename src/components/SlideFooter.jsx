@@ -1,3 +1,6 @@
+// The Back and Next buttons at the bottom of every slide, with the name of the
+// slide each one leads to. They are the only controls that move the deck.
+
 import { useState } from 'react'
 import BackgroundPattern from './BackgroundPattern.jsx'
 import { HEADER_BACKDROP } from '../content/patterns.js'

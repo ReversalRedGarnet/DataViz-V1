@@ -1,3 +1,6 @@
+// Slide 1: the opening poem, in English or French, over a faint drawing of the
+// region's coastline (CoastlineWash.jsx).
+
 import CoastlineWash from './CoastlineWash.jsx'
 import Section from './Section.jsx'
 import LanguageToggle from './LanguageToggle.jsx'
@@ -44,12 +47,10 @@ const STANZAS = [
   'You were left to suffer the consequences of a changing world you did not create.',
 ]
 
-// French draft by Ayga, September 2026 -- the crafted counterpart the note
-// below used to say was still pending. Kept verbatim as given: this is a
-// creative decision, not a mechanical string swap, and it isn't Claude's text
-// to edit unasked. Any pronoun-register questions on this draft (tu/vous/
-// nous) are worth a look before calling it final -- flagged separately,
-// not resolved here.
+// French version: a supplied translation (September 2026), kept verbatim as
+// given. It is a creative text rather than a mechanical string swap, so it is
+// not edited without its translator. Open question before calling it final:
+// the pronoun register (tu / vous / nous).
 const STANZAS_FR = [
   'En tant qu\u2019Insulaire, tu as grandi sous le soleil, avec l\u2019océan toujours à portée de main, le sel sur la peau.',
   'Tu as grandi avec le vent. Tu le sentais traverser les arbres, tes cheveux, les maisons que toi et les tiens aviez construites.',

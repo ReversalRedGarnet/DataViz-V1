@@ -1,3 +1,6 @@
+// The key under a multi-nation chart: a short line sample (colour and dash
+// pattern) next to each nation's name.
+
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { nationLabel } from '../content/nations.js'

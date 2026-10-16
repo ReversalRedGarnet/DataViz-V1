@@ -1,8 +1,7 @@
-// The before/after anchor is no longer a constant: it is a property of
-// whichever storm the reader has selected (see src/content/storms.js). The old
-// module-level EVENT_YEAR is gone deliberately rather than left as a default,
-// because a default would silently anchor a 2015 storm's charts to 2020 and
-// nothing would look wrong.
+// The before/after anchor year is not a constant here: it belongs to whichever
+// storm the reader has selected (see src/content/storms.js). There is
+// deliberately no module-level default year, because a default would silently
+// anchor a 2015 storm's charts to 2020 and nothing would look wrong.
 
 // Filenames match data-pipeline/clean_data.py's DATASETS dict.
 //
@@ -17,11 +16,9 @@
 //
 // source: { label, url } -- the FILTERED Pacific Data Hub query this series was
 // exported from, printed under the chart by components/FigureCaption.jsx and
-// collected into the sources slide by App.jsx. It lives here rather than in
-// App.jsx because it is a property of the metric, and because App.jsx used to
-// keep its own hand-written list of exactly these URLs -- two places to type
-// one value, with no way for a search to catch a drift between them. App.jsx
-// now derives its list from this one. `source.label` is { en, fr }, resolved
+// collected into the sources slide by App.jsx. It lives here because it is a
+// property of the metric, and so that each URL is typed once: App.jsx derives
+// its list from this one. `source.label` is { en, fr }, resolved
 // through sourceLabel() below -- "Pacific Data Hub (SPC)" itself stays as
 // given in both, since that's the platform's own name rather than a
 // description of it.
@@ -34,8 +31,8 @@
 // four filtered .Stat Explorer URLs in as `source` and the captions and the
 // sources slide both pick them up with no other change.
 //
-// population's URL is the portal root rather than a filtered query, which is
-// what App.jsx already carried. It is a denominator rather than a charted
+// population's URL is the portal root rather than a filtered query. It is a
+// denominator rather than a charted
 // series, so it appears in the sources slide and in no caption.
 //
 // The three groups below are an argument, not a filing convenience.
@@ -48,13 +45,13 @@
 // satellite-derived and need nobody to file a return. That asymmetry is not an
 // inconvenience in the data; it is one of the things the data says.
 //
-// TRANSLATION-ERA CHANGE: `label`, `caveat` and `source.label` are { en, fr }
+// LANGUAGES: `label`, `caveat` and `source.label` are { en, fr }
 // objects rather than plain strings -- call metricLabel(m, language),
 // metricCaveat(m, language) and sourceLabel(m.source, language) below rather
-// than reading .label/.caveat/.source.label directly. `format` now also takes
-// a language argument for its unit word and its number formatting (comma vs.
-// period decimal, space vs. comma thousands separator) -- call sites default
-// to 'en' when they don't have a language in scope, so nothing older breaks.
+// than reading .label/.caveat/.source.label directly. `format` also takes a
+// language argument for its unit word and its number formatting (comma vs.
+// period decimal, space vs. comma thousands separator), defaulting to 'en'
+// where a call site has no language in scope.
 
 // The ripple chain: who was hit, then the harvest, the herds, the power supply
 // and the visitors that follow. A sequence of plausible links, not a measured

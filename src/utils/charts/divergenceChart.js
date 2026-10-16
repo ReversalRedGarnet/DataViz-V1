@@ -1,3 +1,7 @@
+// Draws one divergence chart (DivergenceChart.jsx): every nation's line
+// indexed to 100 in the storm year, so they start together and the gap
+// between them is the story. Called by hooks/useChartCanvas.js.
+
 import * as d3 from 'd3'
 import { chartTheme } from '../theme.js'
 import { slug } from '../d3helpers.js'

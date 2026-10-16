@@ -1,3 +1,6 @@
+// A faint drawing of the Pacific coastline (and optionally the six storm
+// paths) used as a background behind the opening poem. Decorative only.
+
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
@@ -8,19 +11,16 @@ import { STORMS } from '../content/storms.js'
 
 // THE REGION, DRAWN FROM THE ROSTER, AS A BACKGROUND WASH.
 //
-// It was HeroWash and it lived on the title card. It is neither any more: the
-// hero now takes the same ambient atmosphere and margin weave every other
-// slide carries, and this layer moved to the opening poem, where a coastline
-// under the words is the whole point rather than a fourth treatment competing
-// with three others. The name went with it, because a component called
-// HeroWash that no hero uses is a comment that lies.
+// It sits behind the opening poem, where a coastline under the words is the
+// whole point. That is its only use: the title card takes the same ambient
+// atmosphere and margin weave as every other slide.
 //
 // It is decoration that happens to be true: the coastline of the region the
 // piece is about, and the six storm paths the roster is made of. Both are
 // decoration in the strict sense -- they carry nothing, and switching them off
 // costs nothing.
 //
-// It is still ornament and is still treated as such -- hidden from assistive
+// It is ornament and is treated as such -- hidden from assistive
 // technology, incapable of taking a pointer event, and carrying no information
 // a reader needs, since the same six storms are spelled out in the kicker,
 // drawn as pips below the headline and given a section each further down. A

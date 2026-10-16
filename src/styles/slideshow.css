@@ -25,12 +25,10 @@
   }
 
   /*
-    The track used to carry its own transform transition -- the deck sliding
-    sideways was the page-change animation. It moved to an instant jump: the
-    reader never sees the jump itself, because it happens mid-drop, hidden
-    under the ripple-droplet cover in utils/rippleTransition.js. That is now
-    the one page-change animation for the whole site, so this does not get a
-    second, competing motion of its own.
+    The track has no transform transition of its own: it jumps instantly. The
+    reader never sees the jump, because it happens mid-drop, hidden under the
+    ripple-droplet cover in utils/rippleTransition.js -- the one page-change
+    animation for the whole site -- so this gets no second, competing motion.
   */
   .slide-track {
     display: flex;
@@ -532,14 +530,9 @@
   /*
     SLIDE TRANSITIONS
 
-    Used to be two motions here: the track sliding sideways, and the entering
-    panel's contents settling in a beat later along the same axis. Both are
-    gone, replaced by the ripple-droplet transition every page change and
-    language switch now shares -- see utils/rippleTransition.js.
-
-    The `direction` state and its data-dir attribute went with them. They
-    outlived the animation they were computed for by some time, threaded from
-    useDeck through App to PageSections to an attribute no selector read.
+    There are none in this file: page changes and language switches all use
+    the ripple-droplet transition in utils/rippleTransition.js, so nothing here
+    animates the track or the entering panel.
   */
 
   /* The counter is the one part of the footer whose meaning changes on every
@@ -555,12 +548,12 @@
     }
 
     to {
-      /* The token, not the 0.5 that used to be typed here. `both` fill means
-         this keyframe's value is what the counter keeps for the life of the
-         element, so a literal here silently outranked the opacity utility on
-         the span -- which is how the counter stayed at 2.84:1 in light while
-         every other footer label moved. Read from the same custom property the
-         utility does, so the two cannot drift again. */
+      /* The token, not a typed number. `both` fill means this keyframe's
+         value is what the counter keeps for the life of the element, so a
+         literal here would silently outrank the opacity utility on the span
+         (a typed 0.5 leaves the counter at 2.84:1 contrast in light mode).
+         Reading the same custom property the utility does keeps the two in
+         step. */
       opacity: var(--dim-quiet);
       transform: translateY(0);
     }

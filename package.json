@@ -4,10 +4,11 @@
   "version": "0.1.0",
   "description": "Ripple: an interactive data story on six severe cyclones across Solomon Islands, Vanuatu, Fiji and Tonga, 2015-2024, and why the same storm leaves neighbours in very different places.",
   "license": "MIT",
-  "homepage": "https://data-viz-v1.vercel.app/",
+  "author": "Aziel Douglas Orihao",
+  "homepage": "https://YOUR-SITE-URL/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ReversalRedGarnet/DataViz-V1.git"
+    "url": "git+https://github.com/Aziel-Orihao/Ripple.git"
   },
   "type": "module",
   "engines": {

@@ -1,3 +1,8 @@
+// The Pacific basemap shared by every map on the site: the projection (how the
+// round earth is flattened, centred on the Pacific so it is not split at the
+// date line), fitting it to a set of points, and drawing and recolouring the
+// ocean and land.
+
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import { MAP_COLORS } from './theme.js'

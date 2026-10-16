@@ -1,3 +1,7 @@
+// The faint decorative patterns behind slides and the header: woven shapes in
+// the side margins, or a tiling ripple pattern. Which one a slide gets is set
+// in content/patterns.js. Purely decorative and hidden from screen readers.
+
 import { useId } from 'react'
 
 // A quiet tiling backdrop for a band of the page. Sits behind its container's
@@ -29,12 +33,10 @@ import { useId } from 'react'
 //
 // Props:
 //   backdrop -- one entry from src/content/patterns.js, or null for none
-//   className -- extra classes on the wrapper, if a caller needs to inset it
 
-// Scattered drop rings, sparse rather than latticed. An earlier draft put a
-// ring set on every lattice point; the rings intersected so evenly that they
-// closed into rosettes and read as wallpaper. Two drops per tile, offset
-// diagonally, keeps it reading as water instead.
+// Scattered drop rings, sparse rather than latticed: two drops per tile, offset
+// diagonally, so it reads as water. A ring on every lattice point would
+// intersect so evenly that the rings close into rosettes and read as wallpaper.
 function ripples() {
   const size = 104
   const drops = [
@@ -147,10 +149,10 @@ function seedFromString(str) {
 // weave. Every woven fragment anywhere on the site -- whatever size,
 // rotation or silhouette its outline has -- is filled with weave at exactly
 // this scale, so the margins read as one mat cut into different pieces rather
-// than as one pattern re-rendered at whatever size a seed happened to pick. There was per-seed jitter on this (0.7x to 1.3x) and a `scale` knob in
-// content/patterns.js feeding it; both are gone. Variety lives in the outlines
-// (see randomShape and scatterShapes below), which is where it can vary
-// without the material changing.
+// than as one pattern re-rendered at whatever size a seed happened to pick.
+// So there is deliberately no per-seed size jitter and no `scale` knob for it.
+// Variety lives in the outlines (see randomShape and scatterShapes below),
+// which is where it can vary without the material changing.
 //
 // The unit is measured in the 1200x640 backdrop viewBox rather than in CSS
 // pixels, which is what makes it consistent: every section draws that same
@@ -381,9 +383,8 @@ const BANDS = [
 // centre-only band check did not give it.
 const SHAPE_REACH = 1.62
 
-// How many positions a fragment may be offered before it is dropped. The jitter
-// distribution is unchanged -- each attempt draws from exactly the same
-// `spread` box the single attempt used to -- so this only decides how hard the
+// How many positions a fragment may be offered before it is dropped. Every
+// attempt draws from the same `spread` box, so this only decides how hard the
 // scatter tries before accepting a gap.
 //
 // 14 IS THE KNEE, AND THE CURVE IS FLAT. Raising it to 24 buys about half a
@@ -391,39 +392,33 @@ const SHAPE_REACH = 1.62
 // geometric: a cluster jitters its members inside a box of `spread` (1.6r)
 // while a fragment reaches up to about 2.1r and must additionally clear
 // MIN_SEPARATION, so a second fragment in a cluster often has nowhere to go
-// however many times it is asked. That is a property of the cluster sizing,
-// which is deliberately unchanged here. The margins carry about seven pieces a
-// side rather than the seventeen they once did, and every one of them is its
+// however many times it is asked. That is a property of the cluster sizing.
+// The margins carry about seven pieces a side, and every one of them is its
 // own legible triangle or quad.
 const PLACEMENT_ATTEMPTS = 14
 
 // Around seven pieces a side, clustered, in the two margins.
 //
-// CLUSTERS OF SEPARATE PIECES, NOT FUSED ONES. This used to place one to three
-// shapes per cluster and let them overlap on purpose: every shape is a hole in
-// one <clipPath>, so overlapping shapes merge instead of doubling in opacity,
-// and a cluster read as one torn piece rather than as a darker patch. That was
-// a real property and it produced the wrong picture. A merged pair is a single
-// silhouette with five or seven sides, so the margins read as torn cloth --
-// while a pandanus or coconut-leaf mat is made of discrete strips laid beside
-// one another, every one of them still its own clean edge even where the
-// packing is tight.
+// CLUSTERS OF SEPARATE PIECES, NOT FUSED ONES. Every shape is a hole in one
+// <clipPath>, so two overlapping shapes would merge into a single silhouette
+// with five or seven sides, and the margins would read as torn cloth. A
+// pandanus or coconut-leaf mat is made of discrete strips laid beside one
+// another, each still its own clean edge even where the packing is tight -- so
+// that is what this draws.
 //
-// Clustering survives; fusing does not. A cluster still asks for up to three
-// pieces at one spot and they still sit close, but each has to clear every
-// piece already placed by MIN_SEPARATION (see tooClose above), and is dropped
-// rather than laid on top when it cannot. What the merge-instead-of-compound
-// property still buys is the thing that made this safe beside a chart: pieces
-// never stack into a darker patch, so density can never turn into weight.
+// A cluster asks for up to three pieces at one spot and they sit close, but
+// each has to clear every piece already placed by MIN_SEPARATION (see tooClose
+// above), and is dropped rather than laid on top when it cannot. The shared
+// <clipPath> still matters beside a chart: pieces can never stack into a darker
+// patch, so density can never turn into weight.
 //
-// SIZES CAME DOWN when the outlines went to three and four sides. At the old
-// 30-135 cluster radius a fragment could span 350 units of a 340-wide margin,
-// so what the reader saw was one soft-edged mass per side and the geometry was
-// academic. At 32-86 a fragment spans roughly forty to two hundred units --
-// one to six weave units across, which is enough of the tile to read as woven
-// and little enough that the triangle or quad holding it is still a shape
-// rather than a field. The range is what keeps the margins from settling at
-// one weight: large anchors, small debris.
+// SIZES. A cluster radius of 32-86 means a fragment spans roughly forty to two
+// hundred units -- one to six weave units across: enough of the tile to read
+// as woven, and little enough that the triangle or quad holding it is still a
+// shape rather than a field. (Much larger, and a fragment could span most of a
+// 340-wide margin, so each side would show one soft-edged mass.) The range is
+// what keeps the margins from settling at one weight: large anchors, small
+// debris.
 //
 // The floor is set by the weave rather than by taste. Below about one and a
 // half tiles a fragment shows two or three strokes, which at 0.05 opacity is
@@ -432,9 +427,8 @@ const PLACEMENT_ATTEMPTS = 14
 //
 // The cluster spread widens with the cluster's own size, so a cluster of large
 // pieces has room to hold more than one of them while a cluster of small ones
-// does not scatter into three separate specks -- a flat jitter did both. It
-// matters more now than it did: with separation enforced, a spread too tight
-// for its own pieces does not fuse them, it drops them.
+// does not scatter into three separate specks. With separation enforced, a
+// spread too tight for its own pieces does not fuse them, it drops them.
 function scatterShapes(rand, prefix) {
   const shapes = []
   // Every fragment already accepted, as coordinates, so each new candidate can
@@ -523,7 +517,7 @@ function WeaveScatter({ seed, opacity, id }) {
   )
 }
 
-export default function BackgroundPattern({ backdrop, className = '' }) {
+export default function BackgroundPattern({ backdrop }) {
   // Two backdrops render per page, so the <pattern> ids have to be unique or
   // the second one's fill resolves to the first one's tile.
   const id = useId()
@@ -534,7 +528,7 @@ export default function BackgroundPattern({ backdrop, className = '' }) {
   // `backdrop-layer` is a hook, not a style: it is what lets an off-stage slide
   // switch its backdrop off (see styles/slideshow.css). Both branches below
   // carry it, since either can end up inside a panel.
-  const wrapper = `backdrop-layer pointer-events-none absolute inset-0 overflow-hidden ${className}`
+  const wrapper = 'backdrop-layer pointer-events-none absolute inset-0 overflow-hidden'
 
   // No `scale` here, and that is rule (3): the scatter's weave is WEAVE_UNIT
   // and nothing else, so there is no per-section knob that could put two

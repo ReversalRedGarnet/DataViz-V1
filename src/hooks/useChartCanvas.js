@@ -1,3 +1,23 @@
+// HOW A CHART GETS DRAWN -- the D3 setup in one place.
+//
+// React and D3 split the work. React renders the chart card: the heading, the
+// caption and an empty <svg>. D3 (a JavaScript library for drawing data) then
+// draws inside that <svg> -- axes, bars, lines, dots. They must not both try
+// to manage the same elements, so React never touches what is inside the svg.
+//
+// This hook (a "hook" is a reusable piece of React logic whose name starts
+// with `use`) does the hand-over:
+//   1. measures the card's width in real pixels (useElementWidth.js),
+//   2. waits until the card is on screen (useInView.js), so the entrance
+//      animation is seen,
+//   3. clears the svg (resetSvg in utils/d3helpers.js),
+//   4. calls the chart's draw function -- one of the render*Chart functions in
+//      utils/charts/ -- with the width, the theme and the language,
+//   5. does it all again whenever the width, theme or language changes.
+// Each render function turns data into pixels with D3 "scales" (functions
+// that map a value, like 1,200 tonnes, to a position, like 140px), then draws
+// axes, marks and tooltips. Colours come from utils/theme.js.
+
 import { useEffect, useState } from 'react'
 import { useElementWidth } from './useElementWidth.js'
 import { useInView } from './useInView.js'
@@ -8,16 +28,16 @@ import { resetSvg } from '../utils/d3helpers.js'
 
 // The scaffolding every D3 chart card on this page needs: measure the card in
 // real pixels, wait until it is on screen, clear the SVG, draw, and redraw when
-// the theme flips -- and now, when the language flips, since axis labels,
-// tooltips and any text drawn with d3's own .text() (rather than JSX) need a
-// full redraw to pick up new strings; there is no CSS-only path for imperative
-// SVG text the way there is for colour.
+// the theme or the language changes. Language needs a redraw too: axis labels,
+// tooltips and any text drawn with d3's own .text() (rather than JSX) only pick
+// up new strings when drawn again; there is no CSS-only path for SVG text
+// drawn from JavaScript the way there is for colour.
 //
 // Worth centralising because the ordering is where the bugs live. A draw effect
 // that runs before its data or its container is ready must still run again once
-// they are, and twice this session a chart stayed blank because an effect fired
-// early and its dependencies never changed afterwards. One implementation of
-// that rule is one place to get it right.
+// they are -- an effect that fires early and never sees its dependencies change
+// again leaves a chart blank for good. One implementation of that rule is one
+// place to get it right.
 //
 // Options:
 //   height -- fixed SVG height in px
@@ -44,7 +64,7 @@ import { resetSvg } from '../utils/d3helpers.js'
 // the restyle is keyed on, so there is nothing else for such an effect to
 // notice. Depending on this makes "run again after every draw" expressible
 // without falling back to a dependency-free effect that runs after every
-// render, which is what TrendChart was doing.
+// render.
 export function useChartCanvas({ height, ready = true, waitForInView = true, draw, deps = [] }) {
   const [svgRef, node, width] = useElementWidth()
   const [cardRef, inView] = useInView()

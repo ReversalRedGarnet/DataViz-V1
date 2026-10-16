@@ -1,18 +1,17 @@
+// The four nations the project covers (Solomon Islands, Vanuatu, Fiji,
+// Tonga): names, French names, map coordinates and helpers for writing a list
+// of them in a sentence. Built from nations.json, which the Python pipeline
+// also reads.
+
 import scope from './nations.json'
 import { formatNationList } from '../utils/formatNationList.js'
 
 // THE FOUR IN-SCOPE NATIONS, IN ONE PLACE.
 //
-// This list used to live in components/MapView.jsx, and App, BigPicture,
-// ContextPanel, DivergenceView and StormJourney each imported it from there --
-// a page shell and four siblings reaching into a UI component for the project's
-// own scope. Four of them then wrote out the same `NATIONS.map(n => n.name)`
-// independently, so the same derivation existed four times and the count was
-// typed as a literal `4` in a sixth place.
-//
-// Everything below is derived once, here, from nations.json -- which the
-// cleaning scripts read too, so the site and the pipeline cannot disagree about
-// which countries this project covers.
+// Everything below -- the list, the names, the count -- is derived once, here,
+// from nations.json, which the cleaning scripts read too, so the site and the
+// pipeline cannot disagree about which countries this project covers.
+// Components import these rather than deriving their own copies.
 //
 // ORDER IS LOAD-BEARING. It is the order every chart sorts its rows into (see
 // byNationOrder in utils/rows.js) and the order the divergence legend assigns
@@ -39,8 +38,9 @@ export const NATION_COORDS = Object.fromEntries(scope.nations.map((n) => [n.name
 // "Federated", so long names get a real short form and anything not listed is
 // left alone.
 //
-// The in-scope four come from nations.json; the rest are here so a future
-// hazard page covering more of the region gets the same treatment for free.
+// The in-scope four come from nations.json; the rest are here so that if the
+// scope ever widens to more of the region, those names get the same
+// treatment for free.
 const SHORT_NAMES = {
   'Federated States of Micronesia': 'Micronesia',
   'Papua New Guinea': 'PNG',

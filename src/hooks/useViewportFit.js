@@ -1,3 +1,6 @@
+// Reports the window size and whether it is big enough for the deck's layout
+// (used by components/DisplayCheck.jsx).
+
 import { useEffect, useState } from 'react'
 
 /*
@@ -53,7 +56,7 @@ import { useEffect, useState } from 'react'
 export const MIN_WIDTH = 768
 export const MIN_HEIGHT = 640
 
-export function viewportFits(width, height) {
+function viewportFits(width, height) {
   return width >= MIN_WIDTH && height >= MIN_HEIGHT
 }
 

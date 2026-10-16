@@ -1,3 +1,6 @@
+// The slider beside the storm journey map: drag it (or use the arrow keys) to
+// move the storm from one documented stop to the next.
+
 import { useRef, useState } from 'react'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { nationLabel } from '../content/nations.js'

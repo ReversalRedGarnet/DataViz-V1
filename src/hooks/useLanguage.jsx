@@ -1,8 +1,12 @@
+// The current language (English or French) for the whole site, and the
+// function the EN/FR button calls to switch it. Every component reads it to
+// pick its own strings.
+
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // Site-wide EN/FR state. Context for the same reason useTheme.jsx is: both
 // ends of the site need it -- Header's toggle sets it, and every
-// content/UI-string component on every page reads it.
+// content/UI-string component on every slide reads it.
 const LanguageContext = createContext(null)
 
 // Two decisions keep this simple:

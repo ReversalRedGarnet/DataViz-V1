@@ -1,3 +1,5 @@
+// One of the map's zoom-in / zoom-out / reset buttons.
+
 import MapControlIcon from './MapControlIcon.jsx'
 
 // One of the map's zoom/reset controls.

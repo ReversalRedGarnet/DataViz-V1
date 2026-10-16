@@ -1,13 +1,16 @@
+// ESLint configuration: the rules `npm run lint` checks every .js/.jsx/.mjs
+// file against (the dist/, node_modules/ and public/ folders are skipped).
+
 import js from '@eslint/js'
 import react from 'eslint-plugin-react'
 import hooks from 'eslint-plugin-react-hooks'
 import a11y from 'eslint-plugin-jsx-a11y'
 import globals from 'globals'
 
-// The project had no linter. That is how nine hand-rolled "latest value" refs,
-// a stale dependency array, an eslint-disable suppressing a rule that no longer
-// fired, and three focusable elements with no accessible name all went
-// unnoticed at once.
+// Lint rules for the whole repo (`npm run lint`). A linter catches the mistakes
+// that are easy to miss by eye: unused variables, effects with missing
+// dependencies, a disable comment for a rule that no longer fires, and
+// interactive elements with no accessible name.
 //
 // react-hooks and jsx-a11y are the two that earn their place here. The hooks
 // rules catch the render-phase ref writes and cascading-setState patterns that

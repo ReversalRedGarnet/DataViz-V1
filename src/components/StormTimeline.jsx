@@ -1,3 +1,7 @@
+// The timeline slide: the six storms on a ten-year axis, and how many times
+// each nation was struck. Choosing a storm here is what unlocks the rest of
+// the deck (the choice is stored by hooks/useStory.js).
+
 import { useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
@@ -61,11 +65,10 @@ const STRINGS = {
 // The opening. Six storms on a ten-year axis, and the strike count per nation
 // above it.
 //
-// The count is the claim, not the calendar. An earlier draft planned to open on
-// year-clustering -- "they keep getting hit in bursts" -- and the roster does
-// not support it: one year of the ten holds more than one storm. Counting per
-// nation says something the data does show, without any trend or attribution
-// claim attached.
+// The count is the claim, not the calendar. The roster does not support a
+// year-clustering story ("they keep getting hit in bursts"): only one year of
+// the ten holds more than one storm. Counting per nation says something the
+// data does show, without any trend or attribution claim attached.
 //
 // Nothing is selected on load. The timeline is the argument; the storm chosen
 // from it is the evidence. That makes the chips the only control on the slide,
@@ -75,7 +78,6 @@ const STRINGS = {
 // Props:
 //   selectedId -- id of the chosen storm, or null
 //   onSelect -- (id) => void, toggles selection
-//   style -- forwarded to Section (entrance stagger)
 
 // How much of the region a storm covered, as four pips rather than a fraction.
 // The one comparison worth having pre-attentive when scanning the timeline.
@@ -218,7 +220,7 @@ function StormPreview({ storm, selected, t, language }) {
   )
 }
 
-export default function StormTimeline({ selectedId, onSelect, style }) {
+export default function StormTimeline({ selectedId, onSelect }) {
   const { setHighlight } = useNationHighlight()
   const { language } = useLanguage()
   const t = STRINGS[language]
@@ -240,12 +242,11 @@ export default function StormTimeline({ selectedId, onSelect, style }) {
   const delayOf = (id) => STORMS.findIndex((s) => s.id === id) * 260
 
   return (
-    <Section style={style} backdrop={scatterBackdrop('timeline')}>
+    <Section backdrop={scatterBackdrop('timeline')}>
       {/*
-        One column, full width. This slide used to be split -- prose left,
-        evidence right -- because the prose ran long enough that stacking cost
-        the reader a scroll. With the argument down to a single sentence there
-        is nothing left for a side column, and a timeline wants the full measure.
+        One column, full width. The argument is a single sentence, so there is
+        nothing for a side column to hold, and a timeline wants the full
+        measure.
       */}
       <p className="type-eyebrow mb-1 text-accent">
         {t.eyebrow(
