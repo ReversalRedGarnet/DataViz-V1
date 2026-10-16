@@ -1,3 +1,7 @@
+// Draws the trend charts (TrendChart.jsx): each chosen nation's record over
+// the years, as bars, lines or a filled area. Called by
+// hooks/useChartCanvas.js; see its header for how the drawing is set up.
+
 import * as d3 from 'd3'
 import { chartTheme } from '../theme.js'
 import { motionDuration } from '../motion.js'

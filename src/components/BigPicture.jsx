@@ -1,3 +1,6 @@
+// "The bigger picture" slide: all four nations in the storm's year, side by
+// side, as snapshot bar charts (MetricSnapshotChart.jsx) plus summary tiles.
+
 import { useMemo, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'

@@ -1,3 +1,6 @@
+// ESLint configuration: the rules `npm run lint` checks every .js/.jsx/.mjs
+// file against (the dist/, node_modules/ and public/ folders are skipped).
+
 import js from '@eslint/js'
 import react from 'eslint-plugin-react'
 import hooks from 'eslint-plugin-react-hooks'

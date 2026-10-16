@@ -1,3 +1,6 @@
+// The up-to-two nations the reader has picked, with the functions to add,
+// remove, swap or clear them, and the sentence a screen reader announces.
+
 import { useCallback, useState } from 'react'
 import { nationLabel } from '../content/nations.js'
 

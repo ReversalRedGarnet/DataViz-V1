@@ -1,3 +1,7 @@
+// Slide 2, the title card: the headline claim, the four nations and the six
+// storms. Its layout comes from PageHero.jsx; its numbers are counted from
+// content/storms.js.
+
 import { useState } from 'react'
 import PageHero from './PageHero.jsx'
 import { scatterBackdrop } from '../content/patterns.js'

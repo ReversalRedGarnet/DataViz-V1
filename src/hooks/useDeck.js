@@ -1,3 +1,6 @@
+// Which slide is showing, and the ways to change it: the Back/Next buttons,
+// the section menu, the arrow keys and the address bar's #hash.
+
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLatest } from './useLatest.js'
 import { runRippleTransition } from '../utils/rippleTransition.js'

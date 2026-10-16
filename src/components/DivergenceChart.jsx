@@ -1,3 +1,7 @@
+// One chart on the divergence slide: each nation's line indexed to 100 in the
+// storm year, swept in from left to right. Drawn by
+// utils/charts/divergenceChart.js through hooks/useChartCanvas.js.
+
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useChartCanvas } from '../hooks/useChartCanvas.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'

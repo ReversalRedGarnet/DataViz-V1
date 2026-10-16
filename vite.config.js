@@ -1,3 +1,8 @@
+// Vite configuration. Vite is the tool that runs the dev server
+// (`npm run dev`) and builds the site into dist/ (`npm run build`). This file
+// adds the React plugin and a small plugin that regenerates the theme colours
+// before every build.
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { buildTokens } from './scripts/build-tokens.mjs'

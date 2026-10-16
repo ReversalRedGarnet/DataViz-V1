@@ -1,3 +1,7 @@
+// The ripple chain slide: five linked trend charts (TrendChart.jsx) showing how
+// a storm's effects spread from people to crops, livestock, power and
+// tourism for the two chosen nations, with a short summary (InsightsPanel).
+
 import { useMemo, useState } from 'react'
 import { CHAIN_METRICS, FOOTNOTE_METRICS, metricLabel, metricCaveat } from '../utils/metrics.js'
 import { buildComparativeInsights } from '../utils/insights.js'

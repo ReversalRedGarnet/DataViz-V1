@@ -1,3 +1,7 @@
+// The faint decorative patterns behind slides and the header: woven shapes in
+// the side margins, or a tiling ripple pattern. Which one a slide gets is set
+// in content/patterns.js. Purely decorative and hidden from screen readers.
+
 import { useId } from 'react'
 
 // A quiet tiling backdrop for a band of the page. Sits behind its container's

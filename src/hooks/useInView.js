@@ -1,3 +1,6 @@
+// Reports whether an element has scrolled into view yet, so charts can wait
+// to draw (and animate) until the reader can see them.
+
 import { useCallback, useEffect, useState } from 'react'
 import { useScrollRoot } from './useScrollRoot.jsx'
 

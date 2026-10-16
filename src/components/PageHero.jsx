@@ -1,3 +1,6 @@
+// Layout for the title card (Hero.jsx): eyebrow line, the page's one <h1>, a
+// lead paragraph and whatever Hero puts underneath.
+
 import Section from './Section.jsx'
 
 // The title card's layout: eyebrow, the one <h1>, a lead paragraph, and

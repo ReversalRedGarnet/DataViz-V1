@@ -1,3 +1,6 @@
+// The header's progress bar: a small canoe that travels along the bottom edge
+// of the header as the reader moves through the deck.
+
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { prefersReducedMotion } from '../utils/motion.js'

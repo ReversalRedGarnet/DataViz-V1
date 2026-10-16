@@ -1,3 +1,6 @@
+// The method slide: how the storm roster was chosen, where the data comes from,
+// and what the site cannot say.
+
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'

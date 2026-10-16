@@ -1,3 +1,23 @@
+// HOW A CHART GETS DRAWN -- the D3 setup in one place.
+//
+// React and D3 split the work. React renders the chart card: the heading, the
+// caption and an empty <svg>. D3 (a JavaScript library for drawing data) then
+// draws inside that <svg> -- axes, bars, lines, dots. They must not both try
+// to manage the same elements, so React never touches what is inside the svg.
+//
+// This hook (a "hook" is a reusable piece of React logic whose name starts
+// with `use`) does the hand-over:
+//   1. measures the card's width in real pixels (useElementWidth.js),
+//   2. waits until the card is on screen (useInView.js), so the entrance
+//      animation is seen,
+//   3. clears the svg (resetSvg in utils/d3helpers.js),
+//   4. calls the chart's draw function -- one of the render*Chart functions in
+//      utils/charts/ -- with the width, the theme and the language,
+//   5. does it all again whenever the width, theme or language changes.
+// Each render function turns data into pixels with D3 "scales" (functions
+// that map a value, like 1,200 tonnes, to a position, like 140px), then draws
+// axes, marks and tooltips. Colours come from utils/theme.js.
+
 import { useEffect, useState } from 'react'
 import { useElementWidth } from './useElementWidth.js'
 import { useInView } from './useInView.js'

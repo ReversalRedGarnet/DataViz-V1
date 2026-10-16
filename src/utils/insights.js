@@ -1,3 +1,6 @@
+// Writes the short bullets under the ripple chain: for each metric, how the
+// two chosen nations changed from the storm year to their latest figure.
+
 import { CHAIN_METRICS, metricLabel } from './metrics.js'
 import { pctChange } from './rows.js'
 import { nationLabel, nationListInProse, nationListIsPlural } from '../content/nations.js'

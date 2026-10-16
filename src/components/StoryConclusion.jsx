@@ -1,3 +1,7 @@
+// The conclusion slide: the one sentence everything adds up to, a simple
+// drawing of four lines spreading from one point, and a button to start again
+// with another storm.
+
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'
 import { sectionGuard } from './sectionGuard.jsx'

@@ -1,3 +1,8 @@
+// The storm profile slide: a chart of storm category against reported deaths,
+// one dot per nation the storm reached, plus a table of the same facts. The
+// chart is drawn by utils/charts/stormProfileChart.js through
+// hooks/useChartCanvas.js; the facts come from content/storms.js.
+
 import { useEffect, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'

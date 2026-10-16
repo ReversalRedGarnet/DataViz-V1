@@ -1,3 +1,7 @@
+// Loads the cleaned data (public/data/metrics.json, via utils/loadData.js) and
+// hands each chart its rows. Returns { data, error } so slides can tell
+// "still loading" from "failed".
+
 import { useState, useEffect } from 'react'
 import { loadMetricBundle } from '../utils/loadData.js'
 

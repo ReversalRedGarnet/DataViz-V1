@@ -1,3 +1,7 @@
+// The deck itself: lays every slide out side by side on one track and slides
+// the track to show the active one. Which slide is active comes from
+// hooks/useDeck.js.
+
 import { useState } from 'react'
 import { NationHighlightProvider } from '../hooks/useNationHighlight.jsx'
 import SlidePanel from './SlidePanel.jsx'

@@ -1,3 +1,7 @@
+// Real colour strings (like '#24333A') for D3 charts and the maps, which
+// cannot read Tailwind classes. Light and dark versions of each; see the
+// header of hooks/useTheme.jsx for how the theme as a whole works.
+
 import { THEME_TOKENS } from '../styles/tokens.js'
 
 // Real color values, for the places JS and D3 need an actual string rather than

@@ -1,3 +1,7 @@
+// Draws the storm profile chart (StormProfile.jsx): one dot per nation, storm
+// category across, reported deaths up. A hollow dot means the deaths were not
+// reported, or not attributed to the storm. Called by hooks/useChartCanvas.js.
+
 import * as d3 from 'd3'
 import { chartTheme } from '../theme.js'
 import { motionDuration } from '../motion.js'

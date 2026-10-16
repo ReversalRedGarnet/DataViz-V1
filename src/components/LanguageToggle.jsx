@@ -1,3 +1,6 @@
+// The EN/FR button. It flips the language held by hooks/useLanguage.jsx; every
+// component then shows its own strings in the new language.
+
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { runRippleTransition } from '../utils/rippleTransition.js'
 

@@ -1,6 +1,22 @@
 """
 Convert Pacific Data Hub CSV exports into the JSON format used by the frontend.
 
+HOW THE DATA PIPELINE WORKS, for a newcomer. The website never reads the raw
+spreadsheets. Instead:
+  1. You download each dataset as a CSV file from the Pacific Data Hub into
+     data-pipeline/raw/ (the raw files are not kept in git).
+  2. This script (and clean_population_data.py, for population) reads each
+     CSV with pandas, keeps only the four nations and the years in scope,
+     finds the country, year and value columns, and turns blank or
+     non-numeric cells into gaps rather than zeros.
+  3. Each cleaned dataset is written to public/data/<name>.json, and
+     write_bundle() in common.py joins them all into public/data/metrics.json.
+  4. The site downloads that one file (src/utils/loadData.js), and
+     src/utils/metrics.js says how each dataset is labelled and charted.
+The four nations and the year window come from src/content/nations.json and
+roster.json, the same files the site reads. Step-by-step commands are in the
+README, under "Rebuilding the data".
+
 Usage:
 1. Export each dataset from https://stats.pacificdata.org/ into
    data-pipeline/raw/ using the filenames defined in DATASETS.

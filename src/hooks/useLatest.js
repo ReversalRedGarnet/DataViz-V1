@@ -1,3 +1,7 @@
+// A "ref" (a box React keeps between renders without re-rendering when it
+// changes) that always holds the newest value of something, for code that
+// runs later, such as a D3 click handler.
+
 import { useEffect, useRef } from 'react'
 
 // A ref that always holds the current value of something, for effects that

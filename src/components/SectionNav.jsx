@@ -1,3 +1,6 @@
+// The header's menu button and the list of slides it opens, for jumping
+// straight to a section. The slide names come from content/pageSections.js.
+
 import { useEffect, useRef, useState } from 'react'
 import { PAGE_SECTIONS, sectionLabel } from '../content/pageSections.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'

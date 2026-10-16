@@ -1,3 +1,7 @@
+// Small D3 helpers used by every chart: clearing an SVG before a fresh draw,
+// and removing the spaces from a nation name so it can be used in a CSS class
+// ("Solomon Islands" becomes "SolomonIslands").
+
 import * as d3 from 'd3'
 
 // Clears an SVG for a fresh D3 draw and returns the selection, viewBox set.

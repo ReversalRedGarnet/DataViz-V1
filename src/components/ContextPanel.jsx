@@ -1,3 +1,7 @@
+// The context slide: slower, structural records (weather stations, sea surface
+// temperature, emissions, reporting completeness) that explain the gaps in
+// everything before it.
+
 import { useMemo } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'

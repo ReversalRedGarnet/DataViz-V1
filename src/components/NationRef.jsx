@@ -1,3 +1,6 @@
+// A country name inside a sentence that works as a control: pointing at it
+// highlights that country on every chart (via hooks/useNationHighlight.jsx).
+
 import { useNationHighlight, highlightHandlers } from '../hooks/useNationHighlight.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { nationLabel } from '../content/nations.js'

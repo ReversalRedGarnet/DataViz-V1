@@ -1,3 +1,6 @@
+// The "no data available" note shown where a nation has no figure for a
+// metric, with an explanation for both mouse and screen-reader users.
+
 import { useId } from 'react'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 

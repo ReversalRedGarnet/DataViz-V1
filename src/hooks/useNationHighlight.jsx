@@ -1,3 +1,6 @@
+// Shared "which country is being pointed at" state: hovering a nation anywhere
+// dims the other nations on every chart at once.
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { slug } from '../utils/d3helpers.js'
 

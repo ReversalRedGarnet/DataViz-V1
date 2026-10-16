@@ -1,3 +1,6 @@
+// Slide 1: the opening poem, in English or French, over a faint drawing of the
+// region's coastline (CoastlineWash.jsx).
+
 import CoastlineWash from './CoastlineWash.jsx'
 import Section from './Section.jsx'
 import LanguageToggle from './LanguageToggle.jsx'

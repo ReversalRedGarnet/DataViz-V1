@@ -1,3 +1,6 @@
+// Measures whether a slide's content fits its panel (so it can be centred) and
+// how far it has been scrolled (for the "more below" hint).
+
 import { useEffect, useLayoutEffect, useState } from 'react'
 
 // How much overflow a panel is allowed before it stops counting as fitting.

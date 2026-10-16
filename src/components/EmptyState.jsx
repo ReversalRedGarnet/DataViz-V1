@@ -1,3 +1,6 @@
+// The "nothing to show yet" box a slide shows when it cannot draw yet -- for
+// example before a storm or a pair of nations has been chosen.
+
 import Section from './Section.jsx'
 
 // "Nothing to show yet" placeholder. Paints the same background as the section

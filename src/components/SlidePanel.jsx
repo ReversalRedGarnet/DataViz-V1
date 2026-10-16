@@ -1,3 +1,6 @@
+// One slide's frame inside the deck: a scrollable area for the slide's content
+// with the Back/Next footer (SlideFooter.jsx) pinned underneath.
+
 import { useEffect, useRef, useState } from 'react'
 import { ScrollRootProvider } from '../hooks/useScrollRoot.jsx'
 import SlideFooter from './SlideFooter.jsx'

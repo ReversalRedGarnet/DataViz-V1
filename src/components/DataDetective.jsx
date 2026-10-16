@@ -1,3 +1,6 @@
+// The "what do you think explains it?" slide: the reader picks a factor and is
+// told which earlier slide holds the evidence. No scoring, no right answer.
+
 import { useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'

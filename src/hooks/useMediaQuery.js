@@ -1,3 +1,6 @@
+// Tells a component whether a CSS media query (for example "is the screen
+// narrow?") currently matches, and updates when it changes.
+
 import { useEffect, useState } from 'react'
 
 // Match a media query from JavaScript.

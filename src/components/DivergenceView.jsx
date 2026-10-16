@@ -1,3 +1,7 @@
+// The divergence slide: each chosen nation's record indexed to 100 in the storm
+// year, so every line starts together and the reader sees them spread apart.
+// Each panel is a DivergenceChart.jsx.
+
 import { useMemo, useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'

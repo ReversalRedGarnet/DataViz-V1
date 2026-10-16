@@ -1,3 +1,6 @@
+// The expanded view of one ripple-chain link: what the metric measures, its
+// caveat, and where the numbers come from.
+
 import { CHAIN_METRICS, metricLabel, metricCaveat } from '../utils/metrics.js'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { nationLabel } from '../content/nations.js'

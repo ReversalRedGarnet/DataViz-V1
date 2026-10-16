@@ -1,3 +1,7 @@
+// A helper every storm-driven slide calls first: if the data has not loaded, or
+// no storm is chosen yet, it returns the right EmptyState message to show
+// instead of the slide.
+
 import EmptyState from './EmptyState.jsx'
 
 // Every storm-driven section opens with the same two checks in the same order:

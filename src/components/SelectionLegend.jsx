@@ -1,3 +1,6 @@
+// The key that ties a chart's colours to the two map pins the reader picked,
+// labelled 1 and 2 like the pins.
+
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'
 import { chartColorsFor } from '../utils/theme.js'

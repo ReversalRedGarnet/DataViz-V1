@@ -1,3 +1,6 @@
+// Animates displayed numbers from their old value to their new one, for the
+// summary tiles. Jumps straight to the new value under reduced motion.
+
 import { useEffect, useRef, useState } from 'react'
 import { motionDuration } from '../utils/motion.js'
 

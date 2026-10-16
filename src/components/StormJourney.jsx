@@ -1,3 +1,7 @@
+// "Follow the storm": a D3 map of the selected storm's documented stops, with
+// a slider (JourneyScrubber.jsx) that moves the storm from one stop to the
+// next. The stops and their text come from content/storms.js.
+
 import { useEffect, useMemo, useRef } from 'react'
 import * as d3 from 'd3'
 import Section from './Section.jsx'

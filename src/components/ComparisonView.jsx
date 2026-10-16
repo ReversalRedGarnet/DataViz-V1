@@ -1,3 +1,6 @@
+// The comparison slide: the two chosen nations side by side, metric by metric,
+// with pickers to change the pair.
+
 import { CHAIN_METRICS, metricLabel } from '../utils/metrics.js'
 import { useTheme } from '../hooks/useTheme.jsx'
 import { useLanguage } from '../hooks/useLanguage.jsx'

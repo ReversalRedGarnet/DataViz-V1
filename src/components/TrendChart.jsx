@@ -1,3 +1,7 @@
+// A chart card showing chosen nations over time (one line or bar series per
+// nation), with its heading, legend, caption and a hidden table for screen
+// readers. Drawn by utils/charts/metricChart.js through hooks/useChartCanvas.js.
+
 import { useEffect, useMemo } from 'react'
 import NoDataNote from './NoDataNote.jsx'
 import SeriesLegend from './SeriesLegend.jsx'

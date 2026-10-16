@@ -1,3 +1,6 @@
+// Reports the window size and whether it is big enough for the deck's layout
+// (used by components/DisplayCheck.jsx).
+
 import { useEffect, useState } from 'react'
 
 /*

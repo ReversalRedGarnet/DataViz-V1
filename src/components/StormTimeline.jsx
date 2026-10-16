@@ -1,3 +1,7 @@
+// The timeline slide: the six storms on a ten-year axis, and how many times
+// each nation was struck. Choosing a storm here is what unlocks the rest of
+// the deck (the choice is stored by hooks/useStory.js).
+
 import { useState } from 'react'
 import Section from './Section.jsx'
 import { scatterBackdrop } from '../content/patterns.js'

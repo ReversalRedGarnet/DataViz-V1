@@ -1,3 +1,6 @@
+// Picks each nation's colour and dash pattern for a chart, so the lines and
+// the legend under them always agree.
+
 import { DIVERGENCE_DASH, SERIES_DASH } from './constants.js'
 
 // HOW A SET OF NATIONS IS DRAWN: one colour and one dash pattern each.

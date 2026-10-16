@@ -1,3 +1,8 @@
+// The four nations the project covers (Solomon Islands, Vanuatu, Fiji,
+// Tonga): names, French names, map coordinates and helpers for writing a list
+// of them in a sentence. Built from nations.json, which the Python pipeline
+// also reads.
+
 import scope from './nations.json'
 import { formatNationList } from '../utils/formatNationList.js'
 

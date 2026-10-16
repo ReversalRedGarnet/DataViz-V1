@@ -1,3 +1,8 @@
+// The top of the app. It loads the data, holds the reader's choices (via
+// useStory), wraps everything in the theme, language and highlight
+// providers, and lists the slides of the deck in order -- each slide is one
+// component from src/components/, rendered by PageSections.jsx.
+
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Header from './components/Header.jsx'
 import Hero from './components/Hero.jsx'

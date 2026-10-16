@@ -1,3 +1,7 @@
+// The current language (English or French) for the whole site, and the
+// function the EN/FR button calls to switch it. Every component reads it to
+// pick its own strings.
+
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // Site-wide EN/FR state. Context for the same reason useTheme.jsx is: both

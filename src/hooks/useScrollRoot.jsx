@@ -1,3 +1,6 @@
+// Tells charts which scrolling box they live in (each slide scrolls on its
+// own), so useInView measures visibility against the right element.
+
 import { createContext, useContext } from 'react'
 
 // Which element a chart's visibility should be measured against.

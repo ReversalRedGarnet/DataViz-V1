@@ -1,3 +1,6 @@
+// A faint drawing of the Pacific coastline (and optionally the six storm
+// paths) used as a background behind the opening poem. Decorative only.
+
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'

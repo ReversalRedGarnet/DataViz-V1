@@ -1,3 +1,7 @@
+// The map slide: a D3 map of the Pacific where the reader picks up to two
+// nations to compare. The choice is held by hooks/useSelection.js and drives
+// the ripple chain, divergence and comparison slides that follow.
+
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import Section from './Section.jsx'
