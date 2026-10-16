@@ -117,21 +117,13 @@ export default function Hero() {
         formatNationList(NATIONS.map((n) => nationLabel(n.name, language)), language),
         numberWordCapitalized(STORMS.length, { language, gender: 'm' })
       )}
-      // THE TITLE CARD IS NOW DRESSED LIKE EVERY OTHER SLIDE, and the
-      // exception it used to be is what this replaces.
-      //
-      // It carried three background treatments of its own: the loud 'hero'
-      // atmosphere (three rings at full strength on a fast cycle), a coastline
-      // and storm-track wash, and no margin weave -- the one section on the
-      // site opting out of the scatter. The reasoning was that an opening
-      // should announce itself. What it produced was a first screen with more
-      // decoration on it than any slide that actually had something to show,
-      // and a piece whose visual system started one slide late.
-      //
-      // So: the ambient atmosphere every section gets, and the same weave
-      // seeded with this section's own id. The coastline moved to the opening
-      // poem (components/CoastlineWash.jsx), where it is the only picture on
-      // the slide instead of the third layer on this one.
+      // THE TITLE CARD IS DRESSED LIKE EVERY OTHER SLIDE: the ambient
+      // atmosphere every section gets, and the same weave seeded with this
+      // section's own id. Extra decoration of its own would put more on the
+      // first screen than on any slide that actually has something to show,
+      // and the visual system would start one slide late. The coastline
+      // drawing is on the opening poem instead (components/CoastlineWash.jsx),
+      // where it is the only picture on the slide.
       //
       // `atmosphere` is omitted rather than set: Section already defaults to
       // 'ambient', and passing it explicitly would suggest a choice being made

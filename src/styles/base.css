@@ -13,14 +13,13 @@
     wheel, trackpad, touch, keyboard, find-in-page -- because
     `scrollbar-width: none` hides the control without changing the container.
 
-    APPLIED EVERYWHERE, NOT ONLY TO THE DOCUMENT. It used to be scoped to
-    <html> on the grounds that an internal scrolling region without a scrollbar
-    would look truncated -- and that reasoning was sound, so the regions that
-    relied on it now carry their own affordance instead: .locked-scroll fades
-    its bottom edge while it overflows, and .slide-more announces a slide with
-    more below it. With those in place, the scrollbars themselves were the last
-    inconsistency, appearing on some panels and not others depending on how much
-    text a storm happened to have.
+    APPLIED EVERYWHERE, NOT ONLY TO THE DOCUMENT. An internal scrolling region
+    without a scrollbar can look truncated, so the regions that need it carry
+    their own affordance instead: .locked-scroll fades its bottom edge while it
+    overflows, and .slide-more announces a slide with more below it. With those
+    in place, hiding every scrollbar keeps the panels consistent, rather than
+    showing bars on some and not others depending on how much text a storm
+    has.
 
     Nothing about scrolling changes. `scrollbar-width: none` and a zero-size
     ::-webkit-scrollbar hide the control without altering the container or the
@@ -102,8 +101,7 @@
   }
 
   /*
-    THERE WAS A CUSTOM ARROW CURSOR HERE, in two files so it could invert with
-    the theme. It was well made and it is gone on purpose.
+    NO CUSTOM ARROW CURSOR, on purpose.
 
     A pointer is one of the few pieces of the interface a reader may already
     have tuned for themselves -- size, contrast, a system-wide replacement --

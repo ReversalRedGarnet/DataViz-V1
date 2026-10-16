@@ -1,11 +1,9 @@
-// The site's decorative weather: rings spreading from a point. Extracted from
-// Hero.jsx, where it was a local HeroAtmosphere that only the title card could
-// use.
+// The site's decorative weather: rings spreading from a point, drawn behind
+// each section by Section.jsx.
 //
-// THERE WAS A SLOW-SPINNING CYCLONE GLYPH HERE TOO, in the top-right corner of
-// every section. It is gone. The one cyclone left on the site is the glyph on
-// the storm journey map, which marks where a storm actually was -- a decorative
-// second one in the corner of every slide only diluted it.
+// No cyclone glyph here, on purpose: the only cyclone on the site is the one on
+// the storm journey map, which marks where a storm actually was. A decorative
+// one in the corner of every slide would dilute it.
 //
 // Decoration, and treated as such throughout -- hidden from assistive
 // technology, removed entirely under reduced motion, and incapable of taking a
@@ -25,15 +23,15 @@
 //     sit near its edges.
 //
 // Props:
-//   variant -- 'hero' is the title card's original weather, unchanged.
-//     'ambient' is the quieter version every other section gets: one ring
-//     instead of three, roughly a third of the opacity, and a slower cycle.
+//   variant -- 'ambient' (the default, and what every section uses): one
+//     ring, roughly a third of the opacity, on a slow cycle. 'hero' is the
+//     louder version -- three rings at full strength on a faster cycle -- which
+//     no section currently passes.
 
 const VARIANTS = {
   hero: {
-    // No modifier class: the hero IS .atmos-layer's own defaults, and the
-    // ambient variant below is what overrides them. There was an `atmos-hero`
-    // here that no stylesheet ever matched.
+    // No modifier class: the hero variant is simply .atmos-layer's own
+    // defaults, and the ambient variant below is what overrides them.
     className: 'atmos-layer',
     delays: ['0ms', '2600ms', '5200ms'],
   },

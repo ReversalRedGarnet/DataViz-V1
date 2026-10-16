@@ -3,24 +3,9 @@
 import Atmosphere from './Atmosphere.jsx'
 import BackgroundPattern from './BackgroundPattern.jsx'
 
-// EVERY SECTION IS bg-panel, AND THERE IS NO LONGER A PROP SAYING SO.
-//
-// There was once an inverted 'ink' background -- bg-ink/text-sand with a dark:
-// override -- and no section ever passed it. The citations panel hardcoded the
-// same three classes instead, which is how the closing slide came to be a
-// black panel in light mode and an ordinary one in dark: an inconsistency
-// invisible to anyone reviewing in dark mode. That option was removed and the
-// panel brought back into the palette.
-//
-// What survived the removal was a prop, a lookup table with one entry, and a
-// `?? default` fallback that resolved every possible input to the same class --
-// threaded through Section, EmptyState, sectionGuard and PageHero, and passed
-// explicitly by fourteen call sites that could not change anything by passing
-// it. All of it is gone.
-//
-// A slide that needs to feel different has `backdrop` for it -- though every
-// slide now passes the same scatter, so what it varies is the seed, not the
-// motif.
+// EVERY SECTION IS bg-panel, so there is no background prop. A slide that
+// needs to feel different has `backdrop` for it -- though every slide passes
+// the same scatter, so what it varies is the seed, not the motif.
 
 // THE SITE'S TWO CONTENT WIDTHS, NAMED.
 //
@@ -56,14 +41,14 @@ const WIDTHS = {
 // styles/layout.css.
 //
 // `atmosphere` is the site's decorative weather: 'ambient' (the default),
-// 'hero' for the louder title-card variant, or false to switch it off. It lives
-// here because this is the one component every section on every page already
-// passes through, which is what makes "the animation appears consistently" a
-// property of the layout rather than something each page has to remember.
+// 'hero' for a louder variant (no slide currently uses it), or false to switch
+// it off. It lives here because every slide passes through this component,
+// which makes "the animation appears consistently" a property of the layout
+// rather than something each slide has to remember.
 //
 // It is rendered as a SIBLING of .section-content, not inside it, so the two
 // can be ordered explicitly: the layer at z-index 0, the content at 1. See the
-// note on .atmos-layer in styles/story.css for what that replaces.
+// note on .atmos-layer in styles/story.css.
 //
 // `backdrop` is a tiling motif from content/patterns.js, off by default. It
 // paints in the same band as the atmosphere -- behind .section-content, in
@@ -74,9 +59,8 @@ const WIDTHS = {
 // scatterBackdrop(seed) from content/patterns.js, whose 'weaveScatter' motif
 // scatters into the section's side margins rather than tiling behind it, which
 // is what makes it safe on an argument slide. The tiling motifs
-// (ripples/fish/weave) are chrome-only, and there are no longer any exceptions:
-// the method and sources slides used to be two, and content/patterns.js has the
-// note on why they stopped being.
+// (ripples/weave) are for page chrome only; no slide uses them, and
+// content/patterns.js has the note on why.
 //
 // This is also why the section is `relative`: the layer positions against it.
 // Note what is deliberately NOT added alongside -- overflow: hidden. The layer
@@ -94,11 +78,11 @@ const WIDTHS = {
 // later: container-type makes the section a containing block for any
 // fixed-position descendant. Nothing here is fixed -- the tooltip is absolute
 // against the inner .relative wrapper each section already has, and the
-// atmosphere is absolute against the section, which is where it was resolving
-// anyway. If something fixed is ever added inside a section, this is the line
+// atmosphere is absolute against the section. If something fixed is ever added inside a section, this is the line
 // that will have moved it.
+//
 // `wash` is a third background layer, below both of the above, and a node
-// rather than a flag because what goes back there is one page's composition
+// rather than a flag because what goes back there is one slide's composition
 // rather than a shape every section shares. The opening poem passes
 // <CoastlineWash />; everything else passes nothing and is unchanged.
 //

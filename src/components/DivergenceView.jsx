@@ -20,11 +20,11 @@ import { buildDivergencePanels, divergenceYearRange } from '../utils/divergence.
 // here rather than in metrics.js because they're about what this indexed view
 // implies, not about the underlying figures.
 //
-// A function of the baseline year, not a constant. As a constant it printed the
-// 2020 sentence under every storm, and for a 2015 baseline that sentence is
-// simply false -- arrivals in 2015 were not collapsed by anything. COVID is
-// still relevant to an earlier baseline, because the sweep crosses 2020-21 on
-// its way to the present, so the note changes form rather than disappearing.
+// A function of the baseline year, not a constant: the sentence about 2020
+// arrivals collapsing is only true for a 2020 baseline -- in 2015 nothing
+// collapsed them. COVID is still relevant to an earlier baseline, because the
+// sweep crosses 2020-21 on its way to the present, so the note changes form
+// rather than disappearing.
 function metricNotes(eventYear, language) {
   const baselineIsCollapsed = eventYear === 2020 || eventYear === 2021
   const notes = {
@@ -70,9 +70,7 @@ const STRINGS = {
 }
 
 // The legend's colours and dashes come from seriesStyles(), the same resolver
-// the charts draw with. They used to be a LEGEND_DASH array declared here --
-// a fourth copy of DIVERGENCE_DASH, differing only in spelling solid as
-// 'none' rather than null, with nothing keeping the two in step.
+// the charts draw with, so the legend cannot disagree with the lines it labels.
 
 // Every nation indexed to its own event-year figure, so the four lines start
 // from one point and the chart can only show how far apart they finish.

@@ -37,14 +37,11 @@ import { useLanguage } from '../hooks/useLanguage.jsx'
 // Props:
 //   storm -- the selected storm, for the question's wording
 //
-// `section` is the id of the slide each factor's evidence lives on. It used to
-// sit here unused beside a hand-copied `sectionLabel` string, so the name shown
-// to the reader was a second copy of PAGE_SECTIONS' label with nothing keeping
-// the two in step. The id is looked up below instead: the dead field turned out
-// to be the fix for the duplication.
-//
-// Renamed to `whereToLook` to avoid colliding with pageSections.js's own
-// exported `sectionLabel(section, language)`, which this now calls directly.
+// `section` is the id of the slide each factor's evidence lives on. The name
+// shown to the reader is looked up from that id by whereToLook() below, which
+// calls pageSections.js's sectionLabel(), so it cannot drift from the label
+// the section menu shows. (The helper is called whereToLook so it does not
+// collide with that exported sectionLabel.)
 function whereToLook(id, language) {
   const section = PAGE_SECTIONS.find((s) => s.id === id)
   return section ? resolveSectionLabel(section, language) : id

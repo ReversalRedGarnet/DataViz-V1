@@ -3,10 +3,9 @@ import { useScrollRoot } from './useScrollRoot.jsx'
 
 // "Has this element been scrolled into view yet?" Returns [ref, inView].
 //
-// The charts on this site animate on entrance, and every one of them used to
-// play that entrance at mount -- which on a page this long meant most of the
-// animation happened several screens below the fold, where nobody saw it. This
-// holds the draw until the card is actually on screen.
+// The charts on this site animate on entrance. Played at mount, most of those
+// entrances would happen off screen, where nobody sees them, so this holds the
+// draw until the card is actually on screen.
 //
 // A callback ref rather than useRef, for the same reason useElementWidth uses
 // one: a chart's card is present from the first render but the elements an
@@ -15,8 +14,8 @@ import { useScrollRoot } from './useScrollRoot.jsx'
 //
 // Latches on by default (`once`), so scrolling back up a page doesn't replay
 // every entrance. Anything without IntersectionObserver -- or without a DOM at
-// all, which is how the server-rendered check runs -- reports visible
-// immediately rather than rendering a page of permanently hidden cards.
+// all -- reports visible immediately rather than rendering a page of
+// permanently hidden cards.
 // `root` defaults to whatever ScrollRootProvider is above this component: the
 // panel's own scroll box inside the deck, the viewport outside it. Pass it
 // explicitly to override.

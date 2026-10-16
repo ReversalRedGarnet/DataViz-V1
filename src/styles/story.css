@@ -251,11 +251,9 @@
     breakpoint the coastline is the only decorative layer and every bit of it
     lands on the words rather than beside them.
 
-    It used to be 0.2, and that was set while the storm tracks were still being
-    drawn -- magnified by the same crop, they arrived as dashes the width of the
-    text and had to be held right down. Land has no ends and crosses nothing, so
-    it can carry far more of the desktop weight; this is now a step down rather
-    than a retreat.
+    The wash here is land only, with no storm tracks, and land has no ends and
+    crosses nothing, so it can carry much of the desktop weight: this is a step
+    down rather than a retreat.
   */
   @media (max-width: 767px) {
     .coast-wash-tall {
@@ -289,11 +287,9 @@
     So the height is fixed and the text lives inside it. Overflow scrolls
     rather than clips: what would be cut off is a casualty figure or a caveat.
 
-    THIS USED TO BE THE ONE PLACE ON THE SITE THAT SHOWED A SCROLLBAR, because
-    there is nothing else here to say the text continues. Now that scrollbars
-    are hidden everywhere (see base.css), the affordance is carried by a fade
-    at the bottom edge instead: the text dissolving rather than stopping is
-    what says there is more of it. It is masked, not painted, so it works over
+    WITH SCROLLBARS HIDDEN (see base.css), a fade at the bottom edge is what
+    says the text continues: the text dissolving rather than stopping is what
+    says there is more of it. It is masked, not painted, so it works over
     either theme's background without a dark: variant.
 
     THE FADE TRACKS SCROLL POSITION, NOT JUST OVERFLOW. data-overflowing means

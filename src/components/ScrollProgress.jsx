@@ -43,13 +43,7 @@ const PADDLE_BLADE_PATH =
 // Props:
 //   progress -- 0..1, supplied by the deck. Required: the document itself never
 //     scrolls (App puts html.is-slides on permanently), so there is nothing
-//     left for this to read on its own.
-//
-//     There used to be a fallback here that watched window.scrollY, with its
-//     own rAF throttle and a ResizeObserver on document.body -- around thirty
-//     lines that could not run. This component has one call site, Header, which
-//     has one call site, App, which always passes a number. It was dead the
-//     moment the deck became the only layout.
+//     else for this to read.
 export default function ScrollProgress({ progress = 0 }) {
   const wrapperRef = useRef(null)
   const canoeRef = useRef(null)
@@ -59,10 +53,8 @@ export default function ScrollProgress({ progress = 0 }) {
   const drawnRef = useRef(0)
   const chaseRef = useRef(null)
   const { theme } = useTheme()
-  // The wake used to be a hardcoded '#5B8FA3' that stayed identical in dark
-  // mode while every other colour on the page flipped. palette.idle is that
-  // exact value in light mode and its dark-mode counterpart otherwise, so this
-  // is the same picture in one theme and a correct one in the other.
+  // The wake uses palette.idle rather than a fixed hex, so it follows the
+  // theme like every other colour on the page.
   const { ink, palette } = chartTheme(theme)
   const ocean = palette.idle
 
@@ -85,13 +77,12 @@ export default function ScrollProgress({ progress = 0 }) {
 
   // Chase the true position rather than jumping to it, and do it WITHOUT React.
   //
-  // This used to call setDrawn() on every frame, which re-rendered the whole
-  // Header subtree -- SectionNav, StoryStateBar and the toggles included --
-  // sixty times a second for the length of every deck movement, to move one
-  // canoe a few pixels. The eased position is not application state; it is an
-  // attribute on three SVG nodes. Writing it straight to them through refs is
-  // the same picture at none of the cost, and it is the pattern the divergence
-  // chart already uses for its own sweep.
+  // The eased position is not application state; it is an attribute on three
+  // SVG nodes, so it is written straight to them through refs. Keeping it in
+  // React state would re-render the whole Header (SectionNav, StoryStateBar
+  // and the toggle) sixty times a second during every deck movement, just to
+  // move one canoe a few pixels. The divergence chart's sweep uses the same
+  // pattern.
   //
   // Runs only while there is a gap to close and stops itself inside SETTLE_PX,
   // so an idle page does no work at all.

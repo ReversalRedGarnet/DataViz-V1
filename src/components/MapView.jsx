@@ -96,11 +96,10 @@ const STRINGS = {
 // to select. Two selections at most, because everything downstream of this
 // slide is a pairwise comparison.
 //
-// The land is real TopoJSON. The markers come from content/nations.js, which
-// this file used to own and export -- so App, BigPicture, ContextPanel,
-// DivergenceView and StormJourney all imported the project's scope from a UI
-// component. It is scope data, not map data, and it now lives with the rest of
-// the content.
+// The land is real TopoJSON. The markers come from content/nations.js: the
+// list of nations is the project's scope, read by the pipeline and by several
+// other components, so it lives with the rest of the content rather than
+// inside this UI component.
 
 const WIDTH = 700
 const HEIGHT = 460
@@ -110,7 +109,7 @@ const HEIGHT = 460
 // see hooks/useViewBoxScale.js for the 4.8px labels this replaces.
 //
 // 22 is the hit radius, so the target is 44px across: the same floor every
-// other control on this site uses, and previously the one place it was missed.
+// other control on this site uses.
 // The markers are at least 146 viewBox units apart at every fit, so they cannot
 // collide at this size.
 const MARKER_HIT_R = 22
@@ -485,9 +484,8 @@ export default function MapView({ storm, selected, onToggle, onClear }) {
     //
     // Counter-scaling is what makes a label legible, and it is also what makes
     // it wide: at the phone's fit a name occupies more than twice the viewBox
-    // room it used to, while the projection's padding is a fixed 65 units
-    // chosen when the labels were small. Tonga sits nearest the right edge and
-    // ran straight off it.
+    // room it was drawn at, while the projection's padding is a fixed 65 units.
+    // Tonga sits nearest the right edge and would run straight off it.
     //
     // So a name that would overflow is drawn on the other side of its pin,
     // which is what stormProfileChart does with its own clamp for the same

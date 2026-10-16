@@ -3,16 +3,10 @@ import { formatNationList } from '../utils/formatNationList.js'
 
 // THE FOUR IN-SCOPE NATIONS, IN ONE PLACE.
 //
-// This list used to live in components/MapView.jsx, and App, BigPicture,
-// ContextPanel, DivergenceView and StormJourney each imported it from there --
-// a page shell and four siblings reaching into a UI component for the project's
-// own scope. Four of them then wrote out the same `NATIONS.map(n => n.name)`
-// independently, so the same derivation existed four times and the count was
-// typed as a literal `4` in a sixth place.
-//
-// Everything below is derived once, here, from nations.json -- which the
-// cleaning scripts read too, so the site and the pipeline cannot disagree about
-// which countries this project covers.
+// Everything below -- the list, the names, the count -- is derived once, here,
+// from nations.json, which the cleaning scripts read too, so the site and the
+// pipeline cannot disagree about which countries this project covers.
+// Components import these rather than deriving their own copies.
 //
 // ORDER IS LOAD-BEARING. It is the order every chart sorts its rows into (see
 // byNationOrder in utils/rows.js) and the order the divergence legend assigns

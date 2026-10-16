@@ -156,9 +156,8 @@ export default function ContextPanel({ data, dataError }) {
 
   // No `storm` key at all, which is what tells sectionGuard this section does
   // not depend on one -- these two records exist with or without a selection.
-  // The error and loading branches used to be written out here by hand for
-  // want of that, and had already drifted from the wording every other section
-  // uses.
+  // sectionGuard then supplies the same error and loading wording every other
+  // section uses.
   const blocked = sectionGuard({ data, error: dataError, subject: t.guardSubject, language })
   if (blocked) return blocked
 
@@ -172,12 +171,10 @@ export default function ContextPanel({ data, dataError }) {
         {capacity && (
           <div className="mb-10">
             <h3 className="type-subhead mb-1 text-accent">{t.observeHeading}</h3>
-            {/* Opens on the human sentence rather than closing on it -- it used
-                to be the last clause of this paragraph, which a skim reads
-                right past. The ranking claim itself used to be stated in
-                prose alone ("set this ranking beside the gaps..."); it is now
-                also the second chart below, so the paragraph only needs to
-                point at it, not carry the whole argument in words. */}
+            {/* Opens on the human sentence rather than closing on it, because
+                a skim reads right past a paragraph's last clause. The ranking
+                claim is also the second chart below, so the paragraph only
+                needs to point at it, not carry the whole argument in words. */}
             <p className="prose-column prose-wide mb-4 text-sm opacity-80">
               {t.rankingIntro(<NationRefList nations={rankOrder} join=", " last=", " />)}
             </p>

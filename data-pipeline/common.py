@@ -10,11 +10,10 @@ structural rather than a thing to remember.
 
 SCOPE IS NOT DEFINED HERE. The nation list, the ISO codes, the year window and
 the storm roster are read from src/content/nations.json and
-src/content/roster.json -- the same two files the site reads. They used to be
-typed out again in this folder, which made "the pipeline and the site agree
-about which countries, which years and which storms" something a person had to
-notice rather than something true by construction. Editing scope now means
-editing one file and re-running.
+src/content/roster.json -- the same two files the site reads -- so "the
+pipeline and the site agree about which countries, which years and which
+storms" is true by construction rather than something a person has to notice.
+Changing the scope means editing one file and re-running.
 """
 
 import json
@@ -114,12 +113,11 @@ def coerce_year(raw_value):
 def coerce_value(raw_value):
     """A figure as a float, or None if it is blank or non-numeric.
 
-    THIS IS WHY IT EXISTS. Values used to be written to JSON exactly as pandas
-    read them. An empty cell arrives as NaN, and json.dump writes NaN as a bare
-    literal, which is not valid JSON. JSON.parse rejects it, res.json() throws
-    inside loadDataset, and because useMetricData loads every dataset with
-    Promise.all, a single empty cell in a single re-export would blank every
-    chart on the site at once.
+    WHY IT EXISTS. pandas reads an empty cell as NaN, and json.dump writes NaN
+    as a bare literal, which is not valid JSON. The browser's JSON.parse would
+    reject the whole of metrics.json, and since every chart reads that one
+    bundle, a single empty cell in a single re-export would blank every chart
+    on the site at once.
 
     Returning None instead drops the row, and the coverage report at the end of
     a run prints the resulting gap -- which is the honest outcome, and a visible
@@ -191,12 +189,11 @@ BUNDLE_NAME = "metrics.json"
 def write_bundle():
     """Collect every per-metric JSON in OUT_DIR into one file for the site.
 
-    WHY ONE FILE. The site used to fetch all ten datasets separately and wait on
-    Promise.all before rendering anything, so the slowest of ten round trips
-    gated every chart on the page. Together they are about 34 KB -- smaller than
-    a single photograph -- which means what was being paid for was the round
-    trips, not the bytes. On the high-latency mobile connections this project is
-    aimed at, that was the dominant cost of the initial load.
+    WHY ONE FILE. Fetching ten datasets separately and waiting on all of them
+    would let the slowest of ten round trips gate every chart on the page.
+    Together they are about 34 KB -- smaller than a single photograph -- so the
+    cost is the round trips, not the bytes, and on the high-latency mobile
+    connections this project is aimed at, round trips dominate the first load.
 
     BUILT BY READING THE DIRECTORY, not from whatever this run happened to
     clean. A partial run -- one raw CSV present, or clean_population_data.py on

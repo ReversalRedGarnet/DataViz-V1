@@ -139,10 +139,9 @@ export default function TrendChart({
   // silently drop the dimming. It stands in for "the chart was drawn again",
   // which is not something node identity or dimNations can express.
   //
-  // This effect previously had no dependency array at all, so it ran a
-  // querySelectorAll and a full class-string scan of every mark after every
-  // render. Correct, and on the ripple chain that was five charts' worth of it
-  // per frame of any scroll.
+  // It has a dependency list rather than running after every render: an
+  // unconditional re-dim is a querySelectorAll and a class scan of every mark,
+  // and the ripple chain draws five of these charts.
   useEffect(() => {
     if (!node) return
     const dim = new Set((dimNations ?? []).map(slug))

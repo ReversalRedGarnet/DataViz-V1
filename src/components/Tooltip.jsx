@@ -6,11 +6,11 @@
 //
 // SIZED TO BE GLANCED AT. A tooltip is supporting information for a mark the
 // reader is already looking at, so it has to stay smaller than the thing it
-// supports. The storm profile's tooltip used to carry the nation, the full
-// category label, the death toll, a reporting note and a research paragraph --
-// over 800 characters at worst, which in a 220px column is a block of text
-// taller than the chart it was explaining, covering the other marks a reader
-// was about to compare it against.
+// supports. A tooltip carrying everything known about a mark -- the nation,
+// the full category label, the death toll, a reporting note and a research
+// paragraph -- can run past 800 characters, which in a 220px column is taller
+// than the chart it explains and covers the marks a reader is about to
+// compare it against.
 //
 // The cap and the padding are the ceiling; keeping bodies to two or three short
 // lines (see utils/charts/tooltips.jsx) is what keeps them well under it.
@@ -18,9 +18,9 @@
 // Props:
 //   tooltip -- { x, y, content } | null, from useTooltip()
 
-// Exported so useTooltip clamps against the real width. The two used to be set
-// independently -- a 220px box clamped as though it were 180 -- so the box could
-// still overhang the edge it was being kept away from.
+// Exported so useTooltip clamps against the real width. Set independently, the
+// two could disagree -- a 220px box clamped as though it were 180 still
+// overhangs the edge it is being kept away from.
 export const TOOLTIP_MAX_WIDTH = 190
 
 // How far above the anchored point the box's bottom edge sits. Exported for
@@ -42,12 +42,11 @@ export default function Tooltip({ tooltip }) {
         // WRITTEN HERE, NOT ONLY IN THE KEYFRAMES. This is what makes (x, y)
         // mean "the point the box is centred over and sits above" rather than
         // "the box's top-left corner", and the clamps in useTooltip are
-        // computed against exactly that. It used to arrive only as a side
-        // effect of tooltip-pop-in's `both` fill -- so under
-        // prefers-reduced-motion, where index.css sets `animation: none`, the
-        // transform vanished with it: the box dropped below its mark and sat
-        // half a width to the right of where the x clamp had placed it, which
-        // put it over the container's right edge on any mark past centre.
+        // computed against exactly that. If it came only from tooltip-pop-in's
+        // `both` fill, it would vanish under prefers-reduced-motion (where
+        // index.css sets `animation: none`): the box would drop below its mark
+        // and sit half a width to the right of where the x clamp placed it,
+        // over the container's right edge for any mark past centre.
         // The keyframes still carry the same translate, so this changes
         // nothing for a reader who has motion on.
         transform: 'translate(-50%, -100%)',

@@ -84,16 +84,14 @@ export function useDeck(sections) {
   // WHAT THIS DOES AND DOES NOT FIX. It fixes hashchange: the Back button after
   // paging around, and any later navigation to a hash, now resolve against the
   // deck as it currently stands. It does NOT make a pasted #compare link work
-  // on a cold load, and this comment used to claim it did. On first load no
+  // on a cold load. On first load no
   // storm is selected, so the sections from 'storm-journey' onwards genuinely
   // do not exist yet and there is nothing to jump to.
   //
   // WHERE AN UNRESOLVABLE LINK LANDS INSTEAD, and why it is stated rather than
-  // left to fall out of the initial state. `active` starts at 0, so "do
-  // nothing" used to mean "show the Hero" -- which was the right answer by
-  // accident. Index 0 is now the opening poem, and the poem is what a reader
-  // arriving with no hash at all should see, not a stand-in for a link that
-  // did not resolve: somebody following a colleague's #compare link has asked
+  // left to fall out of the initial state. `active` starts at 0, the opening
+  // poem, which is what a reader arriving with no hash at all should see -- but
+  // not a stand-in for a link that did not resolve: somebody following a colleague's #compare link has asked
   // for the argument, and answering with the piece's overture reads as the
   // link having been ignored. goToIdOrHero above sends them to the Hero, which
   // is where the deck's first real slide is and where the gate that has to be
@@ -133,8 +131,8 @@ export function useDeck(sections) {
     return () => window.removeEventListener('hashchange', onHashChange)
     // Still runs once -- re-running on every sections change would drag the
     // reader back to the hash's section every time they picked a storm -- but
-    // it now calls through the refs above, so "bound once" no longer means
-    // "answering with a stale deck".
+    // it calls through the refs above, so being bound once does not mean
+    // answering with a stale deck.
   }, [goToIdRef, goToIdOrHeroRef])
 
   // Keyed on the id STRING, not on the sections array. Keyed on the array this

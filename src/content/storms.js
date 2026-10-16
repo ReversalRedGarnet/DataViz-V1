@@ -15,9 +15,8 @@ import roster from './roster.json'
 // WHERE THE SPLIT FALLS, AND WHY THERE IS ONE. The facts the rule determines --
 // id, name, year, label, and which in-scope nations each storm struck -- live in
 // roster.json, because data-pipeline/clean_data.py needs them too and cannot
-// import a JavaScript module. It used to keep its own copy of all six storms,
-// under a comment asking whoever edited one list to remember the other. This
-// file holds everything the pipeline has no use for: the researched per-nation
+// import a JavaScript module; one shared file means nobody has to remember to
+// edit two lists. This file holds everything the pipeline has no use for: the researched per-nation
 // profiles, the sentences that connect them, and the citations.
 //
 // The two halves are merged by id below, and the merge THROWS AT IMPORT TIME if
@@ -681,11 +680,8 @@ export const ROSTER_END = roster.rosterEnd
 // an event-year chart is meaningless without baseline years before it.
 //
 // Both bounds are read by ContextPanel: the max to draw its capacity snapshot
-// against a year the pipeline actually exported, the min (newly re-exported
-// here) to know how many possible country-years its reporting-completeness
-// chart is counting out of. yearMin used to be unexported because nothing on
-// this side read it; that stopped being true the moment a second chart needed
-// the whole window instead of just its edge.
+// against a year the pipeline actually exported, the min to know how many
+// possible country-years its reporting-completeness chart is counting out of.
 export const DATA_YEAR_MIN = roster.yearMin
 export const DATA_YEAR_MAX = roster.yearMax
 

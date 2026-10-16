@@ -46,10 +46,9 @@ export const THEME_TOKENS = {
 // De-emphasis on this site is element opacity over the theme's own ground, and
 // the two themes are not symmetrical about it. Dark ink on sand loses contrast
 // far faster than light ink on a dark panel: at 0.60 the same text reads 3.50:1
-// in light and 5.45:1 in dark. The scale was tuned while looking at the dark
-// theme, so one flat set of numbers left the light theme's small text below
-// WCAG AA in 67 places -- the timeline's gap years at 2.18:1, the deck counter
-// at 2.84:1, the footer's Back/Next sublabels at 3.23:1.
+// in light and 5.45:1 in dark. One flat set of numbers tuned on the dark theme
+// leaves the light theme's small text below WCAG AA -- in 67 places when it
+// was measured, such as the timeline's gap years at 2.18:1.
 //
 // So the numbers are per theme, the way MAP_COLORS and chartTheme() in
 // utils/theme.js already are, and they are named for the job rather than for a
@@ -64,7 +63,7 @@ export const THEME_TOKENS = {
 //
 // The consequence for light is real and intended: its usable de-emphasis range
 // is 0.72-1.0 rather than 0.40-1.0, so the three levels sit closer together
-// than they used to. Where a step-back has to read as a state rather than as a
+// than they do in dark. Where a step-back has to read as a state rather than as a
 // texture -- the hero's unlit years, the timeline's gap years -- the colour and
 // weight cues beside the text are what carry it, and those are untouched.
 //

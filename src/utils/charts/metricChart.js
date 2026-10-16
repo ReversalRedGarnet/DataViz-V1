@@ -41,7 +41,7 @@ export function renderMetricChart(
 
   // Colour and dash come from one resolver shared with the legend, and it
   // picks a wider palette above two nations -- see utils/charts/series.js for
-  // the two countries that used to be drawn identically here.
+  // why one fixed palette is not enough.
   const styles = seriesStyles(nations, palette)
   const styleOf = (nation) => styles[nations.indexOf(nation)]
   const color = (nation) => styleOf(nation).color

@@ -31,10 +31,9 @@ from common import (
     write_json,
 )
 
-# NATIONS, STORMS and the year window are imported rather than declared. The
-# roster in particular used to be written out again here, under a comment asking
-# whoever edited it to keep it in step with src/content/storms.js by hand. Both
-# now read src/content/roster.json.
+# NATIONS, STORMS and the year window come from common.py, which reads them
+# from src/content/roster.json -- the same file the site reads -- so the
+# pipeline and the site cannot disagree about the project's scope.
 
 # Several metrics below come out of the same portal dataflow, and the portal
 # exports whole dataflows rather than single indicators. Rather than asking for

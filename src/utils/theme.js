@@ -3,15 +3,10 @@ import { THEME_TOKENS } from '../styles/tokens.js'
 // Real color values, for the places JS and D3 need an actual string rather than
 // a Tailwind class. A canvas or SVG renderer cannot read a utility class.
 //
-// THE DUPLICATION THIS USED TO CARRY IS GONE. Six of these were written twice:
-// once here as hex, once in styles/base.css as space-separated RGB triples for
-// Tailwind's <alpha-value> syntax. Because the two formats differ, no search
-// would ever have caught a drift between them, and the comment that used to sit
-// here was a hand-maintained table mapping one to the other.
-//
-// The three that appear in both worlds -- ink, surface and the accent -- are now
-// read from styles/tokens.js, which is also what generates the CSS custom
-// properties. One place to type a value.
+// The three colours needed both here and in CSS -- ink, surface and the
+// accent -- are read from styles/tokens.js, which also generates the CSS
+// custom properties, so each is typed once. (Typed twice, as hex here and as
+// RGB triples in CSS, they would be two formats no search could compare.)
 //
 // The rest stay literals on purpose. They exist only for the renderers and have
 // no CSS counterpart to agree with, so hoisting them would move a value out of
@@ -65,9 +60,9 @@ export const MAP_COLORS = {
 
 
 // The three values every D3 renderer opens by reading, resolved together.
-// They are always wanted as a set, and each was previously fetched with its
-// own `?? .light` fallback -- six chances for one of them to be spelled
-// differently and leave a chart half-themed. Destructure what you need:
+// They are always wanted as a set, and resolving them in one call with one
+// fallback means a chart cannot end up half-themed because one lookup was
+// spelled differently. Destructure what you need:
 //
 //   const { ink, surface, palette } = chartTheme(theme)
 export function chartTheme(theme) {

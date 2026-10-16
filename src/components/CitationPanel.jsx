@@ -1,24 +1,13 @@
 // Site footer: sources, copyright, and a plain-language data disclaimer.
 //
-// THIS SLIDE USED TO INVERT ITSELF, AND ONLY IN LIGHT MODE. It was
-// bg-ink/text-sand with a dark:bg-panel/dark:text-ink override, on the
-// reasoning that dark small print on a light panel is a common way footnotes
-// drop below WCAG contrast. The effect was that in dark mode it matched every
-// other slide, and in light mode it alone was a black panel -- so the last
-// thing a reader saw was the one thing that did not belong to the design
-// system, and the inconsistency was invisible to anyone reviewing in dark mode.
+// SAME COLOURS AS EVERY OTHER SLIDE: bg-panel and text-ink in both themes, and
+// the same scatter backdrop. Small print on a light panel is a common way to
+// drop below WCAG contrast, so the small print here is text-ink/75 rather than
+// a low opacity, which clears AA against the panel in both themes.
 //
-// Now bg-panel/text-ink in both, which is what every other slide paints. The
-// contrast concern was real but it was answered in the wrong place: the fix is
-// that the small print here is text-ink/75 rather than a low opacity on a dark
-// ground, which clears AA against panel in both themes.
-//
-// What it loses is its distinctiveness as the closing slide. It is not bought
-// back with a texture of its own: this panel once carried the site's only
-// edge-to-edge fish tile for that job, which marked it as different by putting
-// it outside the system every other slide belongs to. It now paints the same
-// scatter backdrop as the twelve slides before it. Being last is what makes it
-// the closing slide.
+// No special texture or inverted colours to mark it as the closing slide:
+// those would make it look like it belonged to a different site. Being last is
+// what makes it the closing slide.
 //
 // Props:
 //   sources -- array of { label, url }

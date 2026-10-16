@@ -61,11 +61,10 @@ const STRINGS = {
 // The opening. Six storms on a ten-year axis, and the strike count per nation
 // above it.
 //
-// The count is the claim, not the calendar. An earlier draft planned to open on
-// year-clustering -- "they keep getting hit in bursts" -- and the roster does
-// not support it: one year of the ten holds more than one storm. Counting per
-// nation says something the data does show, without any trend or attribution
-// claim attached.
+// The count is the claim, not the calendar. The roster does not support a
+// year-clustering story ("they keep getting hit in bursts"): only one year of
+// the ten holds more than one storm. Counting per nation says something the
+// data does show, without any trend or attribution claim attached.
 //
 // Nothing is selected on load. The timeline is the argument; the storm chosen
 // from it is the evidence. That makes the chips the only control on the slide,
@@ -241,10 +240,9 @@ export default function StormTimeline({ selectedId, onSelect }) {
   return (
     <Section backdrop={scatterBackdrop('timeline')}>
       {/*
-        One column, full width. This slide used to be split -- prose left,
-        evidence right -- because the prose ran long enough that stacking cost
-        the reader a scroll. With the argument down to a single sentence there
-        is nothing left for a side column, and a timeline wants the full measure.
+        One column, full width. The argument is a single sentence, so there is
+        nothing for a side column to hold, and a timeline wants the full
+        measure.
       */}
       <p className="type-eyebrow mb-1 text-accent">
         {t.eyebrow(

@@ -60,15 +60,14 @@ const APP_STRINGS = {
 const DATA_SOURCES = [
   // THE DATASETS, FROM THE METRICS THEMSELVES.
   //
-  // This used to be six hand-written entries whose URLs were the same six
-  // strings utils/metrics.js is now the home of. Two copies of a query URL is
-  // two chances for a re-export to update one of them, and nothing about the
-  // page would look wrong afterwards -- the sources slide would simply point a
-  // reader at a query that no longer produces the numbers above it, which is
-  // the most expensive kind of quiet error on a site whose argument is that the
-  // record can be checked.
+  // Each dataset's query URL is typed once, in utils/metrics.js, and this list
+  // is built from there. A second copy could fall out of step after a
+  // re-export and nothing on the page would look wrong -- the sources slide
+  // would point a reader at a query that no longer produces the numbers above
+  // it, the most expensive kind of quiet error on a site whose argument is
+  // that the record can be checked.
   //
-  // One copy now. A metric with no `source` contributes nothing here and
+  // A metric with no `source` contributes nothing here and
   // renders its figure caption without a data line; see the note in
   // utils/metrics.js about the four that are in that position.
   ...METRICS.filter((m) => m.source).map((m) => m.source),
@@ -113,8 +112,7 @@ function sectionLabels(language) {
 // The comparison's pickers offer every in-scope nation, not only the two
 // currently chosen, so the pair can be changed from the section that asks the
 // question rather than from the map four slides back. NATION_NAMES comes from
-// content/nations.js; this file used to derive it here, and so did BigPicture,
-// ContextPanel and DivergenceView, each independently.
+// content/nations.js, the one place the project's scope is defined.
 
 function pageSections(data, dataError, story, onSelectStorm, language) {
   const { storm, selected } = story

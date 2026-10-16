@@ -27,12 +27,8 @@ export default {
       // The min-width guard keeps it away from a phone in landscape, which is
       // short by definition and already has its own layout.
       //
-      // There was a `compact` width band here too, declared and documented and
-      // never once used as a variant -- the 1100-1399px rules it described are
-      // written as a plain media query in styles/compact.css instead. Half of
-      // this comment was describing a mechanism that was not in play, which is
-      // the expensive kind of stale comment: confidently wrong about
-      // architecture.
+      // The 1100-1399px width rules are a plain media query in
+      // styles/compact.css, not a Tailwind variant.
       screens: {
         short: { raw: '(min-width: 1024px) and (max-height: 960px)' },
       },

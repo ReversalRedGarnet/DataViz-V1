@@ -10,10 +10,10 @@ import { isPluralStormName } from '../utils/pluralize.js'
 
 // THE END OF THE ARGUMENT, NOT THE END OF THE PAGE.
 //
-// The piece used to run out rather than finish: comparison, then method, then
-// sources. Everything the reader had assembled -- a storm, a pair of countries,
-// five records, four trajectories -- was left for them to add up on their own
-// while the site moved on to explaining itself.
+// Without this slide the piece would run out rather than finish: comparison,
+// then method, then sources, leaving everything the reader assembled -- a
+// storm, a pair of countries, five records, four trajectories -- for them to
+// add up on their own while the site moves on to explaining itself.
 //
 // This says the one thing all of it adds up to, in the site's own terms and
 // without a figure that has not already been shown: a shared hazard does not
@@ -34,8 +34,8 @@ import { isPluralStormName } from '../utils/pluralize.js'
 // changing, not a slide jump, which is the distinction the whole deck runs on:
 // the footer's Back and Next are the only things that move a reader.
 //
-// The two other offers that used to sit here -- compare another pair, watch the
-// divergence again -- were slide jumps and are gone. What they pointed at is
+// There are deliberately no "compare another pair" or "watch the divergence
+// again" buttons: they would be slide jumps. What they would point at is
 // named in the line below instead.
 //
 // Props:

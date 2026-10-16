@@ -5,14 +5,12 @@ import { DIVERGENCE_DASH, SERIES_DASH } from './constants.js'
 // THE TWO-SERIES AND FOUR-SERIES CASES ARE DIFFERENT PALETTES, not one palette
 // truncated, and treating them as the same thing is what this exists to stop.
 //
-// renderMetricChart used to build its scale as `d3.scaleOrdinal(nations,
-// palette.selection)` with a two-colour range and pick its dash with
-// `SERIES_DASH[i]` from a two-entry array. That is correct for the ripple
-// chain, which draws the reader's selected pair. ContextPanel passes all four
-// nations, and scaleOrdinal cycles its range while the dash lookup falls
-// through to null -- so Fiji and Vanuatu came out the same colour AND solid,
-// which is to say identical, on two charts whose entire job is comparing four
-// countries.
+// A two-colour d3.scaleOrdinal with a two-entry dash array is right for the
+// ripple chain, which draws the reader's selected pair. But ContextPanel
+// passes all four nations: scaleOrdinal would cycle its two colours and the
+// dash lookup would fall through to null, so Fiji and Vanuatu would come out
+// the same colour AND solid -- identical, on charts whose whole job is
+// comparing four countries.
 //
 // Resolved in one place because the renderer and the legend have to agree: a
 // legend that assigns colours by its own rule is a legend that can lie.

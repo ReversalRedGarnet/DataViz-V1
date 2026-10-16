@@ -8,9 +8,9 @@ import { nationLabel, nationListInProse, nationListIsPlural } from '../content/n
 //
 // Bullets stay short on purpose: the chart above already shows each nation's
 // full trajectory, so the text only needs to carry what the chart can't --
-// the verdict and the two percentages. The full "went from X to Y" phrasing
-// used to duplicate the chart and was the wordiest part of the page for what
-// is meant to be its headline takeaway.
+// the verdict and the two percentages. A full "went from X to Y" sentence
+// would duplicate the chart and be the wordiest part of what is meant to be
+// the headline takeaway.
 //
 // Records don't all end in the same year. Fiji's tourist arrivals run to 2024
 // while Tonga's and Vanuatu's stop at 2022, so an unqualified "+452% against
