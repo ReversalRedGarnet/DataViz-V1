@@ -29,7 +29,6 @@ import { useId } from 'react'
 //
 // Props:
 //   backdrop -- one entry from src/content/patterns.js, or null for none
-//   className -- extra classes on the wrapper, if a caller needs to inset it
 
 // Scattered drop rings, sparse rather than latticed. An earlier draft put a
 // ring set on every lattice point; the rings intersected so evenly that they
@@ -523,7 +522,7 @@ function WeaveScatter({ seed, opacity, id }) {
   )
 }
 
-export default function BackgroundPattern({ backdrop, className = '' }) {
+export default function BackgroundPattern({ backdrop }) {
   // Two backdrops render per page, so the <pattern> ids have to be unique or
   // the second one's fill resolves to the first one's tile.
   const id = useId()
@@ -534,7 +533,7 @@ export default function BackgroundPattern({ backdrop, className = '' }) {
   // `backdrop-layer` is a hook, not a style: it is what lets an off-stage slide
   // switch its backdrop off (see styles/slideshow.css). Both branches below
   // carry it, since either can end up inside a panel.
-  const wrapper = `backdrop-layer pointer-events-none absolute inset-0 overflow-hidden ${className}`
+  const wrapper = 'backdrop-layer pointer-events-none absolute inset-0 overflow-hidden'
 
   // No `scale` here, and that is rule (3): the scatter's weave is WEAVE_UNIT
   // and nothing else, so there is no per-section knob that could put two

@@ -22,12 +22,6 @@
 //
 // Props:
 //   sources -- array of { label, url }
-//   aboutTitle -- heading for the disclaimer block, per-language; default is
-//     the standard {en, fr} pair below. Overridden by whatever page mounts
-//     this with different data, same shape.
-//   children -- optional; replaces the default Cyclone-specific
-//     disclaimer paragraphs so a page with different data gaps/caveats
-//     can say so accurately. Cyclones passes no children.
 //   style -- forwarded onto the <footer>
 import BackgroundPattern from './BackgroundPattern.jsx'
 import LanguageToggle from './LanguageToggle.jsx'
@@ -37,7 +31,7 @@ import { sourceLabel } from '../utils/metrics.js'
 
 const YEAR = new Date().getFullYear()
 
-const DEFAULT_ABOUT_TITLE = { en: 'About this data', fr: 'À propos de ces données' }
+const ABOUT_TITLE = { en: 'About this data', fr: 'À propos de ces données' }
 
 const STRINGS = {
   en: {
@@ -64,10 +58,10 @@ const STRINGS = {
   },
 }
 
-export default function CitationPanel({ sources = [], aboutTitle, children, style }) {
+export default function CitationPanel({ sources = [], style }) {
   const { language } = useLanguage()
   const t = STRINGS[language]
-  const title = aboutTitle ? (aboutTitle[language] ?? aboutTitle.en) : DEFAULT_ABOUT_TITLE[language]
+  const title = ABOUT_TITLE[language]
 
   return (
     <footer
@@ -145,20 +139,14 @@ export default function CitationPanel({ sources = [], aboutTitle, children, styl
 
         <div className="prose-column prose-wide">
           <h2 className="type-eyebrow mb-3 opacity-80">{title}</h2>
-          {children ?? (
-            <>
-              {/* Trimmed to a pointer. The gaps, the zero-as-unreported rule and
-                  the uneven-reporting finding were five paragraphs of caveat
-                  sitting under a list of links; they are the subject of the
-                  method slide before this one, and stating them twice made
-                  neither slide readable. */}
-              <p className="prose-column prose-wide text-ink/85">{t.disclaimer1}</p>
+          {/* Trimmed to a pointer. The gaps, the zero-as-unreported rule and
+              the uneven-reporting finding were five paragraphs of caveat
+              sitting under a list of links; they are the subject of the
+              method slide before this one, and stating them twice made
+              neither slide readable. */}
+          <p className="prose-column prose-wide text-ink/85">{t.disclaimer1}</p>
 
-              <p className="prose-column prose-wide prose-short mt-3 text-ink/85">
-                {t.disclaimer2}
-              </p>
-            </>
-          )}
+          <p className="prose-column prose-wide prose-short mt-3 text-ink/85">{t.disclaimer2}</p>
         </div>
 
         <div className="text-xs text-ink/75">

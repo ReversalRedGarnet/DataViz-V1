@@ -53,7 +53,7 @@ import { useEffect, useState } from 'react'
 export const MIN_WIDTH = 768
 export const MIN_HEIGHT = 640
 
-export function viewportFits(width, height) {
+function viewportFits(width, height) {
   return width >= MIN_WIDTH && height >= MIN_HEIGHT
 }
 

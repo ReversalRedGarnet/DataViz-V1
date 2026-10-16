@@ -11,12 +11,7 @@ import { runRippleTransition } from '../utils/rippleTransition.js'
 // language belongs to rather than which language the page is in. The label
 // shows the language a click switches TO -- answering "what does this do"
 // rather than "what state am I in", which the rest of the page already answers.
-//
-// Props:
-//   className -- forwarded to the <button>, so Header.jsx and the two
-//     chromeless slides can position it without this component needing to
-//     know its own placement
-export default function LanguageToggle({ className = '' }) {
+export default function LanguageToggle() {
   const { language, toggleLanguage } = useLanguage()
 
   function handleClick(event) {
@@ -35,7 +30,7 @@ export default function LanguageToggle({ className = '' }) {
       onClick={handleClick}
       lang={target}
       aria-label={target === 'fr' ? 'FR — Passer au français' : 'EN — Switch to English'}
-      className={`press-target flex h-9 w-9 items-center justify-center rounded-md text-[13px] font-semibold tracking-wide text-ink hover:bg-ink/5 ${className}`}
+      className={`press-target flex h-9 w-9 items-center justify-center rounded-md text-[13px] font-semibold tracking-wide text-ink hover:bg-ink/5`}
     >
       {target.toUpperCase()}
     </button>

@@ -28,7 +28,6 @@
 //   variant -- 'hero' is the title card's original weather, unchanged.
 //     'ambient' is the quieter version every other section gets: one ring
 //     instead of three, roughly a third of the opacity, and a slower cycle.
-//   className -- extra classes on the layer, if a caller needs to reposition it
 
 const VARIANTS = {
   hero: {
@@ -52,11 +51,11 @@ const VARIANTS = {
   },
 }
 
-export default function Atmosphere({ variant = 'ambient', className = '' }) {
+export default function Atmosphere({ variant = 'ambient' }) {
   const { className: variantClass, delays } = VARIANTS[variant] ?? VARIANTS.ambient
 
   return (
-    <div aria-hidden="true" className={`${variantClass} ${className}`}>
+    <div aria-hidden="true" className={variantClass}>
       {delays.map((animationDelay) => (
         <span key={animationDelay} className="atmos-ring" style={{ animationDelay }} />
       ))}

@@ -63,10 +63,6 @@ export default {
       },
 
       colors: {
-        // Fixed brand colors used across both themes.
-        ocean: '#5B8FA3',
-        sun: '#F0C868',
-
         // Theme-aware colors defined in index.css.
         // <alpha-value> lets Tailwind's opacity modifiers (e.g. text-ink/70)
         // substitute the real opacity value in place of this placeholder --

@@ -642,7 +642,7 @@ export const STORMS = roster.storms.map((entry) => ({ ...entry, ...STORM_DETAIL[
 // Swap in the *Fr sibling for every prose field, once, at the point a storm
 // (or a single profile row) is first obtained -- see the note at the top of
 // this file. English is untouched; STORMS itself is never mutated.
-export function localizeStormRow(row, language = 'en') {
+function localizeStormRow(row, language = 'en') {
   if (!row || language !== 'fr') return row
   return {
     ...row,

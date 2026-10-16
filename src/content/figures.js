@@ -17,7 +17,7 @@
 // A key that is rendered but missing here gets no number rather than a wrong
 // one; see figureNumber below. Keys are prefixed by section so a glance tells
 // you where one lives.
-export const FIGURE_ORDER = [
+const FIGURE_ORDER = [
   // big-picture -- the regional snapshot, one card per chain metric
   'snapshot-affected',
   'snapshot-crop',

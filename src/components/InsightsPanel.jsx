@@ -8,9 +8,9 @@
 //     don't have a summary (or don't have enough comparable metrics to earn
 //     one) simply omit it.
 //   items -- [{ key, text }]
-//   staggerItems -- bullets pop in one by one. Only RippleChain does this; the
-//     inconsistency predates this component and is kept opt-in rather than
-//     silently unified.
+//   staggerItems -- true makes the bullets pop in one by one rather than all
+//     at once. RippleChain, the only caller, passes it; the default (false)
+//     keeps the panel usable without the animation.
 export default function InsightsPanel({ title, summary, items, staggerItems = false }) {
   return (
     <div
