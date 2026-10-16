@@ -30,19 +30,13 @@
     context, so it paints above the panel's background and below every word.
   */
   /*
-    z-index: 0 AND NOT -1, WHICH IS A DELIBERATE CHANGE.
-
-    The hero's original layer used -1, and that only ever worked by accident:
-    a negative-z child paints behind its parent's background unless the parent
-    establishes a stacking context, and the section's happens to be established
-    by `animation: pop-in ... both` in animations.css -- the `both` fill mode
-    leaves a transform in effect forever, which keeps the context alive after
-    the entrance has finished. That is a load-bearing dependency on an
-    animation's fill mode, and it was fine while one section used it.
-
-    Made explicit instead: this layer sits at z-index 0 and .section-content at
-    z-index 1 (styles/layout.css), so the order is background, weather, content
-    regardless of what any ancestor does.
+    z-index: 0, NOT -1. A negative-z child paints behind its parent's
+    background unless the parent establishes a stacking context, and a
+    section's only comes from the `both` fill mode of its pop-in animation
+    (animations.css) -- too fragile to depend on. So this layer sits at
+    z-index 0 and .section-content at z-index 1 (styles/layout.css), and the
+    order is background, weather, content regardless of what any ancestor
+    does.
 
     The layer clips its own rings, so a section using this does NOT need
     overflow: hidden -- which would also clip the tooltips near its edges.
@@ -64,10 +58,10 @@
     aspect-ratio: 1 / 1;
     margin-left: -21rem;
     margin-top: -21rem;
-    border: 1px solid rgb(var(--color-accent) / 0.5);
+    border: 1px solid rgb(var(--color-accent) / 0.28);
     border-radius: 9999px;
     opacity: 0;
-    animation: atmos-ring-out 7800ms cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+    animation: atmos-ring-out 15600ms cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
   }
 
   @keyframes atmos-ring-out {
@@ -77,7 +71,7 @@
     }
 
     18% {
-      opacity: var(--atmos-ring-peak, 0.22);
+      opacity: 0.07;
     }
 
     100% {
@@ -87,23 +81,12 @@
   }
 
   /*
-    THE AMBIENT VARIANT, for every section that is not the title card.
-
-    The hero's weather is the first thing a reader sees and is meant to be
-    noticed. Behind a chart it must not be: the same motion at the same strength
-    would compete with the marks a reader is trying to compare, which is the one
-    thing decoration is not allowed to do. So it is the same animation, run
-    quieter -- a third of the peak opacity, and a cycle slow enough to read as
-    drift rather than as an event.
+    WHY SO QUIET: a peak opacity of 0.07, a faint border and a 15.6-second
+    cycle. The ring sits behind charts, and anything stronger or faster would
+    compete with the marks a reader is trying to compare -- the one thing
+    decoration is not allowed to do. Slow enough to read as drift rather than
+    as an event.
   */
-  .atmos-ambient {
-    --atmos-ring-peak: 0.07;
-  }
-
-  .atmos-ambient .atmos-ring {
-    animation-duration: 15600ms;
-    border-color: rgb(var(--color-accent) / 0.28);
-  }
 
   /*
     Settled, not stopped dead. Pausing mid-sweep would freeze a half-drawn ring
@@ -787,9 +770,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    /* Decoration, and the only thing it does is move. Covers every section's
-       ambient layer as well as the hero's, since they are now the same
-       component. */
+    /* Decoration, and the only thing it does is move. Covers every
+       section's atmosphere, the title card's included. */
     .atmos-layer {
       display: none;
     }

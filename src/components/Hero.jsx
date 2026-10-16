@@ -129,14 +129,12 @@ export default function Hero() {
       // drawing is on the opening poem instead (components/CoastlineWash.jsx),
       // where it is the only picture on the slide.
       //
-      // `atmosphere` is omitted rather than set: Section already defaults to
-      // 'ambient', and passing it explicitly would suggest a choice being made
-      // here that isn't.
+      // `atmosphere` is omitted: Section draws it by default, and passing it
+      // explicitly would suggest a choice being made here that isn't.
       backdrop={scatterBackdrop('top')}
-      // hero-atmos and is-stirred stay. They are Hero's own interactivity --
-      // the rings settle once the reader touches a nation -- and that is a
-      // property of this slide having something to touch, not of which
-      // atmosphere variant is running. It works the same against one ring.
+      // hero-atmos and is-stirred are Hero's own interactivity: the ring
+      // settles once the reader touches a nation (see .hero-atmos.is-stirred
+      // in styles/story.css).
       className={`hero-atmos relative overflow-hidden ${stirred ? 'is-stirred' : ''}`}
     >
 

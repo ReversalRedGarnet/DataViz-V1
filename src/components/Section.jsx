@@ -40,9 +40,8 @@ const WIDTHS = {
 // the section's column without being handed a prop -- see .section-content in
 // styles/layout.css.
 //
-// `atmosphere` is the site's decorative weather: 'ambient' (the default),
-// 'hero' for a louder variant (no slide currently uses it), or false to switch
-// it off. It lives here because every slide passes through this component,
+// `atmosphere` is the site's decorative weather (components/Atmosphere.jsx):
+// on by default, or false to switch it off. It lives here because every slide passes through this component,
 // which makes "the animation appears consistently" a property of the layout
 // rather than something each slide has to remember.
 //
@@ -94,7 +93,7 @@ const WIDTHS = {
 export default function Section({
   lock = false,
   width = 'wide',
-  atmosphere = 'ambient',
+  atmosphere = true,
   backdrop = null,
   wash = null,
   className = '',
@@ -115,7 +114,7 @@ export default function Section({
           weave is texture over it; the rings are the only one that moves. */}
       {wash}
       {backdrop && <BackgroundPattern backdrop={backdrop} />}
-      {atmosphere && <Atmosphere variant={atmosphere === true ? 'ambient' : atmosphere} />}
+      {atmosphere && <Atmosphere />}
       <div className="section-content">{children}</div>
     </section>
   )

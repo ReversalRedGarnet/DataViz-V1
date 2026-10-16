@@ -22,41 +22,15 @@
 //     a section that clipped its overflow would also clip the tooltips that
 //     sit near its edges.
 //
-// Props:
-//   variant -- 'ambient' (the default, and what every section uses): one
-//     ring, roughly a third of the opacity, on a slow cycle. 'hero' is the
-//     louder version -- three rings at full strength on a faster cycle -- which
-//     no section currently passes.
-
-const VARIANTS = {
-  hero: {
-    // No modifier class: the hero variant is simply .atmos-layer's own
-    // defaults, and the ambient variant below is what overrides them.
-    className: 'atmos-layer',
-    delays: ['0ms', '2600ms', '5200ms'],
-  },
-  // Written out in full rather than built with a template literal, and that is
-  // load-bearing for this one. Tailwind drops any rule in @layer components
-  // whose class it cannot find in the source, and `atmos-${variant}` is
-  // invisible to that scan -- so `.atmos-ambient { --atmos-ring-peak: 0.07 }`
-  // was purged while the descendant rules beside it survived, and the ambient
-  // rings animated at full hero strength behind every chart on the site.
-  ambient: {
-    className: 'atmos-layer atmos-ambient',
-    // One ring, not three. Three overlapping sweeps read as an event; behind a
-    // chart, an event is the wrong thing for the background to be doing.
-    delays: ['0ms'],
-  },
-}
-
-export default function Atmosphere({ variant = 'ambient' }) {
-  const { className: variantClass, delays } = VARIANTS[variant] ?? VARIANTS.ambient
-
+// One ring, not several: overlapping sweeps read as an event, and behind a
+// chart an event is the wrong thing for the background to be doing. How
+// strong and how slow it is lives in styles/story.css (.atmos-ring).
+//
+// No props. Section.jsx renders it unless a slide passes atmosphere={false}.
+export default function Atmosphere() {
   return (
-    <div aria-hidden="true" className={variantClass}>
-      {delays.map((animationDelay) => (
-        <span key={animationDelay} className="atmos-ring" style={{ animationDelay }} />
-      ))}
+    <div aria-hidden="true" className="atmos-layer">
+      <span className="atmos-ring" />
     </div>
   )
 }
